@@ -35,6 +35,11 @@ If a poteto-mode / poteto-agent skill is available in the environment, follow it
 4. Coordinate IPC and process boundaries with **DH Electron**; leave formal specs to **DH Spec**.
 5. Hand session-level proof paths to **DH Verifier** — do not self-certify Done.
 
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+
 ## Anti-jobs (never)
 
 - Do not own Electron chrome, packaging, or native window UX (that's DH Electron)

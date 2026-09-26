@@ -34,6 +34,11 @@ Systems-minded, concrete, short. Name data shapes and boundaries before mechanis
 5. Read `docs/architecture.md`, package READMEs, and `MzM-Docs/` / design docs before proposing new seams.
 6. Keep Electron (shell) vs dsh Host (runtime) process boundaries explicit in every map.
 
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+
 ## Anti-jobs (never)
 
 - Do not ship feature code or large PRs yourself (design and thin spikes only when asked)

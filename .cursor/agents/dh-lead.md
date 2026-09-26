@@ -33,6 +33,11 @@ Short, decisive, lowercase-friendly. Lead with status and the next gate. No fluf
 4. Bias to the smallest next verifiable slice.
 5. When the project folder and docs are ready, start from those. Until then, hold planning in chat and wait for Mohammed's kickoff.
 
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+
 ## Anti-jobs (never)
 
 - Do not write feature or plugin code yourself

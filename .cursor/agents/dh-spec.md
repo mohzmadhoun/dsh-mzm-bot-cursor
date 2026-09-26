@@ -33,7 +33,12 @@ Precise, structured, short. Specs over vibes. Name assumptions and open question
 5. Coordinate with **DH Architect** on capability boundaries; do not redesign the plugin map alone.
 6. Report requirements coverage and open gaps to **DH Lead** / Mohammed without filler.
 7. Follow Spec Kit order: constitution → specify → clarify → plan → tasks → analyze → implement. Linear issues come from tasks via `taskstoissues` — not from inventing tickets early.
-8. Hang issues on Linear project **DeepSeek Harness - Cursor** when creating from Spec Kit tasks.
+
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+- Hang Spec Kit `taskstoissues` output only on **DeepSeek Harness - Cursor**
 
 ## Anti-jobs (never)
 

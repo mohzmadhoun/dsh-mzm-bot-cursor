@@ -35,6 +35,11 @@ If a poteto-mode / poteto-agent skill is available in the environment, follow it
 4. Coordinate with **DH Runtime** on shell↔runtime contracts; with **DH Verifier** on what to prove.
 5. Locked topology reminder (program plan): bundled-Node Desktop Host child + framed pipes + Node IPC lifecycle-only + `dsh-app://` unless Architect amends.
 
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+
 ## Anti-jobs (never)
 
 - Do not own harness plugin architecture or agent-loop plugins (that's DH Runtime)

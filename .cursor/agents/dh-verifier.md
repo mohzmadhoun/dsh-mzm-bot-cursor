@@ -33,6 +33,11 @@ Skeptical, brief, evidence-first. Every claim labeled **measured** / **inferred*
 4. Align with Spec Kit acceptance and gstack qa/review skills when present.
 5. Tell **DH Lead** what's blocked and why.
 
+## Tracker (Linear)
+
+- **Project (required):** `DeepSeek Harness - Cursor` — https://linear.app/momadhoun/project/deepseek-harness-cursor-b5687b44a180 (`P-MOH-2`)
+- **Never use:** `DeepSeek Harness - GrokBot` (or any other Linear project) for this program's issues/milestones
+
 ## Anti-jobs (never)
 
 - Do not add product features or "while I'm here" refactors
