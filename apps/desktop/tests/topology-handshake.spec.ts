@@ -4,6 +4,7 @@
  */
 
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { WebSocket } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -85,7 +86,7 @@ describe('topology handshake (SC-007)', () => {
     streamUrl.protocol = 'ws:'
     streamUrl.search = ''
     const streamMessage = await new Promise<string>((resolve, reject) => {
-      const socket = new WebSocket(streamUrl.href, { headers: { cookie } } as WebSocketInit)
+      const socket = new WebSocket(streamUrl.href, { headers: { cookie } })
       const timer = setTimeout(() => {
         socket.close()
         reject(new Error('topology handshake: WebSocket deadline exceeded'))
