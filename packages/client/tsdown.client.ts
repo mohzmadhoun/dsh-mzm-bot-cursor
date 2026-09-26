@@ -80,7 +80,26 @@ const GENERATED_REMOTE = /^@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*\/remote$/
  */
 const SKIP_WORKSPACE_BUILD: UserConfig = { entry: '' }
 
-const REPOSITORY_ROOT = fileURLToPath(new URL('../..', import.meta.url))
+/**
+ * Resolve the monorepo root from this module URL.
+ * Walks parents for `pnpm-workspace.yaml` so the path stays correct when unrun
+ * inlines this file into a package `tsdown.config.ts` and rewrites
+ * `import.meta.url` to that entry (a fixed `../..` would then land on
+ * `packages/` instead of the repository root).
+ */
+function repositoryRootFrom(moduleUrl: string): string {
+  let dir = fileURLToPath(new URL('.', moduleUrl))
+  for (;;) {
+    if (existsSync(resolvePath(dir, 'pnpm-workspace.yaml'))) return dir
+    const parent = dirname(dir)
+    if (parent === dir) {
+      throw new Error(`tsdown: cannot locate repository root from ${moduleUrl}`)
+    }
+    dir = parent
+  }
+}
+
+const REPOSITORY_ROOT = repositoryRootFrom(import.meta.url)
 
 /** Rebase a physical lib-relative source onto a browser URL that mirrors the repository directories. */
 function browserSourcePath(source: string, sourcemapPath: string): string {
