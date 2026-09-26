@@ -261,6 +261,99 @@ describe('Team identity and provisioning', () => {
     })
   })
 
+  it('creates a Host-owned bot from displayName plus required model assignment', async () => {
+    const { ctx, lead } = await setup(['hang', 'hang'])
+
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Research Bot',
+      modelSelection: { provider: 'mock', model: 'research-model' },
+      signal: SIGNAL,
+    })
+    expect(created).toMatchObject({
+      displayName: 'Research Bot',
+      name: 'research-bot',
+      modelSelection: { provider: 'mock', model: 'research-model' },
+      member: {
+        name: 'research-bot',
+        displayName: 'Research Bot',
+        model: 'research-model',
+        role: 'teammate',
+      },
+    })
+    const live = await waitRunning(ctx, created.id)
+    expect(live.options).toMatchObject({ provider: 'mock', model: 'research-model' })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
+      displayName: 'Research Bot',
+      model: 'research-model',
+    })
+
+    const second = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Coding Bot',
+      modelSelection: { provider: 'mock', model: 'coding-model' },
+      signal: SIGNAL,
+    })
+    expect(second.modelSelection.model).toBe('coding-model')
+    expect(second.name).toBe('coding-bot')
+  })
+
+  it('rejects Host bot create without displayName or model assignment', async () => {
+    const { ctx, lead } = await setup([])
+    await expect(ctx.agentTeams.createBot(lead, {
+      displayName: '   ',
+      modelSelection: { provider: 'mock', model: 'mock' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT', message: expect.stringContaining('displayName') })
+    await expect(ctx.agentTeams.createBot(lead, {
+      displayName: 'Valid Bot',
+      modelSelection: { provider: '', model: 'mock' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT', message: expect.stringContaining('modelSelection.provider') })
+    await expect(ctx.agentTeams.createBot(lead, {
+      displayName: 'Valid Bot',
+      modelSelection: { provider: 'mock', model: '  ' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT', message: expect.stringContaining('modelSelection.model') })
+    await expect(ctx.agentTeams.createBot(lead, {
+      displayName: '!!!',
+      modelSelection: { provider: 'mock', model: 'mock' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_MEMBER_NAME' })
+  })
+
+  it('rejects non-Lead Host bot create and surfaces Remote createBot rejections', async () => {
+    const { ctx, lead } = await setup(['hang'])
+    const teammate = await spawn(ctx, lead, 'helper', {
+      agentOptions: { provider: 'mock', model: 'mock' },
+    })
+    const child = await waitRunning(ctx, teammate.member.id)
+    await expect(ctx.agentTeams.createBot(child, {
+      displayName: 'Peer Bot',
+      modelSelection: { provider: 'mock', model: 'mock' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_LEAD_REQUIRED' })
+
+    const remote = await ctx.agentTeams.remoteCreateBot(lead, {
+      displayName: ' ',
+      modelSelection: { provider: 'mock', model: 'mock' },
+    }, SIGNAL)
+    expect(remote).toEqual({
+      ok: false,
+      error: { code: 'team-rejected', message: 'displayName must be non-empty' },
+    })
+    const accepted = await ctx.agentTeams.remoteCreateBot(lead, {
+      displayName: 'Remote Bot',
+      modelSelection: { provider: 'mock', model: 'remote-model' },
+    }, SIGNAL)
+    expect(accepted).toMatchObject({
+      ok: true,
+      value: {
+        displayName: 'Remote Bot',
+        name: 'remote-bot',
+        modelSelection: { provider: 'mock', model: 'remote-model' },
+      },
+    })
+  })
+
   it('flushes the accepted child prompt before committing the active roster edge', async () => {
     const { ctx, lead } = await setup([textResponse('checkpointed child answer')])
     const flush = ctx.sessions.flush.bind(ctx.sessions)

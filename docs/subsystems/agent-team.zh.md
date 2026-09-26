@@ -14,6 +14,11 @@ interface TeamMemberSnapshot {
   readonly id: SessionId
   readonly name: string
   readonly description: string
+  /**
+   * Product-facing Bot label from Host create (FR-001).
+   * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
+   */
+  readonly displayName?: string
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -113,6 +118,15 @@ listMembers(agent: Agent): TeamMemberView[]
  * @returns the active roster row.
  */
 async spawnTeammate(caller: Agent, request: SpawnTeammateRequest): Promise<SpawnTeammateResult>
+
+/**
+ * Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment.
+ * Persists the Bot on the Host Team roster; Electron Main must not invent bot records or routes.
+ * @param caller - exact live Lead Agent.
+ * @param request - displayName, ModelSelection, and cancellation.
+ * @returns Host-owned Bot identity, derived roster name, retained model assignment, and roster row.
+ */
+async createBot(caller: Agent, request: CreateBotRequest): Promise<CreateBotResult>
 
 /**
  * Queue one durable peer message, then attempt immediate delivery.

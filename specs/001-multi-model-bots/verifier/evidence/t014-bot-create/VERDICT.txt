@@ -1,0 +1,7 @@
+VERDICT: Pass
+SC: FR-001 Host create (T014)
+SHA: c43bbc6b3e0eaaecb18e555bf34e30c5f0c3aa6b
+UTC: 2026-09-26T23:13:40Z
+COMMAND: pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'creates a Host-owned bot|rejects Host bot create|rejects non-Lead Host bot'
+STDOUT: evidence/t014-bot-create/vitest.stdout.txt
+CLAIM: measured (Runtime proof; Verifier re-run to certify)
