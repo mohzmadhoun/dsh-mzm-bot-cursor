@@ -1,0 +1,6 @@
+# Ignore local Terraform state and lockfiles (token-backed apply is operator-local).
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
