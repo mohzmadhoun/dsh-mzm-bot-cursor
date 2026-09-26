@@ -109,7 +109,11 @@ function spawn(
   ctx: Context,
   lead: Agent,
   name: string,
-  options: { context?: 'fresh' | 'fork'; provider?: string } = {},
+  options: {
+    context?: 'fresh' | 'fork'
+    provider?: string
+    agentOptions?: { provider: string; model: string }
+  } = {},
 ) {
   const context = options.context ?? 'fresh'
   return ctx.agentTeams.spawnTeammate(lead, {
@@ -118,6 +122,7 @@ function spawn(
     prompt: content(`${name} initial`),
     context,
     provider: options.provider ?? (context === 'fork' ? 'fork' : 'spawn'),
+    ...options.agentOptions === undefined ? {} : { agentOptions: options.agentOptions },
     signal: SIGNAL,
   })
 }
@@ -226,6 +231,34 @@ describe('Team identity and provisioning', () => {
     ])
     await expect(spawn(ctx, lead, 'third-worker')).rejects.toMatchObject({ code: 'TEAM_MEMBER_LIMIT' })
     await expect(spawn(ctx, lead, 'fresh-worker')).rejects.toMatchObject({ code: 'TEAM_MEMBER_NAME_TAKEN' })
+  })
+
+  it('applies per-teammate LLM agentOptions at create without sharing the Lead route', async () => {
+    const { ctx, lead } = await setup(['hang', 'hang'])
+    expect(lead.options).toMatchObject({ provider: 'mock', model: 'mock' })
+
+    const alpha = await spawn(ctx, lead, 'alpha-bot', {
+      agentOptions: { provider: 'mock', model: 'alpha-model' },
+    })
+    const alphaLive = await waitRunning(ctx, alpha.member.id)
+    expect(alphaLive.options).toMatchObject({ provider: 'mock', model: 'alpha-model' })
+    expect(alpha.member).toMatchObject({ name: 'alpha-bot', model: 'alpha-model' })
+    expect(lead.options.model).toBe('mock')
+
+    const beta = await spawn(ctx, lead, 'beta-bot', {
+      agentOptions: { provider: 'mock', model: 'beta-model' },
+    })
+    const betaLive = await waitRunning(ctx, beta.member.id)
+    expect(betaLive.options).toMatchObject({ provider: 'mock', model: 'beta-model' })
+    expect(beta.member).toMatchObject({ name: 'beta-bot', model: 'beta-model' })
+    expect(alphaLive.options.model).toBe('alpha-model')
+
+    const alphaDescriptor = (await storedEvents(ctx, alpha.member.id))
+      .find(event => event.type === 'subagent/descriptor')
+    expect(alphaDescriptor?.data).toMatchObject({
+      agentProvider: 'mock',
+      agentModel: 'alpha-model',
+    })
   })
 
   it('flushes the accepted child prompt before committing the active roster edge', async () => {

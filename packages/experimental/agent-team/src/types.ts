@@ -1,5 +1,6 @@
 /** Public Agent Teams identities, durable records, and service request values. */
 
+import type { ModelSelection } from '@deepseek-ai/dsh-agent'
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { ContentBlock } from '@deepseek-ai/dsh-llm/types'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -146,7 +147,18 @@ export interface SpawnTeammateRequest {
   readonly description: string
   readonly prompt: ContentBlock[]
   readonly context: 'fresh' | 'fork'
+  /**
+   * Subagent backend id used for continuable child creation (`spawn`, `fork`, …).
+   * Not the LLM provider route — that belongs on {@link SpawnTeammateRequest.agentOptions}.
+   */
   readonly provider: string
+  /**
+   * Per-bot LLM {@link ModelSelection} applied at continuable create.
+   * Distinct from {@link SpawnTeammateRequest.provider} (subagent backend). Omission inherits the
+   * Lead's route through continuable child option resolution. Electron Main
+   * must not invent or rewrite this route.
+   */
+  readonly agentOptions?: ModelSelection
   readonly signal: AbortSignal
 }
 

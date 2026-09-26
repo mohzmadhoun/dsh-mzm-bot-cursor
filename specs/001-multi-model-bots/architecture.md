@@ -82,7 +82,7 @@ Wedge needs ≥2 bots and peer messaging. Parent↔child `send_message` (`dsh-to
 
 **Pick: A.** Mount experimental Agent Teams for P1 messaging. Product “bot create” maps to Lead-authorized teammate spawn (or equivalent Host API Spec names). Do not fork an Electron bus. Defer task-board productization (P4-ish) — presence of the board is OK if unused by acceptance.
 
-**Runtime gap (not a new mailbox):** `SpawnTeammateRequest` today carries subagent `provider` / context / prompt, not LLM `agentOptions`. Continuable start already supports `agentOptions` when the backend advertises the capability. P1 needs a thin Host path so each teammate gets its own `ModelSelection` at create (Spec → Runtime task).
+**Runtime path:** `SpawnTeammateRequest.agentOptions` carries per-bot LLM `ModelSelection` into continuable create (distinct from Team `provider`, the subagent backend id). Continuable start already applies `agentOptions` when composing the child. Electron Main must not invent or rewrite the route.
 
 ### Novel seam: Shell↔Host data plane
 
