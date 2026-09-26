@@ -8,7 +8,7 @@
 
 **Organization**: Topology handshake (DH Electron + DH Verifier) is Phase 2 foundational and **blocks** all user-story fan-out. Stories then follow spec priority (US1→US4).
 
-**Linear**: Epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37) · Tasks issue [MOH-43](https://linear.app/momadhoun/issue/MOH-43) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-taskstoissues` (not this file)
+**Linear**: Epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37) · Tasks issue [MOH-44](https://linear.app/momadhoun/issue/MOH-44) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-taskstoissues` (not this file)
 
 **Branch**: `cursor/p1-tasks-92fa` (stacked on `cursor/p1-specify-92fa`)
 
