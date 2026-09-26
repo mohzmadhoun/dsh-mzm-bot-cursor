@@ -32,7 +32,8 @@
 ## Notes
 
 - Validation pass 1 (2026-09-26, DH Spec): All items pass.
+- Clarification pass (2026-09-26, DH Spec / MOH-41): PO defaults encoded — Verifier ≥2 models = any two distinct configured assignments; topology handshake packaging = DH Electron + DH Verifier scripts, Architect names criteria, Spec owns acceptance text (FR-013, SC-007). Checklist re-validated: still 16/16.
 - Product constraints (desktop Electron shell, Host mailbox, in-app auth) appear as accepted program locks / WHAT constraints in Assumptions and FRs, not as implementation HOW.
-- Topology handshake remains a plan/implement entry gate; not expanded into product scope.
-- Zero `[NEEDS CLARIFICATION]` markers; residual open questions for Lead/PO are reported outside the checklist (provider catalog granularity, exact Verifier script packaging) and do not block clarify/plan.
-- Ready for `/speckit-clarify` or `/speckit-plan` after PO/Lead ack.
+- Topology handshake remains a plan/implement entry gate with Spec-owned acceptance text; not expanded into wedge product features.
+- Zero `[NEEDS CLARIFICATION]` markers; no residual clarify blockers.
+- Ready for `/speckit-plan`.
