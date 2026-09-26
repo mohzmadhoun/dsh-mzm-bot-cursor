@@ -49,7 +49,9 @@ describe('topology handshake (SC-007)', () => {
     }
   })
 
-  it('spawns one Desktop Host child with ELECTRON_RUN_AS_NODE, ready IPC, auth HTTP+WS, and ordered shutdown', async () => {
+  it('spawns one Desktop Host child with ELECTRON_RUN_AS_NODE, ready IPC, auth HTTP+WS, and ordered shutdown', {
+    timeout: 30_000,
+  }, async () => {
     const handshakeLog: string[] = []
     const log = (step: string, detail?: string): void => {
       handshakeLog.push(detail === undefined ? step : `${step}: ${detail}`)

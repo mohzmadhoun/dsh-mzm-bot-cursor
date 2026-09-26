@@ -21,6 +21,8 @@ import { join } from 'node:path'
 const TOKEN = ${JSON.stringify(FIXTURE_TOKEN)}
 const SESSION = ${JSON.stringify(FIXTURE_SESSION)}
 let streamOpened = false
+/** Upgraded sockets are not always released by server.closeAllConnections(). */
+const upgradeSockets = new Set()
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
   if (url.searchParams.get('token') === TOKEN) {
@@ -70,6 +72,8 @@ server.on('upgrade', (request, socket) => {
     'HTTP/1.1 101 Switching Protocols\\r\\nUpgrade: websocket\\r\\nConnection: Upgrade\\r\\nSec-WebSocket-Accept: '
       + accept + '\\r\\n\\r\\n',
   )
+  upgradeSockets.add(socket)
+  socket.on('close', () => { upgradeSockets.delete(socket) })
   streamOpened = true
   socket.write(Buffer.from([0x81, 0x02, 0x6f, 0x6b]))
 })
@@ -89,6 +93,8 @@ process.on('message', message => {
     return
   }
   if (message.type !== 'shutdown') return
+  for (const socket of upgradeSockets) socket.destroy()
+  upgradeSockets.clear()
   server.close(() => {
     writeFileSync(join(process.argv[3], 'stopped'), '')
     process.send({ type: 'shutdown-complete' }, () => process.disconnect())
