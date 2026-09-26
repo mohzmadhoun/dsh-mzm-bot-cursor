@@ -1,0 +1,104 @@
+# T010/T011 measured checks
+branch: cursor/p1-t010-t011-confirms-92fa
+commit: 0ed5b7c0a8ef1123fbbd0d06e323d3af237e7bd1
+date_utc: 2026-09-26T23:00:34Z
+
+## T010 — Desktop profile bundles (source)
+### DESKTOP_PROFILE_BUNDLES (apps/desktop/src/project-manager.ts)
+/**
+ * Desktop Host composition for P1: Web template plus experimental Agent Teams
+ * Host and Web layers (mailbox only; task-board productization deferred — research R9).
+ * Optional bundles resolve from the bundled dsh installation, not profile `dependencies`.
+ */
+export const DESKTOP_PROFILE_BUNDLES: readonly string[] = [
+  ...WEB_PROFILE.bundles,
+  ...OPTIONAL_BUNDLES,
+]
+
+### PROFILE_TEMPLATES.web + OPTIONAL_BUNDLES (packages/boot/app-boot/src/profile.ts)
+export const PROFILE_TEMPLATES: Record<string, ProfileTemplate> = {
+  acp: {
+    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-acp-app'],
+  },
+  web: {
+    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'],
+  },
+  headless: {
+    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-headless'],
+  },
+  sdk: {
+    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-sdk-app'],
+  },
+  'sdk-minimal': {
+    bundles: ['@deepseek-ai/dsh-sdk-minimal'],
+  },
+}
+
+/** Installation-owned bundle tuples normalized to the shipped template. */
+const INSTALLATION_OWNED_PROFILE_TUPLES: Record<string, readonly string[]> = {
+  headless: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', '@deepseek-ai/dsh-headless'],
+}
+
+/** The bundle list a `dsh plugin` init uses for a name with no shipped template. */
+export const DEFAULT_PROFILE_BUNDLES: readonly string[] = ['@deepseek-ai/dsh-base']
+
+/**
+ * The bundles the dsh installation ships for a person to switch on: each a
+ * runtime dependency of the installation that declares `dsh.bundle.patch`,
+ * selected by no shipped template, and offered switched off by the plugin
+ * manager ([rationale](../../../../.agents/notes/implemented/process/2026-09-15-shipped-optional-bundles.md)).
+ */
+export const OPTIONAL_BUNDLES: readonly string[] = [
+  '@deepseek-ai/dsh-experimental-agent-team-profile',
+  '@deepseek-ai/dsh-experimental-agent-team-web-profile',
+]
+
+## T010 — Box / computer-use absence (rg)
+### Pattern: computer-use|dsh-box|box-backend in Desktop composition trees
+(no matches)
+
+## T010 — Shell tool stack in dsh-base (present; not P1 acceptance-required)
+221:    - id: bash-sandbox
+222:      name: '@deepseek-ai/dsh-bash-sandbox'
+227:    - id: pwsh-sandbox
+228:      name: '@deepseek-ai/dsh-pwsh-sandbox'
+253:    - id: tool-bash
+254:      name: '@deepseek-ai/dsh-tool-bash'
+257:    - id: tool-pwsh
+258:      name: '@deepseek-ai/dsh-tool-pwsh'
+
+## T011 — credentials-local mounting
+104:    - id: credentials
+105-      name: '@deepseek-ai/dsh-credentials-local'
+106-
+107-    # The pi-ai multi-provider twin, mounted dormant: zero routes (and no extra
+108-    # models in the picker) until a `llm-pi-ai:` settings section supplies provider
+109-    # profiles — then those routes register live, keys resolving per request
+110-    # through their apiKeyEnv references, and drop again when the section empties.
+
+## T011 — secret IPC scan (preload + ipc)
+### Files:
+apps/desktop/src/ipc.ts
+apps/desktop/src/preload-app.ts
+apps/desktop/src/preload-mandatory.ts
+apps/desktop/src/preload-menu.ts
+apps/desktop/src/preload-platform.ts
+apps/desktop/src/preload-theme.ts
+apps/desktop/src/preload-update-dialog.ts
+apps/desktop/src/preload-windows.ts
+
+### rg -i credential|secret|apiKey|api_key|password on preload+ipc:
+apps/desktop/src/ipc.ts:30:  /** Main-owned diagnostics without subprocess output or credentials; hidden until expanded. */
+
+### DESKTOP_IPC keys:
+export const DESKTOP_IPC = {
+  boot: 'dsh-desktop:boot',
+  bootFailed: 'dsh-desktop:boot-failed',
+  directoryPick: 'dsh-desktop:directory-pick',
+  updatesStatus: 'dsh-desktop:updates-status',
+  updatesOpen: 'dsh-desktop:updates-open',
+  updatesPresentation: 'dsh-desktop:updates-presentation',
+  nativeThemeSet: 'dsh-desktop:native-theme-set',
+  windowsAppearance: 'dsh-desktop:windows-appearance',
+  windowsMenu: 'dsh-desktop:windows-menu',
+} as const
