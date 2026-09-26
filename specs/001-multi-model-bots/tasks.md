@@ -36,7 +36,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `architecture.md`, `quickstart.md`, `contracts/*`) under `specs/001-multi-model-bots/` and point implementers at [contracts/README.md](./contracts/README.md)
 - [ ] T002 [P] Inventory Shell↔Host spawn/IPC/document surfaces in `apps/desktop/src/host-process.ts`, `apps/desktop/src/host-protocol.ts`, `apps/desktop/src/ipc.ts`, `apps/desktop/src/web-document.ts`, and `apps/desktop-host/src/index.ts` against [contracts/topology-handshake.md](./contracts/topology-handshake.md)
-- [ ] T003 [P] Inventory Host reuse touch points for P1: `packages/core/agent/src/model-selection.ts`, `packages/experimental/agent-team/src/{types,roster,mailbox,index}.ts`, `packages/experimental/agent-team-profile/cordis.patch.yml`, `packages/credentials/credentials-local/`, `packages/client/ui-settings-models/src/client/`, `packages/client/ui-chat/`, `packages/experimental/client-ui-agent-team/`
+- [x] T003 [P] Inventory Host reuse touch points for P1: `packages/core/agent/src/model-selection.ts`, `packages/experimental/agent-team/src/{types,roster,mailbox,index}.ts`, `packages/experimental/agent-team-profile/cordis.patch.yml`, `packages/credentials/credentials-local/`, `packages/client/ui-settings-models/src/client/`, `packages/client/ui-chat/`, `packages/experimental/client-ui-agent-team/`
 - [ ] T004 Create Verifier recipe directory `specs/001-multi-model-bots/verifier/README.md` listing Scenario 0–5 owners (Electron / Verifier / Runtime / Client) mapped to [quickstart.md](./quickstart.md)
 
 ---
