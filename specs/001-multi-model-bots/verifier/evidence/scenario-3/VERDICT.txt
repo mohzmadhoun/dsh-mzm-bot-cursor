@@ -1,11 +1,13 @@
 VERDICT: Pass
 SC: SC-003
-SHA: 19914ea45752255c50409f8a2b0cd7b39fa43fb4
+SHA: 7515f367455bfe48a5dd7e77cc5335651264fbc7
 BRANCH: cursor/p1-t025-scenario3-92fa
-UTC: 2026-09-27T10:08:11Z
-OPERATOR: DH Verifier (Composer acting as Mohammed)
+UTC: 2026-09-27T10:11:05Z
+OPERATOR: DH Verifier (Composer second Pass; acting as Mohammed)
+PASS_CYCLE: 2 (independent re-run of recipe prove path)
 LINEAR: MOH-70 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
 RECIPE: specs/001-multi-model-bots/verifier/scenario-3-mailbox.md
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/49
 BASE_MASTER: 4e61aae8c4 (Phase 1 - T024 - render handoff pending in Desktop chat UI #44)
 T021: Pass (measured)
 COMMAND_T021: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/mailbox-send.spec.ts packages/experimental/agent-team/tests/delivery-state.spec.ts
@@ -26,7 +28,7 @@ TOPOLOGY_NEGATIVE: Pass (measured)
 COMMAND_TOPOLOGY: ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
 STDOUT_TOPOLOGY: evidence/scenario-3/vitest-topology-negative.log (Test Files 1 passed; Tests 1 passed | 4 skipped; EXIT:0)
 LIVE: Deferred
-DEFER_REASON: Keyless composite Pass recorded; live Desktop dual-bot operator path not run on this Verifier host
+DEFER_REASON: Keyless composite Pass recorded; live Desktop dual-bot operator path not run on this Verifier host (recipe allows Deferred for criterion 6)
 EVIDENCE: evidence/scenario-3/
 CRITERIA_CHECKED:
   1. Host A→B send + deliveryState fold (T021) — Pass (measured)
@@ -35,8 +37,8 @@ CRITERIA_CHECKED:
   4. Chat + notices strip visible handoff without copy-paste (T024 + skeleton) — Pass (measured)
   5. Fake Electron mailbox IPC rejected (topology negative) — Pass (measured)
   6. Live Desktop dual-bot operator observation — Deferred
-CLAIM: measured (self-prove keyless composite @ 19914ea457)
+CLAIM: measured (independent second-pass keyless composite @ 7515f36745)
 SCOPE_OUT: T026 Electron bus regression guard file; live Desktop SC-003 operator stamp
 NOTE: Vitest 4.1.8 binary; Node v24.21.0; mock LLM / component fixtures — no provider API secrets
 BLOCKER: none
-LINEAR_STATUS: leave MOH-70 In Progress until PO opens PR and second Pass cycle
+LINEAR_STATUS: leave MOH-70 In Progress (second Pass complete; do not Done; do not merge)
