@@ -1,6 +1,6 @@
 VERDICT: Pass (implementer evidence; Verifier re-confirm pending)
 SC: FR-008 preload/renderer no raw secrets (T034)
-SHA: 605f512e487c042bc0c564018123df0688b5e37a
+SHA: aaf2b96428fff8f3bab07d77a1a2fd143028acb7
 UTC: 2026-09-27T09:59:04Z
 RECIPE: specs/001-multi-model-bots/verifier/t034-no-secret-ipc.md
 RECIPE_VITEST: Pass (measured)
