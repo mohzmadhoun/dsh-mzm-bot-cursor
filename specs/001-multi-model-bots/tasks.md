@@ -149,7 +149,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 **Purpose**: Full Verifier replay, non-goals, open-gap docs, no scope creep
 
 - [ ] T038 [P] Add Verifier Scenario 5 full Phase 1 replay recipe in `specs/001-multi-model-bots/verifier/scenario-5-full-replay.md` (SC-005) requiring Scenario 0 Pass first
-- [ ] T039 [P] Document explicit non-goals absence checks (Box/Shell, MCP/1Password vault, personas/skills/routines/memory product UX, pixel Grok chrome) in `specs/001-multi-model-bots/verifier/non-goals.md`
+- [x] T039 [P] Document explicit non-goals absence checks (Box/Shell, MCP/1Password vault, personas/skills/routines/memory product UX, pixel Grok chrome) in `specs/001-multi-model-bots/verifier/non-goals.md`
 - [ ] T040 Track open B for PO/Lead: amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane in `MzM-Docs/mzm-bot-plan.md` (note only; do not block implement) — cross-link from `specs/001-multi-model-bots/research.md` R1
 - [ ] T041 [P] Link `specs/001-multi-model-bots/architecture.md` Handoff section to `tasks.md` and note analyze → taskstoissues next (no FR rewrite)
 - [ ] T042 Run `specs/001-multi-model-bots/quickstart.md` Scenario 0–5 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
