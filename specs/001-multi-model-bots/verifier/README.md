@@ -32,13 +32,14 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
-Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor.md` (T013).
+Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expands), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), `trust-floor.md` (T013).
 
 ## Host API proofs (pre-Scenario)
 
 | Slice | Recipe | Primary owners | Notes |
 |-------|--------|----------------|-------|
 | **T014** Host bot-create | [t014-host-bot-create.md](./t014-host-bot-create.md) | **Runtime** + **Verifier** | FR-001 Host half; not SC-001/002 Pass |
+| **T015** Bot ModelSelection bind | [t015-model-bind.md](./t015-model-bind.md) | **Runtime** + **Verifier** | FR-002 Host bind via `installModelSelection`; not SC-001/002 Pass |
 | **T017** Client create + assign-model UI | [t017-client-create-ui.md](./t017-client-create-ui.md) | **Electron/Client** + **Verifier** | FR-001 Client half + FR-007; not SC-001/002 Pass |
 | **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Verifier** (after this slice) + Client | FR-003 rule + Client messaging; SC-001/002 session Pass and TTFT stay T019 |
 

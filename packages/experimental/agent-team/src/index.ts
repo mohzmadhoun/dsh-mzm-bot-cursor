@@ -10,6 +10,10 @@ import { errorMessage, TeamError } from './error.ts'
 import { TeamJournal } from './journal.ts'
 import { TeamRuntimeLifecycle } from './lifecycle.ts'
 import { TeamMailbox } from './mailbox.ts'
+import {
+  bindTeammateModelSelection,
+  resolveTeammateModelSelection,
+} from './model-selection-bind.ts'
 import { teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
@@ -117,7 +121,10 @@ export class TeamService extends TypertRemoteService {
     this.tasks = new TeamTaskBoard(this.journal, this.config.maxTasks)
 
     ctx.on('session/event', (session, event) => { this.mailbox.observeSessionEvent(session, event) })
-    ctx.on('agent/created', ({ agent }) => { this.scheduleRecovery(agent) })
+    ctx.on('agent/created', ({ agent }) => {
+      this.bindTeammateModelSelection(agent)
+      this.scheduleRecovery(agent)
+    })
     ctx.on('agent/status', ({ agent }) => {
       const membership = this.roster.tryMembership(agent)
       if (membership !== undefined) this.activity.notify(membership.id)
@@ -165,7 +172,9 @@ export class TeamService extends TypertRemoteService {
 
   /**
    * Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment.
-   * Persists the Bot on the Host Team roster; Electron Main must not invent bot records or routes.
+   * Persists the Bot on the Host Team roster with durable `modelSelection`, spawns with `agentOptions`,
+   * and binds the live Agent through `installModelSelection` so subsequent chats keep that assignment.
+   * Electron Main must not invent bot records or routes.
    * @param caller - exact live Lead Agent.
    * @param request - displayName, ModelSelection, and cancellation.
    * @returns Host-owned Bot identity, derived roster name, retained model assignment, and roster row.
@@ -365,6 +374,20 @@ export class TeamService extends TypertRemoteService {
         this.ctx.logger.warn(`Agent Teams recovery for "${agent.id}" failed: ${errorMessage(error)}`)
       })
     })
+  }
+
+  /**
+   * Bind one teammate Agent to its durable Host ModelSelection via installModelSelection.
+   * Lead Agents and non-Team children are left unbound (FR-002 applies per Bot).
+   * @param agent - newly created or resumed exact live Agent.
+   */
+  private bindTeammateModelSelection(agent: Agent): void {
+    const membership = this.roster.tryMembership(agent)
+    if (membership === undefined || membership.role !== 'teammate') return
+    const member = this.journal.state(membership.root).members.find(row => row.id === agent.id)
+    const selection = resolveTeammateModelSelection(agent, member)
+    if (selection === undefined) return
+    bindTeammateModelSelection(agent, selection)
   }
 
   /** Reconcile roster provisioning before retrying that member's pending mailbox. */

@@ -54,6 +54,12 @@ export interface TeamMemberSnapshot {
    * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
    */
   readonly displayName?: string
+  /**
+   * Durable per-bot LLM route from spawn `agentOptions` / Host create (FR-002).
+   * Bound onto the live Agent via `installModelSelection` so subsequent chats
+   * keep this assignment. Absent when spawn omitted `agentOptions`.
+   */
+  readonly modelSelection?: ModelSelection
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase

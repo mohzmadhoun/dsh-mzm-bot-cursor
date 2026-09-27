@@ -155,12 +155,11 @@ export class TeamRoster {
     }]
     for (const member of state.members) {
       const live = this.ctx.agents.get(member.id)
-      const liveRoute = llmRouteFields(live?.options)
-      // An unloaded child may still show the Lead model string. modelSelection
-      // stays on that child's live route so the Lead pair is not counted as the bot's.
-      const route = liveRoute.model !== undefined
-        ? liveRoute
-        : root.options.model === undefined ? {} : { model: root.options.model }
+      // Prefer durable Host assignment (FR-002). Project Verifier (provider, model)
+      // via llmRouteFields. Never fall back to the Lead route as modelSelection.
+      const route = member.modelSelection !== undefined
+        ? llmRouteFields(member.modelSelection)
+        : llmRouteFields(live?.options)
       result.push({
         id: member.id,
         name: member.name,
@@ -284,6 +283,7 @@ export class TeamRoster {
       name,
       description,
       ...request.displayName === undefined ? {} : { displayName: request.displayName },
+      ...request.agentOptions === undefined ? {} : { modelSelection: request.agentOptions },
       provider: requiredText(request.provider, 'provider', 200),
       context: request.context,
       phase: 'provisioning',
@@ -460,6 +460,9 @@ export class TeamRoster {
   /** Build one runtime member row after successful creation. */
   private memberView(member: TeamMemberSnapshot & { readonly phase: 'active' }): TeamMemberView {
     const live = this.ctx.agents.get(member.id)
+    const route = member.modelSelection !== undefined
+      ? llmRouteFields(member.modelSelection)
+      : llmRouteFields(live?.options)
     return {
       id: member.id,
       name: member.name,
@@ -469,7 +472,7 @@ export class TeamRoster {
       ...member.displayName === undefined ? {} : { displayName: member.displayName },
       provider: member.provider,
       context: member.context,
-      ...llmRouteFields(live?.options),
+      ...route,
       diagnostics: [],
     }
   }
