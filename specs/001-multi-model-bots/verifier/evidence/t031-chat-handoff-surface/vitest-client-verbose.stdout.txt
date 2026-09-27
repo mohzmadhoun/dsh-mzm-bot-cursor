@@ -1,78 +1,12 @@
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-
  RUN  v4.1.8 /workspace
 
  ↓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readTeamMessageSource > reads a complete team-message source
  ↓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readTeamMessageSource > rejects non-team sources and incomplete team-message rows
- ↓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns the first non-empty text block
- ↓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns empty string when no text block is present
- ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readLinkedMailboxMessageId (T030) > returns messageId for a team-message source 1ms
- ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readLinkedMailboxMessageId (T030) > returns null for ordinary user sources 0ms
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > rejects an unrelated event passed directly to the request-prompt start
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > pins the system-message Definition edges the engine cannot reach
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps ordinary command-only history inactive for the Conversation shell
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps the Turn rail projection current when a chunk updates one node in place
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > bounds each rail preview at its card budget instead of copying the whole transcript
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > classifies reply content separately from reasoning and Tool protocol blocks
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > projects one reversible process window before the finalized answer
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > counts Assistant messages, Tool calls, and subagent delegations per Turn
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > orders the opening User before its process control and later steering
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > replays pending splice chains and scopes steering to the current claim
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > orders a command-started Turn first steering before its process control
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps a first human message after process evidence at its event position
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps Process before pre-User Context as answer eligibility changes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > establishes the answer boundary only when a streamed answer finalizes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > reuses the open Turn-process projection across continuing Assistant chunks
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > notifies process sources only for Nodes in the changed Turn
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > anchors a streamed non-text answer from its block start
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > projects ≥1 Host assistant/live-chunk progress update before assistant/message settles (T029)
- ✓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > delivers settled assistant/message final and links cold-resume mailbox attribution (T030) 6ms
- ✓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > attributes mid-turn team-message steer onto turn-tail linkedMailboxMessageId (T030) 1ms
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps one keyed Assistant node while streaming settles and materializes interruption from Location
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > omits first-token metrics after live settlement and after reopening the same history
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > uses live Assistant deltas without replaying settled embedded streams
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps one keyed Tool node from running through settlement and replays nested dispatch after prepend
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > joins mixed historical and current subcall IDs by explicit fields through replay
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > prepends an older turn without replacing already materialized nodes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > appends a later turn without replacing nodes from the completed turn
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps branching unavailable when a tool result follows the closing Assistant
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > publishes exact Turn usage only after pagination supplies the full lifecycle window
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > replays inbox predecessors after prepend and reclassifies the dependent message as steering
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > orders claimed steering after the finalized Turn tail
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > classifies appended producer context from durable source metadata
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > materializes series starts and system node replacements but not same-series config or tool changes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > shows a complete appended prompt at the start of a headerless window
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > withholds windowed replacement prompts until prepend resolves their positions
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > shows the system node text as the request prompt card before the request messages
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > restores A when compaction shadows B without a new system event (replay)
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > restores A when compaction shadows B without a new system event (live)
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > restores A when compaction shadows B without a new system event (partial)
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > withholds reversed unknown replacement endpoints and resolves them after prepend
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > never renders a system/message as a transcript bubble
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > presents an in-history prompt update as its own card and lets no same-step header repeat it
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > renders no card for an in-history update that clears the prompt
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps the initial system prompt before the opening User as Turn process state changes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps an append-only later user turn in the existing system-prompt series
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > places a withheld replacement prompt after prepend supplies its original node
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > repeats an unchanged system prompt after a surface rewrite and before an explicit later series
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > associates each direct message with its immediately following session recall
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > updates an already published direct node when its following recall arrives
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > associates a claimed steering message with its following recall
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > associates a direct message with the skill invocations injected for its step
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > updates an already published direct node when its skill injection arrives
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps replacement copies out of Chat business nodes
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > assembles retry chains and keeps manual and automatic compaction ownership separate
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > fills a landed compaction marker when an older page supplies its summary
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > renders a historical compaction when its start remains outside the loaded window
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > ignores legacy compaction transactions without correlation ids
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > ignores legacy retry and PTC dispatch events without correlation ids
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > renders the exhausted-retry turn error in a partial tail window and after prepending the chain
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > materializes a max-tokens notice and keeps completed and error turns clean
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > keeps the max-tokens notice when the window starts after the owning turn/start
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > pins the max-tokens Definition edges the engine cannot reach
- ↓ |thread-safe| packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts > built-in conversation node Definitions > preserves nested Tools and manual compaction evidence when their start events are outside the window
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns the first non-empty text block 1ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns empty string when no text block is present 0ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > chatHandoffDeliveryState (T031) > stays visible-pending when no later turn Node follows the handoff 0ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > chatHandoffDeliveryState (T031) > folds to acted when a later assistant/turn Node follows the handoff 0ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > chatHandoffDeliveryState (T031) > returns visible-pending when the handoff key is absent from order 0ms
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > opens Markdown references to unmodified files with line navigation
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > threads the injected file-mention vocabulary into the closing prose only
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > formatRunDuration localizes units and floors partial seconds
@@ -102,10 +36,9 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands MISSING_CREDENTIAL turn failure to in-app Models settings (not 1Password)
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > offers Models re-entry for AUTH (invalid/revoked) mid-session failures (T035)
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > offers Models re-entry for INVALID_CREDENTIAL mid-session failures (T035)
- ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > delivers settled Assistant final from session log with optional mailbox attribution (T030 / FR-006) 42ms
- ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > omits linkedMailboxMessageId on finals not caused by a mailbox message (T030) 7ms
- ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders durable team-message context as a Host mailbox handoff (T024)
- ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders pending inbox team-message as a visible handoff without copy-paste (T024)
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders durable team-message context as a Host mailbox handoff (T024) 30ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds durable team-message handoff to acted after recipient follow-up (T031) 11ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders pending inbox team-message as a visible handoff without copy-paste (T024) 4ms
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders the max-tokens notice with localized guidance, distinct from turn errors
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands the trajectory callback to the Tool seat
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > shows assistant IconActions only on the last content message of each turn
@@ -172,8 +105,11 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders command nodes as durable rows: settled text, error state, executing spinner, run-less soft-fall
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders /compact as one stateful disclosure from running through completion
  ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps /compact no-history and error settlements on the generic command row
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx > HandoffNotices > renders TeamView.handoffs for the viewed Session with Host deliveryState (T024) 94ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx > HandoffNotices > shows recipient-acted deliveryState from Host TeamView.handoffs (T031) 4ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx > HandoffNotices > hides the strip when no handoff involves the viewed Session 5ms
 
  Test Files  3 passed (3)
-      Tests  6 passed | 162 skipped (168)
-   Start at  10:53:42
-   Duration  2.33s (transform 2.39s, setup 594ms, import 3.09s, tests 60ms, environment 372ms)
+      Tests  11 passed | 97 skipped (108)
+   Start at  10:49:20
+   Duration  2.19s (transform 2.18s, setup 478ms, import 2.98s, tests 153ms, environment 781ms)

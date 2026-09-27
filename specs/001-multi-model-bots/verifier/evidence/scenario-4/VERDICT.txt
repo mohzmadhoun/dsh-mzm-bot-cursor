@@ -1,0 +1,19 @@
+VERDICT: Deferred
+SC: SC-004
+SHA: <fill on composite Pass after T030 lands>
+BRANCH: cursor/p1-t032-scenario4-92fa
+UTC: 2026-09-27T10:55:00Z
+OPERATOR: DH Verifier (Composer; acting as Mohammed)
+LINEAR: MOH-77 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/scenario-4-progress-final.md
+T029: Pass (measured on master — see evidence/t029-chat-progress/; not re-stamped here)
+T030: Deferred
+SHELL_PROGRESS_IPC: Pass (measured via T029 evidence on master)
+SHELL_FINAL_IPC: Deferred
+LIVE: Skipped
+EVIDENCE: evidence/scenario-4/
+CLAIM: inferred (recipe + stubs only; T030 still landing on PR #60)
+DEFER_REASON: T032 delivers recipe + evidence stubs only. T029 Host-stream progress is on master with Verifier Pass. T030 session-log finals are still in Verifier on PR #60 (cursor/p1-t030-chat-final-92fa). Do not stamp SC-004 Pass until T030 is on the checkout under test and the Scenario 4 composite commands exit 0 with measured logs.
+SCOPE_OUT: SC-004 product Done; live Desktop scripted-chat stamp; feature code
+BLOCKER: T030 not on master (PR #60 open) — blocks SC-004 Pass, not T032 recipe presence
+LINEAR_STATUS: leave MOH-77 In Progress (do not Done; do not merge)

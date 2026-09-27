@@ -119,8 +119,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
 - [x] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
 - [x] T030 [US3] Deliver final result in chat on turn completion / assistant (or handoff) result from session log; support optional `linkedMailboxMessageId` attribution when turn is caused by mailbox message ([data-model.md](./data-model.md) Chat turn)
-- [ ] T031 [US3] Make 1:1 handoff / recipient action understandable on relevant chat surfaces without leaving the app — wire US2 projections from `packages/experimental/client-ui-agent-team/` into `packages/client/ui-chat/` / `packages/client/ui-conversation/` under Desktop
-- [ ] T032 [US3] Add Verifier Scenario 4 recipe in `specs/001-multi-model-bots/verifier/scenario-4-progress-final.md` for SC-004 (≥1 progress + final)
+- [x] T031 [US3] Make 1:1 handoff / recipient action understandable on relevant chat surfaces without leaving the app — wire US2 projections from `packages/experimental/client-ui-agent-team/` into `packages/client/ui-chat/` / `packages/client/ui-conversation/` under Desktop
+- [x] T032 [US3] Add Verifier Scenario 4 recipe in `specs/001-multi-model-bots/verifier/scenario-4-progress-final.md` for SC-004 (≥1 progress + final)
 
 **Checkpoint**: US3 operable for a real work session without Grok chrome parity
 
@@ -150,7 +150,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [ ] T038 [P] Add Verifier Scenario 5 full Phase 1 replay recipe in `specs/001-multi-model-bots/verifier/scenario-5-full-replay.md` (SC-005) requiring Scenario 0 Pass first
 - [x] T039 [P] Document explicit non-goals absence checks (Box/Shell, MCP/1Password vault, personas/skills/routines/memory product UX, pixel Grok chrome) in `specs/001-multi-model-bots/verifier/non-goals.md`
-- [ ] T040 Track open B for PO/Lead: amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane in `MzM-Docs/mzm-bot-plan.md` (note only; do not block implement) — cross-link from `specs/001-multi-model-bots/research.md` R1
+- [x] T040 Track open B for PO/Lead: amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane in `MzM-Docs/mzm-bot-plan.md` (note only; do not block implement) — cross-link from `specs/001-multi-model-bots/research.md` R1
 - [x] T041 [P] Link `specs/001-multi-model-bots/architecture.md` Handoff section to `tasks.md` and note analyze → taskstoissues complete / implement next (no FR rewrite)
 - [ ] T042 Run `specs/001-multi-model-bots/quickstart.md` Scenario 0–5 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
 

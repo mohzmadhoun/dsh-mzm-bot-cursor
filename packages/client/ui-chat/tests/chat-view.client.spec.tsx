@@ -1414,6 +1414,35 @@ describe('ChatView', () => {
     expect(row?.textContent).toContain('Alice')
   })
 
+  it('folds durable team-message handoff to acted after recipient follow-up (T031)', () => {
+    const teamContext: ContextMessageNode = {
+      kind: 'context',
+      seq: 2,
+      time: 2_000,
+      content: [{ type: 'text', text: 'handoff for recipient action' }],
+      source: {
+        kind: 'team-message',
+        messageId: 'msg-acted-1',
+        senderId: 'bot-a',
+        senderName: 'Alice',
+        teamId: 'lead',
+      },
+      producer: { role: 'inject', label: 'team-message' },
+      form: null,
+    }
+    const h = makeHarness({
+      nodes: [user(1, 'start'), teamContext, assistant(3, 'recipient acted on handoff', 1)],
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const row = view.container.querySelector('[data-chat-handoff]')
+    expect(row).not.toBeNull()
+    expect(row?.getAttribute('data-handoff-id')).toBe('msg-acted-1')
+    expect(row?.getAttribute('data-delivery-state')).toBe('acted')
+    expect(row?.getAttribute('data-handoff-source')).toBe('host-mailbox')
+    expect(row?.textContent).toContain(zh['message.handoff.acted'])
+    expect(row?.textContent).toContain('handoff for recipient action')
+  })
+
   it('renders pending inbox team-message as a visible handoff without copy-paste (T024)', () => {
     const pendingPeer = {
       id: 'pending-peer' as never,

@@ -1,0 +1,7 @@
+LIVE: Skipped
+SC: SC-004
+BRANCH: cursor/p1-t032-scenario4-92fa
+UTC: 2026-09-27T10:55:00Z
+OPERATOR: DH Verifier (Composer)
+REASON: T032 scope is recipe + evidence stubs only; live Desktop scripted chat not run. Optional criterion 6 remains Skipped/Deferred until Verifier runs after T030 lands.
+RECIPE: specs/001-multi-model-bots/verifier/scenario-4-progress-final.md
