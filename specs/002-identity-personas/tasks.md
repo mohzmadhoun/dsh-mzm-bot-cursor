@@ -123,7 +123,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 4
 
-- [ ] T026 [US4] Implement Host permanent identity removal from roster/overview entry points and section membership on confirm in `packages/experimental/agent-team/src/{index,roster}.ts` — transcript/mailbox cleanup MAY follow Host/session rules and MUST NOT block delete UX or Pass ([contracts/delete-confirm.md](./contracts/delete-confirm.md); clarify lock 5)
+- [x] T026 [US4] Implement Host permanent identity removal from roster/overview entry points and section membership on confirm in `packages/experimental/agent-team/src/{index,roster}.ts` — transcript/mailbox cleanup MAY follow Host/session rules and MUST NOT block delete UX or Pass ([contracts/delete-confirm.md](./contracts/delete-confirm.md); clarify lock 5)
 - [ ] T027 [US4] Add Client delete flow with explicit confirmation step (`idle` → `pending-confirm` → `cancelled` | `deleted` per [data-model.md](./data-model.md)) in `packages/experimental/client-ui-agent-team/src/client/` — cancel/dismiss returns to idle with profile unchanged
 - [ ] T028 [P] [US4] If product chooses shell-hosted native confirm, keep Electron Main lifecycle-only (no identity store) via optional dialog bridge in `apps/desktop/src/` — confirm step still required before Host delete; prefer Client confirm if shell dialog unused
 - [ ] T029 [US4] On Host delete failure mid-flight, show clear failure and keep bot listed until successful removal — Client + Host error path in `packages/experimental/client-ui-agent-team/src/client/` and `packages/experimental/agent-team/src/index.ts`

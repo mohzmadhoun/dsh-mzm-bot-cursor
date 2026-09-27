@@ -195,6 +195,45 @@ describe('Agent Teams projection events', () => {
     }, SessionSeq(1))])).toThrow(/during provisioning settlement/)
   })
 
+  it('allows active → deleted Host identity tombstone and rejects further transitions', () => {
+    const withIdentity = member({
+      displayName: 'Worker A',
+      persona: { job: 'review', voice: 'terse', antiJobs: ['merge'] },
+      avatar: { shape: 'circle', color: 'blue' },
+      sectionId: SidebarSectionId('sec-reviews'),
+    })
+    const base = event('team/member', { version: 2, teamId: TEAM, member: withIdentity }, SessionSeq(0))
+    const active = event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: { ...withIdentity, phase: 'active' },
+    }, SessionSeq(1))
+    const deleted = event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: {
+        ...withIdentity,
+        phase: 'deleted',
+        sectionId: null,
+      },
+    }, SessionSeq(2))
+
+    const state = teamState(project(ROOT, [base, active, deleted]))
+    expect(state.members).toHaveLength(1)
+    expect(state.members[0]).toMatchObject({
+      phase: 'deleted',
+      sectionId: null,
+      displayName: 'Worker A',
+      persona: { job: 'review', voice: 'terse', antiJobs: ['merge'] },
+    })
+
+    expect(() => projectTeam(ROOT, [base, active, deleted, event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: { ...withIdentity, phase: 'active', sectionId: null },
+    }, SessionSeq(3))])).toThrow(/invalid deleted -> active/)
+  })
+
   it('enforces task revision continuity', () => {
     const first = event('team/task', { version: 2, teamId: TEAM, task: task() }, SessionSeq(0))
     expect(() => projectTeam(ROOT, [event('team/task', {

@@ -383,17 +383,46 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host delete stub (FR-007 / FR-008).
-   * Removes Bot identity from roster / overview / section membership; transcript cleanup is out of band.
+   * Lead-authorized Host delete (FR-007 / FR-008 / clarify lock 5).
+   * Appends an `active` → `deleted` identity tombstone and clears section membership.
+   * Client roster / overview / section projections omit the Bot after commit.
+   * Transcript and mailbox cleanup MAY follow Host/session rules later and MUST NOT
+   * block this mutation or Pass — this path does not wipe them.
+   * Mid-flight reject / abort leaves the prior active row listed (T029 Host).
    * Electron Main must not invent delete records — Host owns the durable write (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - bot id and cancellation.
    * @returns acknowledgement after durable identity removal.
    */
   async deleteBot(caller: Agent, request: DeleteBotRequest): Promise<DeleteBotResult> {
-    void caller
-    void request
-    throw new TeamError('Host deleteBot is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can delete a teammate', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const root = membership.root
+    const deletedId = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const member: typeof current = {
+        ...current,
+        phase: 'deleted',
+        sectionId: null,
+      }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return current.id
+    })
+    return { id: deletedId }
   }
 
   /**

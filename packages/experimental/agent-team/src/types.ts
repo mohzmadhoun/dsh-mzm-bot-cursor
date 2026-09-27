@@ -41,8 +41,12 @@ export function TeamMessageId(id: string): TeamMessageId {
   return id as TeamMessageId
 }
 
-/** Durable teammate lifecycle. */
-export type TeamMemberPhase = 'provisioning' | 'active' | 'failed'
+/**
+ * Durable teammate lifecycle.
+ * `deleted` is a Host identity tombstone (FR-007 / FR-008): absent from Client
+ * roster / overview / section membership projections; kebab `name` stays reserved.
+ */
+export type TeamMemberPhase = 'provisioning' | 'active' | 'failed' | 'deleted'
 
 /** Stable Host id for one named sidebar section grouping. */
 export type SidebarSectionId = Branded<'SidebarSectionId'>
@@ -411,8 +415,9 @@ export interface AssignSectionResult {
 }
 
 /**
- * Host delete input (FR-007 / FR-008).
+ * Host delete input (FR-007 / FR-008 / clarify lock 5).
  * Confirm UX is Client-owned; this mutation performs identity removal when invoked.
+ * Pass = absence from sidebar / overview / section membership — not transcript wipe.
  */
 export interface DeleteBotInput {
   readonly botId: SessionId
@@ -423,7 +428,10 @@ export interface DeleteBotRequest extends DeleteBotInput {
   readonly signal: AbortSignal
 }
 
-/** Host acknowledgement after durable Bot identity removal. */
+/**
+ * Host acknowledgement after durable Bot identity removal.
+ * Mid-flight failure must leave the Bot listed until a successful call (T029 Host).
+ */
 export interface DeleteBotResult {
   readonly id: SessionId
 }

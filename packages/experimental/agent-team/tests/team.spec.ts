@@ -480,9 +480,6 @@ describe('Team identity and provisioning', () => {
       botId: created.id,
       sectionId: null,
     }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
-    expect(await ctx.agentTeams.remoteDeleteBot(lead, {
-      botId: created.id,
-    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
 
     // Prior create identity remains Host-durable; stubs do not invent Electron records.
     expect(durable(lead).members.find(row => row.id === created.id)).toMatchObject({
@@ -492,6 +489,111 @@ describe('Team identity and provisioning', () => {
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
       displayName: 'Identity Stub',
     })
+  })
+
+  it('persists deleteBot tombstone, omits identity from view, and rejects without removing prior', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('delete create'),
+      textResponse('delete peer'),
+    ])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Delete Bot',
+      modelSelection: { provider: 'mock', model: 'delete-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+    const priorName = created.name
+
+    const peer = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Peer Survives',
+      modelSelection: { provider: 'mock', model: 'peer-delete' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, peer.id)
+
+    // Leave a mailbox row targeting the bot — Pass must not require wiping it (clarify lock 5).
+    await ctx.agentTeams.sendMessage(lead, {
+      target: priorName,
+      content: [{ type: 'text', text: 'still queued after identity delete' }],
+      signal: SIGNAL,
+    })
+    const mailboxBefore = durable(lead).pendingMessages.length
+    expect(mailboxBefore).toBeGreaterThan(0)
+
+    const deleted = await ctx.agentTeams.deleteBot(lead, {
+      botId: created.id,
+      signal: SIGNAL,
+    })
+    expect(deleted).toEqual({ id: created.id })
+
+    expect(durable(lead).members.find(row => row.id === created.id)).toMatchObject({
+      name: priorName,
+      phase: 'deleted',
+      sectionId: null,
+      displayName: 'Delete Bot',
+    })
+    // Client-visible roster / overview omit the tombstone (FR-008).
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toBeUndefined()
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === peer.id)?.displayName)
+      .toBe('Peer Survives')
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.members.find(row => row.id === created.id)).toBeUndefined()
+    expect(view.members.find(row => row.id === peer.id)?.displayName).toBe('Peer Survives')
+
+    // Mailbox history is not wiped by identity delete (clarify lock 5).
+    expect(durable(lead).pendingMessages.length).toBe(mailboxBefore)
+
+    // Kebab name stays reserved after delete.
+    await expect(ctx.agentTeams.createBot(lead, {
+      displayName: 'Delete Bot',
+      modelSelection: { provider: 'mock', model: 'reuse-blocked' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_MEMBER_NAME_TAKEN' })
+
+    const remoteOk = await ctx.agentTeams.remoteDeleteBot(lead, {
+      botId: peer.id,
+    }, SIGNAL)
+    expect(remoteOk).toMatchObject({ ok: true, value: { id: peer.id } })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === peer.id)).toBeUndefined()
+    expect(durable(lead).members.find(row => row.id === peer.id)?.phase).toBe('deleted')
+
+    // Already-deleted / missing / non-Lead / abort leave remaining identity intact.
+    expect(await ctx.agentTeams.remoteDeleteBot(lead, {
+      botId: created.id,
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+    expect(await ctx.agentTeams.remoteDeleteBot(lead, {
+      botId: SessionId('missing-bot'),
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+
+    const hang = await setup(['hang'])
+    const hungChild = (await spawn(hang.ctx, hang.lead, 'peer-writer', {
+      agentOptions: { provider: 'mock', model: 'peer' },
+    })).member
+    const liveChild = await waitRunning(hang.ctx, hungChild.id)
+    await expect(hang.ctx.agentTeams.deleteBot(liveChild, {
+      botId: hungChild.id,
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_LEAD_REQUIRED' })
+    expect(durable(hang.lead).members.find(row => row.id === hungChild.id)?.phase).toBe('active')
+    expect(hang.ctx.agentTeams.listMembers(hang.lead).find(row => row.id === hungChild.id))
+      .toBeDefined()
+
+    const aborted = new AbortController()
+    aborted.abort()
+    await expect(hang.ctx.agentTeams.deleteBot(hang.lead, {
+      botId: hungChild.id,
+      signal: aborted.signal,
+    })).rejects.toBeTruthy()
+    expect(durable(hang.lead).members.find(row => row.id === hungChild.id)?.phase).toBe('active')
+    expect(hang.ctx.agentTeams.listMembers(hang.lead).find(row => row.id === hungChild.id))
+      .toBeDefined()
   })
 
   it('persists renameBot, projects displayName on view, and rejects empty rename without changing prior', async () => {

@@ -155,8 +155,10 @@ export class TeamRoster {
 
   /**
    * List the runtime-enriched roster visible to one Team member.
+   * Omits Host-deleted identity tombstones (FR-008 / clarify lock 5) so sidebar /
+   * overview / section membership projections no longer list the Bot.
    * @param membership - exact caller membership resolved by this roster.
-   * @returns Lead and teammate rows in creation order.
+   * @returns Lead and non-deleted teammate rows in creation order.
    */
   list(membership: TeamMembership): TeamMemberView[] {
     const { root } = membership
@@ -170,6 +172,7 @@ export class TeamRoster {
       diagnostics: [],
     }]
     for (const member of state.members) {
+      if (member.phase === 'deleted') continue
       const live = this.ctx.agents.get(member.id)
       // Prefer durable Host assignment (FR-002). Project Verifier (provider, model)
       // via llmRouteFields. Never fall back to the Lead route as modelSelection.
@@ -515,7 +518,13 @@ export class TeamRoster {
       if (current === undefined) {
         throw new TeamError(`provisioned teammate "${terminal.id}" disappeared`, 'TEAM_PROVISIONING_CONFLICT')
       }
-      if (current.phase !== 'provisioning') return current.phase
+      if (current.phase !== 'provisioning') {
+        if (current.phase === 'active' || current.phase === 'failed') return current.phase
+        throw new TeamError(
+          `teammate "${terminal.id}" left provisioning as ${current.phase}`,
+          'TEAM_PROVISIONING_CONFLICT',
+        )
+      }
       await this.journal.appendAndFlush(root, 'team/member', {
         version: 2,
         teamId: TeamId(root.id),
