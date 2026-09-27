@@ -1,0 +1,73 @@
+T020 Client US2 routines pane list — DH Verifier
+=================================================
+Verdict: PASS (Client product UI slice only)
+Stamp: 2026-09-27
+Tip gated: origin/cursor/p4-us2-client-pane-fe1d @ 98dec75009
+  (requested tip 67e5635f2b was pre-rebase; #153 then #155 landed on master)
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/154 (OPEN, MERGEABLE)
+Linear: MOH-213 — left In Progress (PO closes after merge / SO12 embed)
+
+Rebase note
+-----------
+#153 Host T019 merged first → client was 1 behind; rebased.
+#155 Host T019 Verifier stamp then landed → rebased again.
+Measured: git rev-list --left-right --count origin/master...origin/cursor/p4-us2-client-pane-fe1d
+  → 0 behind / 4 ahead. master is ancestor of tip. mergeable=MERGEABLE.
+
+Acceptance (T020 / Client product UI — not SC-001 Scenario Done)
+----------------------------------------------------------------
+[x] Bot info-pane routines list in packages/experimental/client-ui-agent-team/src/client/
+    with data-team-routines-pane (not ui-schedule header catalog).
+[x] Rows project Host RoutineProjection: identity/intent, scheduleExpr, status
+    active|paused, lastRunAt (never / Not run yet).
+[x] List survives leave/return of Agent Team panel.
+[x] Per-bot panes: bot with routines lists them; empty bot shows empty marker only
+    (SC-006 signal supporting, not full Scenario 1 stamp).
+
+Evidence (measured)
+-------------------
+Commands @ 98dec75009 (worktree /tmp/p4-us2-client-pane):
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T020 / US2'
+  → 2 passed | 71 skipped
+    - projects Host routines pane with identity, schedule, status, and lastRunAt
+    - keeps Host routines listed after leave and return
+
+Desktop (Standing Order 11 / FR-010) — independent Verifier CDP replay:
+  Desktop relaunched with tip client-ui lib overlaid into live package symlink,
+  then CDP hard-assert walkthrough (no soft rubber-stamp of implementer frames).
+  panel-state.json (verifier):
+    paneCount=3
+    listedBotId=c92d4a8c-… rowCount=2 (Summarize inbox…, US2 pane list smoke)
+    second bot rowCount=1 (Hourly status ping)
+    third bot empty=true list=false
+    leaveReturn=true rowsAfter=2
+  Screenshots under this dir + /opt/cursor/artifacts/p4-us2-t020-*
+  Recording: routines-pane-walkthrough.mp4
+    (= /opt/cursor/artifacts/p4-us2-t020-verifier-routines-pane-walkthrough.mp4)
+
+Standing Order 12 / FR-011
+--------------------------
+[x] Evidence committed under verifier/evidence/us2-client-t020/ on PR branch.
+[!] PR #154 body currently uses cursor.com artifact page markdown — does NOT yet
+    use absolute /opt/cursor/artifacts/… HTML <img>/<video controls> embeds.
+    PO / product-owner assistant MUST replace PR body embeds before Linear Done.
+    Recommended embeds:
+      <img src="/opt/cursor/artifacts/p4-us2-t020-03-routines-listed.png" alt="routines listed" />
+      <img src="/opt/cursor/artifacts/p4-us2-t020-04-after-return.png" alt="after leave/return" />
+      <video src="/opt/cursor/artifacts/p4-us2-t020-verifier-routines-pane-walkthrough.mp4" controls></video>
+
+Claims
+------
+- Client pane list UI + Host projection fields: **measured** (vitest + Desktop CDP).
+- Leave/return durability: **measured** (Desktop CDP rowsAfter=2).
+- Not ui-schedule Pass surface: **measured** (data-team-routines-pane on Agent Team).
+- SO11 desktop visual: **measured** (screenshots + mp4 this stamp).
+- SO12 commit: **measured**. SO12 PR HTML embeds: **Fail until PO updates #154 body**.
+- Full Scenario 1 / SC-001 / SC-006 / SC-007 product Done: **not stamped** (T021).
+
+Scope lock
+----------
+Does NOT stamp Scenario 1 / SC-001 Done. Does NOT close MOH-213.
+Leave MOH-213 In Progress until PO merges #154 and fixes SO12 embeds.
