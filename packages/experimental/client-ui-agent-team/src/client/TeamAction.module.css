@@ -98,14 +98,25 @@
   gap: 6px;
 }
 
-.member {
+.memberCard {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
   padding: 8px;
   border: 0.5px solid var(--dsw-alias-border-l1);
   border-radius: 8px;
+}
+
+.member {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--dsw-alias-label-primary);
   text-align: left;
@@ -126,6 +137,53 @@
 .meta {
   color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
+}
+
+.antiJobs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 22px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+.antiJobsLabel {
+  color: var(--dsw-alias-label-tertiary);
+  font-weight: 500;
+}
+
+.antiJobs ul {
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.antiJobs li {
+  line-height: 1.35;
+}
+
+.personaButton {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 22px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.personaButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.personaButton:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .diagnostic,

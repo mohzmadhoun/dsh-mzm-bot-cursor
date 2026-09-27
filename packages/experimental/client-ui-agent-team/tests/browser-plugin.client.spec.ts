@@ -23,7 +23,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -85,6 +85,30 @@ async function bench(options: {
                 role: 'teammate' as const,
                 status: 'inactive' as const,
                 displayName: 'Research Bot',
+                diagnostics: [],
+              },
+            },
+          },
+        })
+    },
+    updatePersona: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/updatePersona', args })
+      return Promise.resolve(options.remoteFailure === 'updatePersona'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              persona: { job: 'review', voice: 'terse', antiJobs: ['docs'] },
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Research Bot',
+                persona: { job: 'review', voice: 'terse', antiJobs: ['docs'] },
                 diagnostics: [],
               },
             },
@@ -190,6 +214,12 @@ describe('ui-team browser plugin', () => {
       displayName: 'Research Bot',
       modelSelection: { provider: 'fixture', model: 'model-a' },
     })).ok).toBe(true)
+    expect((await actions.updatePersona(SESSION, {
+      botId: CHILD,
+      job: 'review',
+      voice: 'terse',
+      antiJobs: ['docs'],
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -202,6 +232,7 @@ describe('ui-team browser plugin', () => {
     expect(b.calls.map(call => call.method)).toEqual([
       'agentTeams/view',
       'agentTeams/createBot',
+      'agentTeams/updatePersona',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -209,6 +240,12 @@ describe('ui-team browser plugin', () => {
     expect(b.calls[1]?.args[1]).toEqual({
       displayName: 'Research Bot',
       modelSelection: { provider: 'fixture', model: 'model-a' },
+    })
+    expect(b.calls[2]?.args[1]).toEqual({
+      botId: CHILD,
+      job: 'review',
+      voice: 'terse',
+      antiJobs: ['docs'],
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
@@ -260,6 +297,18 @@ describe('ui-team browser plugin', () => {
     await expect(createActions.createBot(SESSION, {
       displayName: 'Bot',
       modelSelection: { provider: 'fixture', model: 'model-a' },
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const updatePersona = await bench({ remoteFailure: 'updatePersona' })
+    const personaActions = (updatePersona.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(personaActions.updatePersona(SESSION, {
+      botId: CHILD,
+      job: 'review',
+      voice: '',
+      antiJobs: [],
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

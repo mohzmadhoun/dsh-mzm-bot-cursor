@@ -12,7 +12,7 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamCreateBotActionResult, type TeamTaskActionResult,
+  type TeamCreateBotActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -101,6 +101,17 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
           displayName: 'Research Bot',
           name: 'research-bot',
           modelSelection: { provider: 'fixture', model: 'model-a' },
+          member: view.members[1]!,
+        },
+      },
+    }),
+    updatePersona: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          persona: { job: '', voice: '', antiJobs: [] },
           member: view.members[1]!,
         },
       },
@@ -818,7 +829,7 @@ describe('TeamAction', () => {
       expect(current).toMatchObject({ revision: 2, ownerName: 'worker' })
     })
 
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Updated runtime' } })
     fireEvent.change(screen.getByPlaceholderText('任务描述'), { target: { value: 'Updated details' } })
     fireEvent.change(screen.getByPlaceholderText(/依赖任务/u), { target: { value: 'task-0' } })
@@ -891,7 +902,7 @@ describe('TeamAction', () => {
     render(<TeamAction {...props(actions({ load: dependencyLoad, updateTask: dependencyUpdate }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Edited' } })
     fireEvent.change(screen.getByPlaceholderText(zh.blockers), { target: { value: 'task-2' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -1061,10 +1072,10 @@ describe('TeamAction', () => {
     fireEvent.click(screen.getByRole('button', { name: '取消' }))
     expect(screen.queryByPlaceholderText('任务标题')).toBeNull()
 
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.click(screen.getByRole('button', { name: '取消' }))
     expect(screen.queryByRole('button', { name: '保存' })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
     expect(await screen.findByText('edit failed (gateway/internal)')).toBeTruthy()
 
@@ -1095,7 +1106,7 @@ describe('TeamAction', () => {
     render(<TeamAction {...props(actions({ updateTask }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Edited' } })
     fireEvent.change(screen.getByPlaceholderText(zh.blockers), { target: { value: 'task-2' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -1114,7 +1125,7 @@ describe('TeamAction', () => {
     }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Same dependencies' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
 
@@ -1134,7 +1145,7 @@ describe('TeamAction', () => {
     const first = render(<TeamAction {...props(actions({ load, updateTask: conflictUpdate }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Conflict edit' } })
     fireEvent.change(screen.getByPlaceholderText(zh.blockers), { target: { value: 'task-2' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -1153,7 +1164,7 @@ describe('TeamAction', () => {
     const second = render(<TeamAction {...props(actions({ load: dependencyLoad, updateTask: staleUpdate }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Late edit' } })
     fireEvent.change(screen.getByPlaceholderText(zh.blockers), { target: { value: 'task-2' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -1172,7 +1183,7 @@ describe('TeamAction', () => {
     const third = render(<TeamAction {...props(actions({ updateTask: lateUpdate }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
-    fireEvent.click(screen.getByRole('button', { name: /编辑/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^编辑$/u }))
     fireEvent.change(screen.getByPlaceholderText('任务标题'), { target: { value: 'Late edit' } })
     fireEvent.change(screen.getByPlaceholderText(zh.blockers), { target: { value: 'task-2' } })
     fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -1215,5 +1226,243 @@ describe('TeamAction', () => {
     render(<TeamAction {...props(actions())} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     expect(await screen.findByText(zh.handoffsEmpty)).toBeTruthy()
+  })
+
+  it('saves persona through Host updatePersona and shows anti-jobs on the overview (T016/T017)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorMember = {
+      ...view.members[1]!,
+      persona: { job: 'review', voice: 'terse', antiJobs: ['merge without tests'] },
+    }
+    const savedPersona = {
+      job: 'ship',
+      voice: 'direct',
+      antiJobs: ['docs', 'ops'],
+    }
+    const savedMember = { ...priorMember, persona: savedPersona }
+    const updatePersona = vi.fn((): Promise<TeamUpdatePersonaActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          persona: savedPersona,
+          member: savedMember,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, priorMember] },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, savedMember] },
+      })
+    render(<TeamAction {...props(actions({ load, updatePersona }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.antiJobs)).toBeTruthy()
+    const overview = screen.getByText('merge without tests').closest('[data-team-anti-jobs]')
+    expect(overview).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    expect(screen.getByText(zh.personaHint)).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText(zh.personaJobPlaceholder), {
+      target: { value: ' ship ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.personaVoicePlaceholder), {
+      target: { value: ' direct ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.personaAntiJobsPlaceholder), {
+      target: { value: 'docs\nops' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(updatePersona).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        job: ' ship ',
+        voice: ' direct ',
+        antiJobs: ['docs', 'ops'],
+      })
+    })
+    expect(await screen.findByText('docs')).toBeTruthy()
+    expect(screen.getByText('ops')).toBeTruthy()
+    expect(screen.queryByText('merge without tests')).toBeNull()
+    expect(screen.queryByPlaceholderText(zh.personaJobPlaceholder)).toBeNull()
+  })
+
+  it('keeps prior overview anti-jobs and shows failure when updatePersona is unavailable (T018)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorMember = {
+      ...view.members[1]!,
+      persona: { job: 'review', voice: 'terse', antiJobs: ['merge without tests'] },
+    }
+    const priorView: TeamView = { ...view, members: [view.members[0]!, priorMember] }
+    const updatePersona = vi.fn((): Promise<TeamUpdatePersonaActionResult> => Promise.resolve(
+      remoteFailure('persona Host offline') as TeamUpdatePersonaActionResult,
+    ))
+    const load = vi.fn(() => Promise.resolve({ ok: true as const, value: priorView }))
+    render(<TeamAction {...props(actions({ load, updatePersona }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('merge without tests')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    fireEvent.change(screen.getByPlaceholderText(zh.personaAntiJobsPlaceholder), {
+      target: { value: 'should-not-stick' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('persona Host offline (gateway/internal)')).toBeTruthy()
+    expect(updatePersona).toHaveBeenCalledWith(SESSION, {
+      botId: workerId,
+      job: 'review',
+      voice: 'terse',
+      antiJobs: ['should-not-stick'],
+    })
+    const overview = screen.getByText('merge without tests').closest('[data-team-anti-jobs]')
+    expect(overview).not.toBeNull()
+    expect(overview?.textContent).toContain('merge without tests')
+    expect(overview?.textContent).not.toContain('should-not-stick')
+    expect(load).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows Team rejection for updatePersona without mutating overview persona (T018)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      persona: { job: 'review', voice: '', antiJobs: ['docs'] },
+    }
+    const priorView: TeamView = { ...view, members: [view.members[0]!, priorMember] }
+    const updatePersona = vi.fn((): Promise<TeamUpdatePersonaActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'only the Team Lead can update teammate persona' },
+      },
+    }))
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true, value: priorView }),
+      updatePersona,
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('docs')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    fireEvent.change(screen.getByPlaceholderText(zh.personaJobPlaceholder), {
+      target: { value: 'hijack' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText(
+      'only the Team Lead can update teammate persona (team-rejected)',
+    )).toBeTruthy()
+    const overview = document.querySelector('[data-team-anti-jobs]')
+    expect(overview?.textContent).toContain('docs')
+    expect(screen.getByPlaceholderText(zh.personaJobPlaceholder)).toBeTruthy()
+  })
+
+  it('opens an empty persona editor when the teammate has no Host persona yet', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    expect(document.querySelector('[data-team-anti-jobs]')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    expect((screen.getByPlaceholderText(zh.personaJobPlaceholder) as HTMLInputElement).value).toBe('')
+    expect((screen.getByPlaceholderText(zh.personaVoicePlaceholder) as HTMLInputElement).value).toBe('')
+    expect((screen.getByPlaceholderText(zh.personaAntiJobsPlaceholder) as HTMLTextAreaElement).value).toBe('')
+    fireEvent.click(screen.getByRole('button', { name: '取消' }))
+    expect(screen.queryByPlaceholderText(zh.personaJobPlaceholder)).toBeNull()
+  })
+
+  it('ignores a late updatePersona success after the conversation switches sessions', async () => {
+    const workerId = 'worker-id' as SessionId
+    const pending = Promise.withResolvers<TeamUpdatePersonaActionResult>()
+    const updatePersona = vi.fn(() => pending.promise)
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: view })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          members: [{
+            id: 'next-lead' as SessionId,
+            name: 'lead',
+            role: 'lead' as const,
+            status: 'idle' as const,
+            diagnostics: [] as string[],
+          }],
+          tasks: [],
+        },
+      })
+    const rendered = render(<TeamAction {...props(actions({ load, updatePersona }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    fireEvent.change(screen.getByPlaceholderText(zh.personaJobPlaceholder), {
+      target: { value: 'late' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    rendered.rerender(<TeamAction {...props(actions({ load, updatePersona }), 'next-lead' as SessionId)} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText(zh.empty)
+    pending.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          persona: { job: 'late', voice: '', antiJobs: [] },
+          member: {
+            id: workerId,
+            name: 'worker',
+            role: 'teammate',
+            status: 'inactive',
+            persona: { job: 'late', voice: '', antiJobs: [] },
+            diagnostics: [],
+          },
+        },
+      },
+    })
+    await Promise.resolve()
+    expect(screen.queryByText('late')).toBeNull()
+  })
+
+  it('does not settle a successful updatePersona after its reload switches sessions', async () => {
+    const workerId = 'worker-id' as SessionId
+    const savedPersona = { job: 'reload-job', voice: '', antiJobs: ['reload-anti'] }
+    const savedMember = {
+      ...view.members[1]!,
+      persona: savedPersona,
+    }
+    const reload = Promise.withResolvers<TeamActionResult<TeamView>>()
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: view })
+      .mockImplementationOnce(() => reload.promise)
+    const updatePersona = vi.fn((): Promise<TeamUpdatePersonaActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          persona: savedPersona,
+          member: savedMember,
+        },
+      },
+    }))
+    const rendered = render(<TeamAction {...props(actions({ load, updatePersona }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: zh.editPersona }))
+    fireEvent.change(screen.getByPlaceholderText(zh.personaJobPlaceholder), {
+      target: { value: 'reload-job' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.personaAntiJobsPlaceholder), {
+      target: { value: 'reload-anti' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => { expect(load).toHaveBeenCalledTimes(2) })
+    rendered.rerender(<TeamAction {...props(actions(), 'next-session' as SessionId)} />)
+    reload.resolve({
+      ok: true,
+      value: { ...view, members: [view.members[0]!, savedMember] },
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(screen.queryByText('reload-anti')).toBeNull()
   })
 })
