@@ -1,3 +1,6 @@
+=== SHA 5d60f8996b8cd2f78d0c021c2053a3c975d351aa ===
+=== UTC 2026-09-27T07:58:14Z ===
+=== CMD: vitest bind ===
 The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
 The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
 The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
@@ -7,6 +10,7 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
 
  Test Files  1 passed (1)
       Tests  1 passed | 52 skipped (53)
-   Start at  07:48:11
-   Duration  1.83s (transform 1.21s, setup 220ms, import 1.28s, tests 205ms, environment 0ms)
+   Start at  07:58:15
+   Duration  2.13s (transform 1.41s, setup 323ms, import 1.44s, tests 225ms, environment 0ms)
 
+EXIT:0
