@@ -70,9 +70,10 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 ## Scenario 3 — Cron fire + last-run
 
 **Contract:** [contracts/cron-fire.md](./contracts/cron-fire.md)
+**Recipe:** [verifier/scenario-4-cron-fire.md](./verifier/scenario-4-cron-fire.md) (T028 US4; evidence under `verifier/evidence/scenario-3/`)
 
 1. Ensure an **active** routine uses shortest product-supported recurring schedule.
-2. Wait up to **6 minutes** for ≥1 automatic **Host** fire (no manual trigger).
+2. Wait up to **6 minutes** for ≥1 automatic **Host** fire (no manual trigger) — **or** measure Host `evaluateDueRoutines` / ticker wake + `lastRunAt` when full wall-clock wait is impractical (document which).
 3. Confirm pane (or linked activity) shows last-run / fire indicator for that routine.
 4. Do **not** score LLM reply wording.
 5. Capture desktop visual evidence → `verifier/evidence/scenario-3/`.

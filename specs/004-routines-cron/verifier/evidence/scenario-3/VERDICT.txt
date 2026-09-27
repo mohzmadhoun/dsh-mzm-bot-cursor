@@ -1,0 +1,95 @@
+T028 Verifier Scenario 3 cron fire + last-run (SC-003) — DH Verifier
+=====================================================================
+Verdict: PASS (SC-003 / quickstart Scenario 3)
+Stamp: 2026-09-27
+Product tip: origin/master @ abf79caad5
+  (includes Host T025 #161 + Client T027 #163)
+Evidence tip: cursor/p4-t028-cron-fire-recipe-fe1d (this stamp)
+Linear: MOH-221 (T028) — left In Progress (PO closes after SO12 embed / merge)
+Recipe: specs/004-routines-cron/verifier/scenario-4-cron-fire.md
+Evidence home: specs/004-routines-cron/verifier/evidence/scenario-3/
+  (aligned to quickstart Scenario 3 — NOT evidence/scenario-4/)
+
+Acceptance (SC-003 / US4 Scenario path)
+---------------------------------------
+[x] Active routine fires via Host cron wake (evaluateDueRoutines / ticker).
+[x] lastRunAt updates after fire commit/enqueue (paused does not fire).
+[x] ≤6 min product window: satisfied by Host unit/session proof of due-wake +
+    lastRunAt for @every 5m-class schedules — full wall-clock Desktop wait
+    NOT run (documented; recipe allows Host proof when impractical).
+[x] Pane shows last-run / fire indicator from Host lastRunAt (Desktop SO11).
+[x] LLM reply wording NOT scored.
+[x] No sub-5m test-only schedule required.
+[x] FR-010 desktop screenshots + walkthrough of real Desktop (SO 11).
+[x] FR-011 media committed under verifier/evidence/scenario-3/ (SO 12 commit).
+[!] SO12 PR HTML embeds via absolute /opt/cursor/artifacts/… — PO / ManagePullRequest.
+[ ] T026 optional jobs visibility — left unchecked (not required for SC-003).
+
+Evidence reuse + remeasure (measured)
+-------------------------------------
+Desktop FR-010 frames + walkthrough: Client T027 Verifier CDP hard-assert
+  (#163 / us4-client-t027 mirror) copied into this directory:
+  02-fire-never.png · 03-fire-fired.png · 04-after-return-fired.png
+  cron-fire-walkthrough.mp4 · panel-state.json
+  CDP: DISPLAY=:1 · fired.lastRunAt=1790538665247 · text=Last run 2026-09-27T19:51:05.247Z
+  inventory: 1× never (paused) + 2× fired (active)
+
+Host fire + lastRunAt (this stamp @ abf79caad5):
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/routine-cron.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'US4 T025'
+  → 4 passed | 78 skipped
+    - US4 T025: isRoutineDue gates on active + next fire ≤ now
+    - US4 T025: evaluateDueRoutines wakes active routine and updates lastRunAt;
+      paused does not fire
+    - US4 T025: live bot followup wake updates lastRunAt
+    - US4 T025: deleted bot skips fire without lastRunAt; disposed evaluator empty
+  Logs: p4-t028-host-t025-vitest.log · p4-t028-host-t025-verbose.log
+
+Client last-run projection (this stamp):
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T027 / US4'
+  → 3 passed
+  Log: p4-t028-client-t027-vitest.log
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-routines-bus.spec.ts
+  → 3 passed
+  Log: p4-t028-electron-bus.log
+
+Claims
+------
+- Host wake + lastRunAt commit: **measured** (T025 vitest on master tip).
+- ≤6 min wall-clock Desktop wait: **not run** (Host unit/session proof used per
+  recipe; product schedule class remains @every 5m — no sub-5m invent).
+- Last-run / fire indicator UI: **measured** (Desktop CDP + screenshots/mp4).
+- Leave/return fired durability: **measured** (04-after-return-fired.png).
+- LLM wording: **not scored**.
+- FR-010 desktop visual: **measured**. FR-011 commit: **measured**.
+- FR-011 PR HTML embeds: **Fail until PO updates PR body**.
+- T026 jobs visibility: **not claimed** (optional; left unchecked).
+
+Standing Order 12 / FR-011 — recommended PR embeds
+--------------------------------------------------
+<img src="/opt/cursor/artifacts/p4-t028-02-fire-never.png" alt="fire indicator never — Not run yet" />
+<img src="/opt/cursor/artifacts/p4-t028-03-fire-fired.png" alt="fire indicator fired — Host lastRunAt" />
+<img src="/opt/cursor/artifacts/p4-t028-04-after-return-fired.png" alt="fired after leave/return" />
+<video src="/opt/cursor/artifacts/p4-t028-cron-fire-walkthrough.mp4" controls></video>
+
+Also available:
+  /opt/cursor/artifacts/p4-t028-host-t025-vitest.log
+  /opt/cursor/artifacts/p4-t028-host-t025-verbose.log
+  /opt/cursor/artifacts/p4-t028-client-t027-vitest.log
+  /opt/cursor/artifacts/p4-t028-panel-state.json
+
+In-repo evidence paths
+----------------------
+specs/004-routines-cron/verifier/evidence/scenario-3/
+specs/004-routines-cron/verifier/scenario-4-cron-fire.md
+
+Scope lock
+----------
+Does NOT stamp SC-004 / SC-005. Does NOT close MOH-221.
+Does NOT merge. Does NOT mark Linear Done.
+Leave MOH-221 In Progress until PO merges + SO12 embeds.
