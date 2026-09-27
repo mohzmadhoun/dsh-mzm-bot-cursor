@@ -536,6 +536,10 @@ describe('ModelsSection', () => {
   it('stores a typed key write-only from the setup card without touching settings', async () => {
     const { set, mutate, face } = await mountFirstRun()
     const key = screen.getByLabelText<HTMLInputElement>(en.keyInput)
+    // FR-008 / T033: Models entry is a write-only password field; Host stores
+    // the literal under CredentialRef via credentials.set — never settings.
+    expect(key.type).toBe('password')
+    expect(key.hasAttribute('data-models-credential-entry')).toBe(true)
     fireEvent.change(key, { target: { value: '  sk-live  ' } })
     fireEvent.click(screen.getByText(en.apply))
     await waitFor(() => { expect(set).toHaveBeenCalledWith('DEEPSEEK_API_KEY', 'sk-live') })
@@ -543,11 +547,29 @@ describe('ModelsSection', () => {
     // The saved key re-loads the join; the settings answer rides the shared
     // mirror, so the reload shows as a directory read rather than a describe.
     await waitFor(() => { expect(face.llm.listProviders.mock.calls.length).toBeGreaterThan(1) })
-    expect((await screen.findByRole('status')).textContent).toBe(
+    const status = await screen.findByRole('status')
+    expect(status.textContent).toBe(
       providerCopy(en.savedProvider, { provider: 'deepseek-official', displayName: 'DeepSeek' }),
     )
+    expect(status.textContent).not.toContain('sk-live')
+    expect(document.body.textContent).not.toContain('sk-live')
     fireEvent.click(screen.getByText(en.add))
     expect(screen.queryByRole('status')).toBeNull()
+  })
+
+  it('shows CredentialInfo configured state without replaying a stored secret', async () => {
+    // A configured, writable CredentialInfo is the only Host fact the page may
+    // surface: configured/source/writable — never the secret value (FR-008).
+    const { set } = await mountSection()
+    fireEvent.click(screen.getByRole('button', { name: openaiCopy(en.editProvider) }))
+    const editorKey = await screen.findByLabelText<HTMLInputElement>(en.keyInput)
+    expect(editorKey.type).toBe('password')
+    expect(editorKey.hasAttribute('data-models-credential-entry')).toBe(true)
+    await waitFor(() => { expect(editorKey.placeholder).toBe(en.keyStored) })
+    expect(editorKey.value).toBe('')
+    expect(screen.getByLabelText(en.credentialConfigured)).toBeTruthy()
+    expect(document.body.textContent).not.toMatch(/sk-|SECRET|api[_-]?key\s*=/i)
+    expect(set).not.toHaveBeenCalled()
   })
 
   it('reuses the provider editor as a required credential-only onboarding form', async () => {
