@@ -127,7 +127,7 @@ function ModelRetryItem({ node, active, t }: {
 function TurnErrorItem({ node, t, openModelsSettings }: {
   node: TurnErrorNode
   t: ChatViewSlotProps['t']
-  openModelsSettings: () => void
+  openModelsSettings?: () => void
 }) {
   const missingCredential = node.code === 'MISSING_CREDENTIAL'
   return (
@@ -140,7 +140,7 @@ function TurnErrorItem({ node, t, openModelsSettings }: {
       <div className={css.turnErrorCopy}>
         <span className={css.turnErrorTitle}>{t('message.turnError')}</span>
         <span className={css.turnErrorMessage}>{failureMessage(node.message, node.code, t)}</span>
-        {missingCredential && (
+        {missingCredential && openModelsSettings !== undefined && (
           <button
             type="button"
             className={css.turnErrorAction}
@@ -383,7 +383,7 @@ export const RetryNodeView = memo(function RetryNodeView({ node, t }: ChatNodeVi
 /** Terminal turn-error keyed Chat renderer. */
 export const TurnErrorNodeView = memo(function TurnErrorNodeView({
   node, t, openModelsSettings,
-}: ChatNodeViewProps<'turn-error'> & { openModelsSettings: () => void }) {
+}: ChatNodeViewProps<'turn-error'> & { openModelsSettings?: () => void }) {
   return <TurnErrorItem node={node.data} t={t} openModelsSettings={openModelsSettings} />
 })
 

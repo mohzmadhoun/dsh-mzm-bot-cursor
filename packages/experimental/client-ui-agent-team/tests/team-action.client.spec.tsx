@@ -10,7 +10,7 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamTaskActionResult,
+  type TeamCreateBotActionResult, type TeamTaskActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -368,16 +368,17 @@ describe('TeamAction', () => {
 
   it('hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)', async () => {
     const openModelsSettings = vi.fn()
+    const missingCredentialFailure = {
+      ok: false as const,
+      // Host LLM code on the Remote failure carrier (not a gateway/* code).
+      error: {
+        code: 'MISSING_CREDENTIAL',
+        message: 'no API key for provider route; store through Models page',
+      },
+    } as TeamCreateBotActionResult
     const missing = actions({
       openModelsSettings,
-      createBot: () => Promise.resolve({
-        ok: false as const,
-        error: new RemoteError(
-          'MISSING_CREDENTIAL',
-          'no API key for provider route; store through Models page',
-          {},
-        ),
-      }),
+      createBot: () => Promise.resolve(missingCredentialFailure),
     })
     render(<TeamAction {...props(missing)} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))

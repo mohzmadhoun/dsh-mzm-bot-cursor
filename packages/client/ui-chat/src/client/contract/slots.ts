@@ -77,8 +77,9 @@ export interface ChatNodeTurnDataInjected {
   /**
    * Open Settings → Models for in-app credential entry.
    * Wired for Host `MISSING_CREDENTIAL` turn failures (not a 1Password vault).
+   * Optional so keyed Chat renderers outside the shipped Chat target stay type-compatible.
    */
-  openModelsSettings: () => void
+  openModelsSettings?: () => void
 }
 
 /** Stable owner currency delivered to a keyed Chat renderer. */
