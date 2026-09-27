@@ -150,6 +150,7 @@ export class TeamRoster {
             ? 'provisioning'
             : live?.status ?? 'inactive',
         description: member.description,
+        ...member.displayName === undefined ? {} : { displayName: member.displayName },
         provider: member.provider,
         context: member.context,
         ...model === undefined ? {} : { model },
@@ -261,6 +262,7 @@ export class TeamRoster {
       id: childId,
       name,
       description,
+      ...request.displayName === undefined ? {} : { displayName: request.displayName },
       provider: requiredText(request.provider, 'provider', 200),
       context: request.context,
       phase: 'provisioning',
@@ -443,6 +445,7 @@ export class TeamRoster {
       role: 'teammate',
       status: live?.status ?? 'inactive',
       description: member.description,
+      ...member.displayName === undefined ? {} : { displayName: member.displayName },
       provider: member.provider,
       context: member.context,
       ...live?.options.model === undefined ? {} : { model: live.options.model },

@@ -82,7 +82,7 @@ Wedge needs ≥2 bots and peer messaging. Parent↔child `send_message` (`dsh-to
 
 **Pick: A.** Mount experimental Agent Teams for P1 messaging. Product “bot create” maps to Lead-authorized teammate spawn (or equivalent Host API Spec names). Do not fork an Electron bus. Defer task-board productization (P4-ish) — presence of the board is OK if unused by acceptance.
 
-**Runtime path:** `SpawnTeammateRequest.agentOptions` carries per-bot LLM `ModelSelection` into continuable create (distinct from Team `provider`, the subagent backend id). Continuable start already applies `agentOptions` when composing the child. Electron Main must not invent or rewrite the route.
+**Runtime path:** Host `TeamService.createBot({ displayName, modelSelection })` (and Remote `agentTeams/createBot`) is the product create API: Lead-authorized, requires non-empty `displayName` plus exactly one `ModelSelection`, derives the durable kebab roster name, and retains `displayName` on the Host member snapshot. Internally it calls teammate spawn with required `agentOptions` (distinct from Team `provider`, the subagent backend id). Electron Main must not invent bot records or rewrite the route.
 
 ### Novel seam: Shell↔Host data plane
 
@@ -135,7 +135,7 @@ Encode in Spec Kit `plan` / acceptance:
 ## Open questions
 
 1. **PO/Lead**: Confirm plan amend — drop literal “framed pipes” in favor of shipped HTTP data plane (Architect pick 2).
-2. **Runtime**: Exact API for user-initiated bot create (Lead spawn vs dedicated Host RPC) — Spec names WHAT; Runtime picks HOW within Team+agent create.
+2. **Runtime**: ~~Exact API for user-initiated bot create (Lead spawn vs dedicated Host RPC)~~ — **Closed (T014):** `TeamService.createBot` / Remote `agentTeams/createBot` (Lead-authorized; required `displayName` + `modelSelection`).
 3. **Mohammed**: Minimum provider catalog for SC-001 (≥2 distinct models) — configuration, not a fixed marketing list.
 4. **Experimental Teams**: Accept experimental package mount for P1 wedge, with promotion deferred.
 

@@ -34,6 +34,12 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 
 Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor.md` (T013).
 
+## Host API proofs (pre-Scenario)
+
+| Slice | Recipe | Primary owners | Notes |
+|-------|--------|----------------|-------|
+| **T014** Host bot-create | [t014-host-bot-create.md](./t014-host-bot-create.md) | **Runtime** + **Verifier** | FR-001 Host half; not SC-001/002 Pass |
+
 ## Fan-out policy
 
 - Scenario 0 must Pass before Scenarios 1–5 evidence counts toward phase Done.

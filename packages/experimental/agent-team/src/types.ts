@@ -49,6 +49,11 @@ export interface TeamMemberSnapshot {
   readonly id: SessionId
   readonly name: string
   readonly description: string
+  /**
+   * Product-facing Bot label from Host create (FR-001).
+   * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
+   */
+  readonly displayName?: string
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -62,6 +67,8 @@ export interface TeamMemberView {
   readonly role: 'lead' | 'teammate'
   readonly status: 'running' | 'idle' | 'inactive' | 'provisioning' | 'failed'
   readonly description?: string
+  /** Product-facing Bot label when create retained one. */
+  readonly displayName?: string
   readonly provider?: string
   readonly context?: 'fresh' | 'fork'
   readonly model?: string
@@ -145,6 +152,11 @@ export interface Config {
 export interface SpawnTeammateRequest {
   readonly name: string
   readonly description: string
+  /**
+   * Optional product-facing Bot label retained on the durable member snapshot.
+   * Host {@link CreateBotRequest} sets this; model-tool spawn may omit it.
+   */
+  readonly displayName?: string
   readonly prompt: ContentBlock[]
   readonly context: 'fresh' | 'fork'
   /**
@@ -166,6 +178,45 @@ export interface SpawnTeammateRequest {
 export interface SpawnTeammateResult {
   readonly member: TeamMemberView
 }
+
+/**
+ * Product bot-create inputs (FR-001 / FR-002).
+ * Host persists the Bot; Electron Main must not invent bot records or LLM routes.
+ */
+export interface CreateBotInput {
+  /** Non-empty human-facing Bot label. */
+  readonly displayName: string
+  /** Exactly one model/provider assignment for this Bot. */
+  readonly modelSelection: ModelSelection
+}
+
+/** Lead-authorized Host create for one Bot, including creation cancellation. */
+export interface CreateBotRequest extends CreateBotInput {
+  readonly signal: AbortSignal
+}
+
+/**
+ * Host-owned Bot retained after create.
+ * `name` is the durable Team roster id derived from {@link CreateBotInput.displayName}.
+ */
+export interface CreateBotResult {
+  readonly id: SessionId
+  readonly displayName: string
+  readonly name: string
+  readonly modelSelection: ModelSelection
+  readonly member: TeamMemberView
+}
+
+/** Browser create result with Team rejections kept distinct from transport failures. */
+export type CreateBotMutationResult =
+  | { readonly ok: true; readonly value: CreateBotResult }
+  | {
+    readonly ok: false
+    readonly error: {
+      readonly code: 'team-rejected'
+      readonly message: string
+    }
+  }
 
 /** Input for one durable peer message. */
 export interface SendTeamMessageRequest {

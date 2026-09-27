@@ -142,7 +142,7 @@ See [research.md](./research.md). All Technical Context unknowns resolved. Archi
 ## Open gaps (for Lead / follow-ons)
 
 1. **PO/Lead:** Amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane (Architect + Spec aligned; Verifier scripts shipped topology).
-2. **Runtime (tasks):** Exact Host API for user-initiated bot create (Lead spawn vs dedicated RPC) — HOW within Team+agent; Spec WHAT already set.
+2. **Runtime (tasks):** ~~Exact Host API for user-initiated bot create (Lead spawn vs dedicated RPC)~~ — **Closed (T014):** `TeamService.createBot` / Remote `agentTeams/createBot`.
 3. **Lead/Mohammed:** Explicit ack that experimental Agent Teams may mount for P1 with promotion deferred.
 4. **Not gaps:** Architect seam map (present); Verifier catalog (clarify Done); auth primary (locked in-app).
 

@@ -76,7 +76,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Define Host bot-create API (Lead-authorized teammate spawn or equivalent RPC) accepting required `displayName` (non-empty) + exactly one model/provider assignment in Host surfaces under `packages/experimental/agent-team/src/` and/or `packages/api/session-controller/src/agent.ts` — persistence Host-owned ([data-model.md](./data-model.md) Bot rules)
+- [x] T014 [US1] Define Host bot-create API (Lead-authorized teammate spawn or equivalent RPC) accepting required `displayName` (non-empty) + exactly one model/provider assignment in Host surfaces under `packages/experimental/agent-team/src/` and/or `packages/api/session-controller/src/agent.ts` — persistence Host-owned ([data-model.md](./data-model.md) Bot rules)
 - [ ] T015 [P] [US1] Bind each Bot to one `ModelSelection` `{ provider, model, reasoningEffort? }` via `packages/core/agent/src/model-selection.ts` / `installModelSelection` so subsequent chats use that bot’s assignment only (FR-002)
 - [ ] T016 [US1] Resolve model calls through `ctx.llm` adapters under `packages/llm/` using the bot’s assignment and Host credential resolve — Electron Main MUST NOT invent bot records or route models
 - [ ] T017 [US1] Add Client/Web basic create + assign-model UI (happy path, no config-file edit) under `packages/client/` (prefer `ui-agent-preset` / `ui-model-selection` / Agent Team client surfaces) composed into Desktop Web wrapper — minimum inputs: `displayName` + model/provider ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
@@ -253,6 +253,6 @@ Task: "Architecture guard apps/desktop/tests/no-electron-mailbox-bus.spec.ts"
 - [USn] maps to spec user stories for Linear `taskstoissues` traceability
 - First executable product gate = topology handshake (T005–T008), not bot create
 - Do not invent Box/Shell, MCP, personas, skills, routines, or memory product tasks
-- Exact Host bot-create API (Lead spawn vs dedicated RPC) is Runtime HOW within Team+agent — Spec WHAT already set (plan open gap #2)
+- Exact Host bot-create API closed as `TeamService.createBot` / Remote `agentTeams/createBot` (T014; plan open gap #2)
 - Experimental Agent Teams mount for P1 with promotion deferred — Lead/Mohammed ack still open (research R9)
 - Commit after each task or logical group during implement; this Spec change commits only `tasks.md` (+ plan pointer if edited)
