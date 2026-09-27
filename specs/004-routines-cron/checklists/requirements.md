@@ -36,5 +36,6 @@
 - Standing order **11** encoded as FR-010 + per-GUI-story evidence clauses + SC-001…SC-003/SC-005 — desktop screenshots/recordings required; unit/jsdom alone fails GUI Pass.
 - Standing order **12** encoded as FR-011 + evidence clauses — evidence **committed** under `verifier/evidence/` and **embedded** in GUI PR body via `/opt/cursor/artifacts/…` paths.
 - FR-007 names Host ownership as a product obligation (pane projects Host state) without prescribing plugin APIs; `dsh-jobs` / `dsh-schedule` remain plan-time hints in Assumptions only.
-- Spec Quality Checklist: 16/16 items passing.
-- Ready for Verifier specify gate, then `/speckit-clarify` only after Pass. No rewrite of `specs/001`–`003`.
+- Clarification session 2026-09-27 (MOH-190): five answers integrated — fire = Host wake + last-run (no LLM wording); Verifier ≤6 min / no sub-5m test schedule; confirm optional; edit optional; identity MAY derive from intent. Re-validated: all checklist items remain pass; no `[NEEDS CLARIFICATION]` markers; FR-010/FR-011 retained; FR-012 + SC-007 added.
+- Spec Quality Checklist: 16/16 → 16/16 items passing (no regressions).
+- Ready for Verifier clarify gate, then `/speckit-plan` only after Pass. No rewrite of `specs/001`–`003`.
