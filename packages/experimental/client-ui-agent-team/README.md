@@ -75,6 +75,10 @@ Each teammate card exposes a **Bot routines** surface projected from Host `TeamV
 
 The same **Bot routines** pane is the US2 info-pane list: each Host `RoutineProjection` row shows intent-derived identity, schedule label, active/paused status, and last-run (or not-run-yet). Rows come only from Host `TeamView.routines` (same Host catalog projection as `listRoutinesByBot`); the session Schedule / `ui-schedule` header catalog is not the Pass surface. Closing and reopening the panel reloads Host state so listed routines remain without re-create. Electron Main does not invent routine rows.
 
+### Observe last-run / fire indicator after Host cron fire
+
+Each routine row projects Host `RoutineProjection.lastRunAt` as a last-run / fire indicator (`data-team-routine-fire-indicator`: `never` before the first fire, `fired` with the Host timestamp after cron fire commit). Refreshing the Agent Team panel reloads Host projection so a newly committed fire becomes visible without inventing a Client fire clock. Electron Main does not own fire timestamps or a routines bus.
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -98,7 +102,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume routines pane, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |

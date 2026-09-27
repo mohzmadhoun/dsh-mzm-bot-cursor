@@ -408,11 +408,12 @@ function routineStatusKey(status: RoutineStatus): TeamKey {
 }
 
 /**
- * Pane label for Host `lastRunAt` (P4 RoutineProjection / US2).
+ * Pane last-run / fire-indicator copy for Host `lastRunAt` (P4 US4 T027 / FR-005).
+ * Projects Host RoutineProjection only — never invents a Client fire clock.
  * Uses UTC ISO so the Client does not invent a locale clock.
  * @param lastRunAt - Host fire timestamp ms, or null before first fire.
  * @param t - locale lookup.
- * @returns last-run copy for the routines pane row.
+ * @returns last-run / fire-indicator copy for the routines pane row.
  */
 function routineLastRunLabel(
   lastRunAt: number | null,
@@ -420,6 +421,11 @@ function routineLastRunLabel(
 ): string {
   if (lastRunAt === null) return t('routineLastRunNever')
   return t('routineLastRun', { time: new Date(lastRunAt).toISOString() })
+}
+
+/** Fire-indicator discriminant from Host `lastRunAt` (never | fired). */
+function routineFireIndicator(lastRunAt: number | null): 'never' | 'fired' {
+  return lastRunAt === null ? 'never' : 'fired'
 }
 
 /** First text block from a Host mailbox body for the handoff list preview. */
@@ -1607,12 +1613,14 @@ export function TeamAction({
               <span className={css.botRoutinesLabel}>{t('botRoutines')}</span>
             </div>
             <p className={css.hint} data-team-bot-routines-hint="">{t('botRoutinesHint')}</p>
+            <p className={css.hint} data-team-bot-routines-fire-hint="">{t('routineFireHint')}</p>
             {botRoutines.length === 0
               ? <div className={css.notice} data-team-bot-routines-empty={member.id}>{t('botRoutinesEmpty')}</div>
               : (
                 <ul className={css.botRoutinesList} data-team-bot-routines-list={member.id}>
                   {botRoutines.map((routine: RoutineProjection) => {
                     const statusPending = pendingTasks.has(`routine-status:${routine.routineId}`)
+                    const fireIndicator = routineFireIndicator(routine.lastRunAt)
                     return (
                       <li
                         key={routine.routineId}
@@ -1620,6 +1628,7 @@ export function TeamAction({
                         data-team-routine={routine.routineId}
                         data-team-routine-status={routine.status}
                         data-team-routine-schedule-expr={routine.scheduleExpr}
+                        data-team-routine-fire-indicator={fireIndicator}
                       >
                         <span data-team-routine-identity>{routine.identity}</span>
                         <span
@@ -1639,11 +1648,21 @@ export function TeamAction({
                           {t(routineStatusKey(routine.status))}
                         </span>
                         <span
-                          className={css.botRoutineLastRun}
+                          className={
+                            fireIndicator === 'fired'
+                              ? css.botRoutineLastRunFired
+                              : css.botRoutineLastRunNever
+                          }
                           data-team-routine-last-run={
                             routine.lastRunAt === null ? 'never' : String(routine.lastRunAt)
                           }
+                          data-team-routine-fire-indicator={fireIndicator}
+                          title={t('routineFireHint')}
                         >
+                          <StateDot
+                            state={fireIndicator === 'fired' ? 'done' : 'idle'}
+                            size={8}
+                          />
                           {routineLastRunLabel(routine.lastRunAt, t)}
                         </span>
                         {canEditIdentity && routine.status === 'active' && (

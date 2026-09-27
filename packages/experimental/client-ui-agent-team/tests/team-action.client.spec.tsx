@@ -2882,6 +2882,108 @@ describe('TeamAction', () => {
     expect(pausedRow?.textContent).toContain(zh.routineLastRunNever)
   })
 
+  it('shows Host lastRunAt fire indicator as never before first fire (T027 / US4)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-never-fired' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const neverFired = {
+      routineId,
+      botId: workerId,
+      identity: 'Await first fire',
+      intent: 'Await first fire',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({
+        ok: true as const,
+        value: { ...view, routines: [neverFired] },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Await first fire')).toBeTruthy()
+    expect(document.querySelector('[data-team-bot-routines-fire-hint]')).not.toBeNull()
+    const row = document.querySelector(`[data-team-routine="${routineId}"]`)
+    expect(row?.getAttribute('data-team-routine-fire-indicator')).toBe('never')
+    const indicator = row?.querySelector('[data-team-routine-fire-indicator="never"]')
+    expect(indicator).not.toBeNull()
+    expect(indicator?.getAttribute('data-team-routine-last-run')).toBe('never')
+    expect(indicator?.textContent).toContain(zh.routineLastRunNever)
+  })
+
+  it('shows Host lastRunAt fire indicator as fired after cron commit (T027 / US4)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-fired' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const firedAt = Date.UTC(2026, 8, 27, 18, 30, 0)
+    const fired = {
+      routineId,
+      botId: workerId,
+      identity: 'Post-fire ping',
+      intent: 'Post-fire ping',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: firedAt,
+      createdAt: 1,
+      updatedAt: firedAt,
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({
+        ok: true as const,
+        value: { ...view, routines: [fired] },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Post-fire ping')).toBeTruthy()
+    const row = document.querySelector(`[data-team-routine="${routineId}"]`)
+    expect(row?.getAttribute('data-team-routine-fire-indicator')).toBe('fired')
+    const indicator = row?.querySelector('[data-team-routine-fire-indicator="fired"]')
+    expect(indicator).not.toBeNull()
+    expect(indicator?.getAttribute('data-team-routine-last-run')).toBe(String(firedAt))
+    expect(indicator?.textContent).toContain(new Date(firedAt).toISOString())
+  })
+
+  it('updates fire indicator never → fired when Host projects new lastRunAt (T027 / US4)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-refresh-fire' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const firedAt = Date.UTC(2026, 8, 27, 19, 0, 0)
+    const before = {
+      routineId,
+      botId: workerId,
+      identity: 'Refresh fire',
+      intent: 'Refresh fire',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: null as number | null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const after = { ...before, lastRunAt: firedAt, updatedAt: firedAt }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [before] } })
+      .mockResolvedValue({ ok: true as const, value: { ...view, routines: [after] } })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Refresh fire')).toBeTruthy()
+    expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+      ?.getAttribute('data-team-routine-fire-indicator')).toBe('never')
+    fireEvent.click(screen.getByRole('button', { name: zh.refresh }))
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+        ?.getAttribute('data-team-routine-fire-indicator')).toBe('fired')
+    })
+    const indicator = document.querySelector(
+      `[data-team-routine="${routineId}"] [data-team-routine-fire-indicator="fired"]`,
+    )
+    expect(indicator?.getAttribute('data-team-routine-last-run')).toBe(String(firedAt))
+    expect(indicator?.textContent).toContain(new Date(firedAt).toISOString())
+    expect(load.mock.calls.length).toBeGreaterThanOrEqual(2)
+  })
+
   it('keeps Host routines listed after leave and return (T020 / US2 durability)', async () => {
     const workerId = 'worker-id' as SessionId
     const listed = {
