@@ -18,6 +18,7 @@ kind: "package-reference"
 - [系统提示词行](#system-prompt-row)
 - [轮次 token 用量](#turn-token-usage)
 - [已完成轮次的页脚](#completed-turn-footer)
+- [Host 流式聊天进度](#host-stream-chat-progress)
 - [轮次过程折叠](#turn-process-folding)
 - [滚动归属](#scroll-ownership)
 - [模型体验](#model-experience)
@@ -52,9 +53,14 @@ Assistant 回复结算后，已完成轮次的计时对话框不显示 TTFT 和�
 
 已完成轮次的操作页脚位于前方正文或扩展内容下方 20px。
 
-Host code 为 `MISSING_CREDENTIAL` 的终止轮次失败会展示本地化的应用内 Models 凭据引导，以及调用 `ctx.settingsShell.openSection('models')` 的**打开模型设置**控件——不以 1Password / 外部保险库为主路径。
+Host code 为 `MISSING_CREDENTIAL`、`AUTH` 或 `INVALID_CREDENTIAL` 的终止轮次失败会展示本地化的应用内 Models 凭据引导，以及调用 `ctx.settingsShell.openSection('models')` 的**打开模型设置**控件——不以 1Password / 外部保险库为主路径。缺失密钥使用 `data-missing-credential-handoff`；无效/撤销的中途密钥使用 `data-invalid-credential-handoff`。
 
 Host mailbox 对端回执（带持久化 `team-message` source 的 `user/message` 或 pending inbox）渲染为 Mailbox 交接行（`data-chat-handoff`，Host-only `data-handoff-source="host-mailbox"`），并带待处理 / 接收方已跟进标签，因此 FR-005 不需要在 bot 之间复制粘贴。涉及 bot 的完整 `TeamView.handoffs` deliveryState 也会出现在 Agent Teams Client 插件贡献的 Conversation notices 条中。
+
+<a id="host-stream-chat-progress"></a>
+## Host 流式聊天进度
+
+进行中的进度仅来自 Host session/agent 流事件（`assistant/live-chunk` 与打开轮次的 session running 状态）。流式 Assistant 行与轮次状态标签暴露 `data-chat-progress="host-stream"`，便于 Verifier 在完成前观察到至少一次进度更新。Electron Main 不得另造并行的 chat-progress IPC 总线。
 
 来自 Host session log（`assistant/message`）的已结算 Assistant 回复在轮次完成后标记 `data-chat-final="session-log"`。当轮次由 Host mailbox 的 `team-message` 回执引起时，turn-tail 携带可选的 `linkedMailboxMessageId`，收尾 final 暴露 `data-linked-mailbox-message-id`——Electron Main 不合成并行的 chat-final 通道。
 

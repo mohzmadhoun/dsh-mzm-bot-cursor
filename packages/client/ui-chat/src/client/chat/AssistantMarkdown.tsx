@@ -146,6 +146,9 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     <div
       className={css.root}
       data-streaming={streaming || undefined}
+      // Host session/agent stream events (`assistant/live-chunk`) drive in-flight
+      // progress; shell MUST NOT invent a parallel progress bus (T029 / FR-006).
+      data-chat-progress={streaming ? 'host-stream' : undefined}
       // Durable turn completion / assistant result from the session log —
       // shell MUST NOT invent a parallel chat-final IPC bus (T030 / FR-006).
       data-chat-final={finalDelivery && !streaming ? 'session-log' : undefined}

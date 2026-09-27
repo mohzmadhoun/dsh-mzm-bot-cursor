@@ -401,6 +401,37 @@ describe('TeamAction', () => {
     expect(openModelsSettings).toHaveBeenCalledTimes(1)
   })
 
+  it('offers Models re-entry for AUTH invalid/revoked create failure (T035)', async () => {
+    const openModelsSettings = vi.fn()
+    const authFailure = {
+      ok: false as const,
+      error: {
+        code: 'AUTH',
+        message: 'provider rejected key',
+      },
+    } as unknown as TeamCreateBotActionResult
+    const revoked = actions({
+      openModelsSettings,
+      createBot: () => Promise.resolve(authFailure),
+    })
+    render(<TeamAction {...props(revoked)} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-a' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    const alert = await screen.findByRole('alert')
+    expect(alert.getAttribute('data-team-error')).toBe('AUTH')
+    expect(alert.textContent).toContain(zh.invalidCredential)
+    expect(alert.textContent).toMatch(/应用内|模型/u)
+    const handoff = screen.getByRole('button', { name: zh.openModelsSettings })
+    expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
   it('shows createBot Remote and Team rejections and ignores a late success after session switch', async () => {
     const rejected = actions({
       createBot: () => Promise.resolve({

@@ -95,6 +95,7 @@ Requests that need the key use its current stored value, so rotating the key tak
 - **A key the launching environment supplies cannot be overwritten** — `DEEPSEEK_API_KEY=… dsh` (or a CI secret, a container `-e`) wins for this run and is reported read-only; clear the variable in the launching shell before storing a different value.
 - **An empty value cannot be stored** — storing an empty string is refused; remove the key instead.
 - **Key values never appear in configuration UIs or diagnostics** — the UI shows whether a key is set, where it comes from, and whether you can change it; the value itself stays in the store.
+- **`resolve` never substitutes another reference** — asking for `BOT_B_KEY` never returns the secret stored under `BOT_A_KEY`. An unconfigured ref is `undefined` even when peer refs hold values (no silent cross-bot fallback).
 
 -----
 

@@ -59,6 +59,19 @@ export const FORBIDDEN_MODEL_ROUTER_IPC_PATTERNS = [
 ] as const
 
 /**
+ * Forbidden Electron / Host Node IPC channel names for a parallel chat-progress
+ * protocol (T029 / FR-006). Progress is Host session/agent stream events rendered
+ * by Client `ui-chat` only — not Main-synthesized IPC.
+ */
+export const FORBIDDEN_CHAT_PROGRESS_IPC_PATTERNS = [
+  /^chat[-_]?progress$/i,
+  /^assistant[-_]?stream$/i,
+  /^progress[-_]?update$/i,
+  /^stream[-_]?delta$/i,
+  /dsh-desktop:(?:chat-progress|assistant-stream|progress-update|stream-delta)/i,
+] as const
+
+/**
  * Forbidden substrings for a parallel Electron chat-final bus (T030 / FR-006).
  * Finals come from Host session-log turn completion into Client `ui-chat` only.
  */

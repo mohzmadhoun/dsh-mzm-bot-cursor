@@ -151,7 +151,7 @@ This section explains the design decisions behind the provider and points at the
 
 ### Resolution and write paths
 
-`resolve` and `describe` read the inherited environment snapshot, the parsed document snapshot, and the `.env` fallbacks in precedence order. `set`/`unset` queue onto one exclusive operation chain: entry checks reject early (disposed, empty value, environment-shadowed), and the queue re-judges them at run time before a read-modify-write under the writer lock commits and fires `credentials/reference-updated` exactly once.
+`resolve` and `describe` read the inherited environment snapshot, the parsed document snapshot, and the `.env` fallbacks in precedence order. Each call names one `CredentialRef`: a miss for that ref is `undefined` even when peer refs hold secrets (no silent cross-bot substitution). `set`/`unset` queue onto one exclusive operation chain: entry checks reject early (disposed, empty value, environment-shadowed), and the queue re-judges them at run time before a read-modify-write under the writer lock commits and fires `credentials/reference-updated` exactly once.
 
 `modifyRecord` runs on the same chain and lock: it re-reads the document, passes the record as it stands to the mutation, admits the result — a non-empty API key, a grant payload that survives a JSON round trip — renders the record wholesale, and commits, firing `credentials/record-updated` once. A composition the product CLI did not boot has only the inherited environment as its layer.
 

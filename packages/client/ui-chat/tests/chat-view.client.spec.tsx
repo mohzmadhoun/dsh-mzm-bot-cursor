@@ -1316,7 +1316,7 @@ describe('ChatView', () => {
     const view = render(<h.ChatView {...h.props} />)
     const statuses = view.getAllByRole('status')
     expect(statuses.map(status => status.textContent)).toEqual([
-      '本轮运行失败API 密钥无效AUTH',
+      `本轮运行失败${zh['message.failure.auth']}打开模型设置AUTH`,
       '本轮运行失败plugin exploded',
     ])
   })
@@ -1328,8 +1328,33 @@ describe('ChatView', () => {
     expect(status.getAttribute('data-turn-error-code')).toBe('MISSING_CREDENTIAL')
     expect(status.textContent).toContain(zh['message.failure.missingCredential'])
     expect(status.textContent).toMatch(/应用内|模型/u)
-    const handoff = view.getByRole('button', { name: zh['message.failure.missingCredential.action'] })
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
     expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers Models re-entry for AUTH (invalid/revoked) mid-session failures (T035)', () => {
+    const h = makeHarness({ nodes: [user(1, 'try'), turnError(2, 'AUTH')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.getAttribute('data-turn-error-code')).toBe('AUTH')
+    expect(status.textContent).toContain(zh['message.failure.auth'])
+    expect(status.textContent).toMatch(/应用内|模型/u)
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
+    expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers Models re-entry for INVALID_CREDENTIAL mid-session failures (T035)', () => {
+    const h = makeHarness({ nodes: [user(1, 'try'), turnError(2, 'INVALID_CREDENTIAL')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.getAttribute('data-turn-error-code')).toBe('INVALID_CREDENTIAL')
+    expect(status.textContent).toContain(zh['message.failure.invalidCredential'])
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
+    expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
     fireEvent.click(handoff)
     expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
   })
@@ -2208,6 +2233,40 @@ describe('ChatView', () => {
     expect(view.getByText('streaming… more')).toBeTruthy()
     expect(view.getByTestId('tool-seat-a')).toBe(tool)
     expect(tool.innerHTML).toBe(beforeHtml)
+  })
+
+  it('renders Host-stream chat progress (≥1 update) before the turn settles (T029 / FR-006)', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'q')],
+      partial: { turn: 1, step: 1, blocks: [{ kind: 'text', text: 'first progress' }] },
+    }, { running: true })
+    const view = render(<h.ChatView {...h.props} />)
+    const progress = view.container.querySelectorAll('[data-chat-progress="host-stream"]')
+    expect(progress.length).toBeGreaterThanOrEqual(1)
+    expect(view.getByText('first progress')).toBeTruthy()
+    expect(view.container.querySelector('[data-streaming="true"]')).toBeTruthy()
+
+    act(() => {
+      h.setChat({
+        partial: { turn: 1, step: 1, blocks: [{ kind: 'text', text: 'first progress then more' }] },
+      })
+    })
+    expect(view.getByText('first progress then more')).toBeTruthy()
+    expect(view.container.querySelectorAll('[data-chat-progress="host-stream"]').length)
+      .toBeGreaterThanOrEqual(1)
+
+    act(() => {
+      h.set({
+        nodes: [user(1, 'q'), assistant(2, 'final from Host log', 1, 1)],
+        partial: null,
+        running: false,
+        turnEnds: new Map([[1, 3]]),
+      })
+      h.setSession({ running: false })
+    })
+    expect(view.getByText('final from Host log')).toBeTruthy()
+    expect(view.container.querySelector('[data-streaming="true"]')).toBeNull()
+    expect(view.container.querySelector('[data-chat-progress="host-stream"]')).toBeNull()
   })
 
   it('streaming leaves neighbor tool rows and history items at zero re-renders', () => {
