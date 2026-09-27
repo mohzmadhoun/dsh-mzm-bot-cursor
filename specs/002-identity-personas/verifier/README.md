@@ -4,18 +4,44 @@
 **Role:** DH Verifier evidence home. Recipes are rerunnable acceptance scripts/outlines; they do not implement product features.
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/)
-**Linear:** Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88) · T004 [MOH-103](https://linear.app/momadhoun/issue/MOH-103)
+**Linear:** Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88) · T004 [MOH-103](https://linear.app/momadhoun/issue/MOH-103) · T011 [MOH-110](https://linear.app/momadhoun/issue/MOH-110)
 
 ## Foundational Pass gate (T011)
 
-**Rule:** Product success criteria **SC-001…SC-008** MUST NOT be marked Done without a recorded foundational Pass (Host identity types + persistence + mutation stubs + projection + instruction-bind doc + no Electron identity bus). Checklist lands in this README under T011; product SC evidence stays under Scenario recipes.
+**Rule:** Product success criteria **SC-001…SC-008** MUST NOT be marked Done without a recorded foundational Pass (Host identity types + persistence + mutation stubs + projection + instruction-bind doc + no Electron identity bus). Product SC evidence stays under Scenario recipes; this section is the foundation gate only.
 
-| Gate artifact | Location (when present) |
-|---------------|-------------------------|
+| Gate artifact | Location |
+|---------------|----------|
 | Instruction-bind doc (T009) | [instruction-bind.md](./instruction-bind.md) |
-| Sidebar store pick (T012) | `sidebar-store.md` |
-| Non-goals absence checks (T024 / T038 / T040) | `non-goals.md` |
-| Foundational Pass checklist (T011) | this README (section added by T011) |
+| Foundational Pass checklist (T011) | this README (checklist below) |
+| Sidebar store pick (T012) | `sidebar-store.md` (not yet) |
+| Non-goals absence checks (T024 / T038 / T040) | `non-goals.md` (not yet) |
+
+### Foundational Pass checklist — recorded
+
+**Verdict:** **Pass** (foundations only)
+**Stamp:** 2026-09-27 · tip `origin/master` @ `f8ed2f4fff` (includes merged [#78](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/78) T009 · [#79](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/79) T010 · [#80](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/80) T005–T008)
+**Linear:** [MOH-110](https://linear.app/momadhoun/issue/MOH-110) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
+**Scope lock:** This Pass does **not** mark SC-001…SC-008 Done. Scenario recipes (T019+) and product implementation (T013+) remain open. US1–US5 fan-out may begin after this stamp; T012 still blocks US3 Host section store work.
+
+| # | Foundation | Task | Pass bar | Evidence | Claim |
+|---|------------|------|----------|----------|-------|
+| 1 | **Types** | T005 | Optional `persona` (`job` / `voice` / `antiJobs`), optional `avatar` (`shape` and/or `color`), `sectionId` (or null/absent ⇒ Unassigned) on Host Bot identity; P1 `modelAssignment` ownership unchanged | **measured:** `packages/experimental/agent-team/src/types.ts` exports `BotPersonaProfile`, `AvatarMarker`, `SidebarSectionId`; `TeamMemberSnapshot` / `TeamMemberView` carry optional `persona` / `avatar` / `sectionId`; merge [#80](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/80) | Pass |
+| 2 | **Persistence** | T006 | Extended identity fields Host-durable on Team roster / journal path so restart/reload can retain persona, avatar, displayName, section membership | **measured:** `persisted.ts` / `journal.ts` document Lead `team/member` replay; `projection-events.spec.ts` case `persists and allows post-active Host identity field updates` retains persona/avatar/sectionId across apply; `pnpm exec vitest run packages/experimental/agent-team/tests/{team,projection-events}.spec.ts` → 70 passed | Pass |
+| 3 | **Mutation stubs** | T007 | Host request/result types + Remote stubs for rename, persona update, avatar set, section assign/unassign, delete; Electron Main invents no identity records | **measured:** `types.ts` defines `RenameBot*` / `UpdatePersona*` / `SetAvatar*` / `AssignSection*` / `DeleteBot*`; `index.ts` stubs throw `TEAM_NOT_IMPLEMENTED` + Remote `team-rejected`; `team.spec.ts` `exposes Host identity mutation stubs…` asserts all five Remotes reject without mutating create identity | Pass |
+| 4 | **Projection** | T008 | Project displayName, avatar marker, antiJobs (via persona), section membership to Client-readable Team/roster views without Electron IPC synthesis | **measured:** `projection.ts` Zod member schema includes `persona` / `avatar` / `sectionId`; `roster.ts` `projectIdentityFields` copies those onto `TeamMemberView`; projection-events identity update case projects renamed displayName + updated persona/avatar/`sectionId: null` | Pass |
+| 5 | **Instruction-bind doc** | T009 | Normative Host bind approach for saved non-empty job/voice/antiJobs via persona / system-prompt; Verifier observes wiring only (clarify lock 1; SC-008) | **measured:** [instruction-bind.md](./instruction-bind.md) present (Candidate B primary; empty fields contribute no prose; SC-008 wiring-only bar); merge [#78](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/78). **inferred:** T014 still owns runtime bind implementation | Pass (doc) |
+| 6 | **No Electron identity bus** | T010 | Electron Main has no parallel identity/persona/section/delete store or bus | **measured:** `apps/desktop/tests/no-electron-identity-bus.spec.ts` — 3 passed (`pnpm exec vitest run apps/desktop/tests/no-electron-identity-bus.spec.ts`); merge [#79](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/79); forbidden identity channel names and Host mutation API identifiers absent from shell IPC sources | Pass |
+
+**Rerun (idempotent):**
+
+```sh
+pnpm exec vitest run apps/desktop/tests/no-electron-identity-bus.spec.ts
+pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts packages/experimental/agent-team/tests/projection-events.spec.ts
+test -f specs/002-identity-personas/verifier/instruction-bind.md
+```
+
+**PO / DH Lead:** Foundations hold on master tip above. Do **not** close product SC Done on this stamp. Next blockers outside this checklist: T012 sidebar-store pick (before US3), then US1+ implementation + Scenario recipes.
 
 ## Scenario 1–6 owners map
 
