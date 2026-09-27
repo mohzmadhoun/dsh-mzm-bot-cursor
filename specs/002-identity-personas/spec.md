@@ -204,4 +204,4 @@ The team records an ADR that distinguishes agent memory from user memory layers 
 | Verifier replay | FR-012 | SC-007 |
 | Explicit non-goals | Out of Scope section | Edge cases: absent P3/P5 surfaces |
 
-**Intended follow-ons (not this command):** `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-taskstoissues` (Linear under DeepSeek Harness - Cursor / MOH-88) → implement → Verifier.
+**Intended follow-ons:** `/speckit-analyze` → `/speckit-taskstoissues` (Linear under DeepSeek Harness - Cursor / MOH-88) → implement → Verifier.
