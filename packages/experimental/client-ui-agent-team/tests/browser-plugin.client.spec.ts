@@ -524,6 +524,11 @@ describe('ui-team browser plugin', () => {
       displayName: 'My playbook',
       instructionalBody: 'Follow this authored playbook.',
     })
+    expect(b.calls[11]?.args[1]).toEqual({
+      botId: CHILD,
+      intent: 'Ping',
+      scheduleExpr: '@every 5m',
+    })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
     await actions.openTeammate(SESSION, {

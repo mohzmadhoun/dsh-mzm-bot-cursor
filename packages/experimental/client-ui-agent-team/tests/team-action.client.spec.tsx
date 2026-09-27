@@ -2671,7 +2671,7 @@ describe('TeamAction', () => {
       })
     })
     expect(await screen.findByText('Summarize inbox')).toBeTruthy()
-    expect(screen.getByText(zh['routineStatus.active'])).toBeTruthy()
+    expect(document.querySelector('[data-team-routine-status="active"]')).toBeTruthy()
     expect(screen.queryByText(zh.botRoutinesEmpty)).toBeNull()
   })
 
@@ -2680,7 +2680,7 @@ describe('TeamAction', () => {
       ok: true,
       value: {
         ok: false,
-        error: { code: 'TEAM_INVALID_ARGUMENT', message: 'scheduleExpr must be non-empty' },
+        error: { code: 'team-rejected', message: 'scheduleExpr must be non-empty' },
       },
     }))
     render(<TeamAction {...props(actions({ createRoutine }))} />)
@@ -2694,7 +2694,7 @@ describe('TeamAction', () => {
       target: { value: '@every 5m' },
     })
     fireEvent.click(screen.getByRole('button', { name: zh.save }))
-    expect(await screen.findByText('scheduleExpr must be non-empty')).toBeTruthy()
+    expect(await screen.findByText('scheduleExpr must be non-empty (team-rejected)')).toBeTruthy()
     expect(screen.getByText(zh.botRoutinesEmpty)).toBeTruthy()
   })
 
