@@ -16,6 +16,19 @@ export interface DesktopTargetBuildPaths {
 }
 
 /**
+ * Compute the packaging target name for a host without validating support.
+ * @param env - Packaging environment.
+ * @param hostPlatform - Build-host platform used when no target override exists.
+ * @param hostArch - Build-host architecture used when no target override exists.
+ * @returns Candidate target name such as `mac-arm64` or `linux-x64`.
+ */
+export function desktopBuildTargetName(
+  env?: NodeJS.ProcessEnv,
+  hostPlatform?: NodeJS.Platform,
+  hostArch?: string,
+): string
+
+/**
  * Resolve the fixed build target selected by a packaging environment.
  * @param env - Packaging environment.
  * @param hostPlatform - Build-host platform used when no target override exists.
@@ -27,6 +40,20 @@ export function resolveDesktopBuildTarget(
   hostPlatform?: NodeJS.Platform,
   hostArch?: string,
 ): DesktopAutoUpdateTarget
+
+/**
+ * Resolve a packaging target when the host supports one; otherwise return null.
+ * Used by `dev:desktop` / `start:desktop` to skip primary-runtime materialization on Linux.
+ * @param env - Packaging environment.
+ * @param hostPlatform - Build-host platform used when no target override exists.
+ * @param hostArch - Build-host architecture used when no target override exists.
+ * @returns Supported target, or null when unsupported.
+ */
+export function tryResolveDesktopBuildTarget(
+  env?: NodeJS.ProcessEnv,
+  hostPlatform?: NodeJS.Platform,
+  hostArch?: string,
+): DesktopAutoUpdateTarget | null
 
 /**
  * Return the mutable preparation and artifact directories owned by one release target.
