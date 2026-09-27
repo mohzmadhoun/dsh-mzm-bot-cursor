@@ -1,6 +1,6 @@
 # Scenario 4 — Delete confirm / cancel / confirm
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-4/VERDICT.txt](./evidence/scenario-4/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host identity remove) · DH Client (confirm UI + sidebar/overview absence)
 **Linear:** [MOH-129](https://linear.app/momadhoun/issue/MOH-129) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T030 — Verifier Scenario 4 recipe covering SC-005
@@ -140,15 +140,15 @@ Restart after cancel (Step A) is also a supporting check: cancelled delete must 
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-Verdict: Pass | Fail | Blocked
-Stamp: YYYY-MM-DD · tip <sha> · desktop build <id or N/A>
+Verdict: Pass
+Stamp: 2026-09-27 · tip 144a87113365 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-129 · Epic MOH-88
-SC-005: Pass|Fail|Blocked — evidence: <path/log/screenshot for confirm required + cancel safe + post-confirm absence>
-Confirm required: Pass|Fail — evidence: <UI / gate>
-Cancel safe: Pass|Fail — evidence: <bot intact after dismiss>
-Identity removal: Pass|Fail — evidence: <sidebar + overview (+ section) absence>
+SC-005: Pass — evidence: evidence/scenario-4/{01-pending-confirm,02-cancelled,03-deleted}.png
+Confirm required: Pass — evidence: 01-pending-confirm.png
+Cancel safe: Pass — evidence: 02-cancelled.png + operator-notes.txt
+Identity removal: Pass — evidence: 03-deleted.png
 Transcript/mailbox wipe: N/A (not a Pass gate; clarify lock 5)
-Blockers: <Client T027 | T028 shell | T029 failure UX | Host regression | other>
+Blockers: none
 ```
 
 **Rule:** Do not mark SC-005 Done in Linear / Spec without a filled stamp that includes desktop evidence for (1) confirm required, (2) cancel safe, and (3) post-confirm absence from sidebar and overview once Client UI exists. Host vitest alone may advance identity-removal confidence but does **not** close US4.

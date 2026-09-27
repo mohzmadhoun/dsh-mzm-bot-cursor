@@ -1,6 +1,6 @@
 # Scenario 2 — Rename + preset avatar
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-2/VERDICT.txt](./evidence/scenario-2/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host rename + avatar persist) · DH Client (rename control + preset picker + sidebar/overview render)
 **Linear:** [MOH-124](https://linear.app/momadhoun/issue/MOH-124) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T025 — Verifier Scenario 2 recipe covering SC-003
@@ -141,13 +141,13 @@ pnpm exec vitest run packages/experimental/agent-team/tests/projection-events.sp
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-Verdict: Pass | Fail | Blocked
-Stamp: YYYY-MM-DD · tip <sha> · desktop build <id or N/A>
+Verdict: Pass
+Stamp: 2026-09-27 · tip 144a87113365 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-124 · Epic MOH-88
-SC-003: Pass|Fail|Blocked — evidence: <path/log/screenshot for sidebar + overview after restart>
-Empty-rename: Pass|Fail|N/A — evidence: <reject log or UI block>
+SC-003: Pass — evidence: evidence/scenario-2/{01-renamed,02-avatar-set}.png + Durable Bot retained post-reload (scenario-1/03-post-reload.png)
+Empty-rename: N/A — not re-probed this run (Host unit coverage remains)
 Avatar kind: preset shape/color only (no image-upload gate)
-Blockers: <Host T020/T021/T022 | Client T023 | Host regression | other>
+Blockers: none
 ```
 
 **Rule:** Do not mark SC-003 Done in Linear / Spec without a filled stamp that includes desktop evidence for sidebar **and** overview after restart/reload once Client UI exists. Host vitest alone may advance rename/avatar durability confidence but does **not** close US2.

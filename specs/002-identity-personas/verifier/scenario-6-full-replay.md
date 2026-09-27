@@ -1,6 +1,6 @@
 # Scenario 6 — Full Phase 2 Verifier replay (SC-007)
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-6/VERDICT.txt](./evidence/scenario-6/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + composite evidence) · DH Runtime / Client / Docs (slice owners under Scenarios 1–5)
 **Linear:** [MOH-138](https://linear.app/momadhoun/issue/MOH-138) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T039 — Verifier Scenario 6 recipe covering FR-012 / SC-007
@@ -196,27 +196,27 @@ After the gate, run Scenario 1–5 recipes in order and copy their verdicts into
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-VERDICT: Pass|Fail|Deferred|Blocked
+VERDICT: Pass
 SC: SC-007
-SHA: <git rev-parse HEAD>
-BRANCH: <branch>
-UTC: <ISO-8601>
-OPERATOR: <name>
+SHA: 144a871133652f2f3b8a65fb9bf8bec5acb5de6b
+BRANCH: cursor/p2-verifier-desktop-stamps-92fa
+UTC: 2026-09-27T14:48:31Z
+OPERATOR: DH Verifier (Composer; acting as Mohammed)
 LINEAR: MOH-138 · Epic MOH-88
 RECIPE: specs/002-identity-personas/verifier/scenario-6-full-replay.md
-FOUNDATIONAL_T011: Pass|Fail|Blocked
-SCENARIO_1: Pass|Fail|Deferred|Blocked
-SCENARIO_2: Pass|Fail|Deferred|Blocked
-SCENARIO_3: Pass|Fail|Deferred|Blocked
-SCENARIO_4: Pass|Fail|Deferred|Blocked
-SCENARIO_5: Pass|Fail|Deferred|Blocked
-NON_GOALS: Pass|Fail
-LIVE_DESKTOP: Pass|Fail|Deferred|Skipped
-EVIDENCE: evidence/scenario-6/<files>
-CLAIM: measured|inferred|guess
-DEFER_REASON: <only when Deferred>
-BLOCKER: <only when Blocked>
-SCOPE_OUT: <what this Pass does not claim — skills/memory UX/upload/wipe/P1 re-litigation/Grok chrome>
+FOUNDATIONAL_T011: Pass
+SCENARIO_1: Pass
+SCENARIO_2: Pass
+SCENARIO_3: Pass
+SCENARIO_4: Pass
+SCENARIO_5: Pass
+NON_GOALS: Pass
+LIVE_DESKTOP: Pass
+EVIDENCE: evidence/scenario-6/
+CLAIM: measured
+DEFER_REASON: N/A
+BLOCKER: none
+SCOPE_OUT: skills/memory UX/upload/wipe/P1 re-litigation/Grok chrome/LLM reply adherence
 LINEAR_STATUS: leave MOH-138 In Progress until PO merges (do not Done; do not merge)
 ```
 

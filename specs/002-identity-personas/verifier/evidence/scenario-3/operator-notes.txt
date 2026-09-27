@@ -1,0 +1,70 @@
+DSH Local Build
+0.1.6-alpha.2-fe8816b
+New Session
+Plugins
+Workspaces
+go
+ping for chrome
+1min
+Settings
+ping for chrome
+/
+1 subagent
+Standard mode
+Agent Team
+1
+Agent Team
+Members
+New bot
+Create another bot with a different (provider, model) before Verifier can Pass a multi-model session.
+Sidebar sections
+New section
+Replay Section
+Rename section
+Unassigned
+
+Bots never assigned to a named section appear here; Host does not persist an Unassigned catalog row.
+
+Replay Renamed
+replay-bot · Inactive · Model: deepseek-official/deepseek-flash
+Anti-jobs
+merge without review
+
+Pick a named section or Unassigned/default; save writes Host. Electron Main does not own section membership.
+
+Unassigned
+Replay Section
+Save
+Cancel
+Mailbox handoffs
+No 1:1 handoffs yet
+Shared tasks
+New task
+No shared tasks yet
+Chat
+Trajectory
+System prompt
+ping for chrome
+14:42
+Context injection
+@deepseek-ai/dsh-system-prompt
+Context injection
+skill-catalog
+This turn failedProvider API key is missing. Enter it in-app under Models settings — not through a 1Password or external vault product flow.Open Models settings
+MISSING_CREDENTIAL
+Context injection
+subagent-settled
+Background subagent 3be6cadf-580c-43bc-80f1-25aacadf18e4 failed before it finished.
+This turn failedProvider API key is missing. Enter it in-app under Models settings — not through a 1Password or external vault product flow.Open Models settings
+MISSING_CREDENTIAL
+Message or run a task, / commands, @ files or sessions
+DeepSeek-V41-Flash
+High
+2 turns 2 steps
+Start
+Workspace files
+Browse files in this session's workspace
+New terminal
+Run commands in the Session workspace
+Browser
+Browse HTTP(S) pages

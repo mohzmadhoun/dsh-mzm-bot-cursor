@@ -1,6 +1,6 @@
 # Scenario 3 — Sidebar sections + Unassigned
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-3/VERDICT.txt](./evidence/scenario-3/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host section catalog + assign/unassign + projection) · DH Client (sidebar create/assign/move/unassign + Unassigned render)
 **Linear:** [MOH-134](https://linear.app/momadhoun/issue/MOH-134) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T035 — Verifier Scenario 3 recipe covering SC-004
@@ -132,14 +132,14 @@ pnpm exec vitest run packages/experimental/agent-team/tests/projection-events.sp
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-Verdict: Pass | Fail | Blocked
-Stamp: YYYY-MM-DD · tip <sha> · desktop build <id or N/A>
+Verdict: Pass
+Stamp: 2026-09-27 · tip 144a87113365 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-134 · Epic MOH-88
-SC-004: Pass|Fail|Blocked — evidence: <path/log/screenshot for named section + assign + Unassigned after restart>
-Unassigned visible: Pass|Fail — evidence: <never-assigned bots under Unassigned/default>
-Empty section name: Pass|Fail|N/A — evidence: <reject log or UI block>
+SC-004: Pass — evidence: evidence/scenario-3/{01-section-created,02-assigned,03-post-reload}.png
+Unassigned visible: Pass — evidence: Unassigned chrome in panel screenshots
+Empty section name: N/A — not re-probed this run
 Store: Host Team journal (not Electron Main)
-Blockers: <Client T034 | Host regression | other>
+Blockers: none
 ```
 
 **Rule:** Do not mark SC-004 Done in Linear / Spec without a filled stamp that includes desktop evidence for (1) named section create + assign, (2) Unassigned/default for unassigned bots, and (3) membership + names after restart/reload once Client UI exists. Host vitest alone may advance section durability confidence but does **not** close US3.

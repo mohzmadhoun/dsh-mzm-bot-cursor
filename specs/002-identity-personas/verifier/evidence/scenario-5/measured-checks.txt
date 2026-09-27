@@ -1,0 +1,6 @@
+SHA=144a871133652f2f3b8a65fb9bf8bec5acb5de6b
+ADR=MzM-Docs/adr/agent-vs-user-memory-layers.md
+ADR_PRESENT=yes
+20:| **Agent memory** | One bot (agent) | Persona-local preferences, project facts for that bot, ongoing task state owned by that bot |
+21:| **User memory** | Shared across bots (account / user) | Profile facts, durable preferences, cross-bot context |
+53:| US5 no memory product UX in P2 | FR-010 | SC-006 non-goal (no recall/write product flow for Pass) |
