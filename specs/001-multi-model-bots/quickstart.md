@@ -88,6 +88,7 @@ Prerequisites and expected outcomes reference [contracts/](./contracts/) and [da
 ## Scenario 5 — Full Verifier replay
 
 **Acceptance:** SC-005
+**Recipe:** [verifier/scenario-5-full-replay.md](./verifier/scenario-5-full-replay.md) (requires Scenario 0 Pass first)
 
 DH Verifier re-runs documented Phase 1 path on real desktop app and records pass/fail against [spec.md](./spec.md) after Scenario 0 Pass.
 

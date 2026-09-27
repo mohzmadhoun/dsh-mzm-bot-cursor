@@ -1,0 +1,6 @@
+SCENARIO_0_GATE: Pass (see evidence/scenario-0/VERDICT.txt — measured Pass recorded 2026-09-26)
+NEXT: run Scenario 1–4 recipe commands; stamp evidence/scenario-5/VERDICT.txt when complete
+NOTE: T038 stub only — composite replay not executed on this SHA
+UTC: 2026-09-27T10:59:16Z
+SHA: <fill when operator runs one-shot wrapper>
+BRANCH: cursor/p1-t038-scenario5-92fa
