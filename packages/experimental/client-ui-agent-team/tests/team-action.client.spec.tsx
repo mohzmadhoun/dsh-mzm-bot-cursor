@@ -2377,7 +2377,7 @@ describe('TeamAction', () => {
       button => editor!.contains(button),
     )
     expect(save).toBeTruthy()
-    expect(save).toBeDisabled()
+    expect((save as HTMLButtonElement).disabled).toBe(true)
     fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
       target: { value: '   ' },
     })
@@ -2386,7 +2386,7 @@ describe('TeamAction', () => {
     })
     expect(document.querySelector('[data-team-skill-author-reject]')?.textContent)
       .toBe(zh.skillAuthorEmptyReject)
-    expect(save).toBeDisabled()
+    expect((save as HTMLButtonElement).disabled).toBe(true)
     fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
       target: { value: 'Named' },
     })
@@ -2394,7 +2394,7 @@ describe('TeamAction', () => {
       target: { value: '  ' },
     })
     expect(document.querySelector('[data-team-skill-author-reject]')).not.toBeNull()
-    expect(save).toBeDisabled()
+    expect((save as HTMLButtonElement).disabled).toBe(true)
   })
 
   it('creates a user skill via Host upsertUserSkill and lists it in discovery (T029/T030)', async () => {
@@ -2472,7 +2472,9 @@ describe('TeamAction', () => {
     }))
     render(<TeamAction {...props(actions({ load, upsertUserSkill }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
-    await screen.findByText('My playbook')
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill="my-playbook"]')).not.toBeNull()
+    })
     fireEvent.click(document.querySelector('[data-team-skill-edit="my-playbook"]')!)
     expect(document.querySelector('[data-team-skill-author-editor="edit"]')).not.toBeNull()
     fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
