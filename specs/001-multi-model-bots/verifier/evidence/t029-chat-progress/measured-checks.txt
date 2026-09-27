@@ -1,0 +1,14 @@
+T029 / MOH-74 measured checks @ 6d6385b024 (2026-09-27T10:32:19Z)
+
+[pass] Projection: assistant/live-chunk → status:'running' with text before assistant/message settles
+  file: packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts
+  test: projects ≥1 Host assistant/live-chunk progress update before assistant/message settles (T029)
+
+[pass] Render: data-chat-progress="host-stream" ≥1 during open stream; cleared after settlement
+  file: packages/client/ui-chat/tests/chat-view.client.spec.tsx
+  test: renders Host-stream chat progress (≥1 update) before the turn settles (T029 / FR-006)
+  source: AssistantMarkdown.tsx (streaming rows); ChatView.tsx (turn-status)
+
+[pass] Shell guard: no parallel Electron chat-progress IPC
+  file: apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts (3 tests)
+  rg apps/desktop/src: NO_FORBIDDEN_CHANNELS for dsh-desktop:(chat-progress|assistant-stream|progress-update|stream-delta)

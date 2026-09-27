@@ -780,6 +780,48 @@ describe('built-in conversation node Definitions', () => {
       .toMatchObject({ answerAnchorSeq: null, answerStep: null })
   })
 
+  it('projects ≥1 Host assistant/live-chunk progress update before assistant/message settles (T029)', () => {
+    const value = assembler([
+      at(1, 'turn/start', { turn: 1 }),
+      at(2, 'step/start', { turn: 1, step: 1 }),
+      at(3, 'assistant/live-chunk', {
+        turn: 1,
+        step: 1,
+        chunk: { type: 'text-delta', index: 0, text: 'progress-1' },
+      }),
+    ])
+    const first = node(snapshot(value), 'assistant-step')
+    expect(first?.data).toMatchObject({
+      status: 'running',
+      blocks: [{ kind: 'text', text: 'progress-1' }],
+    })
+
+    value.append(at(4, 'assistant/live-chunk', {
+      turn: 1,
+      step: 1,
+      chunk: { type: 'text-delta', index: 0, text: ' progress-2' },
+    }))
+    value.flush()
+    const second = node(snapshot(value), 'assistant-step')
+    expect(second?.key).toBe(first?.key)
+    expect(second?.data).toMatchObject({
+      status: 'running',
+      blocks: [{ kind: 'text', text: 'progress-1 progress-2' }],
+    })
+
+    value.append(at(5, 'assistant/message', {
+      turn: 1,
+      step: 1,
+      message: assistantMessage('assistant-progress', 'progress-1 progress-2'),
+    }, { surfaceOp: 'append' }))
+    value.flush()
+    const settled = node(snapshot(value), 'assistant-step')
+    expect(settled?.data).toMatchObject({
+      status: 'settled',
+      blocks: [{ kind: 'text', text: 'progress-1 progress-2' }],
+    })
+  })
+
   it('keeps one keyed Assistant node while streaming settles and materializes interruption from Location', () => {
     const value = assembler([
       at(1, 'turn/start', { turn: 1 }),
