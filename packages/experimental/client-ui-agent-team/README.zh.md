@@ -47,6 +47,10 @@ kind: "package-reference"
 
 **设置头像**打开预设形状和／或颜色选择器（Host 固定 id）。保存时至少需要形状或颜色之一。保存调用 Host Remote `agentTeams/setAvatar`；标记渲染在 roster／overview 行（`data-team-avatar`）。P2 Pass **不**提供图片文件或 URL 上传控件（clarify lock 3 / T024）。Electron Main 不得发明名称或头像存储。
 
+### 带确认的删除 Bot
+
+健康 teammate 上的**删除 Bot**进入 Client `pending-confirm`，此时不调用 Host。**取消**／关闭确认返回 idle，Bot 保持不变。**确认删除**调用 Host Remote `agentTeams/deleteBot`；成功后重新加载 roster，Bot 从侧栏与 overview 入口消失。会话记录与 mailbox 清理**不是** Pass 条件（clarify lock 5）。Electron Main 不得发明身份记录，也不为本路径托管原生确认对话框（优先 Client 确认；T028 未使用）。
+
 ### 观察 Host mailbox handoff
 
 打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。
@@ -70,7 +74,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建、persona／重命名／头像编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |

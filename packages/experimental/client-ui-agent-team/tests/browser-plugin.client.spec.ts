@@ -23,7 +23,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -162,6 +162,18 @@ async function bench(options: {
           },
         })
     },
+    deleteBot: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/deleteBot', args })
+      return Promise.resolve(options.remoteFailure === 'deleteBot'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: { id: CHILD },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -275,6 +287,9 @@ describe('ui-team browser plugin', () => {
       botId: CHILD,
       avatar: { shape: 'circle', color: 'blue' },
     })).ok).toBe(true)
+    expect((await actions.deleteBot(SESSION, {
+      botId: CHILD,
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -290,6 +305,7 @@ describe('ui-team browser plugin', () => {
       'agentTeams/updatePersona',
       'agentTeams/renameBot',
       'agentTeams/setAvatar',
+      'agentTeams/deleteBot',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -311,6 +327,9 @@ describe('ui-team browser plugin', () => {
     expect(b.calls[4]?.args[1]).toEqual({
       botId: CHILD,
       avatar: { shape: 'circle', color: 'blue' },
+    })
+    expect(b.calls[5]?.args[1]).toEqual({
+      botId: CHILD,
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
