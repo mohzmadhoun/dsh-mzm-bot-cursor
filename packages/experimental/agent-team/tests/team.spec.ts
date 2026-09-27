@@ -1757,6 +1757,7 @@ describe('Team Remote API', () => {
       sections: [],
       unassignedBotIds: [],
       handoffs: [],
+      skills: [],
     })
 
     const createdResult = await ctx.agentTeams.remoteCreateTask(lead, {
@@ -1779,6 +1780,74 @@ describe('Team Remote API', () => {
     await expect(ctx.agentTeams.remoteView(lead, SIGNAL)).resolves.toMatchObject({
       tasks: [expect.objectContaining({ id: created.id })],
       handoffs: [],
+      skills: [],
+    })
+  })
+
+  it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('skill create'),
+      textResponse('skill follow-up'),
+    ])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Skill Bot',
+      modelSelection: { provider: 'mock', model: 'skill-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+
+    const attached = await ctx.agentTeams.attachSkill(lead, {
+      botId: created.id,
+      skillId: 'mzm-thin-pack',
+      signal: SIGNAL,
+    })
+    expect(attached.skillAttachments).toEqual([
+      expect.objectContaining({ botId: created.id, skillId: 'mzm-thin-pack' }),
+    ])
+    expect(durable(lead).members.find(row => row.id === created.id)?.skillAttachments)
+      .toEqual(attached.skillAttachments)
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.skillAttachments)
+      .toEqual(attached.skillAttachments)
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.members.find(row => row.id === created.id)?.skillAttachments)
+      .toEqual(attached.skillAttachments)
+    expect(view.skills).toEqual([])
+
+    const remoteOk = await ctx.agentTeams.remoteAttachSkill(lead, {
+      botId: created.id,
+      skillId: 'second-skill',
+    }, SIGNAL)
+    expect(remoteOk).toMatchObject({
+      ok: true,
+      value: {
+        skillAttachments: [
+          expect.objectContaining({ skillId: 'mzm-thin-pack' }),
+          expect.objectContaining({ skillId: 'second-skill' }),
+        ],
+      },
+    })
+
+    await expect(ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: '  ',
+      instructionalBody: 'body',
+      signal: SIGNAL,
+    })).rejects.toThrow(/displayName must be non-empty/)
+    await expect(ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: 'Named',
+      instructionalBody: '   ',
+      signal: SIGNAL,
+    })).rejects.toThrow(/instructionalBody must be non-empty/)
+
+    const authored = await ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: 'My Playbook',
+      instructionalBody: 'Do the thing.',
+      signal: SIGNAL,
+    })
+    expect(authored.skill).toMatchObject({
+      id: 'my-playbook',
+      displayName: 'My Playbook',
+      source: 'user',
     })
   })
 

@@ -1,8 +1,9 @@
 /** Serialized Team transactions over the exact live Lead Session log.
 
-Identity mutations (persona, avatar, displayName, section membership, delete)
-persist by appending validated `team/member` payloads on this journal path —
-field semantics live in the projection; Electron Main must not invent a parallel store.
+Identity mutations (persona, avatar, displayName, section membership, skill
+attachments, delete) persist by appending validated `team/member` payloads on
+this journal path — field semantics live in the projection; Electron Main must
+not invent a parallel store.
 Named sidebar section catalog rows append as `team/section` (T031); Unassigned
 has no catalog event (clarify lock 4).
 */

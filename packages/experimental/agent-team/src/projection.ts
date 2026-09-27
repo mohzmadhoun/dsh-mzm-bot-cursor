@@ -1,11 +1,13 @@
 /** Host-only Team state projected incrementally from committed Session events.
 
-Persona (`job` / `voice` / `antiJobs`), avatar, displayName, and sectionId on
-`team/member` snapshots are Host→Client readable here — Electron Main must not
-invent a parallel identity store (T015 / FR-002 / FR-003).
-Post-active Host `renameBot` / `setAvatar` journal writes update `displayName`
-and preset avatar markers; `listMembers` / `agentTeams/view` re-read those
-fields for Client roster / sidebar / overview (T022 / FR-004 / FR-005).
+Persona (`job` / `voice` / `antiJobs`), avatar, displayName, sectionId, and
+`skillAttachments` on `team/member` snapshots are Host→Client readable here —
+Electron Main must not invent a parallel identity or skills store (T008–T011 /
+FR-002 / FR-003 / FR-005).
+Post-active Host `renameBot` / `setAvatar` / `attachSkill` journal writes update
+`displayName`, preset avatar markers, and skill attachments; `listMembers` /
+`agentTeams/view` re-read those fields for Client roster / sidebar / overview /
+bot skills (T011 / FR-003 / FR-004 / FR-005).
 Host `deleteBot` appends an `active` → `deleted` tombstone (clears `sectionId`);
 Client roster / overview omit deleted rows (T026 / FR-008 / clarify lock 5).
 Named sidebar sections persist as `team/section` catalog rows; membership is
@@ -33,6 +35,7 @@ import type {
 } from './types.ts'
 import {
   SidebarSectionId as toSidebarSectionId,
+  SkillId,
   TeamId as toTeamId,
   TeamMessageId as toTeamMessageId,
   TeamTaskId as toTeamTaskId,
@@ -112,6 +115,11 @@ const teamMemberSnapshotSchema = z.object({
   persona: botPersonaProfileSchema.optional(),
   avatar: avatarMarkerSchema.optional(),
   sectionId: z.union([sidebarSectionIdSchema, z.null()]).optional(),
+  skillAttachments: z.array(z.object({
+    botId: sessionIdSchema,
+    skillId: z.string().min(1).transform(value => SkillId(value)),
+    attachedAt: z.number().optional(),
+  }).strict()).optional(),
   provider: z.string(),
   context: z.enum(['fresh', 'fork']),
   phase: z.enum(['provisioning', 'active', 'failed', 'deleted']),
@@ -324,12 +332,14 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
           if (prior.displayName !== member.displayName
             || !samePersona(prior.persona, member.persona)
             || !sameAvatar(prior.avatar, member.avatar)
-            || !sameSectionId(prior.sectionId, member.sectionId)) {
+            || !sameSectionId(prior.sectionId, member.sectionId)
+            || !sameSkillAttachments(prior.skillAttachments, member.skillAttachments)) {
             throw new Error(`teammate "${member.id}" changed identity fields during provisioning settlement`)
           }
         } else if (prior.phase === 'active' && member.phase === 'active') {
-          // Post-active Host identity mutations (rename / persona / avatar / section).
-          // displayName, persona, avatar, sectionId, and description may change; modelSelection may not.
+          // Post-active Host identity mutations (rename / persona / avatar / section / skills).
+          // displayName, persona, avatar, sectionId, skillAttachments, and description may change;
+          // modelSelection may not.
         } else if (prior.phase === 'active' && member.phase === 'deleted') {
           // Host delete tombstone (FR-008): clear section membership; other presentation
           // fields may stay for audit. Transcript / mailbox rows are not rewritten here.
@@ -437,6 +447,23 @@ function sameSectionId(
   right: TeamMemberSnapshot['sectionId'],
 ): boolean {
   return left === right
+}
+
+/** Compare ordered skill attachments during provisioning settlement. */
+function sameSkillAttachments(
+  left: TeamMemberSnapshot['skillAttachments'],
+  right: TeamMemberSnapshot['skillAttachments'],
+): boolean {
+  if (left === right) return true
+  if (left === undefined || right === undefined) return left === right
+  if (left.length !== right.length) return false
+  return left.every((item, index) => {
+    const other = right[index]
+    return other !== undefined
+      && item.botId === other.botId
+      && item.skillId === other.skillId
+      && item.attachedAt === other.attachedAt
+  })
 }
 
 /** Host-only Team projection selected by the projected Session identity. */

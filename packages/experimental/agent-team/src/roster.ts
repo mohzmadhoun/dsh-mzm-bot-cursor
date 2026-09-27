@@ -29,15 +29,16 @@ const MEMBER_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
  * Project Host-durable Bot identity fields onto a Client-readable roster row.
  * Electron Main must not invent these values — they come from the Lead `team/member` snapshot.
  * @param member - durable teammate snapshot.
- * @returns optional displayName, persona, avatar, and sectionId fields for {@link TeamMemberView}.
+ * @returns optional displayName, persona, avatar, sectionId, and skillAttachments fields for {@link TeamMemberView}.
  */
 function identityViewFields(member: TeamMemberSnapshot):
-Pick<TeamMemberView, 'displayName' | 'persona' | 'avatar' | 'sectionId'> {
+Pick<TeamMemberView, 'displayName' | 'persona' | 'avatar' | 'sectionId' | 'skillAttachments'> {
   return {
     ...member.displayName === undefined ? {} : { displayName: member.displayName },
     ...member.persona === undefined ? {} : { persona: member.persona },
     ...member.avatar === undefined ? {} : { avatar: member.avatar },
     ...member.sectionId === undefined ? {} : { sectionId: member.sectionId },
+    ...member.skillAttachments === undefined ? {} : { skillAttachments: member.skillAttachments },
   }
 }
 

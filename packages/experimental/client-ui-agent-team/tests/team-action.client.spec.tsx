@@ -62,6 +62,7 @@ const view: TeamView = {
   sections: [],
   unassignedBotIds: [SESSION, 'worker-id' as SessionId],
   handoffs: [],
+  skills: [],
 }
 
 function taskSuccess(value: TeamTask): TeamTaskActionResult {
