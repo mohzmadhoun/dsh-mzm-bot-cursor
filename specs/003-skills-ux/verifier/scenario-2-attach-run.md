@@ -1,6 +1,6 @@
 # Scenario 2 — Attach / run skill on a bot
 
-**Status:** Recipe delivered — product SC Pass **not** stamped (await Client attach/run UI T023–T025 + FR-012 evidence)
+**Status:** Product SC Pass stamped 2026-09-27 — see [evidence/scenario-2/VERDICT.txt](./evidence/scenario-2/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host attach / persist / instruction bind) · DH Client (per-bot attach + run/active UI)
 **Linear:** [MOH-173](https://linear.app/momadhoun/issue/MOH-173) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T026 — Verifier Scenario 2 recipe covering SC-002, SC-006, SC-007 with mandatory FR-012 desktop evidence
@@ -17,7 +17,7 @@
 | Recipe present | This file documents Steps A–D with Pass/Fail and evidence tags |
 | SC coverage | SC-002 (attach + run/active + persist); SC-006 (per-bot isolation); SC-007 (instruction assembly wiring; **no** LLM reply scoring) |
 | FR-012 | Desktop screenshot(s) and/or short screen recording under `verifier/evidence/scenario-2/` — unit/jsdom alone **fails** |
-| Product SC stamp | Deferred until Client attach/run UI (T023–T025) + Verifier desktop evidence land |
+| Product SC stamp | **Pass** @ tip `f79a658fb8` — [evidence/scenario-2/VERDICT.txt](./evidence/scenario-2/VERDICT.txt) |
 
 ---
 
@@ -207,9 +207,8 @@ Blockers: none
 
 ## Explicit non-goals
 
-- Client attach / run/active UI implementation (T023–T025) — out of this Verifier recipe PR; parallel Client work must not be blocked
-- Product SC-002 / SC-006 / SC-007 Done stamps / desktop Pass media (later Verifier stamp after Client lands)
-- Skill authoring (Scenario 3); discover/load product Pass (Scenario 1)
+- Client attach / run/active UI implementation (T023–T025) — delivered on master via [#124](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/124); this stamp closes Scenario 2 product SC
+- Skill authoring (Scenario 3); discover/load product Pass (Scenario 1 — already stamped)
 - Detach-as-Pass-gate; LLM reply-adherence proofs
 - Full managed catalog, plugin skills, learn-from-demonstration
 - Electron Main attachment store (forbidden; T013)
@@ -234,4 +233,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T026).** Product SC Pass **not** stamped. Host attach/bind/projection are on master via [#121](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/121). Full Scenario 2 Done waits on Client attach/run UI (T023–T025, parallel) plus Verifier FR-012 desktop evidence using Steps A–D above. SC-007 remains wiring-only — no LLM reply scoring.
+**Product SC Pass stamped** (2026-09-27) at master tip `f79a658fb8` (#124 Client T023–T025 + prior Host #121). FR-012 desktop evidence under [evidence/scenario-2/](./evidence/scenario-2/) — Steps A–D measured; SC-007 wiring-only (no LLM reply scoring). See [VERDICT.txt](./evidence/scenario-2/VERDICT.txt).

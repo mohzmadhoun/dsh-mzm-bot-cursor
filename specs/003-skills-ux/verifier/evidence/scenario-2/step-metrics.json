@@ -1,0 +1,33 @@
+{
+  "stamp": "2026-09-27T16:33:18.636Z",
+  "tip": "f79a658fb8",
+  "botA": "bf5d7a12-8d78-45c4-8f3c-8fc24d307b13",
+  "botB": "5c08c574-e488-4645-ad6a-bd27ea9021c8",
+  "available": true,
+  "stepA": {
+    "attached": true,
+    "label": "MzM thin pack",
+    "active": "false"
+  },
+  "stepB": {
+    "hasThin": false,
+    "empty": true,
+    "attachmentIds": []
+  },
+  "stepC": {
+    "active": "true",
+    "hasActiveMark": true
+  },
+  "stepCPostReload": {
+    "botAAttached": true,
+    "botALabel": "MzM thin pack",
+    "botAActive": "false",
+    "botBHasThin": false,
+    "botBEmpty": true,
+    "memberNames": [
+      "Attach Demo Bot",
+      "Sc2 Bot A",
+      "Sc2 Bot B"
+    ]
+  }
+}
