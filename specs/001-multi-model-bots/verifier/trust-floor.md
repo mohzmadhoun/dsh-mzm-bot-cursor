@@ -6,9 +6,9 @@
 **Architecture:** [../architecture.md](../architecture.md) Agent scope / trust floor
 **Related:** [non-goals.md](./non-goals.md) (FR-010 Shell/Box) · [credentials-ipc.md](./credentials-ipc.md) (FR-008/009) · [t015-model-bind.md](./t015-model-bind.md) (FR-002 bind)
 
-## Verdict (T013) — Docs Ready (Verifier Pass pending)
+## Verdict (T013) — Verifier Pass
 
-Measured Host wiring already isolates per-bot model assignment and Agent-scoped tool privilege. Phase 1 product acceptance (SC-001…SC-006) MUST NOT require tools that send or post to external destinations. No DH Runtime code change is required for this claim on current `master`.
+**Pass** recorded at SHA `22e2578864` on `cursor/p1-t013-trust-floor-92fa` (evidence: [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)). Measured Host wiring isolates per-bot model assignment and Agent-scoped tool privilege. Phase 1 product acceptance (SC-001…SC-006) MUST NOT require tools that send or post to external destinations. No DH Runtime code change is required for this claim on the measured tree.
 
 ## FR-011 — Per-bot scope isolates model + tool privilege
 
@@ -99,7 +99,7 @@ Fail T013 / FR-012 if any of:
 
 ## Evidence home
 
-When DH Verifier records Pass/Fail, store stdout + SHA under `evidence/t013-trust-floor/` (create at Pass time). Until then this file is the Spec/Verifier recipe; Linear MOH-58 stays **In Progress**.
+Pass evidence (stdout + SHA + VERDICT): [evidence/t013-trust-floor/](./evidence/t013-trust-floor/). Re-confirm via the vitest filters and symbol table above when the wiring changes.
 
 ## How to re-confirm
 

@@ -32,7 +32,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
-Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expands), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Docs Ready; Verifier Pass pending — FR-011/FR-012).
+Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expands), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
 
 ## Host API proofs (pre-Scenario)
 
