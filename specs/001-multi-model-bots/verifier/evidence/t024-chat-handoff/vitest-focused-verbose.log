@@ -1,0 +1,145 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > opens Markdown references to unmodified files with line navigation
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > threads the injected file-mention vocabulary into the closing prose only
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > formatRunDuration localizes units and floors partial seconds
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > Chat node rendering > formatRunDuration uses the English hour template
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > leaves the turn rail unrendered when an unrelated Chat update commits
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > projects loaded turns into prompt and response navigation previews
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > jumps to a turn anchor and reflows stable marks after an older page arrives
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > extends the rail with unloaded outline turns, pages on click, and falls back when nothing lands
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > a jump from the pinned tail releases bottom ownership so the follow snap cannot cancel it
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > holds a jump issued while a plain pull owns the pager and resumes it when the pull settles
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > scrolls the fixed-pitch rail inside its frame with gradient fades at the scrollable ends
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > lands a jump on its turn once the paged rows commit
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands a windowless tool result to the Tool seat with an empty tool name
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > prepend keeps the reader's latest pending-request scroll position anchored
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > bounds no-anchor hit testing before using the mounted-row fallback
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > falls back to the first visible row when the viewport top hit-test misses
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders the fixture main line as independently keyed business nodes
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders Host-pending steering at the flow tail and hands off to the durable node
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a later pending occurrence visible when it reuses a durable MessageId
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders local submission echoes at the flow tail and swaps atomically with the durable node
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders a local steer echo as pending steering before Host image admission completes
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a queued echo out of the Chat flow before and after Host admission
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > an image echo renders its previews through the message-image slot
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > a mixed echo renders the Web file card between its selected images
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > animates only the latest unresolved model retry
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders terminal turn failures inline with their durable message and optional code
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands MISSING_CREDENTIAL turn failure to in-app Models settings (not 1Password)
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders durable team-message context as a Host mailbox handoff (T024) 42ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders pending inbox team-message as a visible handoff without copy-paste (T024) 6ms
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders the max-tokens notice with localized guidance, distinct from turn errors
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands the trajectory callback to the Tool seat
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > shows assistant IconActions only on the last content message of each turn
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds Think and Tool rows before the final answer without unmounting them
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds injected Context in place with the rest of the Turn process
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps the first System prompt above User and outside Process through completion and expansion
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds Context under the fallback title when every summary count is zero
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps ordinary spacing when steering separates the process control from its answer
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps ordinary spacing when steering precedes the first process evidence
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a live Turn expanded and folds it once at turn/end
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > switches completed Turns between the persisted Normal and Compact modes
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds final-step reasoning under the fallback title when every summary count is zero
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds a completed Turn even while the reader is away from the tail
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > folds when the process controller first appears off-tail
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a focused process row visible when a live Turn completes
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a foldable closed Turn fully visible while history is partial
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > withholds process controls for partial history and folds final-page groups
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > refreshes process layout without reordering when the final page only changes Turn data
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a manual expansion when the reader returns from another view
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > withholds assistant IconActions while the turn is still running
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the actions-owning assistant footer shows the turn run time
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the actions-owning assistant footer shows an hour-scale run time
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the settled footer exposes ttft, decode throughput, and usage as the details trigger
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > withholds the usage-details trigger when turn usage is outside the window
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > withholds ttft and throughput while the turn is still running
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps only the latest turn tail actions permanently visible
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the run-time label is withheld when the turn start is outside the window
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > enables fork only on the finalized assistant at the completed transcript tail
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > disables fork when the indexed Turn has a later steering Node
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps final content actions but disables branch when Tool and interrupted Think follow it
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders assistant Markdown across history, streaming, final, and interrupted states while user text stays literal
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > streaming partial frames update the tail without replacing a sibling Tool row
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > streaming leaves neighbor tool rows and history items at zero re-renders
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands running calls to a live Tool group
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps the Tool renderer mounted when a running call settles into log order
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the running clock uses turn/start, ignores steering, and stays out of the live region
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > the running clock reads hours once the turn passes an hour
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > hands each ordered root call to the keyed business-node slot
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > shows a Host open refusal with the reason and retries the same path
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps a non-Error Host refusal visible and dismisses it on cancel
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > substitutes the unknown-open copy when the Host refusal has no text
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > ignores a Host refusal that settles after the dialog is dismissed
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > ignores a Host open that succeeds after the dialog is dismissed
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > prepend preserves a semantic row; a trailing user node force-scrolls
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > back-to-bottom cancels an in-flight paging anchor
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > scrolling away disables follow and shows the back-to-bottom button; clicking returns
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps following when a stream-finalization shrink clamp delivers its scroll
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps following when a shrink clamp regrows before scrollend
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > settles pinned deliveries before observer growth without reading row geometry
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > lets small reader movements accumulate past the follow threshold during growth
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > clears an away sample when a back-to-bottom delivery restores pinned ownership
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > samples away-reader geometry on the interval or scrollend and cancels it on unmount
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > uses the last delivered top when compositor scrolling precedes scroll delivery
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > one ResizeObserver owns pinned dynamic-height follow and ignores growth while away
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > pinned dynamic-height updates select the latest Turn without reading row geometry
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > entering the at-bottom threshold does not snap the remaining scroll distance
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > under data-conversation-scroll, bottom-follow targets the host scrollport
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > a remount restores the saved semantic row after width reflow
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > normalizes a semantic restore clamped to the bottom before an immediate remount
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > a remount while pinned to the bottom keeps the bottom jump
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > paging button loads older and shows its busy label
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > shows open error and loading states
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders command nodes as durable rows: settled text, error state, executing spinner, run-less soft-fall
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > renders /compact as one stateful disclosure from running through completion
+ ↓ |thread-safe| packages/client/ui-chat/tests/chat-view.client.spec.tsx > ChatView > keeps /compact no-history and error settlements on the generic command row
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx > HandoffNotices > renders TeamView.handoffs for the viewed Session with Host deliveryState (T024) 152ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx > HandoffNotices > hides the strip when no handoff involves the viewed Session 4ms
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > ignores a stale Team load after the conversation switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > loads roster/task diagnostics on open and navigates a healthy teammate
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a Host-owned bot from displayName plus provider/model assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > still calls createBot when the draft repeats a roster distinct-models assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a distinct draft message when the draft differs from roster bots
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the distinct-models check cannot pass yet for one teammate pair
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the roster meets the distinct-models rule for two teammate pairs
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > warns when the draft (provider, model) duplicates an existing roster assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows createBot Remote and Team rejections and ignores a late success after session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful createBot after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > cancels bot create without calling Host createBot
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps only the newest overlapping refresh for one session
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a successful task mutation newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a created task newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps task and create failures newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > tracks simultaneous create and task mutations independently
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads derived fields for every task after a mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a task from normalized blocker and write-scope lists
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > assigns, edits, completes, reopens, and deletes with contiguous CAS revisions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads and warns instead of retrying a stale task mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps reload failures visible after task and dependency conflicts
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders roster/task state variants and contains navigation, refresh, and close actions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows load and create failures and ignores a create result after a session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains stale-session and ordinary task failures without retrying
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not publish a task conflict after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful task after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains edit and dependency failures and supports form cancellation and unassignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a Remote carrier failure from the dependency mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > skips the dependency mutation when an edit keeps the same blockers
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads a dependency conflict and ignores dependency settlement after a session switch
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders Host mailbox handoffs from agentTeams/view with deliveryState (T023) 181ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the empty handoffs notice when the Host projection has none 25ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readTeamMessageSource > reads a complete team-message source 1ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > readTeamMessageSource > rejects non-team sources and incomplete team-message rows 0ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns the first non-empty text block 0ms
+ ✓ |thread-safe| packages/client/ui-chat/tests/team-message-source.client.spec.ts > handoffBodyPreview > returns empty string when no text block is present 0ms
+
+ Test Files  4 passed (4)
+      Tests  10 passed | 123 skipped (133)
+   Start at  09:58:53
+   Duration  3.37s (transform 4.19s, setup 704ms, import 6.19s, tests 416ms, environment 1.98s)
+
