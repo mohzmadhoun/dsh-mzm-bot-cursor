@@ -95,7 +95,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T015 [US1] Host createRoutine validates non-empty `intent` and product-supported `scheduleExpr`; rejects with clear user-visible/error reason; persists `status: active` in Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-001
 - [x] T016 [US1] Host createRoutine is per-`botId` (SC-006); confirm step not required (SC-007); separate displayName not required — identity MAY derive from intent
-- [ ] T017 [P] [US1] Client create-routine UI in bot context under `packages/experimental/client-ui-agent-team/src/client/` calling Host HTTP/WS only (no Main IPC mutations)
+- [x] T017 [P] [US1] Client create-routine UI in bot context under `packages/experimental/client-ui-agent-team/src/client/` calling Host HTTP/WS only (no Main IPC mutations)
 - [ ] T018 [US1] Add Verifier Scenario 1 recipe in `specs/004-routines-cron/verifier/scenario-1-create-list.md` covering SC-001/006/007 create path and **requiring** FR-010/011 desktop evidence under `specs/004-routines-cron/verifier/evidence/scenario-1/` (unit/jsdom alone fails)
 
 **Checkpoint**: US1 create works independently with Verifier recipe + evidence path.

@@ -67,6 +67,10 @@ kind: "package-reference"
 
 每个 teammate 卡片展示由该成员 Host `skillAttachments` 驱动的 **Bot 技能**面（仅看全局目录不足）。**挂载技能**对已可挂载的目录项调用 Host `agentTeams/attachSkill`；挂载只出现在该 Bot 上。**运行**是专用控件，将该已挂载技能标为该 Bot 面上的会话生效（clarify lock 4／FR-004）——Pass 不要求匹配 LLM 回复措辞。Host 不可用或拒绝挂载时，面板显示明确失败并保留先前挂载不变。Electron Main 不持有挂载记录。
 
+### 在 Bot 上创建定时任务
+
+每个 teammate 卡片展示由 Host `TeamView.routines` 按该 `botId` 投影的 **Bot 定时任务**面（SC-006）。**新建定时任务**打开意图与产品支持的日程字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/createRoutine`——不是 Electron Main IPC。空意图或日程显示明确 Client 拒绝；Host 拒绝时列表不变。确认步骤可选（SC-007）；身份可由意图派生（无需单独显示名称）。成功后刷新 Team 视图，使进行中的定时任务出现在该 Bot 上。Electron Main 不持有定时任务目录。
+
 ### 观察 Host mailbox handoff
 
 打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。

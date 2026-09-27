@@ -12,6 +12,8 @@ import type {
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
+  CreateRoutineInput,
+  CreateRoutineResult,
   CreateSectionInput,
   CreateSectionResult,
   DeleteBotInput,
@@ -21,6 +23,8 @@ import type {
   RenameBotResult,
   RenameSectionInput,
   RenameSectionResult,
+  RoutineProjection,
+  RoutineStatus,
   SetAvatarInput,
   SetAvatarResult,
   SidebarSectionId,
@@ -86,6 +90,9 @@ export type TeamAttachSkillActionResult = RemoteResult<BotIdentityMutationResult
 /** Generated Remote result whose business value preserves Team upsertUserSkill rejections. */
 export type TeamUpsertUserSkillActionResult = RemoteResult<BotIdentityMutationResult<UpsertUserSkillResult>>
 
+/** Generated Remote result whose business value preserves Team createRoutine rejections. */
+export type TeamCreateRoutineActionResult = RemoteResult<BotIdentityMutationResult<CreateRoutineResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -99,6 +106,7 @@ export interface TeamActionInjected {
   assignSection: (sessionId: SessionId, input: AssignSectionInput) => Promise<TeamAssignSectionActionResult>
   attachSkill: (sessionId: SessionId, input: AttachSkillInput) => Promise<TeamAttachSkillActionResult>
   upsertUserSkill: (sessionId: SessionId, input: UpsertUserSkillInput) => Promise<TeamUpsertUserSkillActionResult>
+  createRoutine: (sessionId: SessionId, input: CreateRoutineInput) => Promise<TeamCreateRoutineActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -182,6 +190,15 @@ interface SkillAuthorDraft {
   instructionalBody: string
 }
 
+/**
+ * Draft fields for Host createRoutine (P4 FR-001 / T017).
+ * Both intent and scheduleExpr MUST be non-empty after trim; schedule must be product-supported.
+ */
+interface CreateRoutineDraft {
+  intent: string
+  scheduleExpr: string
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
@@ -190,12 +207,23 @@ const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
 const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
 const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
+const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = { intent: '', scheduleExpr: '' }
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
 
 /** Select sentinel for attach picker — never a Host skill id. */
 const ATTACH_SKILL_NONE = ''
+
+/** Select sentinel for routine schedule — never a product scheduleExpr. */
+const ROUTINE_SCHEDULE_NONE = ''
+
+/** Product-supported schedule presets for Host createRoutine (P4 T008 / FR-001). */
+const ROUTINE_SCHEDULE_PRESETS = [
+  { value: '@every 5m', label: 'routineSchedule.every5m' },
+  { value: '@hourly', label: 'routineSchedule.hourly' },
+  { value: '@daily', label: 'routineSchedule.daily' },
+] as const satisfies readonly { readonly value: string; readonly label: TeamKey }[]
 
 /** Stable Client key for session-active run indication on one bot×skill pair (FR-004). */
 function skillSessionActiveKey(botId: SessionId, skillId: SkillId): string {
@@ -357,6 +385,14 @@ function skillSourceKey(source: SkillCatalogSummary['source']): TeamKey {
   }
 }
 
+/** Locale key for Host Routine status (active / paused). */
+function routineStatusKey(status: RoutineStatus): TeamKey {
+  switch (status) {
+    case 'active': return 'routineStatus.active'
+    case 'paused': return 'routineStatus.paused'
+  }
+}
+
 /** First text block from a Host mailbox body for the handoff list preview. */
 function handoffBodyPreview(body: HostMailboxMessage['body']): string {
   for (const block of body) {
@@ -379,7 +415,7 @@ function memberLabel(
 export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
   createSection, renameSection, assignSection, attachSkill, upsertUserSkill,
-  createTask, updateTask, openTeammate, openModelsSettings, t,
+  createRoutine, createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -409,6 +445,9 @@ export function TeamAction({
   /** Host user-skill edit target id, or null when not editing (T029). */
   const [editingSkillId, setEditingSkillId] = useState<SkillId | null>(null)
   const [skillAuthorDraft, setSkillAuthorDraft] = useState<SkillAuthorDraft>(EMPTY_SKILL_AUTHOR_DRAFT)
+  /** Bot whose Host createRoutine editor is open (US1 / T017). */
+  const [creatingRoutineBotId, setCreatingRoutineBotId] = useState<SessionId | null>(null)
+  const [createRoutineDraft, setCreateRoutineDraft] = useState<CreateRoutineDraft>(EMPTY_CREATE_ROUTINE_DRAFT)
   /**
    * Session-local instructional bodies from successful upserts (edit prefill).
    * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
@@ -473,6 +512,8 @@ export function TeamAction({
     setCreatingSkill(false)
     setEditingSkillId(null)
     setSkillAuthorDraft(EMPTY_SKILL_AUTHOR_DRAFT)
+    setCreatingRoutineBotId(null)
+    setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
     setAuthoredBodies(new Map())
     setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
@@ -880,7 +921,41 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
-
+  const settleCreateRoutine = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamCreateRoutineActionResult>,
+  ): Promise<CreateRoutineResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`create-routine:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep prior Host routines in the loaded view.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not write; pane still shows prior routines.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const created = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return created
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`create-routine:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
   const settleUpsertUserSkill = useCallback(async (
     operation: () => Promise<TeamUpsertUserSkillActionResult>,
@@ -943,6 +1018,7 @@ export function TeamAction({
     setPendingDelete(null)
     setAssigningBotId(null)
     setAttachingBotId(null)
+    setCreatingRoutineBotId(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -965,6 +1041,7 @@ export function TeamAction({
     setPendingDelete(null)
     setAssigningBotId(null)
     setAttachingBotId(null)
+    setCreatingRoutineBotId(null)
   }
 
   const submitRename = async (member: TeamRosterMember): Promise<void> => {
@@ -991,6 +1068,7 @@ export function TeamAction({
     setPendingDelete(null)
     setAssigningBotId(null)
     setAttachingBotId(null)
+    setCreatingRoutineBotId(null)
   }
 
   const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
@@ -1014,6 +1092,7 @@ export function TeamAction({
     setEditingPersona(null)
     setAssigningBotId(null)
     setAttachingBotId(null)
+    setCreatingRoutineBotId(null)
   }
 
   /** Cancel / dismiss confirm → idle with profile unchanged (data-model cancelled → idle). */
@@ -1067,6 +1146,7 @@ export function TeamAction({
     setPendingDelete(null)
     setEditingSectionId(null)
     setAttachingBotId(null)
+    setCreatingRoutineBotId(null)
   }
 
   const submitAssignSection = async (
@@ -1090,6 +1170,8 @@ export function TeamAction({
     setPendingDelete(null)
     setAssigningBotId(null)
     setEditingSectionId(null)
+    setCreatingRoutineBotId(null)
+    setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
   }
 
   const submitAttachSkill = async (member: TeamRosterMember): Promise<void> => {
@@ -1103,6 +1185,39 @@ export function TeamAction({
     if (saved === undefined) return
     setAttachingBotId(null)
     setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+  }
+
+  const startCreateRoutine = (member: TeamRosterMember): void => {
+    setCreatingRoutineBotId(member.id)
+    setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+    setAttachingBotId(null)
+    setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+    setEditingRename(null)
+    setEditingAvatar(null)
+    setEditingPersona(null)
+    setPendingDelete(null)
+    setAssigningBotId(null)
+    setEditingSectionId(null)
+  }
+
+  /**
+   * Host createRoutine in bot context (P4 FR-001 / SC-007 / T017).
+   * Empty intent or schedule reject Client-side; Host rejects leave catalog unchanged.
+   * No confirm step and no separate displayName — identity derives from intent.
+   */
+  const submitCreateRoutine = async (member: TeamRosterMember): Promise<void> => {
+    const intent = createRoutineDraft.intent.trim()
+    const scheduleExpr = createRoutineDraft.scheduleExpr.trim()
+    /* v8 ignore next -- CreateRoutineForm disables Save while either normalized field is empty. */
+    if (intent === '' || scheduleExpr === '') return
+    const saved = await settleCreateRoutine(member.id, () => createRoutine(sessionId, {
+      botId: member.id,
+      intent,
+      scheduleExpr,
+    }))
+    if (saved === undefined) return
+    setCreatingRoutineBotId(null)
+    setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
   }
 
   /** Dedicated run control: mark attached skill session-active on this bot (FR-004). */
@@ -1236,12 +1351,17 @@ export function TeamAction({
     const deletePending = pendingTasks.has(`delete:${member.id}`)
     const assignPending = pendingTasks.has(`assign-section:${member.id}`)
     const attachPending = pendingTasks.has(`attach-skill:${member.id}`)
+    const createRoutinePending = pendingTasks.has(`create-routine:${member.id}`)
     const identityBusy = personaPending || renamePending || avatarPending
-      || deletePending || assignPending || attachPending
+      || deletePending || assignPending || attachPending || createRoutinePending
     const confirmPending = pendingDelete === member.id
     const assignOpen = assigningBotId === member.id
     const attachOpen = attachingBotId === member.id
+    const createRoutineOpen = creatingRoutineBotId === member.id
     const attachments = member.skillAttachments ?? []
+    const botRoutines = view === null
+      ? []
+      : view.routines.filter((routine: RoutineProjection) => routine.botId === member.id)
     const catalogById = view === null
       ? new Map<SkillId, SkillCatalogSummary>()
       : new Map(view.skills.map(skill => [skill.id, skill]))
@@ -1376,6 +1496,7 @@ export function TeamAction({
               />
             )}
             {canEditIdentity && !attachOpen
+              && !createRoutineOpen
               && editingRename !== member.id
               && editingAvatar !== member.id
               && editingPersona !== member.id
@@ -1389,6 +1510,69 @@ export function TeamAction({
                 onClick={() => { startAttachSkill(member) }}
               >
                 <IconPlusOutline16 size={13} /> {t('attachSkill')}
+              </button>
+            )}
+          </div>
+        )}
+        {member.role === 'teammate' && (
+          <div
+            className={css.botRoutines}
+            data-team-bot-routines={member.id}
+          >
+            <div className={css.botRoutinesHeader}>
+              <span className={css.botRoutinesLabel}>{t('botRoutines')}</span>
+            </div>
+            <p className={css.hint}>{t('botRoutinesHint')}</p>
+            {botRoutines.length === 0
+              ? <div className={css.notice} data-team-bot-routines-empty={member.id}>{t('botRoutinesEmpty')}</div>
+              : (
+                <ul className={css.botRoutinesList} data-team-bot-routines-list={member.id}>
+                  {botRoutines.map((routine: RoutineProjection) => (
+                    <li
+                      key={routine.routineId}
+                      className={css.botRoutineRow}
+                      data-team-routine={routine.routineId}
+                      data-team-routine-status={routine.status}
+                    >
+                      <span data-team-routine-identity>{routine.identity}</span>
+                      <span className={css.botRoutineMeta} data-team-routine-schedule="">
+                        {routine.scheduleLabel}
+                      </span>
+                      <span className={css.botRoutineStatus}>
+                        {t(routineStatusKey(routine.status))}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            {canEditIdentity && createRoutineOpen && (
+              <CreateRoutineForm
+                draft={createRoutineDraft}
+                setDraft={setCreateRoutineDraft}
+                pending={createRoutinePending}
+                onSave={() => { void submitCreateRoutine(member) }}
+                onCancel={() => {
+                  setCreatingRoutineBotId(null)
+                  setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+                }}
+                t={t}
+              />
+            )}
+            {canEditIdentity && !createRoutineOpen
+              && !attachOpen
+              && editingRename !== member.id
+              && editingAvatar !== member.id
+              && editingPersona !== member.id
+              && !confirmPending
+              && !assignOpen && (
+              <button
+                type="button"
+                className={css.personaButton}
+                disabled={identityBusy}
+                data-team-create-routine={member.id}
+                onClick={() => { startCreateRoutine(member) }}
+              >
+                <IconPlusOutline16 size={13} /> {t('createRoutine')}
               </button>
             )}
           </div>
@@ -1455,7 +1639,8 @@ export function TeamAction({
           && editingPersona !== member.id
           && !confirmPending
           && !assignOpen
-          && !attachOpen && (
+          && !attachOpen
+          && !createRoutineOpen && (
           <div className={css.identityActions}>
             <button
               type="button"
@@ -2255,6 +2440,76 @@ function DeleteConfirmForm({
         >
           {t('cancel')}
         </button>
+      </div>
+    </div>
+  )
+}
+
+interface CreateRoutineFormProps {
+  draft: CreateRoutineDraft
+  setDraft: (draft: CreateRoutineDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host createRoutine editor in bot context (P4 FR-001 / SC-007 / T017).
+ * Empty intent or schedule show a clear reject and block Save; no confirm step.
+ */
+function CreateRoutineForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: CreateRoutineFormProps) {
+  const ready = draft.intent.trim() !== '' && draft.scheduleExpr.trim() !== ''
+  return (
+    <div
+      className={css.form}
+      data-team-create-routine-editor=""
+    >
+      <p className={css.hint}>{t('createRoutineHint')}</p>
+      {!ready && (
+        <div
+          className={css.error}
+          role="alert"
+          data-team-create-routine-reject=""
+        >
+          {t('routineCreateReject')}
+        </div>
+      )}
+      <input
+        aria-label={t('routineIntent')}
+        data-team-routine-intent=""
+        value={draft.intent}
+        placeholder={t('routineIntentPlaceholder')}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          setDraft({ ...draft, intent: event.target.value })
+        }}
+      />
+      <select
+        aria-label={t('routineSchedule')}
+        data-team-routine-schedule-select=""
+        value={draft.scheduleExpr === '' ? ROUTINE_SCHEDULE_NONE : draft.scheduleExpr}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+          const value = event.target.value
+          setDraft({
+            ...draft,
+            scheduleExpr: value === ROUTINE_SCHEDULE_NONE ? '' : value,
+          })
+        }}
+      >
+        <option value={ROUTINE_SCHEDULE_NONE}>{t('routineSchedulePlaceholder')}</option>
+        {ROUTINE_SCHEDULE_PRESETS.map(preset => (
+          <option key={preset.value} value={preset.value}>
+            {t(preset.label)}
+          </option>
+        ))}
+      </select>
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>
   )
