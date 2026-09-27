@@ -303,6 +303,23 @@
   color: var(--dsw-alias-label-secondary);
 }
 
+.turnErrorAction {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--dsw-alias-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.turnErrorAction:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
 .turnErrorCode {
   color: var(--dsw-alias-label-tertiary);
   font: var(--dsw-font-markdown-code-block-small);

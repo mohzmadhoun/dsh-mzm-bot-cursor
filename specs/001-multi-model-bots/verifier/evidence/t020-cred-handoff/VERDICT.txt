@@ -1,0 +1,34 @@
+VERDICT: Pass
+SC: FR-008 Client missing-credential handoff to in-app Models (T020 / US1)
+SHA: 9039f96f9ffcf536da90ee26856d81a649503fb1
+UTC: 2026-09-27T08:58:54Z
+IMPL_SHA: 9039f96f9f (Phase 1 - fix - harden settingsShell bind box and handoff attrs)
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/39
+RECIPE: specs/001-multi-model-bots/verifier/t020-cred-handoff.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/client/ui-settings/tests/settings-shell.client.spec.ts packages/client/ui-settings/tests/plugin.client.spec.ts packages/client/ui-settings-general/tests/settings-root.client.spec.tsx packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'MISSING_CREDENTIAL|settingsShell|binds openSection|missing-credential'
+STDOUT: evidence/t020-cred-handoff/vitest-client.stdout.txt (Test Files 4 passed | 1 skipped; Tests 6 passed | 150 skipped; EXIT:0)
+PASSED_TESTS (measured, verbose):
+  1. ChatView > hands MISSING_CREDENTIAL turn failure to in-app Models settings (not 1Password)
+  2. SettingsPanel navigation > binds openSection to settingsShell so MISSING_CREDENTIAL handoff can open Models
+  3. TeamAction > hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)
+  4. settingsShell navigation (T020) > publishes settingsShell beside settingsScope and retires on fiber dispose
+  5. settingsShell navigation (T020) > openSection no-ops until bound, then opens the bound section id
+  6. settingsShell navigation (T020) > bindOpenSection replaces the prior handler and disposer clears only its own
+NOTE_SKIP: packages/client/ui-settings/tests/plugin.client.spec.ts matched no -t names (file skipped); settingsShell face covered by settings-shell.client.spec.ts
+HOST_OPTIONAL: Pass (measured)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/llm-route.spec.ts -t 'MISSING_CREDENTIAL'
+STDOUT2: evidence/t020-cred-handoff/vitest-host.stdout.txt (1 passed | 1 skipped; EXIT:0)
+IPC_AUDIT: Pass (measured; T011 baseline re-check)
+COMMAND3: rg -n -i 'credential|secret|api[_-]?key|password' apps/desktop/src/preload-*.ts apps/desktop/src/ipc.ts
+STDOUT3: evidence/t020-cred-handoff/credentials-ipc-rg.txt (JSDoc-only hits in ipc.ts; no secret channel / preload bridge)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; no provider API secrets
+CRITERIA_CHECKED:
+  1. Chat turn-error MISSING_CREDENTIAL → in-app Models copy + data-missing-credential-handoff → openModelsSettings — Pass (measured)
+  2. Team create/chat MISSING_CREDENTIAL → data-team-error + handoff button → openModelsSettings — Pass (measured)
+  3. ctx.settingsShell.openSection('models') reaches SettingsRoot-bound opener — Pass (measured; settings-root + settings-shell)
+  4. No new Electron credential secret IPC channels — Pass (measured; rg vs credentials-ipc.md baseline)
+  5. Locale primary path names in-app Models; 1Password only as non-primary disclaimer — Pass (measured; zh/en locale strings + test assertions)
+CLAIM: measured (independent Verifier re-run @ 9039f96f9f)
+SCOPE_OUT: US4 dump hygiene / SC-006 / Scenario 1 (T033–T037); Desktop multi-model Scenario 2
+BLOCKER: none

@@ -10,7 +10,7 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamTaskActionResult,
+  type TeamCreateBotActionResult, type TeamTaskActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -88,6 +88,7 @@ function props(actions: TeamActionInjected, sessionId: SessionId = SESSION): Tea
 function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjected {
   return {
     load: () => Promise.resolve({ ok: true, value: view }),
+    openModelsSettings: vi.fn(),
     createBot: () => Promise.resolve({
       ok: true,
       value: {
@@ -363,6 +364,38 @@ describe('TeamAction', () => {
     await waitFor(() => {
       expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
     })
+  })
+
+  it('hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)', async () => {
+    const openModelsSettings = vi.fn()
+    const missingCredentialFailure = {
+      ok: false as const,
+      // Host LLM code on the Remote failure carrier (not a gateway/* code).
+      error: {
+        code: 'MISSING_CREDENTIAL',
+        message: 'no API key for provider route; store through Models page',
+      },
+    } as unknown as TeamCreateBotActionResult
+    const missing = actions({
+      openModelsSettings,
+      createBot: () => Promise.resolve(missingCredentialFailure),
+    })
+    render(<TeamAction {...props(missing)} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-a' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    const alert = await screen.findByRole('alert')
+    expect(alert.getAttribute('data-team-error')).toBe('MISSING_CREDENTIAL')
+    expect(alert.textContent).toContain(zh.missingCredential)
+    expect(alert.textContent).toMatch(/应用内|模型/u)
+    const handoff = screen.getByRole('button', { name: zh.openModelsSettings })
+    expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(openModelsSettings).toHaveBeenCalledTimes(1)
   })
 
   it('shows createBot Remote and Team rejections and ignores a late success after session switch', async () => {

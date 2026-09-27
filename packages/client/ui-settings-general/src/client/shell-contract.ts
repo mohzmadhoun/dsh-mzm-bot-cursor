@@ -40,6 +40,13 @@ export type SettingsRootInjected = {
   openDesktopUpdate: () => void
   /** Request a fresh logical generation and physical WebSocket immediately. */
   reconnect: () => void
+  /**
+   * Publish this mount's `openSection` on `ctx.settingsShell` so Chat / Team
+   * can hand off MISSING_CREDENTIAL into Models without importing the shell.
+   * @param handler - shell-owned openSection.
+   * @returns disposer that unbinds only this handler.
+   */
+  bindOpenSection: (handler: (id: string) => void) => () => void
   hooks: {
     /** Shared Electron status for both sidebar locations. */
     desktopUpdate: HostObservable<DesktopUpdateView>

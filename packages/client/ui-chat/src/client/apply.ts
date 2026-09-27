@@ -37,14 +37,6 @@ import { TranscriptViewPolicy } from './transcript-view.ts'
 import { CHAT_SETTINGS_NAMESPACE, type ChatSettings } from '../chat-settings.ts'
 import { useTurnDataValue } from './chat/use-turn-data.ts'
 
-const CHAT_NODE_INJECT: ChatNodeTurnDataInjected = {
-  hooks: {
-    turnData: (_standard, data) => function useTurnData(key) {
-      return useTurnDataValue(data, key)
-    },
-  },
-}
-
 /** Services required by the Chat target and its presentation registrations. */
 export const inject = [
   'slots', 'sessions', 'uiWorkspace', 'uiSession', 'uiConversation', 'locale',
@@ -83,6 +75,18 @@ export function apply(ctx: Context): void {
   const transcriptView = new TranscriptViewPolicy(
     ctx.settingsScope.bind<ChatSettings>({ namespace: CHAT_SETTINGS_NAMESPACE }),
   )
+  // Models section id matches ui-settings-models `settings.section` registration.
+  // Optional get: compositions without the settings shell no-op the handoff CTA.
+  const chatNodeInject: ChatNodeTurnDataInjected = {
+    hooks: {
+      turnData: (_standard, data) => function useTurnData(key) {
+        return useTurnDataValue(data, key)
+      },
+    },
+    openModelsSettings: () => {
+      ctx.get('settingsShell')?.openSection('models')
+    },
+  }
 
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({
     name: 'settings.general.item',
@@ -103,7 +107,7 @@ export function apply(ctx: Context): void {
       label: () => t('view.chat'),
       locale: NS,
       children: {
-        'conversation.chat.node': { kind: 'keyed', scope: 'session', inject: CHAT_NODE_INJECT },
+        'conversation.chat.node': { kind: 'keyed', scope: 'session', inject: chatNodeInject },
         'conversation.message.images': { kind: 'single', scope: 'session' },
       },
       store: chatStore,

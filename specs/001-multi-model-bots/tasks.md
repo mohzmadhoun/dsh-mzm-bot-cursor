@@ -82,7 +82,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T017 [US1] Add Client/Web basic create + assign-model UI (happy path, no config-file edit) under `packages/client/` (prefer `ui-agent-preset` / `ui-model-selection` / Agent Team client surfaces) composed into Desktop Web wrapper — minimum inputs: `displayName` + model/provider ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
 - [x] T018 [US1] Enforce Verifier “different models” = any two distinct configured `(provider, model)` assignments in environment (no fixed marketing catalog) in create/session validation messaging near Client model pickers and Verifier recipe `specs/001-multi-model-bots/verifier/scenario-2-multi-model.md`
 - [x] T019 [US1] Document clean-machine TTFT path (< 30 min to first multi-model team session) in `specs/001-multi-model-bots/verifier/scenario-2-multi-model.md` with wall-clock recording fields for SC-001
-- [ ] T020 [US1] Wire missing-credential create/chat failure to direct user to in-app credential entry (not 1Password) — Host/Client handoff into Models settings (`packages/client/ui-settings-models/`); full dump hygiene lands in US4
+- [x] T020 [US1] Wire missing-credential create/chat failure to direct user to in-app credential entry (not 1Password) — Host/Client handoff into Models settings (`packages/client/ui-settings-models/`); full dump hygiene lands in US4
 
 **Checkpoint**: US1 independently testable after handshake Pass + credentials available
 

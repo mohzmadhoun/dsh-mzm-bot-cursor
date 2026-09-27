@@ -50,6 +50,8 @@ After Assistant replies settle, the completed-turn timing dialog omits TTFT and 
 
 The completed-turn action footer starts 20px below the preceding prose or extension content.
 
+Terminal turn failures with Host code `MISSING_CREDENTIAL` show localized in-app Models credential guidance and an **Open Models settings** control that calls `ctx.settingsShell.openSection('models')` — not a 1Password / external vault primary path.
+
 -----
 
 <a id="turn-process-folding"></a>

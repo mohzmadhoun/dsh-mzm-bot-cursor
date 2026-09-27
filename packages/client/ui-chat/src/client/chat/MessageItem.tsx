@@ -52,7 +52,9 @@ function failureMessage(
   code: unknown,
   t: ChatViewSlotProps['t'],
 ): string {
-  return code === 'AUTH' ? t('message.failure.auth') : message
+  if (code === 'AUTH') return t('message.failure.auth')
+  if (code === 'MISSING_CREDENTIAL') return t('message.failure.missingCredential')
+  return message
 }
 
 function ModelRetryItem({ node, active, t }: {
@@ -122,16 +124,32 @@ function ModelRetryItem({ node, active, t }: {
 }
 
 /** Persistent, turn-positioned feedback for a terminal failure. */
-function TurnErrorItem({ node, t }: {
+function TurnErrorItem({ node, t, openModelsSettings }: {
   node: TurnErrorNode
   t: ChatViewSlotProps['t']
+  openModelsSettings?: () => void
 }) {
+  const missingCredential = node.code === 'MISSING_CREDENTIAL'
   return (
-    <div className={css.turnErrorRow} role="status">
+    <div
+      className={css.turnErrorRow}
+      role="status"
+      {...node.code === undefined ? {} : { 'data-turn-error-code': node.code }}
+    >
       <StateDot state="error" className={css.turnErrorDot} />
       <div className={css.turnErrorCopy}>
         <span className={css.turnErrorTitle}>{t('message.turnError')}</span>
         <span className={css.turnErrorMessage}>{failureMessage(node.message, node.code, t)}</span>
+        {missingCredential && openModelsSettings !== undefined && (
+          <button
+            type="button"
+            className={css.turnErrorAction}
+            data-missing-credential-handoff
+            onClick={openModelsSettings}
+          >
+            {t('message.failure.missingCredential.action')}
+          </button>
+        )}
       </div>
       {node.code !== undefined && <code className={css.turnErrorCode}>{node.code}</code>}
     </div>
@@ -363,8 +381,16 @@ export const RetryNodeView = memo(function RetryNodeView({ node, t }: ChatNodeVi
 })
 
 /** Terminal turn-error keyed Chat renderer. */
-export const TurnErrorNodeView = memo(function TurnErrorNodeView({ node, t }: ChatNodeViewProps<'turn-error'>) {
-  return <TurnErrorItem node={node.data} t={t} />
+export const TurnErrorNodeView = memo(function TurnErrorNodeView({
+  node, t, openModelsSettings,
+}: ChatNodeViewProps<'turn-error'> & { openModelsSettings?: () => void }) {
+  return (
+    <TurnErrorItem
+      node={node.data}
+      t={t}
+      {...openModelsSettings === undefined ? {} : { openModelsSettings }}
+    />
+  )
 })
 
 /** Max-tokens turn-end notice keyed Chat renderer. */

@@ -13,6 +13,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
+import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
 import {
@@ -68,6 +69,10 @@ function registerUi(ctx: ClientContext): void {
         childSessionId: member.id,
         mode: 'continuable',
       })
+    },
+    // Models section id matches ui-settings-models; optional when settings shell absent.
+    openModelsSettings: () => {
+      ctx.get('settingsShell')?.openSection('models')
     },
   }
 

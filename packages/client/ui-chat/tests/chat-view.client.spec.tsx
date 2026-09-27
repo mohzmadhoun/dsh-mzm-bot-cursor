@@ -257,6 +257,7 @@ function makeHarness(
   )
   const openFile = vi.fn<(path: string) => Promise<void>>().mockResolvedValue(undefined)
   const openSkill = vi.fn<(name: string) => void>()
+  const openModelsSettings = vi.fn()
   const loadOlder = vi.fn()
   const loadThrough = vi.fn<(seq: number) => Promise<void>>().mockResolvedValue(undefined)
   // Mutable outline holder: tests swap the value and drive a re-render via set().
@@ -321,7 +322,12 @@ function makeHarness(
       case 'model-retry':
         return <RetryNodeView {...nodeProps<'model-retry'>()} />
       case 'turn-error':
-        return <TurnErrorNodeView {...nodeProps<'turn-error'>()} />
+        return (
+          <TurnErrorNodeView
+            {...nodeProps<'turn-error'>()}
+            openModelsSettings={openModelsSettings}
+          />
+        )
       case 'turn-max-tokens':
         return <TurnMaxTokensNodeView {...nodeProps<'turn-max-tokens'>()} />
       case 'turn-process':
@@ -435,7 +441,7 @@ function makeHarness(
   }
   return {
     set, setSession: session.set, setChat: chatSource.set, ChatView, props,
-    openFile, openSkill, loadOlder, loadThrough, openView,
+    openFile, openSkill, openModelsSettings, loadOlder, loadThrough, openView,
     setOutline: (value: unknown) => { outlineValue = value },
     chatScroll, forkAt, toolOwners,
     setTranscriptView: (mode: TranscriptViewMode) => { transcriptView.set(mode) },
@@ -1308,6 +1314,19 @@ describe('ChatView', () => {
       '本轮运行失败API 密钥无效AUTH',
       '本轮运行失败plugin exploded',
     ])
+  })
+
+  it('hands MISSING_CREDENTIAL turn failure to in-app Models settings (not 1Password)', () => {
+    const h = makeHarness({ nodes: [user(1, 'try'), turnError(2, 'MISSING_CREDENTIAL')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.getAttribute('data-turn-error-code')).toBe('MISSING_CREDENTIAL')
+    expect(status.textContent).toContain(zh['message.failure.missingCredential'])
+    expect(status.textContent).toMatch(/应用内|模型/u)
+    const handoff = view.getByRole('button', { name: zh['message.failure.missingCredential.action'] })
+    expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
   })
 
   it('renders the max-tokens notice with localized guidance, distinct from turn errors', () => {
