@@ -1,0 +1,45 @@
+Verdict: Pass
+Stamp: 2026-09-27 · tip c5742bff46 (≥ ca46eb7a2b / #120) · desktop start:desktop (DISPLAY=:1)
+Branch: cursor/p3-sc001-scenario1-stamp-fe1d
+Linear: MOH-166 · Epic MOH-142
+SC-001: Pass — evidence: evidence/scenario-1/{01-discovery-thin-pack,02-available-to-attach,03-post-reload}.png + scenario-1-walkthrough.mp4
+FR-012: desktop screenshots/recording present; not unit/jsdom-only
+Blockers: none for SC-001 discover/load/restart of mzm-thin-pack
+
+Acceptance (Scenario 1 / SC-001)
+--------------------------------
+[x] Step A — Discover: Desktop Skills library lists MzM thin pack / mzm-thin-pack (managed)
+[x] Step B — Load: Make available to attach (no wizard); leave/return keeps available mark
+[x] Step C — Restart: After full Desktop restart, thin pack still listed from Host catalog;
+    Client available-to-attach mark resets (session-local) and one click restores attach-ready
+[x] FR-012 real Desktop evidence (CDP Page.captureScreenshot + ffmpeg x11grab + mp4)
+
+Evidence (measured)
+-------------------
+Launch: pnpm run start:desktop on DISPLAY=:1 @ master tip c5742bff46 (#120 Client + #121 on master) (#120 merged)
+Artifacts (also /opt/cursor/artifacts/):
+  01-discovery-thin-pack.png — Skills library showing MzM thin pack + Make available to attach
+  02-available-to-attach.png — MzM thin pack shows Available to attach
+  03-post-reload.png — After Electron restart; thin pack listed; available restored by one click
+  scenario-1-walkthrough.mp4 — short recording covering open → discover → load → restart path
+  step-metrics.json — CDP DOM assertions (ids, available flags, managedCount)
+
+DOM / metrics excerpts (measured):
+  Step A: visible mzm-thin-pack displayName="MzM thin pack" source=managed available=false
+  Step B: available=true; hasAvailableMark; load button gone
+  Leave/return: listed=true available=true
+  Step C post-restart: listed=true available=false (Client-local mark); after one click available=true
+
+Notes
+-----
+- managedCount=4 on this Desktop (mzm-thin-pack + office-docx/pptx/xlsx via bundled→managed).
+  SC-001 thin-pack discover/load/restart Pass. Exactly-one managed count remains T032 / SC-004 /
+  Scenario 4 — do not treat office bundled skills as SC-001 Fail for thin-pack path.
+- available-to-attach is Client-local React state across process restart; Host catalog listing of
+  mzm-thin-pack is the durable half (contract reopen/restart: managed pack still listed).
+- No Electron Main skills bus (prior T013 Pass still holds).
+
+Scope lock
+----------
+Does NOT stamp SC-002…SC-007 / Scenario 2–5. Attach/run is US2.
+T019 recipe checkbox remains [x]; this stamp fills product SC Pass + FR-012 media.

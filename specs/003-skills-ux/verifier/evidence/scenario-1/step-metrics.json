@@ -1,0 +1,54 @@
+{
+  "stepA": {
+    "visible": true,
+    "display": "MzM thin pack",
+    "id": "mzm-thin-pack",
+    "source": "managed",
+    "available": "false",
+    "managedCount": 4,
+    "managedIds": [
+      "mzm-thin-pack",
+      "office-docx",
+      "office-pptx",
+      "office-xlsx"
+    ],
+    "headings": [
+      "Members",
+      "Sidebar sections",
+      "Skills library",
+      "Mailbox handoffs",
+      "Shared tasks"
+    ]
+  },
+  "stepB": {
+    "available": "true",
+    "hasAvailableMark": true,
+    "loadButtonGone": true,
+    "text": "MzM thin pack\nManaged\nmzm-thin-pack\nMzM thin pack — single managed skill for Phase 3 Skills UX Pass.\nAvailable to attach"
+  },
+  "leaveReturn": {
+    "listed": true,
+    "available": "true",
+    "display": "MzM thin pack"
+  },
+  "stepC": {
+    "listed": true,
+    "display": "MzM thin pack",
+    "available": "false",
+    "source": "managed",
+    "managedCount": 4,
+    "managedIds": [
+      "mzm-thin-pack",
+      "office-docx",
+      "office-pptx",
+      "office-xlsx"
+    ],
+    "text": "MzM thin pack\nManaged\nmzm-thin-pack\nMzM thin pack — single managed skill for Phase 3 Skills UX Pass.\nMake available to attach"
+  },
+  "stepCAfter": {
+    "listed": true,
+    "available": "true",
+    "hasAvailableMark": true,
+    "text": "MzM thin pack\nManaged\nmzm-thin-pack\nMzM thin pack — single managed skill for Phase 3 Skills UX Pass.\nAvailable to attach"
+  }
+}
