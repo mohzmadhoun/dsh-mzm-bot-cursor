@@ -17,8 +17,31 @@ interface TeamMemberSnapshot {
   /**
    * Product-facing Bot label from Host create (FR-001).
    * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
+   * Mutable after active via Host rename (FR-004); kebab {@link name} stays immutable.
    */
   readonly displayName?: string
+  /**
+   * Durable per-bot LLM route from spawn `agentOptions` / Host create (FR-002).
+   * Bound onto the live Agent via `installModelSelection` so subsequent chats
+   * keep this assignment. Absent when spawn omitted `agentOptions`.
+   * P1 ownership unchanged — immutable after first durable write.
+   */
+  readonly modelSelection?: ModelSelection
+  /**
+   * Optional persona profile retained with the Bot (FR-002 / FR-003).
+   * Mutable after active via Host `updatePersona`.
+   */
+  readonly persona?: BotPersonaProfile
+  /**
+   * Optional preset avatar marker (FR-005).
+   * Mutable after active via Host `setAvatar`.
+   */
+  readonly avatar?: AvatarMarker
+  /**
+   * Named sidebar section membership, or `null` / absent ⇒ Unassigned/default (FR-006).
+   * Mutable after active via Host `assignSection`.
+   */
+  readonly sectionId?: SidebarSectionId | null
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -26,7 +49,7 @@ interface TeamMemberSnapshot {
 }
 ```
 
-每个 member 都从 `provisioning` 开始，并且只到达一个终态 roster phase：`active` 或 `failed`。运行时 `running`／`idle`／`inactive` 状态单独派生，绝不会重写该记录。
+每个 member 都从 `provisioning` 开始，并且只到达一个终态 roster phase：`active` 或 `failed`。到达 `active` 之后，Host 身份变更可以继续追加仅修改可变产品字段（`displayName`、`persona`、`avatar`、`sectionId`、`description`）的 `active` 快照；kebab `name`、subagent `provider`、`context` 与 `modelSelection` 保持不可变。运行时 `running`／`idle`／`inactive` 状态单独派生，绝不会重写该记录。
 
 ## 持久 mailbox
 

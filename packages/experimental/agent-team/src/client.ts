@@ -1,12 +1,24 @@
 /** Client-safe Agent Teams request, result, and view vocabulary. */
 
 export type {
+  AssignSectionInput,
+  AssignSectionResult,
+  AvatarMarker,
+  BotIdentityMutationResult,
+  BotPersonaProfile,
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
   CreateTeamTaskRequest,
+  DeleteBotInput,
+  DeleteBotResult,
   HostMailboxMessage,
   HostMailboxMessageSource,
+  RenameBotInput,
+  RenameBotResult,
+  SetAvatarInput,
+  SetAvatarResult,
+  SidebarSectionId,
   TeamMailboxDeliveryState,
   TeamMemberView,
   TeamMessageId,
@@ -16,5 +28,7 @@ export type {
   TeamTaskStatus,
   TeamTaskView,
   TeamView,
+  UpdatePersonaInput,
+  UpdatePersonaResult,
   UpdateTeamTaskRequest,
 } from './types.ts'

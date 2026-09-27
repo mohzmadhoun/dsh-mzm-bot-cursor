@@ -7,6 +7,8 @@ import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import { readHostMailboxMessage } from './host-mailbox-message.ts'
 import type {
+  AvatarMarker,
+  BotPersonaProfile,
   HostMailboxMessage,
   TeamId,
   TeamMemberSnapshot,
@@ -15,6 +17,7 @@ import type {
   TeamTaskSnapshot,
 } from './types.ts'
 import {
+  SidebarSectionId as toSidebarSectionId,
   TeamId as toTeamId,
   TeamMessageId as toTeamMessageId,
   TeamTaskId as toTeamTaskId,
@@ -72,12 +75,28 @@ const modelSelectionSchema = z.object({
   reasoningEffort: z.string().min(1).transform(value => ReasoningEffortId(value)).optional(),
 }).strict()
 
+const botPersonaProfileSchema = z.object({
+  job: z.string(),
+  voice: z.string(),
+  antiJobs: z.array(z.string()),
+}).strict() as z.ZodType<BotPersonaProfile>
+
+const avatarMarkerSchema = z.object({
+  shape: z.string().min(1).optional(),
+  color: z.string().min(1).optional(),
+}).strict() as z.ZodType<AvatarMarker>
+
+const sidebarSectionIdSchema = z.string().min(1).transform(value => toSidebarSectionId(value))
+
 const teamMemberSnapshotSchema = z.object({
   id: sessionIdSchema,
   name: z.string(),
   description: z.string(),
   displayName: z.string().optional(),
   modelSelection: modelSelectionSchema.optional(),
+  persona: botPersonaProfileSchema.optional(),
+  avatar: avatarMarkerSchema.optional(),
+  sectionId: z.union([sidebarSectionIdSchema, z.null()]).optional(),
   provider: z.string(),
   context: z.enum(['fresh', 'fork']),
   phase: z.enum(['provisioning', 'active', 'failed']),
@@ -260,11 +279,24 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
         if (prior.name !== member.name
           || prior.provider !== member.provider
           || prior.context !== member.context
-          || prior.displayName !== member.displayName
           || !sameModelSelection(prior.modelSelection, member.modelSelection)) {
           throw new Error(`teammate "${member.id}" changed immutable identity fields`)
         }
-        if (prior.phase !== 'provisioning' || member.phase === 'provisioning') {
+        if (prior.phase === 'provisioning') {
+          if (member.phase === 'provisioning') {
+            throw new Error(`teammate "${member.name}" has an invalid ${prior.phase} -> ${member.phase} transition`)
+          }
+          // provisioning → active|failed: retain create-time displayName and optional P2 identity fields.
+          if (prior.displayName !== member.displayName
+            || !samePersona(prior.persona, member.persona)
+            || !sameAvatar(prior.avatar, member.avatar)
+            || !sameSectionId(prior.sectionId, member.sectionId)) {
+            throw new Error(`teammate "${member.id}" changed identity fields during provisioning settlement`)
+          }
+        } else if (prior.phase === 'active' && member.phase === 'active') {
+          // Post-active Host identity mutations (rename / persona / avatar / section).
+          // displayName, persona, avatar, sectionId, and description may change; modelSelection may not.
+        } else {
           throw new Error(`teammate "${member.name}" has an invalid ${prior.phase} -> ${member.phase} transition`)
         }
       }
@@ -327,6 +359,37 @@ function sameModelSelection(
   return left.provider === right.provider
     && left.model === right.model
     && left.reasoningEffort === right.reasoningEffort
+}
+
+/** Compare durable persona profiles during provisioning settlement. */
+function samePersona(
+  left: TeamMemberSnapshot['persona'],
+  right: TeamMemberSnapshot['persona'],
+): boolean {
+  if (left === right) return true
+  if (left === undefined || right === undefined) return false
+  return left.job === right.job
+    && left.voice === right.voice
+    && left.antiJobs.length === right.antiJobs.length
+    && left.antiJobs.every((item, index) => item === right.antiJobs[index])
+}
+
+/** Compare durable avatar markers during provisioning settlement. */
+function sameAvatar(
+  left: TeamMemberSnapshot['avatar'],
+  right: TeamMemberSnapshot['avatar'],
+): boolean {
+  if (left === right) return true
+  if (left === undefined || right === undefined) return false
+  return left.shape === right.shape && left.color === right.color
+}
+
+/** Compare section membership during provisioning settlement (`null` and absent differ). */
+function sameSectionId(
+  left: TeamMemberSnapshot['sectionId'],
+  right: TeamMemberSnapshot['sectionId'],
+): boolean {
+  return left === right
 }
 
 /** Host-only Team projection selected by the projected Session identity. */

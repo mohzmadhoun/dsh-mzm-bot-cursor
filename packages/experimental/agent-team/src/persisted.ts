@@ -1,4 +1,9 @@
-/** Short-lived read-handle access to persisted Team member Sessions. */
+/** Short-lived read-handle access to persisted Team member Sessions.
+
+Restart/reload rebuilds Host Bot identity (including optional persona, avatar,
+displayName, and section membership) by replaying Lead `team/member` events into
+the Team projection; this helper only opens child Session logs for recovery.
+*/
 
 import type { SessionEvent, SessionHeader, SessionId , SessionLogOffset } from '@deepseek-ai/dsh-session'
 import type { SessionPersistence } from '@deepseek-ai/dsh-session-persistence'
