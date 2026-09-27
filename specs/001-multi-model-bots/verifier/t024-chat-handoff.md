@@ -66,4 +66,4 @@ Record stdout + SHA under [evidence/t024-chat-handoff/](./evidence/t024-chat-han
 - Contract: [../contracts/host-mailbox-1to1.md](../contracts/host-mailbox-1to1.md)
 - Data model: [../data-model.md](../data-model.md) (Host mailbox message)
 - T023 Host projections: [t023-handoff-projections.md](./t023-handoff-projections.md)
-- Scenario 3 (T025): `scenario-3-mailbox.md` (when present)
+- Scenario 3 (T025): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
