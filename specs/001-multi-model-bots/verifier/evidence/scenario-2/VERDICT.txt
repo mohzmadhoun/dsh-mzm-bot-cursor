@@ -1,13 +1,15 @@
 VERDICT: Pass
 SC: FR-003 / SC-002 rule definition (T018 slice); FR-001…002 / FR-007 create path reused
-SHA: 5cc1cf4612900c40d64dda7341a0e482266c2474
-UTC: 2026-09-27T08:17:45Z
-BRANCH: cursor/p1-t018-distinct-models-92fa
-PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/33
-COMMAND: ./node_modules/.bin/vitest run packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'creates a Host-owned bot|warns when the draft|cancels bot create'
-STDOUT: evidence/scenario-2/vitest-client.stdout.txt (3 passed | 23 skipped)
-COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'applies per-teammate LLM agentOptions|creates a Host-owned bot from displayName'
-STDOUT: evidence/scenario-2/vitest-host.stdout.txt (2 passed | 50 skipped)
-CRITERIA: distinct-models hint + duplicate soft warning + multiModel pending/ready copy green; Host createBot/agentOptions expose member.modelSelection; recipe defines distinct (provider, model) with no marketing catalog
-DEFERRED: SC-001 wall-clock + live multi-provider session Pass remain T019
-CLAIM: measured (Verifier certified independent re-run at 5cc1cf4612900c40d64dda7341a0e482266c2474; Save stays enabled on duplicate — disabled={pending || !ready} only, measured from TeamAction.tsx)
+SHA: 8ab25122c764d6ba6aa926dd96eddb49ef845f97
+UTC: 2026-09-27T08:36:30Z
+BRANCH: cursor/p1-t018-recertify-8ab2
+BASE: origin/master merge "Merge phase 1: T018 distinct provider-model. PR #33."
+SUPERSEDES: scenario-2 Pass at 5cc1cf4612900c40d64dda7341a0e482266c2474 (does not cover 3030237356 or c4226b9982)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'creates a Host-owned bot|warns when the draft|cancels bot create|distinct-models|distinct draft' --reporter=verbose
+STDOUT: evidence/scenario-2/vitest-client.stdout.txt (7 passed | 23 skipped, exit 0)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'modelAssignmentsAreDistinct|treats trimmed \(provider, model\)|rejects an empty provider or model|Lead pair|applies per-teammate LLM agentOptions|creates a Host-owned bot from displayName' --reporter=verbose
+STDOUT: evidence/scenario-2/vitest-host.stdout.txt (5 passed | 51 skipped, exit 0)
+CRITERIA: modelAssignmentsAreDistinct covers same pair, different model, different provider, ignored reasoningEffort, trim, and empty rejection; Client shows same-assignment createBot with Save enabled, distinct-draft copy, one teammate pair as not-yet, and two distinct teammate pairs as meets-rule; Host createBot/agentOptions still expose member.modelSelection; unloaded teammate does not inherit the Lead pair
+DEFERRED: SC-001 wall-clock + live multi-provider session Pass remain T019. This file does not claim SC-002 session Pass.
+ENV: pnpm install --frozen-lockfile exited 1 at root postinstall because lefthook refused to replace core.hooksPath. vitest binary was already linked. First host run exited 1: MODULE_NOT_FOUND for gitignored native/system/packages/linux-x64/bin/glibc/system.node. native/system tree cf2bf0abfb5db04b77ee6540ed4c0e83e413e22d matches the checkout that already had that binary. Copied it and reran. Recorded host stdout is the rerun.
+CLAIM: measured (Verifier re-run at 8ab25122c764d6ba6aa926dd96eddb49ef845f97 in a detached worktree; GitHub Actions on PR #33 were not used)
