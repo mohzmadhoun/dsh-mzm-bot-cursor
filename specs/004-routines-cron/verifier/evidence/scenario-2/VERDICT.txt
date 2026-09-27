@@ -4,7 +4,7 @@ Verdict: PASS (SC-002 / quickstart Scenario 2)
 Stamp: 2026-09-27
 Product tip: origin/master @ 97880d2791
   (includes Host T022 #157 + Client T023 #158)
-Evidence tip: this stamp commit on cursor/p4-t024-pause-resume-recipe-fe1d
+Evidence tip: cursor/p4-t024-pause-resume-recipe-fe1d @ b3052caa00
 Linear: MOH-217 (T024) — left In Progress (PO closes after SO12 embed / merge)
 Recipe: specs/004-routines-cron/verifier/scenario-3-pause-resume.md
 
