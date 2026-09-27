@@ -1,31 +1,41 @@
 # Feature Specification: Phase 3 — Skills UX
 
-**Feature Branch**: `cursor/p3-specify-fe1d`
+**Feature Branch**: `cursor/p3-clarify-fe1d`
 
 **Spec Directory**: `specs/003-skills-ux`
 
 **Created**: 2026-09-27
 
-**Status**: Draft
+**Status**: Clarified
 
 **Input**: User description: "Phase 3 (Skills UX) Spec Kit specify only: load/discover + authoring; thin managed pack (not every playbook). Explicit non-goals: full managed skill catalog parity; learn-from-demonstration. Exit: user can attach/run a skill on a bot; Verifier covers load + one authoring path. GUI acceptance must require desktop screenshots/recordings (standing order 11). Do not rewrite specs/001 or specs/002. Plan accepted in MzM-Docs/mzm-bot-plan.md §4 P3."
 
-**Program refs**: `MzM-Docs/mzm-bot-plan.md` (P3) · `MzM-Docs/living-next-gate.md` · `MzM-Docs/mzm-bot-initial-plan.md` (§6 Skills as inventory context) · `.specify/memory/constitution.md` v1.0.0 · Linear epic MOH-142 / specify MOH-143 (project DeepSeek Harness - Cursor) · predecessors `specs/001-multi-model-bots` (P1 Done) · `specs/002-identity-personas` (P2 Done)
+**Program refs**: `MzM-Docs/mzm-bot-plan.md` (P3) · `MzM-Docs/living-next-gate.md` · `MzM-Docs/mzm-bot-initial-plan.md` (§6 Skills as inventory context) · `.specify/memory/constitution.md` v1.0.0 · Linear epic MOH-142 / specify MOH-143 / clarify MOH-144 (project DeepSeek Harness - Cursor) · predecessors `specs/001-multi-model-bots` (P1 Done) · `specs/002-identity-personas` (P2 Done)
+
+## Clarifications
+
+### Session 2026-09-27
+
+- Q: If the user leaves the instructional body empty when authoring a skill, must save be rejected or may empty content be allowed? → A: Reject save until both display name and instructional body are non-empty; show a clear user-visible reason. Verifier scripted authoring path uses non-empty name and body (simplest path; matches Pass evidence).
+- Q: Is “load” a separate multi-step ritual, or does making a discovered skill available to attach satisfy load? → A: Making a discovered skill available to attach satisfies load; a separate multi-step load ritual is not required for Pass.
+- Q: May one bot have multiple skills attached at once? → A: Yes; Verifier Pass requires proving at least one attachment on one bot.
+- Q: What user-visible action satisfies “run” for Verifier Pass? → A: Either a dedicated product run control OR a session turn that applies the attached skill, so long as the desktop UI shows run/active state for that bot; LLM reply wording that quotes the skill is not required.
+- Q: After attach, must the skill’s instructional content be applied as that bot’s instructions on subsequent turns (like P2 persona fields)? → A: Yes — attached skills’ instructional content MUST be applied as that bot’s instructions on subsequent turns after attach; Verifier Pass still measures attach/run UI visibility (plus desktop visual evidence), not LLM reply adherence.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Discover and load skills (Priority: P1)
 
-Mohammed opens the desktop app, finds available skills (thin managed pack plus any user-authored skills), and loads one so it is ready to attach or run on a bot—without hunting through developer tooling or a full Grok-sized catalog.
+Mohammed opens the desktop app, finds available skills (thin managed pack plus any user-authored skills), and makes one available to attach or run on a bot—without hunting through developer tooling or a full Grok-sized catalog.
 
 **Why this priority**: Plan exit requires Verifier coverage of **load**; discover/load is the prerequisite for attach/run.
 
-**Independent Test**: On the real desktop app, open the skills discovery surface, locate at least one managed skill from the thin pack and (if present) one user skill, load a skill, and confirm it appears as available. Verifier records desktop screenshot(s) and/or a short screen recording under `verifier/evidence/` for this path.
+**Independent Test**: On the real desktop app, open the skills discovery surface, locate at least one managed skill from the thin pack and (if present) one user skill, make a skill available to attach (that counts as load), and confirm it appears as available. Verifier records desktop screenshot(s) and/or a short screen recording under `verifier/evidence/` for this path.
 
 **Acceptance Scenarios**:
 
 1. **Given** the desktop app is running with at least one bot from P1/P2, **When** the user opens the skills discovery/library surface, **Then** at least one skill from the thin managed pack is listed with a human-readable name (and short description if the product shows one).
-2. **Given** a listed managed skill, **When** the user loads that skill, **Then** the skill becomes available for attach/run on a bot and remains listed as loaded/available after leaving and returning to the surface (or after restart/reload used by Verifier).
+2. **Given** a listed managed skill, **When** the user makes that skill available to attach (load; a separate multi-step load ritual is not required), **Then** the skill becomes available for attach/run on a bot and remains available after leaving and returning to the surface (or after restart/reload used by Verifier).
 3. **Given** the user has previously authored a skill (Story 3), **When** the user opens skills discovery, **Then** that user-authored skill appears alongside managed skills (or in a clearly labeled user group) without requiring a separate developer path.
 4. **Given** Verifier is proving this story, **When** the load path completes, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording of the real app UI under `specs/003-skills-ux/verifier/evidence/` (unit/jsdom alone is not sufficient).
 
@@ -41,11 +51,13 @@ Mohammed attaches a loaded skill to a specific bot and runs it so that bot uses 
 
 **Acceptance Scenarios**:
 
-1. **Given** a bot and a loaded skill exist, **When** the user attaches the skill to that bot and saves/confirms, **Then** the bot’s identity/overview (or equivalent skills-on-bot surface) shows that skill as attached.
+1. **Given** a bot and a loaded skill exist, **When** the user attaches the skill to that bot and saves/confirms, **Then** the bot’s identity/overview (or equivalent skills-on-bot surface) shows that skill as attached (global catalog alone is insufficient for Pass).
 2. **Given** a skill is attached to bot A, **When** the user views bot B (a different bot without that attachment), **Then** bot B does not show that skill as attached solely because it was attached to A.
-3. **Given** a skill is attached to a bot, **When** the user runs that skill on that bot (product run action and/or a session turn that applies the attached skill), **Then** the desktop UI shows that the skill was run or is active for that bot (not merely listed in a global catalog).
+3. **Given** a skill is attached to a bot, **When** the user runs that skill on that bot via a dedicated product run control **or** a session turn that applies the attached skill, **Then** the desktop UI shows that the skill was run or is active for that bot (not merely listed in a global catalog); LLM reply wording that quotes the skill is not required for Pass.
 4. **Given** an attach and a run completed, **When** the user restarts the app (or Verifier reloads durable state), **Then** the attachment remains; run history beyond “attachment still present” is not required for Pass.
-5. **Given** Verifier is proving this story, **When** attach and run complete, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording under `specs/003-skills-ux/verifier/evidence/` showing attach and run on the real desktop app (unit/jsdom alone is not sufficient).
+5. **Given** a skill is attached to a bot, **When** that bot runs a subsequent user turn, **Then** the attached skill’s instructional content is applied as that bot’s instructions for the turn (Verifier Pass still does not require proving specific LLM reply wording).
+6. **Given** a bot already has one skill attached, **When** the user attaches a second distinct skill to the same bot, **Then** both attachments may coexist; Verifier Pass still only requires proving at least one attachment.
+7. **Given** Verifier is proving this story, **When** attach and run complete, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording under `specs/003-skills-ux/verifier/evidence/` showing attach and run on the real desktop app (unit/jsdom alone is not sufficient).
 
 ---
 
@@ -59,10 +71,11 @@ Mohammed creates (or edits) a reusable skill through one in-app authoring path, 
 
 **Acceptance Scenarios**:
 
-1. **Given** the desktop app is running, **When** the user opens the skill-authoring surface and creates a new skill with a display name and instructional content, then saves, **Then** the skill is persisted and appears in skills discovery as a user-authored skill.
-2. **Given** a saved user-authored skill, **When** the user edits its name or instructional content and saves again, **Then** the updated values replace the previous ones on subsequent open and in discovery.
-3. **Given** a saved user-authored skill, **When** the user loads and attaches it to a bot (Stories 1–2), **Then** attach/run behave the same as for a managed skill for Pass purposes.
-4. **Given** Verifier is proving this story, **When** the authoring path completes, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording under `specs/003-skills-ux/verifier/evidence/` of the real authoring UI (unit/jsdom alone is not sufficient).
+1. **Given** the desktop app is running, **When** the user opens the skill-authoring surface and creates a new skill with a non-empty display name and non-empty instructional content, then saves, **Then** the skill is persisted and appears in skills discovery as a user-authored skill.
+2. **Given** the user is authoring or editing a skill with an empty display name or empty instructional body, **When** the user attempts to save, **Then** the product rejects the save and shows a clear user-visible reason; the incomplete skill is not listed as a saved discoverable skill.
+3. **Given** a saved user-authored skill, **When** the user edits its name or instructional content (still non-empty) and saves again, **Then** the updated values replace the previous ones on subsequent open and in discovery.
+4. **Given** a saved user-authored skill, **When** the user loads and attaches it to a bot (Stories 1–2), **Then** attach/run behave the same as for a managed skill for Pass purposes.
+5. **Given** Verifier is proving this story, **When** the authoring path completes, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording under `specs/003-skills-ux/verifier/evidence/` of the real authoring UI (unit/jsdom alone is not sufficient).
 
 ---
 
@@ -85,8 +98,10 @@ The product ships a **thin** managed skill pack—enough to demonstrate discover
 
 - What happens if no user-authored skills exist yet? Discovery still shows the thin managed pack; Story 3 remains independently testable by authoring one.
 - What happens if the user attaches the same skill to multiple bots? Allowed; each attachment is per-bot; Verifier Pass requires proving at least one bot attachment.
+- What happens if the user attaches multiple skills to one bot? Allowed; Pass requires proving at least one attachment.
 - What happens if the user tries to detach a skill? Detach is helpful but **not** required for Phase 3 Pass; Pass measures attach + run + load + one authoring path.
-- What happens if instructional content is left empty on author? Save MAY be rejected with a clear user-visible reason, or empty content MAY be allowed; Verifier Pass for authoring requires a non-empty name and non-empty instructional body in the scripted path.
+- What happens if instructional content or display name is left empty on author? Save MUST be rejected with a clear user-visible reason until both are non-empty; Verifier scripted authoring path uses non-empty name and body.
+- What happens if “load” is implemented as selecting a skill for attach without a separate load button? Allowed and preferred for Pass; making a discovered skill available to attach satisfies FR-002.
 - What happens if the user expects learn-from-demonstration (screen-recording → skill)? Out of scope for P3; MUST NOT be required for Pass.
 - What happens if the user expects the full managed catalog (all inventory §6 skills / all site playbooks)? Out of scope; thin pack only.
 - What happens if the user expects plugin/connector-provided skills? Deferred with connectors/MCP (P6); not required for P3 Pass.
@@ -98,17 +113,19 @@ The product ships a **thin** managed skill pack—enough to demonstrate discover
 ### Functional Requirements
 
 - **FR-001**: Users MUST be able to discover available skills in a user-visible skills surface in the desktop app, including at least the thin managed pack and any user-authored skills.
-- **FR-002**: Users MUST be able to load a discovered skill so it becomes available to attach or run on a bot; loaded availability MUST persist across app restart (or the durable reload path Verifier uses).
-- **FR-003**: Users MUST be able to attach a loaded skill to a specific bot; the attachment MUST be visible on that bot’s skills/overview surface and MUST NOT automatically attach to other bots.
-- **FR-004**: Users MUST be able to run an attached skill on that bot such that the desktop UI shows the skill as run or active for that bot (product run action and/or session application of the attached skill).
+- **FR-002**: Users MUST be able to load a discovered skill so it becomes available to attach or run on a bot. Making a discovered skill available to attach satisfies load; a separate multi-step load ritual is NOT required. Loaded availability MUST persist across app restart (or the durable reload path Verifier uses).
+- **FR-003**: Users MUST be able to attach a loaded skill to a specific bot; the attachment MUST be visible on that bot’s skills/overview surface (global catalog alone is insufficient) and MUST NOT automatically attach to other bots. A bot MAY have multiple skills attached; Pass requires proving at least one attachment.
+- **FR-004**: Users MUST be able to run an attached skill on that bot such that the desktop UI shows the skill as run or active for that bot via either a dedicated product run control OR a session turn that applies the attached skill. Proving specific LLM reply wording that quotes the skill is NOT required for Pass.
 - **FR-005**: Skill attachments MUST persist across app restart (or Verifier durable reload).
-- **FR-006**: Users MUST be able to author a new reusable skill through one in-app authoring path (display name + instructional content) and save it so it appears in discovery.
-- **FR-007**: Users MUST be able to edit and re-save a user-authored skill’s name and instructional content; updates MUST replace prior values.
-- **FR-008**: Phase 3 MUST ship a thin managed skill pack with at least one managed skill discoverable for Verifier Pass; Phase 3 MUST NOT require full managed catalog parity with inventory §6 or site-playbook completeness.
+- **FR-006**: Users MUST be able to author a new reusable skill through one in-app authoring path (non-empty display name + non-empty instructional content) and save it so it appears in discovery.
+- **FR-007**: Users MUST be able to edit and re-save a user-authored skill’s name and instructional content (both remaining non-empty); updates MUST replace prior values.
+- **FR-008**: Phase 3 MUST ship a thin managed skill pack with at least one managed skill discoverable for Verifier Pass; Phase 3 MUST NOT require full managed catalog parity with inventory §6 or site-playbook completeness. Exact pack membership is chosen during plan/implement with Architect.
 - **FR-009**: Phase 3 MUST NOT require learn-from-demonstration (screen-recording → skill) for acceptance.
 - **FR-010**: Phase 3 MUST NOT require plugin/connector-provided skills for acceptance (deferred with P6).
 - **FR-011**: DH Verifier MUST be able to re-run a documented path that covers discover/load, attach/run on a bot, and one authoring path—and record pass/fail evidence against this spec.
 - **FR-012**: For every GUI acceptance scenario in this feature (Stories 1–3 and the corresponding success criteria), Verifier Pass MUST include real desktop-app visual evidence: screenshots and/or short screen recordings stored under `specs/003-skills-ux/verifier/evidence/` (and may also be mirrored under `/opt/cursor/artifacts/`). Unit tests or jsdom-only runs MUST NOT alone constitute Pass for those GUI scenarios.
+- **FR-013**: Save of a user-authored skill MUST be rejected with a clear user-visible reason when display name or instructional body is empty; incomplete skills MUST NOT appear as saved discoverable skills.
+- **FR-014**: After a skill is attached to a bot, that skill’s instructional content MUST be applied as that bot’s instructions on subsequent turns. Verifier Pass measures attach/run UI visibility and desktop visual evidence; it does NOT require proving specific LLM reply adherence.
 
 ### Out of Scope (explicit non-goals for this feature)
 
@@ -126,12 +143,12 @@ The product ships a **thin** managed skill pack—enough to demonstrate discover
 
 ### Key Entities
 
-- **Skill**: A reusable instructional playbook the user can discover, load, attach to a bot, and run; has a display name and instructional content.
+- **Skill**: A reusable instructional playbook the user can discover, load, attach to a bot, and run; has a non-empty display name and non-empty instructional content when saved.
 - **Managed skill**: Platform-shipped skill in the thin managed pack; not user-authored.
-- **User-authored skill**: Skill created or edited by the user via the in-app authoring path.
-- **Thin managed pack**: Small curated set of managed skills (at least one) shipped for P3; explicitly not full catalog parity.
-- **Skill attachment**: Association of one skill to one bot; durable; visible on that bot’s skills/overview surface.
-- **Skill run**: User-visible application or execution of an attached skill on a bot (run action and/or session application), observable in the desktop UI.
+- **User-authored skill**: Skill created or edited by the user via the in-app authoring path; save requires non-empty name and body.
+- **Thin managed pack**: Small curated set of managed skills (at least one) shipped for P3; explicitly not full catalog parity; exact membership deferred to plan/Architect.
+- **Skill attachment**: Association of one skill to one bot; durable; visible on that bot’s skills/overview surface; a bot may have multiple attachments; after attach, instructional content is applied as bot instructions on subsequent turns.
+- **Skill run**: User-visible application or execution of an attached skill on a bot via dedicated run control or session application, observable in the desktop UI; LLM reply adherence not required for Pass.
 - **Skills discovery/library surface**: User-visible list or browse UI for managed and user skills.
 - **Skill authoring surface**: User-visible create/edit UI for user-authored skills (one path required for Pass).
 
@@ -139,12 +156,13 @@ The product ships a **thin** managed skill pack—enough to demonstrate discover
 
 ### Measurable Outcomes
 
-- **SC-001**: In a Verifier-scripted desktop path, the user discovers and loads at least one managed skill from the thin pack; after restart/reload the skill remains available. Desktop screenshot(s) and/or short screen recording are filed under `verifier/evidence/`.
-- **SC-002**: In a Verifier-scripted desktop path, the user attaches a loaded skill to one bot and runs it on that bot; the UI shows attachment and run/active state; attachment survives restart/reload. Desktop screenshot(s) and/or short screen recording are filed under `verifier/evidence/`.
-- **SC-003**: In a Verifier-scripted desktop path, the user authors a new skill (non-empty name + instructional body), saves it, and sees it in discovery; authoring evidence includes desktop screenshot(s) and/or short screen recording under `verifier/evidence/`.
+- **SC-001**: In a Verifier-scripted desktop path, the user discovers and loads (makes available to attach) at least one managed skill from the thin pack; after restart/reload the skill remains available. Desktop screenshot(s) and/or short screen recording are filed under `verifier/evidence/`.
+- **SC-002**: In a Verifier-scripted desktop path, the user attaches a loaded skill to one bot and runs it on that bot (dedicated run control or session application with UI run/active state); the UI shows attachment on that bot’s skills/overview surface and run/active state; attachment survives restart/reload. Desktop screenshot(s) and/or short screen recording are filed under `verifier/evidence/`.
+- **SC-003**: In a Verifier-scripted desktop path, the user authors a new skill (non-empty name + instructional body), saves it, and sees it in discovery; attempting save with empty name or body is rejected with a clear user-visible reason; authoring evidence includes desktop screenshot(s) and/or short screen recording under `verifier/evidence/`.
 - **SC-004**: Phase 3 Pass does not require full managed catalog parity or learn-from-demonstration; Verifier non-goals checks confirm those absences are acceptable.
 - **SC-005**: DH Verifier re-runs the documented Phase 3 acceptance path on the real desktop app and records pass/fail evidence against this spec, including FR-012 visual evidence for all GUI scenarios.
 - **SC-006**: Attach is per-bot: Verifier observes that attaching a skill to bot A does not by itself mark the same skill attached on bot B.
+- **SC-007**: After a skill is attached, the product applies its instructional content as that bot’s instructions on subsequent turns; Verifier does not gate Pass on proving specific LLM reply wording.
 
 ## Assumptions
 
@@ -152,25 +170,29 @@ The product ships a **thin** managed skill pack—enough to demonstrate discover
 - Constitution v1.0.0 wedge-first A→C principles bind; this feature is Phase 3 Skills UX only, not north star C and not P4–P7 scope.
 - Delivery shell for acceptance remains the project desktop app; this spec states WHAT the user can do, not HOW Host/Client plugins implement skill storage or model injection.
 - Inventory `MzM-Docs/mzm-bot-initial-plan.md` §6 informs vocabulary (managed / user / plugin sources; skill-authoring vs learn-from-demonstration) but does **not** require shipping the full managed list in P3.
-- “Thin managed pack” means ≥1 shipped managed skill for Pass; exact pack membership is chosen during plan/implement with Architect and is not a specify blocker.
-- “Run” means a user-visible run/active indication for an attached skill on a bot; proving specific LLM reply wording that quotes the skill text is **not** required for Pass (mirrors P2 instruction-adherence stance).
+- “Thin managed pack” means ≥1 shipped managed skill for Pass; exact pack membership is chosen during plan/implement with Architect and remains deferred (not a clarify blocker).
+- “Load” means making a discovered skill available to attach; a separate multi-step load ritual is not required (locked in Clarifications 2026-09-27).
+- “Run” means either a dedicated run control or session application with user-visible run/active indication; proving specific LLM reply wording that quotes the skill text is **not** required for Pass (locked in Clarifications 2026-09-27).
+- Attached skill instructional content is applied as bot instructions on subsequent turns; Verifier does not require LLM reply adherence (locked in Clarifications 2026-09-27).
+- Author save requires non-empty display name and instructional body; empty fields reject save with a clear user-visible reason (locked in Clarifications 2026-09-27).
+- Multiple attachments per bot are allowed; Pass proves at least one (locked in Clarifications 2026-09-27).
 - Detach/delete of skills or attachments is optional UX, not a Pass gate.
 - Plugin skills wait for P6; user + thin managed sources are sufficient for P3.
-- Standing order 11 / DH Spec agent rule: GUI Verifier Pass requires real desktop screenshots and/or short screen recordings—not unit/jsdom alone.
-- Linear issues for implementation are created only after Spec Kit `tasks` → `taskstoissues`, hung on project **DeepSeek Harness - Cursor** under epic MOH-142 (never DeepSeek Harness - GrokBot). PO creates/links epic children; this specify step does not invent implement tickets.
+- Standing order 11 / DH Spec agent rule: GUI Verifier Pass requires real desktop screenshots and/or short screen recordings—not unit/jsdom alone. FR-012 remains in force after clarify.
+- Linear issues for implementation are created only after Spec Kit `tasks` → `taskstoissues`, hung on project **DeepSeek Harness - Cursor** under epic MOH-142 (never DeepSeek Harness - GrokBot). PO creates/links epic children; this clarify step does not invent implement tickets.
 - Single primary user for Phase 3 acceptance: Mohammed (founder = customer).
-- No clarify session yet — Verifier gates this specify draft before `/speckit-clarify`.
 
 ## Traceability (capability → requirement → acceptance)
 
 | Capability | Requirements | Acceptance / Success |
 |------------|--------------|----------------------|
-| Discover / load | FR-001, FR-002 | US1 scenarios 1–3; SC-001 |
-| Attach skill to bot | FR-003, FR-005 | US2 scenarios 1–2, 4; SC-002, SC-006 |
-| Run skill on bot | FR-004 | US2 scenario 3; SC-002 |
-| Author skill | FR-006, FR-007 | US3 scenarios 1–3; SC-003 |
+| Discover / load (select-for-attach) | FR-001, FR-002 | US1 scenarios 1–3; SC-001 |
+| Attach skill to bot (multi allowed) | FR-003, FR-005 | US2 scenarios 1–2, 4, 6; SC-002, SC-006 |
+| Run skill on bot (control or session) | FR-004 | US2 scenario 3; SC-002 |
+| Instruction application after attach | FR-014 | US2 scenario 5; SC-007 |
+| Author skill (non-empty required) | FR-006, FR-007, FR-013 | US3 scenarios 1–4; SC-003 |
 | Thin managed pack | FR-008 | US4 scenarios 1–2; SC-004 |
 | Non-goals (full catalog / learn-from-demo / plugin) | FR-009, FR-010; Out of Scope | US4; SC-004; edge cases |
 | Verifier replay + desktop visual evidence | FR-011, FR-012 | US1–3 scenario evidence clauses; SC-001–SC-003, SC-005 |
 
-**Intended follow-ons (held until Verifier Pass on specify):** `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-taskstoissues` (Linear under DeepSeek Harness - Cursor / MOH-142) → implement → Verifier.
+**Intended follow-ons (held until Verifier Pass on clarify):** `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-taskstoissues` (Linear under DeepSeek Harness - Cursor / MOH-142) → implement → Verifier.
