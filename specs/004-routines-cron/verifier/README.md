@@ -95,7 +95,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 
 | Scenario | Quickstart | Recipe path (later tasks) | Primary owners | Acceptance | FR-010/011 |
 |----------|------------|---------------------------|----------------|------------|------------|
-| **1** Create + pane list | [Scenario 1](../quickstart.md#scenario-1--create--pane-list) | `scenario-1-create-list.md` (T018) · [create-list.md](../contracts/create-list.md) | **Runtime** + **Client** + **Verifier** | SC-001, SC-006, SC-007 | **Required** |
+| **1** Create + pane list | [Scenario 1](../quickstart.md#scenario-1--create--pane-list) | [scenario-1-create-list.md](./scenario-1-create-list.md) (T018) · [create-list.md](../contracts/create-list.md) | **Runtime** + **Client** + **Verifier** | SC-001, SC-006, SC-007 | **Required** |
 | **2** Pause / resume | [Scenario 2](../quickstart.md#scenario-2--pause--resume) | `scenario-2-pause-resume.md` (tasks) · [pause-resume.md](../contracts/pause-resume.md) | **Runtime** + **Client** + **Verifier** | SC-002 | **Required** |
 | **3** Cron fire + last-run | [Scenario 3](../quickstart.md#scenario-3--cron-fire--last-run) | `scenario-3-cron-fire.md` (tasks) · [cron-fire.md](../contracts/cron-fire.md) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
 | **4** Non-goals / seam absence | [Scenario 4](../quickstart.md#scenario-4--non-goals--seam-absence) | [schedule-not-routines.md](./schedule-not-routines.md) + no-Electron-routines-bus (T011) · [non-goals.md](../contracts/non-goals.md) | **Runtime** + **Electron** + **Verifier** | SC-004 | Docs/absence ok |
