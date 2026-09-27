@@ -15,6 +15,9 @@ import type { IpcMainInvokeEvent } from 'electron'
  * (`contracts/in-app-credentials.md`); Host credential resolve stays off this surface.
  * There is no chat-final / assistant-final channel — Client `ui-chat` delivers finals from Host
  * session log turn completion only (`contracts/chat-progress-final.md`, T030).
+ * There is no identity, persona, section-membership, avatar, rename, or bot-delete channel —
+ * Host Agent Teams owns durable bot identity mutations (research R1 / T010;
+ * `specs/002-identity-personas/contracts/`).
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
