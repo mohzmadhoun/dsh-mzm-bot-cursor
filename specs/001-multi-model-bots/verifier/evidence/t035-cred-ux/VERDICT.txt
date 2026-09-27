@@ -1,13 +1,14 @@
-VERDICT: Pass (Electron measured; awaiting PO / Verifier Done gate)
+VERDICT: Pass (Electron measured; awaiting PO Done gate — leave MOH-80 In Progress)
 SC: FR-008 missing/invalid credential UX + no silent peer resolve fallback (T035 / US4)
-SHA: e40a50c7af611d665574e2903abaaab1178f8222
-UTC: 2026-09-27T10:19:30Z
+SHA: 705ab21b93b441473a6ad880c88073de7758a281
+UTC: 2026-09-27T10:32:18Z
 IMPL_SHA: e40a50c7af (Phase 1 - T035 - wire missing/invalid credential UX without peer fallback)
-BRANCH: cursor/p1-t035-cred-ux-92fa
-PR: (none — ask PO; do not open PR from this agent)
+BRANCH: cursor/p1-t035-cred-ux-92fa (evidence refresh on cursor/p1-t035-verifier-rerun-c24a)
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/56
 RECIPE: specs/001-multi-model-bots/verifier/t035-cred-ux.md
-OPERATOR: DH Electron (Composer)
-NOTE: Vitest 4.1.8; Node v24.21.0; no provider API secrets; MOH-80 stays In Progress
+OPERATOR: DH Verifier (Composer)
+NOTE: Vitest 4.1.8; Node v24.21.0; no provider API secrets; MOH-80 stays In Progress; do not merge
+PRIOR_EVIDENCE_SHA: e40a50c7af (superseded by re-run on merge-forward HEAD 705ab21b93)
 
 CLIENT_UX: Pass (measured)
 COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/client/ui-chat/tests/conversation.client.spec.ts packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'MISSING_CREDENTIAL|AUTH|INVALID_CREDENTIAL|credential|Models re-entry|redacts auth'
@@ -16,9 +17,12 @@ PASSED_TESTS (measured):
   1. ChatView > hands MISSING_CREDENTIAL turn failure to in-app Models settings (not 1Password)
   2. ChatView > offers Models re-entry for AUTH (invalid/revoked) mid-session failures (T035)
   3. ChatView > offers Models re-entry for INVALID_CREDENTIAL mid-session failures (T035)
-  4. conversation projection > redacts AUTH / INVALID_CREDENTIAL messages from UI state
+  4. toAssistantBlock > redacts auth failures and presents the remaining durable values (AUTH + INVALID_CREDENTIAL message wipe)
   5. TeamAction > hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)
   6. TeamAction > offers Models re-entry for AUTH invalid/revoked create failure (T035)
+WIRING (measured in source): ui-chat apply.ts + agent-team mount.ts call ctx.get('settingsShell')?.openSection('models')
+COPY (measured): locale strings name in-app Models; 1Password only as non-primary disclaimer
+TEAM_INVALID_CREDENTIAL: inferred same reportFailure path via CREDENTIAL_REENTRY_CODES (no dedicated team INVALID_CREDENTIAL case)
 
 HOST_RESOLVE_NO_PEER_FALLBACK: Pass (measured)
 COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/credentials/credentials/tests/credentials.spec.ts packages/credentials/credentials-local/tests/local.spec.ts -t 'never silently falls back'
@@ -30,4 +34,5 @@ COMMAND3: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest ru
 STDOUT3: evidence/t035-cred-ux/vitest-llm-route.stdout.txt (1 passed | 1 skipped; EXIT:0)
 PASSED: Bot B MISSING_CREDENTIAL; never uses Bot A credential
 
-SCOPE_OUT: Scenario 1 / SC-006 dump hygiene (T037); T036 env/key-file docs
+SCOPE_OUT: Scenario 1 / SC-006 dump hygiene (T037); T033 write-only entry; T034 preload audit; live Electron GUI launch (recipe is focused Vitest)
+BLOCKERS: none for T035 slice Pass

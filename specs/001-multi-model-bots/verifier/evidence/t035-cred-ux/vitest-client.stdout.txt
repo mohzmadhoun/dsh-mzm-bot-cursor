@@ -1,11 +1,8 @@
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
-
  RUN  v4.1.8 /workspace
 
 
  Test Files  3 passed (3)
       Tests  6 passed | 128 skipped (134)
-   Start at  10:19:13
-   Duration  3.38s (transform 2.38s, setup 454ms, import 3.75s, tests 353ms, environment 2.11s)
+   Start at  10:32:14
+   Duration  2.52s (transform 2.48s, setup 472ms, import 3.32s, tests 369ms, environment 831ms)
+
