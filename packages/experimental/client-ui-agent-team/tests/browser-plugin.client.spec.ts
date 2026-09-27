@@ -418,6 +418,15 @@ describe('ui-team browser plugin', () => {
       error: { code: 'gateway/internal', message: 'offline' },
     })
 
+    const deleteBot = await bench({ remoteFailure: 'deleteBot' })
+    const deleteActions = (deleteBot.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(deleteActions.deleteBot(SESSION, {
+      botId: CHILD,
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
     const update = await bench({ remoteFailure: 'update' })
     const updateActions = (update.entry()!.inject as unknown as () => TeamActionInjected)()
     await expect(updateActions.updateTask(SESSION, {
