@@ -75,9 +75,11 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
  ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host createRoutine rejection without inventing a listed routine (T017)
  ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior routines and shows failure when createRoutine transport is unavailable (T017)
  ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > lists only the selected bot’s Host routines after create (T017 / SC-006)
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > projects Host routines pane with identity, schedule, status, and lastRunAt (T020 / US2) 121ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps Host routines listed after leave and return (T020 / US2 durability) 62ms
 
- Test Files  1 skipped (1)
-      Tests  71 skipped (71)
-   Start at  18:57:11
-   Duration  2.72s (transform 1.46s, setup 285ms, import 1.90s, tests 0ms, environment 428ms)
+ Test Files  1 passed (1)
+      Tests  2 passed | 71 skipped (73)
+   Start at  18:57:31
+   Duration  2.50s (transform 1.21s, setup 166ms, import 1.68s, tests 185ms, environment 373ms)
 
