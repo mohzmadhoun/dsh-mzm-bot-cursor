@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
+本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、编辑 Bot persona（职责／语气／反职责）、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
 
 ## 目录
 
@@ -37,6 +37,10 @@ kind: "package-reference"
 
 当草稿同时有两个 id，且 roster 上的 Bot 已有赋值时，表单会说明该草稿是否为新的不同赋值。面板只统计同时暴露 LLM provider 与 model 的 teammate 行；Lead 行以及没有该配对的后端 id 不计入。不完整草稿不显示该比较。
 
+### 编辑 Bot 身份（职责／语气／反职责）
+
+健康 teammate 上的**编辑身份**打开 Host 身份／profile 编辑器，可改 `job`、`voice` 与有序 anti-jobs 列表（每行一项；空字段允许）。保存调用 Host Remote `agentTeams/updatePersona`；成功后重新加载 roster。已保存的 anti-jobs 直接显示在 bot overview 上供 Verifier 观察——不藏在隐藏／仅高级编辑器里。保存中断或 Host 不可用时，面板显示明确失败，overview 上先前持久 persona 保持不变。Electron Main 不得发明 persona 记录。
+
 ### 观察 Host mailbox handoff
 
 打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。
@@ -60,7 +64,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建、persona 编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |
@@ -94,7 +98,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 
 - **Snapshot refresh**——panel 会在打开、显式 refresh 与 mutation 后刷新；handoff 来自最新的 `agentTeams/view` 快照，没有实时事件订阅。
 - **普通 child continuation**——导航后发送的人类消息使用稳定 addressed-subagent 提示词路径，而不是 Team peer mailbox。
-- **没有 rename/delete/interrupt 控件**——panel 通过 Host `createBot` 创建 bot，但不能 rename、delete 或 interrupt teammate；write scope 仍只是提示性 metadata。
+- **没有 rename/delete/interrupt 控件**——panel 通过 Host Remote 创建 bot 并编辑 persona，但不能 rename、delete 或 interrupt teammate；write scope 仍只是提示性 metadata。
 
 <a id="dev-note"></a>
 ### 开发备注

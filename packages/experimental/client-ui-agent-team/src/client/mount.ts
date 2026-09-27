@@ -4,6 +4,7 @@ import type {
   CreateBotInput,
   TeamMemberView as TeamRosterMember,
   TeamView,
+  UpdatePersonaInput,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type {} from '@deepseek-ai/dsh-experimental-agent-team/remote'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
@@ -21,13 +22,13 @@ import {
 } from './HandoffNotices.tsx'
 import {
   TeamAction, type TeamActionInjected, type TeamActionResult, type TeamCreateBotActionResult,
-  type TeamTaskActionResult,
+  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, bot-create, and task-board copy. */
+    /** Agent Teams roster, bot-create, persona editor, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -51,6 +52,9 @@ function registerUi(ctx: ClientContext): void {
     },
     async createBot(sessionId, input: CreateBotInput): Promise<TeamCreateBotActionResult> {
       return await ctx.remote.agentTeams.createBot(leadSessionId(sessionId), input)
+    },
+    async updatePersona(sessionId, input: UpdatePersonaInput): Promise<TeamUpdatePersonaActionResult> {
+      return await ctx.remote.agentTeams.updatePersona(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)

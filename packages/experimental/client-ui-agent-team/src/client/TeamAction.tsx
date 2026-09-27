@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
+  BotIdentityMutationResult,
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
@@ -12,6 +13,8 @@ import type {
   TeamTaskMutationResult,
   TeamTaskView as TeamTask,
   TeamView,
+  UpdatePersonaInput,
+  UpdatePersonaResult,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
 import {
@@ -32,10 +35,14 @@ export type TeamTaskActionResult = RemoteResult<TeamTaskMutationResult>
 /** Generated Remote result whose business value preserves Team createBot rejections. */
 export type TeamCreateBotActionResult = RemoteResult<CreateBotMutationResult>
 
+/** Generated Remote result whose business value preserves Team updatePersona rejections. */
+export type TeamUpdatePersonaActionResult = RemoteResult<BotIdentityMutationResult<UpdatePersonaResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
   createBot: (sessionId: SessionId, input: CreateBotInput) => Promise<TeamCreateBotActionResult>
+  updatePersona: (sessionId: SessionId, input: UpdatePersonaInput) => Promise<TeamUpdatePersonaActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -78,11 +85,24 @@ interface BotDraft {
   model: string
 }
 
+/** Draft fields for the Host persona profile editor (job / voice / anti-jobs). */
+interface PersonaDraft {
+  job: string
+  voice: string
+  antiJobs: string
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
+const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
 
 function items(value: string): string[] {
   return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]
+}
+
+/** Split anti-jobs draft text into ordered non-empty lines (Host list items). */
+function antiJobItems(value: string): string[] {
+  return value.split(/\r?\n/u).map(item => item.trim()).filter(Boolean)
 }
 
 function taskIds(value: string): TeamTaskId[] {
@@ -208,7 +228,7 @@ function memberLabel(
 
 /** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
-  sessionId, load, createBot, createTask, updateTask, openTeammate, openModelsSettings, t,
+  sessionId, load, createBot, updatePersona, createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -217,6 +237,8 @@ export function TeamAction({
   const [credentialFailureCode, setCredentialFailureCode] = useState<string | null>(null)
   const [creatingBot, setCreatingBot] = useState(false)
   const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
+  const [editingPersona, setEditingPersona] = useState<SessionId | null>(null)
+  const [personaDraft, setPersonaDraft] = useState<PersonaDraft>(EMPTY_PERSONA_DRAFT)
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -249,6 +271,8 @@ export function TeamAction({
     clearError()
     setCreatingBot(false)
     setBotDraft(EMPTY_BOT_DRAFT)
+    setEditingPersona(null)
+    setPersonaDraft(EMPTY_PERSONA_DRAFT)
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
     setEditing(null)
@@ -354,6 +378,42 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleUpdatePersona = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamUpdatePersonaActionResult>,
+  ): Promise<UpdatePersonaResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`persona:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep prior durable persona in the loaded view.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not write; overview still shows prior durable fields.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`persona:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -367,6 +427,27 @@ export function TeamAction({
     if (created === undefined) return
     setBotDraft(EMPTY_BOT_DRAFT)
     setCreatingBot(false)
+  }
+
+  const startEditPersona = (member: TeamRosterMember): void => {
+    setEditingPersona(member.id)
+    setPersonaDraft({
+      job: member.persona?.job ?? '',
+      voice: member.persona?.voice ?? '',
+      antiJobs: member.persona?.antiJobs.join('\n') ?? '',
+    })
+  }
+
+  const submitPersona = async (member: TeamRosterMember): Promise<void> => {
+    const saved = await settleUpdatePersona(member.id, () => updatePersona(sessionId, {
+      botId: member.id,
+      job: personaDraft.job,
+      voice: personaDraft.voice,
+      antiJobs: antiJobItems(personaDraft.antiJobs),
+    }))
+    if (saved === undefined) return
+    setEditingPersona(null)
+    setPersonaDraft(EMPTY_PERSONA_DRAFT)
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -500,34 +581,80 @@ export function TeamAction({
                   />
                 )}
                 <div className={css.roster}>
-                  {view.members.map(member => (
-                    <button
-                      key={member.id}
-                      type="button"
-                      className={css.member}
-                      disabled={member.role === 'lead' || member.status === 'failed' || member.status === 'provisioning'}
-                      title={member.role === 'teammate' ? t('open') : undefined}
-                      onClick={() => {
-                        void openTeammate(sessionId, member).catch((reason: unknown) => {
-                          setError(String(reason))
-                          setCredentialFailureCode(null)
-                        })
-                      }}
-                    >
-                      <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
-                      <span className={css.memberText}>
-                        <span>{member.displayName ?? member.name}</span>
-                        <small>
-                          {member.displayName !== undefined ? `${member.name} · ` : ''}
-                          {t(memberStatusKey(member.status))}
-                          {member.modelSelection !== undefined
-                            ? ` · ${t('model')}: ${member.modelSelection.provider}/${member.modelSelection.model}`
-                            : member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
-                        </small>
-                        {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
-                      </span>
-                    </button>
-                  ))}
+                  {view.members.map((member) => {
+                    const antiJobs = member.persona?.antiJobs ?? []
+                    const canEditPersona = member.role === 'teammate'
+                      && member.status !== 'failed'
+                      && member.status !== 'provisioning'
+                    const personaPending = pendingTasks.has(`persona:${member.id}`)
+                    return (
+                      <div
+                        key={member.id}
+                        className={css.memberCard}
+                        data-team-member={member.id}
+                      >
+                        <button
+                          type="button"
+                          className={css.member}
+                          disabled={member.role === 'lead' || member.status === 'failed' || member.status === 'provisioning'}
+                          title={member.role === 'teammate' ? t('open') : undefined}
+                          onClick={() => {
+                            void openTeammate(sessionId, member).catch((reason: unknown) => {
+                              setError(String(reason))
+                              setCredentialFailureCode(null)
+                            })
+                          }}
+                        >
+                          <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
+                          <span className={css.memberText}>
+                            <span>{member.displayName ?? member.name}</span>
+                            <small>
+                              {member.displayName !== undefined ? `${member.name} · ` : ''}
+                              {t(memberStatusKey(member.status))}
+                              {member.modelSelection !== undefined
+                                ? ` · ${t('model')}: ${member.modelSelection.provider}/${member.modelSelection.model}`
+                                : member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
+                            </small>
+                            {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
+                          </span>
+                        </button>
+                        {antiJobs.length > 0 && (
+                          <div className={css.antiJobs} data-team-anti-jobs>
+                            <span className={css.antiJobsLabel}>{t('antiJobs')}</span>
+                            <ul>
+                              {antiJobs.map(item => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {canEditPersona && editingPersona === member.id && (
+                          <PersonaForm
+                            draft={personaDraft}
+                            setDraft={setPersonaDraft}
+                            pending={personaPending}
+                            onSave={() => { void submitPersona(member) }}
+                            onCancel={() => {
+                              setEditingPersona(null)
+                              setPersonaDraft(EMPTY_PERSONA_DRAFT)
+                            }}
+                            t={t}
+                          />
+                        )}
+                        {canEditPersona && editingPersona !== member.id && (
+                          <button
+                            type="button"
+                            className={css.personaButton}
+                            disabled={personaPending}
+                            data-team-edit-persona={member.id}
+                            onClick={() => { startEditPersona(member) }}
+                          >
+                            <IconEditOutline16 size={13} /> {t('editPersona')}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </section>
               <section data-team-handoffs>
@@ -712,6 +839,49 @@ function BotCreateForm({
       )}
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface PersonaFormProps {
+  draft: PersonaDraft
+  setDraft: (draft: PersonaDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/** Host persona editor: job, voice, and anti-jobs list (FR-002 / FR-003). */
+function PersonaForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: PersonaFormProps) {
+  const field = (key: keyof PersonaDraft, value: string): void => { setDraft({ ...draft, [key]: value }) }
+  return (
+    <div className={css.form} data-team-persona-editor>
+      <p className={css.hint}>{t('personaHint')}</p>
+      <input
+        value={draft.job}
+        aria-label={t('personaJob')}
+        placeholder={t('personaJobPlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { field('job', event.target.value) }}
+      />
+      <input
+        value={draft.voice}
+        aria-label={t('personaVoice')}
+        placeholder={t('personaVoicePlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { field('voice', event.target.value) }}
+      />
+      <textarea
+        value={draft.antiJobs}
+        aria-label={t('personaAntiJobs')}
+        placeholder={t('personaAntiJobsPlaceholder')}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => { field('antiJobs', event.target.value) }}
+      />
+      <div className={css.formActions}>
+        <button type="button" disabled={pending} onClick={onSave}>{t('save')}</button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>
