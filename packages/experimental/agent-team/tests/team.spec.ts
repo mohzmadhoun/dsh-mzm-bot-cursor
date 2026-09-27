@@ -1851,6 +1851,56 @@ describe('Team Remote API', () => {
     })
   })
 
+  it('projects Host skill catalog with mzm-thin-pack managed + user skills (T015)', async () => {
+    const { ctx, lead } = await setup([])
+    await expect(ctx.agentTeams.listSkills(lead, SIGNAL))
+      .rejects.toThrow(/skill catalog is unavailable/)
+    await expect(ctx.agentTeams.remoteListSkills(lead, SIGNAL)).resolves.toEqual({
+      ok: false,
+      error: {
+        code: 'team-rejected',
+        message: 'skill catalog is unavailable: Host skills registry is not mounted',
+      },
+    })
+
+    // Stub Host `ctx.skills` (Desktop mounts real dsh-skill + thin-pack; agent-team only projects).
+    const hostSkills = {
+      async list() {
+        return [
+          {
+            name: 'mzm-thin-pack',
+            description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+            source: 'bundled',
+          },
+          {
+            name: 'my-playbook',
+            description: 'User authored playbook',
+            source: 'user-dsh',
+          },
+        ]
+      },
+    }
+    ctx.provide('skills', hostSkills)
+
+    const catalog = await ctx.agentTeams.listSkills(lead, SIGNAL)
+    expect(catalog).toEqual([
+      expect.objectContaining({
+        id: 'mzm-thin-pack',
+        displayName: 'MzM thin pack',
+        source: 'managed',
+      }),
+      expect.objectContaining({
+        id: 'my-playbook',
+        displayName: 'User authored playbook',
+        source: 'user',
+      }),
+    ])
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.skills).toEqual(catalog)
+    const remote = await ctx.agentTeams.remoteListSkills(lead, SIGNAL)
+    expect(remote).toEqual({ ok: true, value: { skills: catalog } })
+  })
+
   it('preserves Team task rejections and propagates unexpected failures', async () => {
     const { ctx, lead } = await setup([])
     const createRequest = {

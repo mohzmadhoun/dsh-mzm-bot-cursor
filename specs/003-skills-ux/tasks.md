@@ -99,7 +99,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Ensure Host skill catalog returns the managed thin-pack skill (and user-authored skills when present) to Client via projection / `skills/list` path used by Desktop Web — `packages/experimental/agent-team/src/projection.ts` and/or `packages/api/session-controller/` ([contracts/discover-load.md](./contracts/discover-load.md))
+- [x] T015 [US1] Ensure Host skill catalog returns the managed thin-pack skill (and user-authored skills when present) to Client via projection / `skills/list` path used by Desktop Web — `packages/experimental/agent-team/src/projection.ts` and/or `packages/api/session-controller/` ([contracts/discover-load.md](./contracts/discover-load.md))
 - [ ] T016 [US1] Add Client/Web skills discovery/library surface under `packages/experimental/client-ui-agent-team/src/client/` (and locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) listing managed + user skills with human-readable names — happy path, no config-file edit
 - [ ] T017 [US1] Implement load = select / make-available-to-attach in Client (no separate multi-step load wizard required) under `packages/experimental/client-ui-agent-team/src/client/` so a discovered skill can enter the attach flow (clarify lock 2; FR-002)
 - [ ] T018 [US1] On Host catalog unavailable, show clear user-visible failure (no silent empty success) in `packages/experimental/client-ui-agent-team/src/client/` + Host error path

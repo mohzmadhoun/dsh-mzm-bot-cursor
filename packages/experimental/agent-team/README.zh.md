@@ -64,6 +64,8 @@ kind: "package-reference"
 
 持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（来自固定 Host 预设 id 的 `shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。Host `updatePersona` 会替换活跃 Bot 上的 job／voice／anti-jobs，经 `listMembers`／`agentTeams/view` 投影，并在 create 与冷恢复时把非空字段绑定进该 Bot 作用域的 `deployment:persona-prefix` 指令文本（空字段不贡献文案；Verifier 观察装配接线，不评分 LLM 回复措辞）。Host `renameBot` 持久化非空 `displayName`（允许重名；kebab `name` 不可变；空 rename 拒绝且不写入）。Host `setAvatar` 替换预设 shape 与／或 color 标记（至少一项；图片文件／URL 上传不在 Pass 范围——clarify lock 3）。二者均经 `listMembers`／`agentTeams/view` 投影。Host `createSection`／`renameSection` 把具名侧边栏目录行持久化到 `team/section`（空名称拒绝）；Host `assignSection` 将 Bot.`sectionId` 设为具名目录 id，或设为 `null` 表示 Unassigned／default，且不存储 Unassigned 行（clarify lock 4）。`agentTeams/view` 投影 `sections`（名称＋按 roster 顺序的 `botIds`）与 `unassignedBotIds`。Host `deleteBot` 追加 `active` → `deleted` 身份墓碑（清除 `sectionId`）；Client roster／overview／section membership 省略该 Bot，而 transcript 与 mailbox 行在 Pass 中保持不动（clarify lock 5）。Electron Main 不得发明身份或 section 记录。
 
+Host 技能发现经 `projectSkillCatalog` 把 `ctx.skills` 投影到 `agentTeams/view.skills` 与会失败响亮的 `agentTeams/listSkills` Remote（`listSkills`）：thin-pack id `mzm-thin-pack` 始终为 `managed` 且显示名为 `MzM thin pack`，其余注册行映射为 `user`；缺失 skills registry 时 `listSkills` 失败响亮（非 Desktop 组合上 `view` 软返回空）。Electron Main 不得发明目录行。
+
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
@@ -126,7 +128,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | [`src/host-mailbox-message.ts`](src/host-mailbox-message.ts) | 从持久日志重建产品侧 Host mailbox 字段（`fromBotId` / `toBotId` / `body` / `createdAt` / 仅 Host 的 `source`） |
 | [`src/task-board.ts`](src/task-board.ts) | 任务 CAS 命令、DAG 校验与派生视图 |
 | [`src/journal.ts`](src/journal.ts) | 串行化的 Lead 日志事务与提交通知 |
-| [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影 |
+| [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影；`projectSkillCatalog` 映射 Host 技能摘要供 Desktop 发现 |
 | [`src/activity.ts`](src/activity.ts) | 一次性变更等待者与 dispose（资源释放）时的等待解除 |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | 共享准入截止与有界结算 |
 | [`src/invariant.ts`](src/invariant.ts) | 在 append 前回放候选事件的不变式伴生插件 |
