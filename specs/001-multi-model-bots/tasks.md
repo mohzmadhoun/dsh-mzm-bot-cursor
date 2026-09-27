@@ -59,9 +59,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Shared Host / composition foundations
 
 - [x] T009 Mount experimental Agent Teams for P1 Desktop Host composition via `packages/experimental/agent-team-profile/` (+ `packages/experimental/agent-team-web-profile/` if Client panel required) into `$DSH_HOME/profiles/desktop` / Desktop Host packaging paths under `apps/desktop/` / `apps/desktop-host/` — mailbox only; do not productize task board (research R9)
-- [x] T010 [P] Confirm P1 desktop Host remains chat-oriented without local Shell/Box backends for acceptance in Desktop profile composition under `apps/desktop/` / `apps/desktop-host/` and `packages/bundle/` (FR-010); document non-goal absence check in `specs/001-multi-model-bots/verifier/non-goals.md`
-- [x] T011 [P] Confirm in-app credentials primary path uses Host `ctx.credentials` + `packages/credentials/credentials-local/` under `$DSH_HOME` with no secret IPC in `apps/desktop/src/preload-*.ts` / `apps/desktop/src/ipc.ts` (FR-008/009; research R4)
-- [ ] T012 Close Architect runtime gap: extend teammate spawn so each bot receives its own LLM `ModelSelection` / `agentOptions` at create — update `packages/experimental/agent-team/src/types.ts` (`SpawnTeammateRequest`), `packages/experimental/agent-team/src/roster.ts`, and call sites so Electron Main never routes models ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
+- [ ] T010 [P] Confirm P1 desktop Host remains chat-oriented without local Shell/Box backends for acceptance in Desktop profile composition under `apps/desktop/` / `apps/desktop-host/` and `packages/bundle/` (FR-010); document non-goal absence check in `specs/001-multi-model-bots/verifier/non-goals.md`
+- [ ] T011 [P] Confirm in-app credentials primary path uses Host `ctx.credentials` + `packages/credentials/credentials-local/` under `$DSH_HOME` with no secret IPC in `apps/desktop/src/preload-*.ts` / `apps/desktop/src/ipc.ts` (FR-008/009; research R4)
+- [x] T012 Close Architect runtime gap: extend teammate spawn so each bot receives its own LLM `ModelSelection` / `agentOptions` at create — update `packages/experimental/agent-team/src/types.ts` (`SpawnTeammateRequest`), `packages/experimental/agent-team/src/roster.ts`, and call sites so Electron Main never routes models ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
 - [ ] T013 [P] Ensure per-bot agent scope isolates model assignment and does not share another bot’s tool privilege by default via `packages/core/agent/` scope wiring and Team spawn (FR-011); tools in P1 acceptance MUST NOT send/post externally (FR-012) — document trust floor in `specs/001-multi-model-bots/verifier/trust-floor.md`
 
 **Checkpoint**: Foundation ready — user story implementation can begin (after handshake Pass)
@@ -76,7 +76,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Define Host bot-create API (Lead-authorized teammate spawn or equivalent RPC) accepting required `displayName` (non-empty) + exactly one model/provider assignment in Host surfaces under `packages/experimental/agent-team/src/` and/or `packages/api/session-controller/src/agent.ts` — persistence Host-owned ([data-model.md](./data-model.md) Bot rules)
+- [x] T014 [US1] Define Host bot-create API (Lead-authorized teammate spawn or equivalent RPC) accepting required `displayName` (non-empty) + exactly one model/provider assignment in Host surfaces under `packages/experimental/agent-team/src/` and/or `packages/api/session-controller/src/agent.ts` — persistence Host-owned ([data-model.md](./data-model.md) Bot rules)
 - [ ] T015 [P] [US1] Bind each Bot to one `ModelSelection` `{ provider, model, reasoningEffort? }` via `packages/core/agent/src/model-selection.ts` / `installModelSelection` so subsequent chats use that bot’s assignment only (FR-002)
 - [ ] T016 [US1] Resolve model calls through `ctx.llm` adapters under `packages/llm/` using the bot’s assignment and Host credential resolve — Electron Main MUST NOT invent bot records or route models
 - [ ] T017 [US1] Add Client/Web basic create + assign-model UI (happy path, no config-file edit) under `packages/client/` (prefer `ui-agent-preset` / `ui-model-selection` / Agent Team client surfaces) composed into Desktop Web wrapper — minimum inputs: `displayName` + model/provider ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
@@ -253,6 +253,6 @@ Task: "Architecture guard apps/desktop/tests/no-electron-mailbox-bus.spec.ts"
 - [USn] maps to spec user stories for Linear `taskstoissues` traceability
 - First executable product gate = topology handshake (T005–T008), not bot create
 - Do not invent Box/Shell, MCP, personas, skills, routines, or memory product tasks
-- Exact Host bot-create API (Lead spawn vs dedicated RPC) is Runtime HOW within Team+agent — Spec WHAT already set (plan open gap #2)
+- Exact Host bot-create API closed as `TeamService.createBot` / Remote `agentTeams/createBot` (T014; plan open gap #2)
 - Experimental Agent Teams mount for P1 with promotion deferred — Lead/Mohammed ack still open (research R9)
 - Commit after each task or logical group during implement; this Spec change commits only `tasks.md` (+ plan pointer if edited)

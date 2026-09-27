@@ -58,7 +58,9 @@ kind: "package-reference"
 
 ### Teammate
 
-请 Lead 创建 teammate：给它一个唯一的小写名字（例如 `reviewer`）并描述其职责。teammate 可以 fresh 启动（不携带 Lead 对话的任何记忆），也可以作为 fork 启动（继承 Lead 已完成的轮次）；创建请求决定用哪种。teammate 名字是永久的——即使创建失败的 teammate 也保留其名字，任何名字都不会被复用。
+请 Lead 创建 teammate：给它一个唯一的小写名字（例如 `reviewer`）并描述其职责。teammate 可以 fresh 启动（不携带 Lead 对话的任何记忆），也可以作为 fork 启动（继承 Lead 已完成的轮次）；创建请求决定用哪种。teammate 名字是永久的——即使创建失败的 teammate 也保留其名字，任何名字都不会被复用。Host 调用方还可在 spawn 时传入按 teammate 区分的 LLM `agentOptions`（`provider` + `model`[以及可选的推理强度]），使每个 bot 保留自己的模型路由；该字段与 subagent 后端 `provider` 不同，Electron Main 不得发明或改写它。
+
+产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 保留在 Host member 快照上。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
 
@@ -169,7 +171,7 @@ dispose 会关闭准入、中止并等待已获准的创建与 mailbox dispatch 
 
 ### 浏览器 Remote
 
-`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
+`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
 
 ## 模型体验
 

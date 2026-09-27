@@ -17,6 +17,10 @@ import { TeamTaskBoard } from './task-board.ts'
 import { TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
+  CreateBotInput,
+  CreateBotMutationResult,
+  CreateBotRequest,
+  CreateBotResult,
   CreateTeamTaskRequest,
   SendTeamMessageRequest,
   SendTeamMessageResult,
@@ -29,6 +33,11 @@ import type {
   TeamWaitResult,
   UpdateTeamTaskRequest,
 } from './types.ts'
+import {
+  requiredDisplayName,
+  requiredModelSelection,
+  teammateNameFromDisplayName,
+} from './validation.ts'
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
@@ -147,11 +156,41 @@ export class TeamService extends TypertRemoteService {
   /**
    * Create one named, continuable direct child of the Team Lead.
    * @param caller - exact live Lead Agent.
-   * @param request - immutable name, description, prompt, context mode, provider, and cancellation.
+   * @param request - immutable name, description, prompt, context mode, subagent provider, optional LLM `agentOptions`, and cancellation.
    * @returns the active roster row.
    */
   async spawnTeammate(caller: Agent, request: SpawnTeammateRequest): Promise<SpawnTeammateResult> {
     return await this.roster.spawn(caller, request)
+  }
+
+  /**
+   * Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment.
+   * Persists the Bot on the Host Team roster; Electron Main must not invent bot records or routes.
+   * @param caller - exact live Lead Agent.
+   * @param request - displayName, ModelSelection, and cancellation.
+   * @returns Host-owned Bot identity, derived roster name, retained model assignment, and roster row.
+   */
+  async createBot(caller: Agent, request: CreateBotRequest): Promise<CreateBotResult> {
+    const displayName = requiredDisplayName(request.displayName)
+    const modelSelection = requiredModelSelection(request.modelSelection)
+    const name = teammateNameFromDisplayName(displayName)
+    const { member } = await this.roster.spawn(caller, {
+      name,
+      description: displayName,
+      displayName,
+      prompt: [{ type: 'text', text: `You are bot "${displayName}".` }],
+      context: 'fresh',
+      provider: 'spawn',
+      agentOptions: modelSelection,
+      signal: request.signal,
+    })
+    return {
+      id: member.id,
+      displayName,
+      name,
+      modelSelection,
+      member,
+    }
   }
 
   /**
@@ -259,6 +298,22 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Create one product Bot through the generated Remote API (FR-001 / FR-002).
+   * @param agent - exact live Lead Agent authorizing create.
+   * @param request - displayName and exactly one model/provider assignment.
+   * @param signal - Remote call cancellation forwarded to teammate provisioning.
+   * @returns the retained Bot or a typed Team rejection.
+   */
+  @Remote('createBot')
+  remoteCreateBot(
+    agent: Agent,
+    request: CreateBotInput,
+    signal: AbortSignal,
+  ): Promise<CreateBotMutationResult> {
+    return this.createBotMutationResult(this.createBot(agent, { ...request, signal }))
+  }
+
+  /**
    * Apply one task mutation and preserve Team rejections as business results.
    * @param agent - exact live Team member authorizing the mutation.
    * @param request - task identity, expected revision, action, and action fields.
@@ -279,6 +334,22 @@ export class TeamService extends TypertRemoteService {
         ok: false,
         error: {
           code: error.code === 'TEAM_TASK_STALE_REVISION' ? 'team-task-conflict' : 'team-rejected',
+          message: error.message,
+        },
+      }
+    }
+  }
+
+  /** Preserve Team createBot rejections while allowing unexpected failures to reject the Remote call. */
+  private async createBotMutationResult(operation: Promise<CreateBotResult>): Promise<CreateBotMutationResult> {
+    try {
+      return { ok: true, value: await operation }
+    } catch (error) {
+      if (!(error instanceof TeamError)) throw error
+      return {
+        ok: false,
+        error: {
+          code: 'team-rejected',
           message: error.message,
         },
       }

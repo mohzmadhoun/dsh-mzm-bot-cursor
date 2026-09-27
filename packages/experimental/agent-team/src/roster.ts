@@ -150,6 +150,7 @@ export class TeamRoster {
             ? 'provisioning'
             : live?.status ?? 'inactive',
         description: member.description,
+        ...member.displayName === undefined ? {} : { displayName: member.displayName },
         provider: member.provider,
         context: member.context,
         ...model === undefined ? {} : { model },
@@ -162,7 +163,7 @@ export class TeamRoster {
   /**
    * Create one named, continuable direct child of the Team Lead.
    * @param caller - exact live Lead Agent.
-   * @param request - immutable name, description, prompt, context mode, provider, and cancellation.
+   * @param request - immutable name, description, prompt, context mode, subagent provider, optional LLM `agentOptions`, and cancellation.
    * @returns the active roster row.
    */
   async spawn(caller: Agent, request: SpawnTeammateRequest): Promise<SpawnTeammateResult> {
@@ -261,6 +262,7 @@ export class TeamRoster {
       id: childId,
       name,
       description,
+      ...request.displayName === undefined ? {} : { displayName: request.displayName },
       provider: requiredText(request.provider, 'provider', 200),
       context: request.context,
       phase: 'provisioning',
@@ -286,6 +288,7 @@ export class TeamRoster {
         request: {
           prompt: request.prompt,
           parent: root,
+          ...request.agentOptions === undefined ? {} : { agentOptions: request.agentOptions },
         },
         signal,
       })
@@ -442,6 +445,7 @@ export class TeamRoster {
       role: 'teammate',
       status: live?.status ?? 'inactive',
       description: member.description,
+      ...member.displayName === undefined ? {} : { displayName: member.displayName },
       provider: member.provider,
       context: member.context,
       ...live?.options.model === undefined ? {} : { model: live.options.model },
