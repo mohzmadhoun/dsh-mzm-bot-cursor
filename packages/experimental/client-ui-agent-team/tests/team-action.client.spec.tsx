@@ -2787,4 +2787,90 @@ describe('TeamAction', () => {
     expect(otherList?.textContent).not.toContain('Worker only')
   })
 
+  it('projects Host routines pane with identity, schedule, status, and lastRunAt (T020 / US2)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const firedAt = Date.UTC(2026, 8, 27, 12, 0, 0)
+    const active = {
+      routineId: 'routine-active' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Summarize inbox',
+      intent: 'Summarize inbox',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: firedAt,
+      createdAt: 1,
+      updatedAt: firedAt,
+    }
+    const paused = {
+      routineId: 'routine-paused' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Weekly digest',
+      intent: 'Weekly digest',
+      scheduleExpr: '@daily',
+      scheduleLabel: 'Every day',
+      status: 'paused' as const,
+      lastRunAt: null,
+      createdAt: 2,
+      updatedAt: 2,
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({
+        ok: true as const,
+        value: { ...view, routines: [active, paused] },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Summarize inbox')).toBeTruthy()
+    expect(screen.getByText('Weekly digest')).toBeTruthy()
+    expect(document.querySelector(`[data-team-routines-pane="${workerId}"]`)).not.toBeNull()
+    expect(document.querySelector('[data-team-bot-routines-hint]')).not.toBeNull()
+    const activeRow = document.querySelector('[data-team-routine="routine-active"]')
+    const pausedRow = document.querySelector('[data-team-routine="routine-paused"]')
+    expect(activeRow?.getAttribute('data-team-routine-status')).toBe('active')
+    expect(activeRow?.getAttribute('data-team-routine-schedule-expr')).toBe('@every 5m')
+    expect(activeRow?.querySelector('[data-team-routine-status-label]')?.textContent)
+      .toBe(zh['routineStatus.active'])
+    expect(activeRow?.querySelector('[data-team-routine-last-run]')?.getAttribute('data-team-routine-last-run'))
+      .toBe(String(firedAt))
+    expect(activeRow?.textContent).toContain(new Date(firedAt).toISOString())
+    expect(pausedRow?.getAttribute('data-team-routine-status')).toBe('paused')
+    expect(pausedRow?.querySelector('[data-team-routine-status-label]')?.textContent)
+      .toBe(zh['routineStatus.paused'])
+    expect(pausedRow?.querySelector('[data-team-routine-last-run]')?.getAttribute('data-team-routine-last-run'))
+      .toBe('never')
+    expect(pausedRow?.textContent).toContain(zh.routineLastRunNever)
+  })
+
+  it('keeps Host routines listed after leave and return (T020 / US2 durability)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const listed = {
+      routineId: 'routine-durable' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Durable ping',
+      intent: 'Durable ping',
+      scheduleExpr: '@hourly',
+      scheduleLabel: 'Every hour',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, routines: [listed] },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Durable ping')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.close }))
+    expect(screen.queryByText('Durable ping')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Durable ping')).toBeTruthy()
+    expect(load.mock.calls.length).toBeGreaterThanOrEqual(2)
+    expect(document.querySelector(
+      `[data-team-bot-routines-list="${workerId}"] [data-team-routine="routine-durable"]`,
+    )).not.toBeNull()
+  })
+
 })

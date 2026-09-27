@@ -393,6 +393,21 @@ function routineStatusKey(status: RoutineStatus): TeamKey {
   }
 }
 
+/**
+ * Pane label for Host `lastRunAt` (P4 RoutineProjection / US2).
+ * Uses UTC ISO so the Client does not invent a locale clock.
+ * @param lastRunAt - Host fire timestamp ms, or null before first fire.
+ * @param t - locale lookup.
+ * @returns last-run copy for the routines pane row.
+ */
+function routineLastRunLabel(
+  lastRunAt: number | null,
+  t: TeamActionProps['t'],
+): string {
+  if (lastRunAt === null) return t('routineLastRunNever')
+  return t('routineLastRun', { time: new Date(lastRunAt).toISOString() })
+}
+
 /** First text block from a Host mailbox body for the handoff list preview. */
 function handoffBodyPreview(body: HostMailboxMessage['body']): string {
   for (const block of body) {
@@ -1518,11 +1533,12 @@ export function TeamAction({
           <div
             className={css.botRoutines}
             data-team-bot-routines={member.id}
+            data-team-routines-pane={member.id}
           >
             <div className={css.botRoutinesHeader}>
               <span className={css.botRoutinesLabel}>{t('botRoutines')}</span>
             </div>
-            <p className={css.hint}>{t('botRoutinesHint')}</p>
+            <p className={css.hint} data-team-bot-routines-hint="">{t('botRoutinesHint')}</p>
             {botRoutines.length === 0
               ? <div className={css.notice} data-team-bot-routines-empty={member.id}>{t('botRoutinesEmpty')}</div>
               : (
@@ -1533,13 +1549,32 @@ export function TeamAction({
                       className={css.botRoutineRow}
                       data-team-routine={routine.routineId}
                       data-team-routine-status={routine.status}
+                      data-team-routine-schedule-expr={routine.scheduleExpr}
                     >
                       <span data-team-routine-identity>{routine.identity}</span>
-                      <span className={css.botRoutineMeta} data-team-routine-schedule="">
+                      <span
+                        className={css.botRoutineMeta}
+                        data-team-routine-schedule=""
+                      >
                         {routine.scheduleLabel}
                       </span>
-                      <span className={css.botRoutineStatus}>
+                      <span
+                        className={
+                          routine.status === 'paused'
+                            ? css.botRoutineStatusPaused
+                            : css.botRoutineStatusActive
+                        }
+                        data-team-routine-status-label=""
+                      >
                         {t(routineStatusKey(routine.status))}
+                      </span>
+                      <span
+                        className={css.botRoutineLastRun}
+                        data-team-routine-last-run={
+                          routine.lastRunAt === null ? 'never' : String(routine.lastRunAt)
+                        }
+                      >
+                        {routineLastRunLabel(routine.lastRunAt, t)}
                       </span>
                     </li>
                   ))}
