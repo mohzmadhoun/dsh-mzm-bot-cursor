@@ -1,0 +1,18 @@
+T034 Schedule-overlay product copy spot-check (refined)
+UTC: 2026-09-27T20:05:09Z
+SHA: 72943043888584e6e48cc5e9907a279d0082e2a2
+
+=== Product sources: forbidden affirmative phrasing (expect empty) ===
+(no hits — Pass)
+
+=== agent-team import of @deepseek-ai/dsh-schedule (expect empty import lines) ===
+(no import hits — Pass)
+
+=== Client locale: Schedule is NOT Pass surface (expect botRoutinesHint hits) ===
+108:  botRoutinesHint: '此面列出 Host 目录投影（身份、日程、状态、上次运行／触发指示）。会话 Schedule／ui-schedule 抬头目录不是 Pass 面。Electron Main 不持有定时任务目录。',
+264:  botRoutinesHint: 'This pane lists Host catalog projections (identity, schedule, status, last-run / fire indicator). Session Schedule / ui-schedule header catalog is not the Pass surface. Electron Main does not own the routine catalog.',
+
+=== Verifier README T034 honesty note (expected negation) ===
+115:**Seam honesty (T034):** Routines Pass is Host Routine catalog + Host cron wake — **not** “enable Schedule overlay.” See [schedule-not-routines.md](./schedule-not-routines.md) · [non-goals.md](./non-goals.md).
+
+VERDICT: Pass — no product path documents Routines as enable Schedule overlay

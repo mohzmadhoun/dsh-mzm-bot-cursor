@@ -1,0 +1,3 @@
+Canonical SC-004 evidence lives under ../non-goals/
+See ../non-goals/VERDICT.txt and ../non-goals/README.md
+Do not put cron-fire media in this directory.

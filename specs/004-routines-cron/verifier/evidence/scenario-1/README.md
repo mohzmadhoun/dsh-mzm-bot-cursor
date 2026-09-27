@@ -7,7 +7,7 @@ FR-010/011 / standing orders **11** + **12** artifacts for:
 
 Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR bodies.
 
-## Required filenames (minimum)
+## Required filenames (minimum) — T030 expectations
 
 | Artifact | Content | Owner recipe | Status |
 |----------|---------|--------------|--------|
@@ -18,9 +18,12 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `05-pane-after-leave-return.png` (or `.webp`) | Same Host list after leave/return or reload | T021 | **Present** (US2 Pass) |
 | Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering create / reject / isolation (+ durability) | T018/T021 | — |
 | Optional `scenario-1-pane-list-walkthrough.mp4` / `.webm` | Durability-only recording (Steps A–B of pane-list recipe) | T021 | **Present** |
+| `panel-state.json` · supporting `*.log` | CDP / Host supporting logs | T018/T021 | Partial (T021 CDP present) |
 | `VERDICT.txt` | Filled stamp when product SC / US2 path Pass is claimed | Verifier | **US2 pane-list Pass** (see file) |
 
 **Numbering:** Pane-list US2 media stays in **this** directory (`04-`/`05-`). Do **not** put T021 Pass media under `../scenario-2/` — that folder is reserved for quickstart Scenario 2 (pause/resume / T024).
+
+**Do not delete** existing `04-`/`05-` / walkthrough / VERDICT when filling T018 gaps.
 
 **Provenance (T021):** `04-`/`05-` (+ walkthrough) copied byte-identical from [`../us2-client-t020/`](../us2-client-t020/) Desktop Verifier frames (leave/return CDP-asserted). See [VERDICT.txt](./VERDICT.txt).
 
