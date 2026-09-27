@@ -2,89 +2,92 @@
 
 **Feature**: `specs/004-routines-cron`
 **Date**: 2026-09-27
-**Inputs**: [spec.md](./spec.md) (Clarified) · `MzM-Docs/mzm-bot-plan.md` P4 · `MzM-Docs/mzm-bot-initial-plan.md` §5 (cron only) · constitution v1.0.0 · predecessors `specs/001`–`003` · packages `dsh-schedule`, `dsh-jobs`, `dsh-client-ui-schedule`
+**Inputs**: [spec.md](./spec.md) (Clarified) · `MzM-Docs/mzm-bot-plan.md` P4 · constitution v1.0.0 · predecessors `specs/001`–`003` · **DH Architect seam map on MOH-191** (Option 3)
 
 All Technical Context unknowns from plan.md are resolved below. Format: Decision / Rationale / Alternatives.
 
+**Supersedes** earlier draft that incorrectly treated `@deepseek-ai/dsh-schedule` as Routines SoT.
+
 ---
 
-## R1 — Host schedule is the routines source of truth (seam lock)
+## R1 — Host-owned Routine catalog is the SoT (Architect Option 3)
 
-**Decision:** Phase 4 **routines** are Host-owned durable **schedule records** via `@deepseek-ai/dsh-schedule` (session `schedule/change` fold / equivalent Host durable path). The desktop **routines pane projects** that Host state for the selected bot. Electron Main MUST NOT own a parallel routines store or IPC bus that mutates routine state without Host.
+**Decision:** Phase 4 **routines** are a **Host-owned Routine catalog** (prefer Agent Teams / Host journal extension, same pattern as P2 persona + P3 skills). Durable fields live on Host as `RoutineRecord` keyed by `botId`. The desktop **routines pane projects** that Host state. Electron Main and Client local stores MUST NOT be SoT.
 
-**Rationale:** Spec FR-007; living-gate seam hint; constitution V (seam honesty); existing schedule package already owns create/list/dispatch, durable replay, and Client projection vocabulary (`ScheduleRecord` / `dsh-client-ui-schedule` patterns).
+**Rationale:** Architect Option 3; Spec FR-007; mirrors P2/P3 Host SoT + Client projection; supports per-bot pane, pause/resume, and product cron (including 5-field cron as Spec allows).
 
 **Alternatives considered:**
 
-| Option | Why not |
-|--------|---------|
-| Electron Main SQLite/JSON routines store | Parallel bus; fails FR-007 |
-| Renderer-only localStorage list | Not Host-durable; fails restart/pause proofs |
-| New top-level “routines” package ignoring schedule | Duplicates timers + durability already in `dsh-schedule` |
+| # | Option | Verdict |
+|---|--------|---------|
+| 1 | Mount `@deepseek-ai/dsh-schedule` as product Routines | **Reject** — session-local reminders; delay/absolute/interval ≥5m; **no** 5-field cron; **no** per-bot cross-session pane SoT; pause≠delete |
+| 2 | Electron Main owns timers + stores routines; Host fires on IPC | **Reject** — parallel bus/storage; violates dual-process lock and FR-007 |
+| 3 | **Host-owned Routine catalog + Host cron wake; Client pane projects; optional `ctx.jobs` for in-flight fire** | **Choose** |
 
 ---
 
-## R2 — Pause / resume on Host schedule (Architect optional confirm)
+## R2 — Do not ship P4 as “mount dsh-schedule”
 
-**Decision:** Pause and resume are **Host schedule lifecycle operations** that persist across restart and suppress dispatch while paused. Product UI exposes pause/resume on the routines pane. Implement may extend `dsh-schedule` durable ops and/or a thin Host RPC facade over schedule — **exact API shape is tasks-time**, but ownership stays Host schedule, not Electron Main.
+**Decision:** `@deepseek-ai/dsh-schedule` remains **session-local durable reminders** (`schedule_create` / `schedule_list` / `schedule_delete` on the session log). Client `dsh-client-ui-schedule` is a read-only projection of that **session** catalog. P4 MAY borrow **time-math helpers** from schedule code if useful, but MUST NOT treat the Schedule catalog, Schedule overlay, or `ui-schedule` header as the Routines pane SoT or Pass surface.
 
-**Architect flag (optional):** Confirm whether pause/resume should land as first-class `schedule/change` operations vs a Host-only control plane wrapping create/delete+flags. Spec Pass only requires durable paused/active behavior (FR-003/004).
+**Rationale:** Architect package facts; schedule delivery needs live root agent and is conversation reminders, not bot routines.
 
-**Rationale:** Clarify + FR-003/004 / SC-002; current public schedule tools are create/list/delete — pause/resume is a known P4 gap relative to today’s tool surface; domain currently rejects unknown ops such as bare `pause` payloads.
-
-**Alternatives considered:** Soft “pause” = delete (loses identity; fails resume); Client-only pause flag (not Host-durable; fails SC-002).
+**Alternatives considered:** Equate Routines pane with Schedule overlay (rejected); replace schedule package (out of scope / YAGNI).
 
 ---
 
-## R3 — Per-bot isolation via bot↔session binding (Architect optional confirm)
+## R3 — Host cron wake (product scheduler in Host process)
 
-**Decision:** Routines are **per-bot**. Plan default: each bot’s routines are the schedule records belonging to **that bot’s Host session** (or the Host-equivalent association already used for Agent Teams bots). Creating a routine on bot A MUST NOT list it on bot B’s pane (SC-006). Pane always scopes to the selected bot.
+**Decision:** Cron match and wake run in the **Desktop Host** process while Host is live: product cron/shorthand → next fire → **Host agent/session path** starts/continues a bot turn with the routine intent. Not Electron `setInterval` / Main crontab. Not raw `dsh-schedule` dispatch as the product Routines fire path.
 
-**Architect flag (optional):** Confirm bot↔session binding used in Desktop Host for P1–P3 is sufficient as the schedule ownership key; if Runtime prefers an explicit botId field on schedule records, lock that in tasks without inventing an Electron store.
+**Rationale:** Architect capability map; clarify fire = Host wake applying intent; FR-005.
 
-**Rationale:** Spec US1/SC-006; schedule today is session-local — binding routines to the bot’s session is the simplest reuse path.
-
-**Alternatives considered:** Global account-wide routines list (violates per-bot Pass); new cross-session routines registry (YAGNI for P4 if session binding works).
+**Alternatives considered:** Main-process timers (Option 2 reject); schedule follow-up as sole fire path (ties Routines to session reminders — Option 1 reject).
 
 ---
 
-## R4 — Fire = schedule dispatch / Host wake (not LLM proof; not Box/MCP)
+## R4 — Fire observability (last-run; LLM not scored)
 
-**Decision:** A Pass **fire** is a Host schedule **dispatch** that queues applying the routine’s **intent** as a bot wake/turn (schedule follow-up / equivalent), with a **last-run / fire indicator** visible in the pane or clearly linked activity. Proving specific LLM reply wording or external side effects is **not** required. Prefer schedule’s existing idle follow-up delivery path over inventing a second fire pipeline.
+**Decision:** A Pass **fire** is a Host **RoutineFire**: scheduled wake that starts/continues a bot turn with intent; pane **last-run** updates from Host after fire commit. Proving specific LLM reply wording or external side effects is **not** required.
 
-**Rationale:** Clarify Q1; FR-005 / SC-003; matches `dsh-schedule` “due reminders appear as ordinary follow-up messages” model.
+**Rationale:** Clarify Q1; FR-005 / SC-003; Architect `RoutineFire` shape.
 
-**Alternatives considered:** Require chat transcript text match (non-deterministic); fire only as `dsh-jobs` background job without pane last-run (misses visibility); cold-session external notify (out of schedule’s session-local model; not required for Pass with desktop available).
-
----
-
-## R5 — Schedule expressions for Pass (`@every` / product-supported)
-
-**Decision:** For Verifier Pass, product-supported schedules include at least a **recurring interval** at inventory minimum (**`@every 5m` / 300s**). Verifier observation window is **≤6 minutes**. Full 5-field cron and inventory shorthands (`@hourly`, `@daily`, …) MAY ship if mapped onto Host schedule selectors, but are **not** required beyond what Pass needs. **No** special sub-5-minute test-only schedule.
-
-**Rationale:** Clarify Q2; `dsh-schedule` already enforces repeating interval ≥5 minutes; aligns with FR-005 / SC-003.
-
-**Alternatives considered:** Mandate 5-field cron parser in P4 (unnecessary for Pass); force sub-5m test hooks (clarify rejected).
+**Alternatives considered:** Require chat transcript text match (non-deterministic); cold-session external notify (not required for desktop-available Verifier).
 
 ---
 
-## R6 — `dsh-jobs` role (explicit non-SoT)
+## R5 — Schedule expressions for Pass
 
-**Decision:** `@deepseek-ai/dsh-jobs` / `dsh-jobs-local` remain the **background tool-job** registry. They are **not** the routines catalog, pane list source, or pause/resume authority. A fire path MAY incidentally create a job if a future tool run needs one, but Pass does **not** require jobs UI or job ids for routine fire proof.
+**Decision:** Product-supported schedules include Spec-allowed forms (5-field cron and/or shorthands such as `@every 5m`). Verifier observation window is **≤6 minutes**. Shortest product-supported recurring schedule for Pass may be `@every 5m`. **No** special sub-5-minute test-only schedule required. Host product scheduler owns evaluation — not limited to `dsh-schedule`’s interval-only model for the Routines SoT.
 
-**Rationale:** Living-gate “Host jobs/schedule” means Host owns work+timing; schedule owns cron routines; jobs package README is tool background work — conflating them creates a second bus.
+**Rationale:** Clarify Q2; Architect note that `dsh-schedule` lacks 5-field cron (another reason it is not SoT).
 
-**Alternatives considered:** Store routines as jobs records (wrong lifecycle; no schedule fold); Electron jobs mirror (forbidden).
+**Alternatives considered:** Force Routines to inherit schedule’s interval-only API (rejects Spec cron vocabulary).
 
 ---
 
-## R7 — Client pane vs existing `ui-schedule` header catalog
+## R6 — Optional `dsh-jobs` for in-flight fire visibility only
 
-**Decision:** P4 Pass surface is a **bot info-pane routines list** with create + pause/resume + last-run visibility (spec US1–US4). Existing `@deepseek-ai/dsh-client-ui-schedule` session-header **read-only** catalog may be reused for projection patterns / ordering inspiration, but **alone is insufficient** for Pass (no create/pause/resume on that catalog today). Implement may extend Client schedule UI or add a bot-scoped routines pane that still **only reads/writes Host**.
+**Decision:** `@deepseek-ai/dsh-jobs` + `@deepseek-ai/dsh-jobs-local` MAY be used for **in-flight fire visibility** (`ctx.jobs`; process-local; jobs die with Host). They are **not** the durable Routine catalog, cron evaluator, pause/resume authority, or pane list SoT.
 
-**Rationale:** Spec pane list + lifecycle controls; current ui-schedule README: read-only, no mutation RPC.
+**Rationale:** Architect Option 3; jobs README = execution registry, not cron catalog.
 
-**Alternatives considered:** Declare header catalog as Pass surface (fails create/pause/resume); build Electron-native pane store (forbidden).
+**Alternatives considered:** Store routines as jobs records (wrong lifecycle); require jobs UI for Pass (unnecessary).
+
+---
+
+## R7 — Topology & data plane (unchanged dual-process)
+
+**Decision:**
+- **Electron shell** (`apps/desktop`): spawn Host child; lifecycle IPC only; load `dsh-app://`. Does **not** own routine records, timers, fire bus, or pane SoT.
+- **Desktop Host** (`apps/desktop-host` + Host plugins): Routine CRUD, pause/resume, durable store, cron evaluation, fire→bot wake, Host projection API.
+- **Client / Web**: Routines pane UI; mutate via Host RPC; render projected list/status/last-run.
+- **Main ↔ Host IPC:** lifecycle-only (`ready` / `fatal` / `shutdown-complete` / `update-tasks` + Main `shutdown` / `update-tasks`). **Forbidden** on that channel: routine-catalog, routine-create/pause/resume, cron-fire, last-run payloads (extend `host-protocol.ts` exclusion list like identity + skills).
+- **Data plane:** routine mutations + projections travel **shipped authenticated Host HTTP/WS** only.
+
+**Rationale:** Architect boundaries; P1 R1 / room freeze topology.
+
+**Alternatives considered:** Routine payloads on Node IPC (forbidden); Client-only persistence (fails restart/pause proofs).
 
 ---
 
@@ -94,27 +97,24 @@ All Technical Context unknowns from plan.md are resolved below. Format: Decision
 
 **Rationale:** Clarify Q3–Q5; FR-001/012; SC-001/007.
 
-**Alternatives considered:** Require confirm card (inventory guidance only; clarify optional).
-
 ---
 
-## R9 — Non-goals unchanged
+## R9 — Non-goals unchanged (+ schedule ≠ Routines)
 
-**Decision:** Event listeners, memory recall UX, Box/Shell, MCP/connectors remain Out. Absence does not fail Pass (SC-004).
+**Decision:** Event listeners, memory recall UX, Box/Shell, MCP/connectors remain Out. **`dsh-schedule` as Routines SoT** is an explicit non-goal / absence check. Absence of event/memory/box/MCP does not fail Pass (SC-004).
 
-**Rationale:** Plan P4 Out; FR-006/008.
+**Rationale:** Plan P4 Out; Architect Option 1 reject; FR-006/008.
 
 ---
 
 ## Seam map (summary)
 
 ```text
-User (Desktop Client pane)
-    │  create / pause / resume / list / last-run (UI only)
+User (Desktop Client routines pane)
+    │  create / pause / resume / list / last-run  (Host HTTP/WS only)
     ▼
-Desktop Host  ──►  dsh-schedule (durable SoT + timers + dispatch wake)
-              ──►  dsh-jobs (background tools only; NOT routines SoT)
-Electron Main ──►  lifecycle/IPC only; NO routines durable store
+Desktop Host  ──►  Host Routine catalog (SoT) + Host cron wake → bot turn
+              ──►  optional dsh-jobs / jobs-local (in-flight fire visibility only)
+              ──►  dsh-schedule (session reminders ONLY — not Routines SoT)
+Electron Main ──►  lifecycle IPC only; NO routines durable store / timers / fire bus
 ```
-
-**Architect optional spawn topics:** R2 pause/resume Host API shape; R3 bot↔session ownership key.

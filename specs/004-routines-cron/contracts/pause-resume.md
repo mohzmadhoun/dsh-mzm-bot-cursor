@@ -1,21 +1,21 @@
 # Contract: Pause / resume
 
-**Owners:** DH Runtime (Host schedule lifecycle) · DH Client/Web (controls)
+**Owners:** DH Runtime (Host Routine catalog lifecycle) · DH Client/Web (controls)
 **Acceptance:** Spec FR-003, FR-004 · SC-002 · US3 · FR-010/011 visual evidence
 
 ## User-visible operations
 
 | Operation | Input (minimum) | Observable result |
 |-----------|-----------------|-------------------|
-| Pause | Active routine in pane | Status shows paused; no fire on subsequent matches while paused |
+| Pause | Active routine in pane | Status shows paused; no Host wake/fire on subsequent matches while paused |
 | Resume | Paused routine | Status shows active/scheduled; eligible to fire again |
-| Restart / reload | Prior pause or resume | Last status preserved |
+| Restart / reload | Prior pause or resume | Last status preserved (Host durable) |
 
 ## Host obligations
 
-- Persist pause/resume on Host schedule (or Host facade over schedule); Client must not be sole authority.
-- While paused, suppress schedule dispatch/fire for that routine.
-- Electron Main MUST NOT store pause flags as the durable source of truth.
+- Persist `status: active|paused` on `RoutineRecord` in Host catalog; Client must not be sole authority.
+- While paused, Host cron evaluator MUST suppress wake for that routine.
+- Electron Main MUST NOT store pause flags as durable SoT; IPC MUST NOT carry pause/resume payloads as the data plane (use Host HTTP/WS).
 
 ## Verifier rules
 
@@ -28,13 +28,9 @@
 
 | Condition | Required behavior |
 |-----------|-------------------|
-| Pause that only hides UI row | Fail — must suppress fire |
+| Pause that only hides UI row | Fail — must suppress Host wake |
 | Unit/jsdom-only evidence | GUI scenario Fail |
 
 ## Non-goals
 
-Delete-as-pause; confirm card; Architect-final API naming (tasks may extend `schedule/change` or Host RPC — ownership stays Host).
-
-## Architect note
-
-Optional confirm: durable `schedule/change` pause/resume ops vs thin Host control plane — Pass cares about behavior, not API brand names.
+Delete-as-pause; confirm card; treating `dsh-schedule` delete as pause.
