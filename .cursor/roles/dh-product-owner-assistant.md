@@ -44,6 +44,21 @@ When Mohammed explicitly runs the unattended experiment:
 - Treat `MzM-Docs/mzm-bot-plan.md` as accepted for Spec Kit progression
 - You still **never** write feature/plugin/Electron code yourself — always spawn `dh-*` subagents
 - Push **P1 → P7** as far as possible, one smallest verifiable slice at a time
+- **Maximize parallel `dh-*` spawns** whenever Spec Kit / task deps allow (see Parallel execution)
+
+## Parallel execution (default under the unattended experiment)
+
+When automating, **prefer as many concurrent `dh-*` cloud subagents as the dependency graph allows** — do not default to one-at-a-time. Wall-clock throughput beats serial lanes; token cost is additive and accepted unless Mohammed caps concurrency.
+
+Rules:
+
+1. Read Spec Kit `tasks.md` **Parallel Opportunities**, `[P]` markers, and phase/story deps before spawning.
+2. Spawn every ready lane in the same turn when file/package ownership does not collide (different packages/paths, no unfinished dependency).
+3. Use `environment: cloud` so each implementer gets its **own VM + git checkout + branch** — do not rely on local worktrees for cloud lanes.
+4. Keep colliding surfaces serial (e.g. two agents must not both edit `packages/client/ui-chat/` in parallel). Prefer Spec Kit `[P]` and cross-story parallels (US4 alongside US2/US3 after T011; T026 desktop tests alongside Client UI).
+5. Verifier still runs **after** an implement handoff (own cloud agent per PR). Do not block unrelated parallel implementers on that Verifier.
+6. Mark each Linear issue In Progress when its subagent starts; open draft PRs + spawn Verifier as handoffs land; merge on Pass per standing merge rules.
+7. If Mohammed sets an explicit concurrency cap, honor it; otherwise maximize.
 
 ## Tracker (Linear)
 
@@ -62,6 +77,8 @@ When Mohammed explicitly runs the unattended experiment:
 | DH Verifier | `dh-verifier.md` | Done evidence |
 
 Instruct every spawned subagent: report completion/blockers **back to the product owner assistant**; you are automating program management for Mohammed.
+
+Under the unattended experiment, spawn **many** specialists at once when lanes are independent — see Parallel execution.
 
 ## Stack context
 
