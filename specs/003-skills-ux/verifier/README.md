@@ -4,8 +4,10 @@
 **Role:** DH Verifier evidence home. Recipes are rerunnable acceptance scripts/outlines; they do not implement product features.
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
-**Thin-pack pick:** [thin-pack-skill.md](./thin-pack-skill.md) (T005)
-**Linear:** Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142) · T001 [MOH-148](https://linear.app/momadhoun/issue/MOH-148) · T004 [MOH-151](https://linear.app/momadhoun/issue/MOH-151) · T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152) · T014 [MOH-161](https://linear.app/momadhoun/issue/MOH-161)
+**Thin-pack pick + T032 measurement:** [thin-pack-skill.md](./thin-pack-skill.md) (T005 / T032)
+**Non-goals (T033):** [non-goals.md](./non-goals.md)
+**Scenario 4 stub (T034):** [scenario-4-thin-pack.md](./scenario-4-thin-pack.md)
+**Linear:** Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142) · T001 [MOH-148](https://linear.app/momadhoun/issue/MOH-148) · T004 [MOH-151](https://linear.app/momadhoun/issue/MOH-151) · T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152) · T014 [MOH-161](https://linear.app/momadhoun/issue/MOH-161) · T032 [MOH-179](https://linear.app/momadhoun/issue/MOH-179) · T033 [MOH-180](https://linear.app/momadhoun/issue/MOH-180) · T034 [MOH-181](https://linear.app/momadhoun/issue/MOH-181)
 
 ## Foundational Pass gate (T014)
 
@@ -18,7 +20,7 @@
 | Attachment/bind inventory (T003) | [attachment-bind-inventory.md](./attachment-bind-inventory.md) |
 | Instruction-bind doc (T012) | [instruction-bind.md](./instruction-bind.md) |
 | Foundational Pass checklist (T014) | this README (checklist below) |
-| Non-goals absence checks (T033) | `non-goals.md` (not yet) |
+| Non-goals absence checks (T033) | [non-goals.md](./non-goals.md) |
 
 ### Foundational Pass checklist — recorded
 
@@ -73,7 +75,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **1** Discover / load managed skill | [Scenario 1](../quickstart.md) | `scenario-1-discover-load.md` (T019) · contract [discover-load.md](../contracts/discover-load.md) | **Runtime** + **Client** + **Verifier** | SC-001 | **Required** |
 | **2** Attach / run on a bot | [Scenario 2](../quickstart.md) | [scenario-2-attach-run.md](./scenario-2-attach-run.md) (T026) · contract [attach-run.md](../contracts/attach-run.md) | **Runtime** + **Client** + **Verifier** | SC-002, SC-006, SC-007 | **Required** |
 | **3** Author skill (+ reject empty) | [Scenario 3](../quickstart.md) | [scenario-3-skill-authoring.md](./scenario-3-skill-authoring.md) (T031) · contract [skill-authoring.md](../contracts/skill-authoring.md) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
-| **4** Thin pack / non-goals | [Scenario 4](../quickstart.md) | `scenario-4-thin-pack.md` (T034) · contract [thin-managed-pack.md](../contracts/thin-managed-pack.md) · pick [thin-pack-skill.md](./thin-pack-skill.md) | **Runtime** + **Verifier** | SC-004 | Docs/absence ok |
+| **4** Thin pack / non-goals | [Scenario 4](../quickstart.md) | [scenario-4-thin-pack.md](./scenario-4-thin-pack.md) (T034) · [non-goals.md](./non-goals.md) (T033) · contract [thin-managed-pack.md](../contracts/thin-managed-pack.md) · pick [thin-pack-skill.md](./thin-pack-skill.md) (T032) | **Runtime** + **Verifier** | SC-004 | Docs/absence ok |
 | **5** Full Phase 3 replay | [Scenario 5](../quickstart.md) | `scenario-5-full-replay.md` (T036) · all contracts above | **Verifier** | SC-005 (+ composite of 1–3) | **Required** |
 
 Recipe markdown files listed above are **paths reserved for later tasks** (T019, T026, T031, T034, T036). This README does not create empty stubs; links resolve once those tasks land.
