@@ -22,6 +22,11 @@ import {
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
 import { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
+import {
+  bindTeammateSkillInstructions,
+  composeSkillInstructions,
+  type SkillBindRef,
+} from './skill-bind.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
@@ -100,6 +105,12 @@ export {
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
 export { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog } from './projection.ts'
+export {
+  SKILL_INSTRUCTIONS_SECTION,
+  bindTeammateSkillInstructions,
+  composeSkillInstructions,
+} from './skill-bind.ts'
+export type { SkillBindRef } from './skill-bind.ts'
 export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -145,6 +156,8 @@ export class TeamService extends TypertRemoteService {
   private readonly tasks: TeamTaskBoard
   /** Live teammate persona refs for instruction bind updates after Host save. */
   private readonly personaBinds = new Map<SessionId, PersonaBindRef>()
+  /** Live teammate skill-instruction refs for FR-014 bind updates after Host attach. */
+  private readonly skillBinds = new Map<SessionId, SkillBindRef>()
 
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'agentTeams')
@@ -180,6 +193,7 @@ export class TeamService extends TypertRemoteService {
     ctx.on('agent/created', ({ agent }) => {
       this.bindTeammateModelSelection(agent)
       this.bindTeammatePersona(agent)
+      this.bindTeammateSkillInstructions(agent)
       this.scheduleRecovery(agent)
     })
     ctx.on('agent/status', ({ agent }) => {
@@ -539,10 +553,11 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host skill attach (FR-003 / FR-005).
+   * Lead-authorized Host skill attach (FR-003 / FR-005 / T020).
    * Appends `{ botId, skillId }` onto that Bot’s ordered `skillAttachments` (multi-attach allowed).
-   * Does not auto-attach other bots. Electron Main must not invent attachment records (research R4).
-   * Instruction bind of attached bodies is owned by T021; this mutation only persists associations.
+   * Requires the skill to exist in Host `ctx.skills`; does not auto-attach other bots.
+   * After commit, refreshes that Bot’s skill-instruction bind for subsequent turns (FR-014 / T021).
+   * Electron Main must not invent attachment records (research R4).
    * @param caller - exact live Lead Agent.
    * @param request - bot id, skill id, and cancellation.
    * @returns updated Host Bot identity after attach.
@@ -554,6 +569,22 @@ export class TeamService extends TypertRemoteService {
     }
     request.signal.throwIfAborted()
     const skillId = requiredSkillId(String(request.skillId))
+    const skills = this.ctx.get('skills')
+    if (skills === undefined) {
+      throw new TeamError(
+        'skill catalog is unavailable: Host skills registry is not mounted',
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const definition = await skills.get(skillId, { signal: request.signal }) as
+      | { readonly content?: string }
+      | undefined
+    if (definition === undefined) {
+      throw new TeamError(
+        `skill "${skillId}" is not available in the Host catalog`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
     const root = membership.root
     const updated = await this.journal.transact(root.id, async () => {
       request.signal.throwIfAborted()
@@ -579,6 +610,7 @@ export class TeamService extends TypertRemoteService {
       })
       return member
     })
+    await this.refreshTeammateSkillBind(updated.id, updated.skillAttachments, request.signal)
     const view = this.roster.list(membership).find(row => row.id === updated.id)
     /* v8 ignore next 3 -- journal commit above retains the active roster row. */
     if (view === undefined) {
@@ -1150,6 +1182,70 @@ export class TeamService extends TypertRemoteService {
     const existing = this.personaBinds.get(botId)
     if (existing === undefined) return
     existing.current = persona
+  }
+
+  /**
+   * Bind one teammate Agent's durable Host skill attachments into system-prompt assembly (FR-014).
+   * Lead Agents and non-Team children are left unbound. Empty / missing bodies contribute no prose.
+   * Cold resume resolves catalog bodies asynchronously onto the mutable ref before subsequent turns.
+   * @param agent - newly created or resumed exact live Agent.
+   */
+  private bindTeammateSkillInstructions(agent: Agent): void {
+    const membership = this.roster.tryMembership(agent)
+    if (membership === undefined || membership.role !== 'teammate') return
+    const member = this.journal.state(membership.root).members.find(row => row.id === agent.id)
+    const ref: SkillBindRef = { current: '' }
+    this.skillBinds.set(agent.id, ref)
+    bindTeammateSkillInstructions(agent, ref, () => {
+      this.skillBinds.delete(agent.id)
+    })
+    void this.refreshTeammateSkillBind(agent.id, member?.skillAttachments).catch((error: unknown) => {
+      this.ctx.logger.warn(
+        `agentTeams: failed to resolve skill-instruction bind for "${agent.id}": ${errorMessage(error)}`,
+      )
+    })
+  }
+
+  /**
+   * Recompose attached skill bodies onto the live Agent bind when the Bot is activated.
+   * Cold resume starts from an empty ref and fills via this path; Host `attachSkill` refreshes live.
+   * @param botId - teammate Session identity.
+   * @param attachments - durable ordered attachments for that Bot, or undefined when none.
+   * @param signal - optional cancellation for catalog loads.
+   */
+  private async refreshTeammateSkillBind(
+    botId: SessionId,
+    attachments: readonly SkillAttachment[] | undefined,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const existing = this.skillBinds.get(botId)
+    if (existing === undefined) return
+    existing.current = await this.composeAttachedSkillBodies(attachments, signal)
+  }
+
+  /**
+   * Load Host catalog bodies for one Bot's attachments in stable order and join non-empty text.
+   * Missing skills or empty bodies skip that attachment's prose (instruction-bind compose rule).
+   * @param attachments - durable ordered attachments, or undefined when none.
+   * @param signal - optional cancellation for provider get.
+   * @returns composed instructional text, or `''` when nothing contributes.
+   */
+  private async composeAttachedSkillBodies(
+    attachments: readonly SkillAttachment[] | undefined,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    if (attachments === undefined || attachments.length === 0) return ''
+    const skills = this.ctx.get('skills')
+    if (skills === undefined) return ''
+    const bodies: (string | undefined)[] = []
+    for (const attachment of attachments) {
+      signal?.throwIfAborted()
+      const definition = await skills.get(String(attachment.skillId), { signal }) as
+        | { readonly content?: string }
+        | undefined
+      bodies.push(definition?.content)
+    }
+    return composeSkillInstructions(bodies)
   }
 
   /** Reconcile roster provisioning before retrying that member's pending mailbox. */
