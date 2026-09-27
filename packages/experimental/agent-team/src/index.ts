@@ -22,7 +22,7 @@ import {
   type PersonaBindRef,
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
-import { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
+import { projectMailboxHandoffs, projectRoutine, projectRoutines, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
 import {
   bindTeammateSkillInstructions,
   composeSkillInstructions,
@@ -31,7 +31,7 @@ import {
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { SidebarSectionId, TeamId, TeamTaskId } from './types.ts'
+import { SidebarSectionId, RoutineId, TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
   CreateBotInput,
@@ -42,6 +42,9 @@ import type {
   CreateSectionRequest,
   CreateSectionResult,
   CreateTeamTaskRequest,
+  CreateRoutineInput,
+  CreateRoutineRequest,
+  CreateRoutineResult,
   AssignSectionInput,
   AssignSectionRequest,
   AssignSectionResult,
@@ -54,6 +57,9 @@ import type {
   DeleteBotRequest,
   DeleteBotResult,
   HostMailboxMessage,
+  ListRoutinesByBotInput,
+  ListRoutinesByBotRequest,
+  ListRoutinesByBotResult,
   RenameBotInput,
   RenameBotRequest,
   RenameBotResult,
@@ -88,6 +94,8 @@ import {
   normalizePersonaProfile,
   requiredDisplayName,
   requiredModelSelection,
+  requiredRoutineIntent,
+  requiredScheduleExpr,
   requiredSectionName,
   requiredSkillDisplayName,
   requiredSkillId,
@@ -98,14 +106,26 @@ import {
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
-export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId } from './types.ts'
+export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId, RoutineId } from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
 export {
   HOST_MAILBOX_MESSAGE_SOURCE,
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
-export { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog } from './projection.ts'
+export {
+  projectMailboxHandoffs,
+  projectRoutines,
+  projectRoutine,
+  projectSidebarSections,
+  projectSkillCatalog,
+} from './projection.ts'
+export {
+  parseScheduleExpr,
+  nextFireAt,
+  describeScheduleExpr,
+  MIN_EVERY_INTERVAL_MS,
+} from './routine-cron.ts'
 export {
   SKILL_INSTRUCTIONS_SECTION,
   bindTeammateSkillInstructions,
@@ -563,6 +583,70 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Lead-authorized Host Routine create (P4 FR-001 / T007).
+   * Persists a `RoutineRecord` on the Team journal (`team/routine`); status defaults to `active`.
+   * Rejects empty intent or unsupported scheduleExpr without writing.
+   * Electron Main must not invent routine records — Host owns the durable write (research R1).
+   * Not `@deepseek-ai/dsh-schedule` session reminders (research R2).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, intent, scheduleExpr, and cancellation.
+   * @returns Host-owned Routine projection after create.
+   */
+  async createRoutine(caller: Agent, request: CreateRoutineRequest): Promise<CreateRoutineResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can create a routine', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const intent = requiredRoutineIntent(request.intent)
+    const scheduleExpr = requiredScheduleExpr(request.scheduleExpr)
+    const root = membership.root
+    const routine = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const state = this.journal.state(root)
+      const bot = state.members.find(member => member.id === request.botId)
+      if (bot === undefined || bot.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const now = Date.now()
+      const row = {
+        routineId: RoutineId(`routine-${randomUUID()}`),
+        botId: request.botId,
+        intent,
+        scheduleExpr,
+        status: 'active' as const,
+        lastRunAt: null,
+        createdAt: now,
+        updatedAt: now,
+      }
+      await this.journal.appendAndFlush(root, 'team/routine', {
+        version: 2,
+        teamId: TeamId(root.id),
+        routine: row,
+      })
+      return row
+    })
+    return { routine: projectRoutine(routine) }
+  }
+
+  /**
+   * Project Host routines for one bot (P4 FR-002 / T009; SC-006).
+   * @param caller - exact live Team member.
+   * @param request - bot id and cancellation.
+   * @returns that bot’s Host Routine projections only.
+   */
+  listRoutinesByBot(caller: Agent, request: ListRoutinesByBotRequest): ListRoutinesByBotResult {
+    const membership = this.roster.membership(caller)
+    request.signal.throwIfAborted()
+    return {
+      routines: projectRoutines(this.journal.state(membership.root), request.botId),
+    }
+  }
+
+  /**
    * Lead-authorized Host skill attach (FR-003 / FR-005 / T020).
    * Appends `{ botId, skillId }` onto that Bot’s ordered `skillAttachments` (multi-attach allowed).
    * Requires the skill to exist in Host `ctx.skills`; does not auto-attach other bots.
@@ -822,18 +906,20 @@ export class TeamService extends TypertRemoteService {
 
   /**
    * Read the current roster, non-deleted task board, sidebar sections + Unassigned,
-   * Host mailbox handoffs, and skill catalog summaries through the generated Remote API
-   * (FR-005 / FR-006 / P3 T011).
+   * Host mailbox handoffs, skill catalog summaries, and Host Routine catalog through
+   * the generated Remote API (FR-005 / FR-006 / P3 T011 / P4 T009).
    * Handoffs reconstruct from Lead Session + target Session logs — never Main-synthesized IPC.
    * Skills project from Host `ctx.skills` when present — never Electron-synthesized.
+   * Routines project from Host journal `team/routine` — never `dsh-schedule` or Electron Main.
    * @param agent - exact live Team member used as the authority credential.
    * @param signal - cancellation for cold target Session reads.
-   * @returns detached current roster, task, section, handoff, and skill catalog views.
+   * @returns detached current roster, task, section, handoff, skill, and routine views.
    */
   @Remote('view')
   async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView> {
     const membership = this.roster.membership(agent)
-    const { sections, unassignedBotIds } = projectSidebarSections(this.journal.state(membership.root))
+    const state = this.journal.state(membership.root)
+    const { sections, unassignedBotIds } = projectSidebarSections(state)
     return {
       members: this.listMembers(agent),
       tasks: this.listTasks(agent),
@@ -841,6 +927,7 @@ export class TeamService extends TypertRemoteService {
       unassignedBotIds,
       handoffs: await this.listHandoffs(membership.root, signal),
       skills: await this.listSkillCatalog(signal),
+      routines: projectRoutines(state),
     }
   }
 
@@ -1034,6 +1121,40 @@ export class TeamService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<BotIdentityMutationResult<CreateSectionResult>> {
     return this.botIdentityMutationResult(this.createSection(agent, { ...request, signal }))
+  }
+
+  /**
+   * Create one Host Routine through the generated Remote API (P4 T009).
+   * @param agent - exact live Lead Agent authorizing create.
+   * @param request - bot id, intent, and scheduleExpr.
+   * @param signal - Remote call cancellation.
+   * @returns the Routine projection or a typed Team rejection.
+   */
+  @Remote('createRoutine')
+  remoteCreateRoutine(
+    agent: Agent,
+    request: CreateRoutineInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<CreateRoutineResult>> {
+    return this.botIdentityMutationResult(this.createRoutine(agent, { ...request, signal }))
+  }
+
+  /**
+   * List Host Routines for one bot through the generated Remote API (P4 T009).
+   * @param agent - exact live Team member authorizing the read.
+   * @param request - bot id filter.
+   * @param signal - Remote call cancellation.
+   * @returns that bot’s Routine projections or a typed Team rejection.
+   */
+  @Remote('listRoutinesByBot')
+  remoteListRoutinesByBot(
+    agent: Agent,
+    request: ListRoutinesByBotInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<ListRoutinesByBotResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.listRoutinesByBot(agent, { ...request, signal })),
+    )
   }
 
   /**

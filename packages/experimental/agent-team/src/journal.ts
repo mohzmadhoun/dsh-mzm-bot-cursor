@@ -6,6 +6,8 @@ this journal path — field semantics live in the projection; Electron Main must
 not invent a parallel store.
 Named sidebar section catalog rows append as `team/section` (T031); Unassigned
 has no catalog event (clarify lock 4).
+Host Routine catalog rows append as `team/routine` (P4 T007) — Architect Option 3
+SoT; not `dsh-schedule` session reminders.
 */
 
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -18,6 +20,7 @@ type MutableTeamEventType =
   | 'team/member'
   | 'team/task'
   | 'team/section'
+  | 'team/routine'
   | 'team/message/queued'
   | 'team/message/delivered'
 

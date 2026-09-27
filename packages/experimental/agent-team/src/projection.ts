@@ -13,6 +13,8 @@ Client roster / overview omit deleted rows (T026 / FR-008 / clarify lock 5).
 Named sidebar sections persist as `team/section` catalog rows; membership is
 Bot.`sectionId`. Unassigned/default is null/absent sectionId — no catalog row
 (T031–T033 / FR-006 / clarify lock 4).
+Host Routine catalog rows persist as `team/routine` (P4 Architect Option 3 SoT) —
+not `dsh-schedule` session reminders; Electron Main must not invent parallel rows.
 */
 
 import { z } from 'zod'
@@ -21,10 +23,13 @@ import { ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import { readHostMailboxMessage } from './host-mailbox-message.ts'
+import { describeScheduleExpr } from './routine-cron.ts'
 import type {
   AvatarMarker,
   BotPersonaProfile,
   HostMailboxMessage,
+  RoutineProjection,
+  RoutineRecord,
   SidebarSectionSnapshot,
   SidebarSectionView,
   SkillCatalogSummary,
@@ -35,6 +40,7 @@ import type {
   TeamTaskSnapshot,
 } from './types.ts'
 import {
+  RoutineId as toRoutineId,
   SidebarSectionId as toSidebarSectionId,
   SkillId,
   TeamId as toTeamId,
@@ -187,12 +193,33 @@ const teamSectionEventSchema = z.object({
   section: sidebarSectionSnapshotSchema,
 }).strict() as z.ZodType<SessionEventMap['team/section']>
 
+const routineIdSchema = z.string().min(1).transform(value => toRoutineId(value))
+
+const routineRecordSchema = z.object({
+  routineId: routineIdSchema,
+  botId: sessionIdSchema,
+  intent: z.string().min(1),
+  scheduleExpr: z.string().min(1),
+  status: z.enum(['active', 'paused']),
+  lastRunAt: z.union([z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER), z.null()]),
+  createdAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  updatedAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+}).strict() as z.ZodType<RoutineRecord>
+
+const teamRoutineEventSchema = z.object({
+  version: z.literal(2),
+  teamId: teamIdSchema,
+  routine: routineRecordSchema,
+}).strict() as z.ZodType<SessionEventMap['team/routine']>
+
 /** Current Team state selected by durable Team identity. */
 export interface TeamState {
   readonly id: TeamId
   readonly members: TeamMemberSnapshot[]
   /** Named sidebar section catalog only — Unassigned has no row (clarify lock 4). */
   readonly sections: SidebarSectionSnapshot[]
+  /** Host Routine catalog (P4 Architect Option 3 SoT). */
+  readonly routines: RoutineRecord[]
   readonly tasks: TeamTaskSnapshot[]
   readonly messages: TeamMessageSnapshot[]
   readonly delivered: TeamMessageId[]
@@ -209,6 +236,7 @@ export function emptyTeamState(rootId: SessionId): TeamProjectionState {
     id: toTeamId(rootId),
     members: [],
     sections: [],
+    routines: [],
     tasks: [],
     messages: [],
     delivered: [],
@@ -231,6 +259,7 @@ const teamProjectionEntrySchema = z.object({
   id: teamIdSchema,
   members: z.array(teamMemberSnapshotSchema),
   sections: z.array(sidebarSectionSnapshotSchema),
+  routines: z.array(routineRecordSchema),
   tasks: z.array(teamTaskSnapshotSchema),
   messages: z.array(teamMessageSnapshotSchema),
   delivered: z.array(teamMessageIdSchema),
@@ -243,6 +272,7 @@ export type TeamEventType =
   | 'team/member'
   | 'team/task'
   | 'team/section'
+  | 'team/routine'
   | 'team/message/queued'
   | 'team/message/delivered'
 
@@ -258,6 +288,7 @@ export function isTeamEvent(event: SessionEvent): event is TeamSessionEvent {
   return event.type === 'team/member'
     || event.type === 'team/task'
     || event.type === 'team/section'
+    || event.type === 'team/routine'
     || event.type === 'team/message/queued'
     || event.type === 'team/message/delivered'
 }
@@ -280,6 +311,8 @@ function parseCurrentTeamEvent(event: TeamSessionEvent): TeamSessionEvent {
       return { ...event, data: parsePersisted(event.type, teamTaskEventSchema, event.data) }
     case 'team/section':
       return { ...event, data: parsePersisted(event.type, teamSectionEventSchema, event.data) }
+    case 'team/routine':
+      return { ...event, data: parsePersisted(event.type, teamRoutineEventSchema, event.data) }
     case 'team/message/queued':
       return { ...event, data: parsePersisted(event.type, teamMessageQueuedEventSchema, event.data) }
     case 'team/message/delivered':
@@ -385,6 +418,22 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       else state.sections[index] = section
       break
     }
+    case 'team/routine': {
+      const routine = event.data.routine
+      if (routine.intent.trim().length === 0) {
+        throw new Error(`routine "${routine.routineId}" intent must be non-empty`)
+      }
+      if (routine.scheduleExpr.trim().length === 0) {
+        throw new Error(`routine "${routine.routineId}" scheduleExpr must be non-empty`)
+      }
+      if (routine.status !== 'active' && routine.status !== 'paused') {
+        throw new Error(`routine "${routine.routineId}" status must be active or paused`)
+      }
+      const index = state.routines.findIndex(candidate => candidate.routineId === routine.routineId)
+      if (index < 0) state.routines.push(routine)
+      else state.routines[index] = routine
+      break
+    }
     case 'team/message/queued': {
       const message = event.data.message
       if (state.messages.some(candidate => candidate.id === message.id)) {
@@ -470,8 +519,8 @@ function sameSkillAttachments(
 /** Host-only Team projection selected by the projected Session identity. */
 export const teamProjectionDefinition = {
   key: 'agentTeam',
-  // Bumped when named section catalog joined TeamState (T031).
-  stateVersion: 4,
+  // Bumped when Host Routine catalog joined TeamState (P4 T007).
+  stateVersion: 5,
   stateSchema: teamProjectionEntrySchema,
   init: header => emptyTeamState(header.id),
   apply: (state, event) => {
@@ -503,6 +552,42 @@ export function projectSidebarSections(state: TeamState): {
     .filter(member => member.sectionId == null || !catalogIds.has(member.sectionId))
     .map(member => member.id)
   return { sections, unassignedBotIds }
+}
+
+/**
+ * Project Host Routine catalog rows for Client pane list (P4 FR-002 / T009).
+ * @param state - projected Team state.
+ * @param botId - when set, restrict to that bot’s routines (SC-006); omit for full catalog.
+ * @returns Client {@link RoutineProjection} rows in catalog order.
+ */
+export function projectRoutines(
+  state: TeamState,
+  botId?: SessionId,
+): readonly RoutineProjection[] {
+  const rows = botId === undefined
+    ? state.routines
+    : state.routines.filter(routine => routine.botId === botId)
+  return rows.map(projectRoutine)
+}
+
+/**
+ * Map one durable {@link RoutineRecord} to a Client projection.
+ * @param routine - Host catalog row.
+ * @returns pane-ready projection (identity derives from intent).
+ */
+export function projectRoutine(routine: RoutineRecord): RoutineProjection {
+  return {
+    routineId: routine.routineId,
+    botId: routine.botId,
+    identity: routine.intent,
+    intent: routine.intent,
+    scheduleExpr: routine.scheduleExpr,
+    scheduleLabel: describeScheduleExpr(routine.scheduleExpr),
+    status: routine.status,
+    lastRunAt: routine.lastRunAt,
+    createdAt: routine.createdAt,
+    updatedAt: routine.updatedAt,
+  }
 }
 
 /**

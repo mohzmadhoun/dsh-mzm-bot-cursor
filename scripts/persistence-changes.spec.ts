@@ -302,6 +302,13 @@ describe('persistence change classification', () => {
     }
     expect(classifyPersistenceChange(wrapped(false), wrapped(true)).every(change => !change.requiresVersionBump)).toBe(true)
     expect(classifyPersistenceChange(wrapped(false), wrapped(true, 'number')).some(change => change.requiresVersionBump)).toBe(true)
+    // Agent Teams journal refinements stay same-version without a SessionHeader bump.
+    function teamWrapped(primitive: 'string' | 'number'): PersistenceRoot {
+      const base = wrapped(false, primitive)
+      return { ...base, key: 'event:team/member', event: 'team/member', surface: false }
+    }
+    expect(classifyPersistenceChange(teamWrapped('string'), teamWrapped('number'))
+      .every(change => !change.requiresVersionBump)).toBe(true)
   })
 
   it('keeps optional header/envelope properties and surface event additions strict', () => {

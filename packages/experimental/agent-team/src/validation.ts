@@ -10,6 +10,7 @@ import type {
   SkillId,
 } from './types.ts'
 import { SkillId as toSkillId } from './types.ts'
+import { parseScheduleExpr } from './routine-cron.ts'
 
 const PERSONA_FIELD_MAX = 200
 const PERSONA_ANTI_JOB_MAX_ITEMS = 64
@@ -85,6 +86,26 @@ export function requiredSkillDisplayName(value: string): string {
  */
 export function requiredSkillInstructionalBody(value: string): string {
   return requiredText(value, 'instructionalBody', 100_000)
+}
+
+/**
+ * Normalize Host routine wake intent (P4 FR-001).
+ * Empty / whitespace-only intents reject create without writing.
+ * @param value - raw intent from Host create.
+ * @returns trimmed non-empty intent text.
+ */
+export function requiredRoutineIntent(value: string): string {
+  return requiredText(value, 'intent', 10_000)
+}
+
+/**
+ * Normalize and validate Host routine scheduleExpr (P4 FR-001 / T008).
+ * Rejects empty / unsupported expressions with a stable TeamError.
+ * @param value - raw schedule expression.
+ * @returns trimmed product-supported scheduleExpr string.
+ */
+export function requiredScheduleExpr(value: string): string {
+  return parseScheduleExpr(value).expr
 }
 
 /**

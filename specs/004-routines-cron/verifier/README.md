@@ -35,11 +35,11 @@
 |---------------|----------|--------|
 | Host routines inventory (T002) | [host-routines-inventory.md](./host-routines-inventory.md) | Setup Pass |
 | Cron-wake inventory (T003) | [cron-wake-inventory.md](./cron-wake-inventory.md) | Setup Pass |
-| Schedule ≠ Routines (T004 / T012) | [schedule-not-routines.md](./schedule-not-routines.md) | Setup Pass (T012 spot-check later) |
-| Host types + catalog + evaluator + Remotes (T006–T009) | product packages | **Not ready** |
-| Electron exclusion + no-routines-bus (T010–T011) | `apps/desktop/` | **Not ready** |
-| Optional jobs visibility doc (T013) | `verifier/optional-jobs-visibility.md` | **Not ready** |
-| Foundational Pass checklist (T014) | this README | **Deferred** — stamp only after T006–T013 |
+| Schedule ≠ Routines (T004 / T012) | [schedule-not-routines.md](./schedule-not-routines.md) | T012 spot-check ready (`cursor/p4-foundation-host-fe1d`) |
+| Host types + catalog + evaluator + Remotes (T006–T009) | `packages/experimental/agent-team/` | Ready on `cursor/p4-foundation-host-fe1d` |
+| Electron exclusion + no-routines-bus (T010–T011) | `apps/desktop/` | Ready (Electron PR on master) |
+| Optional jobs visibility doc (T013) | [optional-jobs-visibility.md](./optional-jobs-visibility.md) | Ready on `cursor/p4-foundation-host-fe1d` |
+| Foundational Pass checklist (T014) | this README | **Deferred** — stamp only after Verifier Pass on T006–T013 |
 
 **Scope lock:** Setup T001–T005 does **not** authorize US1–US4 product work. Wait for Host/Electron foundation + T014 stamp ([tasks.md](../tasks.md) Phase 2 CRITICAL).
 
