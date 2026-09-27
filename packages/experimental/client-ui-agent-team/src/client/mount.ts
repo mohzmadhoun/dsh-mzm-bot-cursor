@@ -17,6 +17,9 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
 import {
+  HandoffNotices, type HandoffNoticesInjected,
+} from './HandoffNotices.tsx'
+import {
   TeamAction, type TeamActionInjected, type TeamActionResult, type TeamCreateBotActionResult,
   type TeamTaskActionResult,
 } from './TeamAction.tsx'
@@ -85,6 +88,22 @@ function registerUi(ctx: ClientContext): void {
       locale: NS,
       inject: () => actions,
     }, TeamAction),
+  )
+
+  const notices: HandoffNoticesInjected = {
+    load: actions.load,
+    openTeammate: actions.openTeammate,
+  }
+  // Sticky strip between Chat View and composer — Host TeamView.handoffs only.
+  ctx.slots.inject(
+    'conversation.session.notices',
+    () => ctx.slots.register({
+      name: 'conversation.session.notices',
+      id: 'agent-team-handoffs',
+      order: 10,
+      locale: NS,
+      inject: () => notices,
+    }, HandoffNotices),
   )
 }
 

@@ -143,13 +143,15 @@
   font-size: 11px;
 }
 
-.tasks {
+.tasks,
+.handoffs {
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 
 .task,
+.handoff,
 .form {
   padding: 9px;
   border: 0.5px solid var(--dsw-alias-border-l1);

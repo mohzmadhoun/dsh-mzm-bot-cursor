@@ -57,5 +57,5 @@ Record stdout + SHA under [evidence/t021-mailbox-send/](./evidence/t021-mailbox-
 ## Related
 
 - Contract: [../contracts/host-mailbox-1to1.md](../contracts/host-mailbox-1to1.md)
-- Scenario 3 (T025): `scenario-3-mailbox.md` (when present)
+- Scenario 3 (T025): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
 - T026 Electron bus guard checklist: extend `apps/desktop/tests/topology-handshake.spec.ts` or add `no-electron-mailbox-bus.spec.ts`

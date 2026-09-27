@@ -1,0 +1,30 @@
+VERDICT: Pass
+SC: FR-004 negative — Electron Main MUST NOT invent bot↔bot messaging bus (T026 / US2)
+SHA: 4c203de952617f01ec6108c242954d79cec78ca2
+UTC: 2026-09-27T10:05:09Z
+IMPL_SHA: 4c203de952 (Phase 1 - T026 - guard against Electron bot↔bot bus)
+BRANCH: cursor/p1-t026-no-ipc-bus-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/46
+LINEAR: MOH-71 (left In Progress; Verifier does not Done)
+RECIPE: specs/001-multi-model-bots/verifier/t026-no-ipc-bus.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/no-electron-mailbox-bus.spec.ts
+STDOUT: evidence/t026-no-ipc-bus/vitest-no-electron-mailbox-bus.log (Test Files 1 passed; Tests 3 passed; EXIT:0)
+PASSED_TESTS (measured):
+  no-electron-mailbox-bus.spec.ts (3):
+    1. documents Host mailbox only — DESKTOP_IPC and Host Node IPC stay lifecycle/chrome
+    2. rejects mailbox / bot-message / peer-message names on Electron and Host IPC channels
+    3. keeps Main / preload free of product Host-mailbox APIs and dsh-desktop mailbox channels
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT2: evidence/t026-no-ipc-bus/vitest-topology-negative.log (1 passed | 4 skipped; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; static inventory — no provider API secrets
+SPOT_CHECK (measured): rg over apps/desktop/src for fromBotId|toBotId|deliveryState|sendTeamMessage|TeamService|mailbox|bot-message|peer-message|agent-chat — only documentation comments in ipc.ts / host-protocol.ts / project-manager.ts asserting Host owns mailbox; no product APIs
+CRITERIA_CHECKED:
+  1. DESKTOP_IPC + Host Node IPC expose no mailbox/bot-message/peer-message/agent-chat channels — Pass (measured; allow-list + forbidden-name inventory)
+  2. Shell sources document Host HTTP/WS ownership; free of product mailbox APIs — Pass (measured; SHELL_IPC_SOURCES scan)
+  3. Story-level static inventory green independent of Scenario 0 spawn — Pass (measured; no-electron-mailbox-bus.spec.ts alone)
+  4. Optional topology negative (T007 complement) — Pass (measured; rejects fake mailbox)
+CLAIM: measured (independent Verifier re-run @ 4c203de952)
+SCOPE_OUT: T023–T025 SC-003 Desktop UI handoff; T021–T022 Host mailbox send/persist (owned elsewhere)
+BLOCKER: none

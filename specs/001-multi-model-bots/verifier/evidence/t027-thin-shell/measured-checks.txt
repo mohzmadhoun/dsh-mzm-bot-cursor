@@ -1,0 +1,25 @@
+T027 thin-shell — independent Verifier measured checks @ 030382572f
+UTC: 2026-09-27T10:13:45Z
+Node: v24.21.0
+Vitest: 4.1.8
+
+RECIPE (required):
+  ./node_modules/.bin/vitest run apps/desktop/tests/thin-shell-main.spec.ts
+  → Test Files 1 passed; Tests 3 passed; EXIT 0
+  → log: vitest-focused.log
+
+OPTIONAL (recipe-listed; owned elsewhere; not Fail gates for T027 alone):
+  topology-handshake -t 'mailbox / bot-message|createBot / ModelSelection'
+  → 2 passed | 3 skipped; EXIT 0 → vitest-topology-optional.log
+  web-document.spec.ts + backend-controller.spec.ts
+  → Test Files 2 passed; Tests 13 passed; EXIT 0 → vitest-related.log
+
+SURFACES (rg spot-check, measured):
+  main.ts: DESKTOP_IPC boot/chrome/update ipcMain only; protocol.handle(SCHEME); serveWebDocument / authenticateWebHost / forwardWebRequest
+  web-document.ts: serveWebDocument + authenticateWebHost + forwardWebRequest; origin gate dsh-app://app
+  backend-controller.ts: DesktopBackendController start/stop/close lifecycle; no ipcMain
+
+FORBIDDEN routers absent in those three files (measured by thin-shell-main.spec.ts):
+  SendTeamMessage, agentTeams, ctx.llm, ctx.credentials, createBot,
+  installModelSelection, ModelSelection, credentials.set|resolve|get,
+  dsh-desktop:(mailbox|bot-message|bot-msg|agent-chat|create-bot|model-selection|api-key|credential)
