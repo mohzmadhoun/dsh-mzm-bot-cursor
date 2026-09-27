@@ -62,6 +62,8 @@ Host mailbox 对端回执（带持久化 `team-message` source 的 `user/message
 
 进行中的进度仅来自 Host session/agent 流事件（`assistant/live-chunk` 与打开轮次的 session running 状态）。流式 Assistant 行与轮次状态标签暴露 `data-chat-progress="host-stream"`，便于 Verifier 在完成前观察到至少一次进度更新。Electron Main 不得另造并行的 chat-progress IPC 总线。
 
+来自 Host session log（`assistant/message`）的已结算 Assistant 回复在轮次完成后标记 `data-chat-final="session-log"`。当轮次由 Host mailbox 的 `team-message` 回执引起时，turn-tail 携带可选的 `linkedMailboxMessageId`，收尾 final 暴露 `data-linked-mailbox-message-id`——Electron Main 不合成并行的 chat-final 通道。
+
 -----
 
 <a id="turn-process-folding"></a>

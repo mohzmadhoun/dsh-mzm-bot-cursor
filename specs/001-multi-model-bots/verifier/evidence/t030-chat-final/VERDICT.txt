@@ -1,0 +1,50 @@
+VERDICT: Pass
+SC: FR-006 (complete half) — final result in chat from session log; optional linkedMailboxMessageId; shell MUST NOT synthesize parallel chat-final IPC (T030 / US3)
+SHA: 438b248f60160e53a8b8a0f127ad471b03506b25
+UTC: 2026-09-27T10:54:19Z
+PRIOR_FAIL_SHA: 887073c789 (merge-forward JSDoc wrap split `authenticated Host HTTP/WS`)
+FIX_SHA: 438b248f60160e53a8b8a0f127ad471b03506b25 (Phase 1 - fix - keep Host HTTP/WS phrase on one JSDoc line)
+BRANCH: cursor/p1-t030-chat-final-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/60
+LINEAR: MOH-75 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t030-chat-final.md
+NODE: v24.21.0
+VITEST: 4.1.8
+
+RECIPE_CLIENT: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/client/ui-chat/tests/team-message-source.client.spec.ts -t 'T030|session log|linkedMailbox|mailbox attribution|cold-resume mailbox|mid-turn team-message'
+NOTE: pnpm exec hits lefthook postinstall refusal in this agent env; same vitest binary as pnpm exec.
+STDOUT: evidence/t030-chat-final/vitest-client.stdout.txt (Test Files 3 passed; Tests 6 passed | 162 skipped; EXIT:0)
+VERBOSE: evidence/t030-chat-final/vitest-client-verbose.stdout.txt
+PASSED_TESTS (measured):
+  1. conversation-node-definitions — delivers settled assistant/message final and links cold-resume mailbox attribution (T030)
+  2. conversation-node-definitions — attributes mid-turn team-message steer onto turn-tail linkedMailboxMessageId (T030)
+  3. chat-view — delivers settled Assistant final from session log with optional mailbox attribution (T030 / FR-006)
+  4. chat-view — omits linkedMailboxMessageId on finals not caused by a mailbox message (T030)
+  5. team-message-source — readLinkedMailboxMessageId returns messageId for team-message source (T030)
+  6. team-message-source — readLinkedMailboxMessageId returns null for ordinary user sources (T030)
+
+RECIPE_SHELL_IPC: Pass (measured) — prior Fail cleared
+COMMAND2: ./node_modules/.bin/vitest run apps/desktop/tests/no-shell-chat-final-ipc.spec.ts
+STDOUT2: evidence/t030-chat-final/vitest-shell.stdout.txt (Test Files 1 passed; Tests 3 passed; EXIT:0)
+VERBOSE2: evidence/t030-chat-final/vitest-shell-verbose.stdout.txt
+PASSED_TESTS (measured):
+  1. documents Host session-log finals only — DESKTOP_IPC stays lifecycle/chrome
+  2. rejects chat-final / assistant-final names on Electron and Host IPC channels
+  3. keeps Main / preload free of dsh-desktop chat-final channels
+
+SOURCE_SPOTCHECK (measured):
+  - AssistantMarkdown.tsx sets data-chat-final="session-log" and data-linked-mailbox-message-id when finalDelivery && !streaming
+  - host-protocol.ts JSDoc keeps substring `authenticated Host HTTP/WS` on one physical line (line 9)
+  - rg over apps/desktop/src: no dsh-desktop:(chat-final|assistant-final|final-result|turn-complete) channel literals
+
+CRITERIA_CHECKED:
+  1. Settled assistant/message final with turn-tail linkedMailboxMessageId (cold-resume + mid-turn) — Pass (measured)
+  2. data-chat-final="session-log" and optional data-linked-mailbox-message-id on closing final — Pass (measured)
+  3. Shell MUST NOT invent chat-final IPC — Pass (measured; no-shell-chat-final-ipc ×3 + source rg)
+
+CLAIM: measured (independent Verifier re-run @ 438b248f60160e53a8b8a0f127ad471b03506b25 after Fail fix)
+SCOPE_OUT: SC-004 end-to-end Desktop Scenario 4 (T032); handoff row chrome (T024/T031); progress half (T029)
+BLOCKER: none
+LINEAR_STATUS: leave MOH-75 In Progress until PO merges after Pass
+MERGE: do not merge (PO owns)

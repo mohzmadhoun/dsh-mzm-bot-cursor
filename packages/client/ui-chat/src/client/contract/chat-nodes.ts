@@ -95,6 +95,11 @@ export interface TurnTailChatData {
   readonly tokensPerSecond?: number
   /** Exact per-Turn accounting; absent when the loaded evidence is incomplete. */
   readonly tokenUsage?: TurnTokenUsage
+  /**
+   * Host mailbox message id when this Turn was caused by a `team-message`
+   * receipt (Chat turn `linkedMailboxMessageId`; FR-006 / T030).
+   */
+  readonly linkedMailboxMessageId?: string
 }
 
 /** Turn-level process disclosure projected before the finalized answer. */

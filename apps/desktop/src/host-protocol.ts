@@ -5,9 +5,10 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
 
 /**
  * Child→Main event `type` values accepted on the Host Node IPC channel.
- * Application chat, mailbox, bot-message, and chat-progress / assistant-stream payloads are not
- * members and must not be added; that traffic stays on the authenticated Host HTTP/WS data plane
- * (Agent Teams + session/agent streams for Client `ui-chat`).
+ * Application chat, mailbox, bot-message, chat-progress / assistant-stream, and chat-final
+ * payloads are not members and must not be added; that traffic stays on the authenticated Host HTTP/WS
+ * data plane (Agent Teams + session/agent streams and session-log finals for Client `ui-chat`;
+ * `contracts/chat-progress-final.md`).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',

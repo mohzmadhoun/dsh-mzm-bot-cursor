@@ -89,6 +89,18 @@ export function sessionRecallLabels(source: unknown): string[] {
 }
 
 /**
+ * Chat-turn `linkedMailboxMessageId` when a durable source attributes work to a
+ * Host mailbox peer message ([data-model.md] Chat turn / T030).
+ * @param source - Logged `user/message` source.
+ * @returns mailbox message id, or null when the source is not a team message.
+ */
+export function readLinkedMailboxMessageId(source: unknown): string | null {
+  const record = asRecord(source)
+  if (record === null || readString(record, 'kind') !== 'team-message') return null
+  return readString(record, 'messageId')
+}
+
+/**
  * Read the skill name a durable skill-invocation injection loaded.
  * @param source - Logged `user/message` source.
  * @returns The skill name, or null for every other source.

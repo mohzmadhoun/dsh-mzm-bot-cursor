@@ -60,6 +60,8 @@ Host mailbox peer receipts (`user/message` or pending inbox with durable `team-m
 
 In-flight progress is Host session/agent stream events only (`assistant/live-chunk` and open-turn session running state). Streaming Assistant rows and the turn-status label expose `data-chat-progress="host-stream"` so Verifier can observe ≥1 progress update before completion. Electron Main MUST NOT invent a parallel chat-progress IPC bus.
 
+Settled Assistant replies from the Host session log (`assistant/message`) mark `data-chat-final="session-log"` after turn completion. When the turn is caused by a Host mailbox `team-message` receipt, turn-tail carries optional `linkedMailboxMessageId` and the closing final exposes `data-linked-mailbox-message-id` — Electron Main does not synthesize a parallel chat-final channel.
+
 -----
 
 <a id="turn-process-folding"></a>

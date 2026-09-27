@@ -70,3 +70,14 @@ export const FORBIDDEN_CHAT_PROGRESS_IPC_PATTERNS = [
   /^stream[-_]?delta$/i,
   /dsh-desktop:(?:chat-progress|assistant-stream|progress-update|stream-delta)/i,
 ] as const
+
+/**
+ * Forbidden substrings for a parallel Electron chat-final bus (T030 / FR-006).
+ * Finals come from Host session-log turn completion into Client `ui-chat` only.
+ */
+export const FORBIDDEN_CHAT_FINAL_IPC_PATTERNS = [
+  /chat[-_]?final/i,
+  /assistant[-_]?final/i,
+  /final[-_]?result/i,
+  /turn[-_]?complete/i,
+] as const

@@ -107,6 +107,9 @@ function makeSessionSource(init: Partial<TestSessionSnapshot> = {}) {
 
 type ChatSlice = Partial<LegacyConversationSlice> & {
   readonly turnUsages?: NonNullable<Parameters<typeof chatSnapshotFixture>[0]>['turnUsages']
+  readonly linkedMailboxMessageIds?: NonNullable<
+    Parameters<typeof chatSnapshotFixture>[0]
+  >['linkedMailboxMessageIds']
 }
 type HarnessUpdate = ChatSlice & Partial<TestSessionSnapshot> & { readonly chat?: ChatSnapshot }
 
@@ -236,6 +239,7 @@ function makeHarness(
 ) {
   const {
     chat: initialChat, nodes, partial, runningCalls, turnTimings, turnEnds, turnUsages,
+    linkedMailboxMessageIds,
     ...sessionInit
   } = init
   const chatSlice: ChatSlice = {
@@ -245,6 +249,7 @@ function makeHarness(
     ...(turnTimings === undefined ? {} : { turnTimings }),
     ...(turnEnds === undefined ? {} : { turnEnds }),
     ...(turnUsages === undefined ? {} : { turnUsages }),
+    ...(linkedMailboxMessageIds === undefined ? {} : { linkedMailboxMessageIds }),
   }
   const session = makeSessionSource({ ...sessionInit, ...sessionOverrides })
   const useTestSession = bindSnapshotSelector(session.source)
@@ -1352,6 +1357,32 @@ describe('ChatView', () => {
     expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
     fireEvent.click(handoff)
     expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('delivers settled Assistant final from session log with optional mailbox attribution (T030 / FR-006)', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'q'), assistant(2, 'final from Host session log', 1, 1)],
+      turnEnds: new Map([[1, 3]]),
+      linkedMailboxMessageIds: new Map([[1, 'msg-mailbox-42']]),
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const final = view.container.querySelector('[data-chat-final="session-log"]')
+    expect(final).not.toBeNull()
+    expect(final?.getAttribute('data-linked-mailbox-message-id')).toBe('msg-mailbox-42')
+    expect(view.getByText('final from Host session log')).toBeTruthy()
+    expect(view.container.querySelector('[data-streaming="true"]')).toBeNull()
+  })
+
+  it('omits linkedMailboxMessageId on finals not caused by a mailbox message (T030)', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'q'), assistant(2, 'ordinary final', 1, 1)],
+      turnEnds: new Map([[1, 3]]),
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const final = view.container.querySelector('[data-chat-final="session-log"]')
+    expect(final).not.toBeNull()
+    expect(final?.hasAttribute('data-linked-mailbox-message-id')).toBe(false)
+    expect(view.getByText('ordinary final')).toBeTruthy()
   })
 
   it('renders durable team-message context as a Host mailbox handoff (T024)', () => {

@@ -11,7 +11,7 @@ import type {
 } from '../contract/chat-nodes.ts'
 import { deriveTurnMetrics } from '../contract/turn-metrics.ts'
 import { CHAT_SYNTHETIC_SEQ_OFFSETS, chatNode } from './common.ts'
-import { toAssistantBlocks } from './event-projection.ts'
+import { readLinkedMailboxMessageId, toAssistantBlocks } from './event-projection.ts'
 
 declare module '../contract/chat-nodes.ts' {
   interface ChatNodeDataMap {
@@ -30,6 +30,13 @@ declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
 interface TurnTailState {
   readonly turn: number
   readonly end?: ConversationMatch
+  /** Cold-resume path: team-message receipt immediately before `turn/start`. */
+  readonly linkedMailboxMessageId?: string
+}
+
+/** Predecessor input-message state used only for mailbox attribution. */
+interface PrecedingInputMessage {
+  readonly source: unknown
 }
 
 interface StepEvidence {
@@ -150,6 +157,11 @@ function tailData(context: ConversationNodeContext<TurnTailState>): TurnTailChat
   const tokenUsage = context.start?.event.type === 'turn/start'
     ? deriveTurnTokenUsage(context.matches.map(match => match.event).filter(isSessionEvent))
     : undefined
+  // Prefer mid-turn Location publication; fall back to cold-resume capture at start.
+  const fromTurnData = turn.data.get('linkedMailboxMessageId')
+  const linkedMailboxMessageId = typeof fromTurnData === 'string' && fromTurnData.length > 0
+    ? fromTurnData
+    : context.state?.linkedMailboxMessageId
   return {
     turn: end.event.data.turn,
     seq: end.event.seq,
@@ -159,6 +171,7 @@ function tailData(context: ConversationNodeContext<TurnTailState>): TurnTailChat
     ...metrics?.ttftMs === undefined ? {} : { ttftMs: metrics.ttftMs },
     ...metrics?.tokensPerSecond === undefined ? {} : { tokensPerSecond: metrics.tokensPerSecond },
     ...tokenUsage === undefined ? {} : { tokenUsage },
+    ...linkedMailboxMessageId === undefined ? {} : { linkedMailboxMessageId },
   }
 }
 
@@ -176,9 +189,16 @@ export const turnTailDefinition: ConversationNodeDefinition<TurnTailState> = {
     if (coordinates !== undefined) return { id: String(coordinates.turn), role: 'update' }
     return null
   },
-  start: (_context, match) => {
+  start: (_context, match, reader) => {
     if (match.event.type !== 'turn/start') throw new Error('turn-tail start requires turn/start')
-    return { turn: match.event.data.turn }
+    const preceding = reader.previous<PrecedingInputMessage>('input-message')
+    const linked = preceding === undefined
+      ? null
+      : readLinkedMailboxMessageId(preceding.state.source)
+    return {
+      turn: match.event.data.turn,
+      ...linked === null ? {} : { linkedMailboxMessageId: linked },
+    }
   },
   update: (context, match) => match.event.type === 'turn/end'
     ? { ...context.state, end: match }

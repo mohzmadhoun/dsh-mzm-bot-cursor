@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   chatHandoffDeliveryState, handoffBodyPreview, readTeamMessageSource,
 } from '../src/client/chat/team-message-source.ts'
+import { readLinkedMailboxMessageId } from '../src/client/conversation-nodes/event-projection.ts'
 
 describe('readTeamMessageSource', () => {
   it('reads a complete team-message source', () => {
@@ -45,6 +46,23 @@ describe('handoffBodyPreview', () => {
 
   it('returns empty string when no text block is present', () => {
     expect(handoffBodyPreview([{ type: 'image' }])).toBe('')
+  })
+})
+
+describe('readLinkedMailboxMessageId (T030)', () => {
+  it('returns messageId for a team-message source', () => {
+    expect(readLinkedMailboxMessageId({
+      kind: 'team-message',
+      messageId: 'msg-42',
+      senderId: 's1',
+      senderName: 'Alice',
+      teamId: 't1',
+    })).toBe('msg-42')
+  })
+
+  it('returns null for ordinary user sources', () => {
+    expect(readLinkedMailboxMessageId({ kind: 'user' })).toBeNull()
+    expect(readLinkedMailboxMessageId(null)).toBeNull()
   })
 })
 

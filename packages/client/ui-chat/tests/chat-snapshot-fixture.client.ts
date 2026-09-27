@@ -277,6 +277,8 @@ export function chatSnapshotFixture(input: {
   readonly turnEnds?: LegacyConversationSlice['turnEnds']
   /** Per-turn usage buckets; production derives these from session events. */
   readonly turnUsages?: ReadonlyMap<number, TurnTokenUsage> | undefined
+  /** Optional Chat-turn mailbox attribution (T030 / linkedMailboxMessageId). */
+  readonly linkedMailboxMessageIds?: ReadonlyMap<number, string> | undefined
 } = {}, previous?: ChatSnapshot): ChatSnapshot {
   const legacy: LegacyConversationSlice = {
     nodes: input.nodes ?? EMPTY,
@@ -463,6 +465,7 @@ export function chatSnapshotFixture(input: {
     })
     const metrics = deriveTurnMetrics(legacy.nodes).get(turnNumber)
     const tokenUsage = input.turnUsages?.get(turnNumber)
+    const linkedMailboxMessageId = input.linkedMailboxMessageIds?.get(turnNumber)
     const tailData = {
       turn: turnNumber,
       seq: endSeq,
@@ -474,6 +477,7 @@ export function chatSnapshotFixture(input: {
       ...metrics?.ttftMs === undefined ? {} : { ttftMs: metrics.ttftMs },
       ...metrics?.tokensPerSecond === undefined ? {} : { tokensPerSecond: metrics.tokensPerSecond },
       ...tokenUsage === undefined ? {} : { tokenUsage },
+      ...linkedMailboxMessageId === undefined ? {} : { linkedMailboxMessageId },
     }
     dataStore.set('turn-tail', tailData)
     nodes.push({
