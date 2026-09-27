@@ -11,44 +11,46 @@
 
 **P1 (Wedge A)** — Done on `master` (epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37/p1-wedge-a-per-bot-models-11-messaging-electron-ui)). Specs remain under `specs/001-multi-model-bots`.
 
-**Deferred (non-blocking):** SC-005 live Desktop full Phase 1 replay — recipe present; `specs/001-multi-model-bots/verifier/evidence/scenario-5/VERDICT.txt` = Deferred (`LIVE_DESKTOP: Skipped`). Does **not** block P2 Spec Kit.
+**Deferred (non-blocking):** SC-005 live Desktop full Phase 1 replay — recipe present; `specs/001-multi-model-bots/verifier/evidence/scenario-5/VERDICT.txt` = Deferred (`LIVE_DESKTOP: Skipped`). Does **not** block P2/P3.
 
-**P2 (Identity / personas)** — Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) In Progress.
+**P2 (Identity / personas)** — Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) **In Progress** (do **not** mark Done until Verifier Pass + PO).
 
-- Spec Kit **design closed** (specify → clarify → plan → tasks → analyze):
-  - Specify Done ([MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas) / PR #67).
-  - Clarify Done ([MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass).
-  - Plan Done ([MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) / PR #70; Verifier [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Pass).
-  - Tasks Done ([MOH-96](https://linear.app/momadhoun/issue/MOH-96/p2-spec-kit-tasks-identity-personas) / PR #72 @ `837152b248`; Verifier [MOH-97](https://linear.app/momadhoun/issue/MOH-97/p2-verifier-gate-tasks-002-identity-personas) Pass).
-  - Analyze + taskstoissues Done ([MOH-98](https://linear.app/momadhoun/issue/MOH-98/p2-spec-kit-analyze-taskstoissues) / PR #73 @ `97e62765a3`; Verifier [MOH-99](https://linear.app/momadhoun/issue/MOH-99/p2-verifier-gate-analyze-taskstoissues) Pass). Issues [MOH-100](https://linear.app/momadhoun/issue/MOH-100)…[MOH-141](https://linear.app/momadhoun/issue/MOH-141) under epic MOH-88.
+- Spec Kit **closed** (specify → clarify → plan → tasks → analyze → implement T001–T042) on `master` (docs + implement). Specs under `specs/002-identity-personas/`.
+  - Design Verifier gates Pass: [MOH-91](https://linear.app/momadhoun/issue/MOH-91)…[MOH-99](https://linear.app/momadhoun/issue/MOH-99).
+  - Implement issues [MOH-100](https://linear.app/momadhoun/issue/MOH-100)…[MOH-141](https://linear.app/momadhoun/issue/MOH-141); polish T039–T042 merged (#98 / #99).
+- **Phase 2 product Verifier gate — in flight.** Epic stays open until Pass. Linear statuses owned by PO.
 
 ## Next gate
 
-**Implement — Setup (T001–T004) in flight** (parallel; no US fan-out yet).
+**Current — P2 Verifier Pass** (epic exit / SC path + non-goals). Owner: **DH Verifier**. Lead does not stamp Done.
 
-| Task | Issue | Owner |
-|------|-------|-------|
-| T001 Confirm design tree | [MOH-100](https://linear.app/momadhoun/issue/MOH-100) | **DH Spec** |
-| T002 Inventory Host bot-identity | [MOH-101](https://linear.app/momadhoun/issue/MOH-101) | **DH Runtime** |
-| T003 Inventory instruction-bind | [MOH-102](https://linear.app/momadhoun/issue/MOH-102) | **DH Runtime** |
-| T004 Verifier recipe README | [MOH-103](https://linear.app/momadhoun/issue/MOH-103) | **DH Verifier** |
+**After Verifier Pass + PO confirm — P3 Skills UX** Spec Kit **specify** (first Spec Kit step). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P3.
 
-- Spec / Verifier may touch `specs/002-identity-personas/` for their Setup slices only; Lead does **not** edit that tree.
-- **After Setup Done:** foundations **T005–T012** ([MOH-104](https://linear.app/momadhoun/issue/MOH-104)…) — **blocking** before any US1–US5 product fan-out (`tasks.md` Phase 2).
-- After foundations checkpoint: US fan-out (US1 → US2 → US4 → US3 → US5) + Architect seams as needed for story slices.
+- **Do not invent FR detail** — Spec owns FRs/acceptance when specify runs.
+- **Do not create a P3 epic** until PO confirms Verifier Pass and authorizes epic open.
+- Program In/Out/Exit (plan only; not FRs): load/discover + authoring; thin managed pack — **out** full managed catalog parity + learn-from-demonstration; exit = attach/run a skill on a bot with Verifier covering load + one authoring path.
+
+## Phase 3 kickoff checklist (hold until Verifier Pass)
+
+Run only after PO confirms P2 Verifier Pass. Checklist for Spec **specify** (Skills UX); no epic/issues until PO opens them.
+
+1. **PO** — Confirm Verifier Pass on MOH-88 Phase 2 exit; leave Linear statuses to PO (epic Done only after Pass).
+2. **PO** — Open P3 epic (Skills UX) under **DeepSeek Harness - Cursor** when ready; Lead does **not** create it preemptively.
+3. **DH Lead** — Kickoff + phase gate (mirror P2 MOH-89 pattern): authorize Spec specify only; update this living gate; no feature code.
+4. **DH Spec** — `/speckit-specify` for P3 Skills UX only; new `specs/00x-…` tree; do **not** rewrite `specs/001` / `specs/002`; FRs come from specify, not this checklist.
+5. **DH Verifier** — Gate specify delivery (Pass/Fail) before clarify.
+6. **Held until after specify Pass** — clarify → plan → tasks → analyze → taskstoissues → implement (same Spec Kit order as P2); Architect / Runtime / Electron engage on seams when plan/tasks demand.
 
 ## Owners / held
 
 | Role | Action |
 |------|--------|
-| **DH Spec** | Setup T001 (MOH-100) in flight |
-| **DH Runtime** | Setup T002+T003 (MOH-101, MOH-102) in flight |
-| **DH Verifier** | Setup T004 (MOH-103) in flight |
-| **DH Architect** | Held for Setup; engage on foundations / story seams after T001–T004 |
-| **DH Electron** | Held until foundations + Client/UI story slices need shell work |
-| **DH Lead** | Living gate / plan §10 only (this branch); no `specs/002` edits |
-| **PO Assistant** | Orchestration; no feature code |
+| **DH Verifier** | Phase 2 product gate **in flight** — Pass/Fail → PO |
+| **DH Lead** | This living gate + P3 kickoff checklist; no epic Done; no P3 epic create |
+| **DH Spec** | Held for P3 specify until PO confirms Verifier Pass + epic open |
+| **DH Architect / Runtime / Electron** | Held for P3; no P2 reopen |
+| **PO Assistant** | Orchestration; Linear statuses; ship/no-ship on P3 epic open |
 
 ## Blockers
 
-None for Setup T001–T004 parallel fan-out. Foundations T005–T012 remain the hard gate before US product work.
+**Hard gate:** P2 Verifier Pass before any P3 Spec Kit start or P3 epic create. No other blockers for living-gate prep.
