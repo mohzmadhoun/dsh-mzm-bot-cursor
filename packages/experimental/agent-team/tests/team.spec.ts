@@ -18,7 +18,16 @@ import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
 import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
-import TeamService, { SidebarSectionId, TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
+import TeamService, {
+  SidebarSectionId,
+  TeamError,
+  TeamId,
+  TeamMessageId,
+  TeamTaskId,
+  RoutineId,
+  isRoutineEligibleForWake,
+  routinesEligibleForWake,
+} from '../src/index.ts'
 import {
   modelAssignmentsAreDistinct,
   normalizeAvatarMarker,
@@ -2020,6 +2029,133 @@ describe('Team Remote API', () => {
     })
     expect(betaListed.value.routines.some(row => row.routineId === created.routine.routineId))
       .toBe(false)
+  })
+
+  it('US3 T022: pauseRoutine / resumeRoutine persist status; paused is not wake-eligible', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('routine pause a'),
+      textResponse('routine pause b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Pause Alpha',
+      modelSelection: { provider: 'mock', model: 'pause-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Pause Beta',
+      modelSelection: { provider: 'mock', model: 'pause-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, beta.id)
+
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Inbox sweep',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    expect(created.routine.status).toBe('active')
+    expect(isRoutineEligibleForWake(created.routine)).toBe(true)
+
+    await expect(ctx.agentTeams.pauseRoutine(lead, {
+      routineId: RoutineId('routine-missing'),
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_ROUTINE_NOT_FOUND' })
+    await expect(ctx.agentTeams.remotePauseRoutine(lead, {
+      routineId: RoutineId('routine-missing'),
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/not found/) },
+    })
+
+    const paused = await ctx.agentTeams.pauseRoutine(lead, {
+      routineId: created.routine.routineId,
+      signal: SIGNAL,
+    })
+    expect(paused.routine).toMatchObject({
+      routineId: created.routine.routineId,
+      botId: alpha.id,
+      intent: 'Inbox sweep',
+      identity: 'Inbox sweep',
+      scheduleExpr: '@every 5m',
+      status: 'paused',
+      lastRunAt: null,
+    })
+    expect(paused.routine.updatedAt).toBeGreaterThanOrEqual(created.routine.updatedAt)
+    expect(isRoutineEligibleForWake(paused.routine)).toBe(false)
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toEqual([paused.routine])
+
+    // Host wake gate: paused catalog rows MUST NOT be selected for cron fire (FR-003).
+    const pausedRecords = ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL })
+      .routines
+      .map(row => ({
+        routineId: row.routineId,
+        botId: row.botId,
+        intent: row.intent,
+        scheduleExpr: row.scheduleExpr,
+        status: row.status,
+        lastRunAt: row.lastRunAt,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      }))
+    expect(routinesEligibleForWake(pausedRecords)).toEqual([])
+
+    // Remote pause is idempotent; list still shows paused.
+    const remotePaused = await ctx.agentTeams.remotePauseRoutine(lead, {
+      routineId: created.routine.routineId,
+    }, SIGNAL)
+    expect(remotePaused).toMatchObject({
+      ok: true,
+      value: { routine: { status: 'paused', routineId: created.routine.routineId } },
+    })
+
+    const resumed = await ctx.agentTeams.resumeRoutine(lead, {
+      routineId: created.routine.routineId,
+      signal: SIGNAL,
+    })
+    expect(resumed.routine.status).toBe('active')
+    expect(isRoutineEligibleForWake(resumed.routine)).toBe(true)
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toEqual([resumed.routine])
+    expect(routinesEligibleForWake([{
+      routineId: resumed.routine.routineId,
+      botId: resumed.routine.botId,
+      intent: resumed.routine.intent,
+      scheduleExpr: resumed.routine.scheduleExpr,
+      status: resumed.routine.status,
+      lastRunAt: resumed.routine.lastRunAt,
+      createdAt: resumed.routine.createdAt,
+      updatedAt: resumed.routine.updatedAt,
+    }])).toHaveLength(1)
+
+    const remoteResumed = await ctx.agentTeams.remoteResumeRoutine(lead, {
+      routineId: created.routine.routineId,
+    }, SIGNAL)
+    expect(remoteResumed).toMatchObject({
+      ok: true,
+      value: { routine: { status: 'active', routineId: created.routine.routineId } },
+    })
+
+    // Per-bot isolation: pausing alpha does not invent beta rows.
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: beta.id, signal: SIGNAL }).routines)
+      .toEqual([])
+
+
+    // Durability: pause again, then re-list (leave/return) keeps paused status (FR-003).
+    await ctx.agentTeams.pauseRoutine(lead, {
+      routineId: created.routine.routineId,
+      signal: SIGNAL,
+    })
+    const relisted = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: alpha.id }, SIGNAL)
+    expect(relisted).toMatchObject({
+      ok: true,
+      value: { routines: [{ routineId: created.routine.routineId, status: 'paused' }] },
+    })
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.routines.find(row => row.routineId === created.routine.routineId)?.status)
+      .toBe('paused')
   })
 
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {

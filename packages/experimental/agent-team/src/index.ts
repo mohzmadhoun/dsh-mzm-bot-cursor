@@ -60,12 +60,20 @@ import type {
   ListRoutinesByBotInput,
   ListRoutinesByBotRequest,
   ListRoutinesByBotResult,
+  PauseRoutineInput,
+  PauseRoutineRequest,
+  PauseRoutineResult,
   RenameBotInput,
   RenameBotRequest,
   RenameBotResult,
   RenameSectionInput,
   RenameSectionRequest,
   RenameSectionResult,
+  ResumeRoutineInput,
+  ResumeRoutineRequest,
+  ResumeRoutineResult,
+  RoutineRecord,
+  RoutineStatus,
   SendTeamMessageRequest,
   SendTeamMessageResult,
   SetAvatarInput,
@@ -124,6 +132,8 @@ export {
   parseScheduleExpr,
   nextFireAt,
   describeScheduleExpr,
+  isRoutineEligibleForWake,
+  routinesEligibleForWake,
   MIN_EVERY_INTERVAL_MS,
 } from './routine-cron.ts'
 export {
@@ -650,6 +660,81 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Lead-authorized Host Routine pause (P4 US3 T022 / FR-003).
+   * Persists `status: paused` on the catalog row; Host cron wake MUST NOT fire while paused.
+   * Idempotent when already paused. Electron Main must not invent pause flags (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - routine id and cancellation.
+   * @returns Host-owned Routine projection after pause.
+   */
+  async pauseRoutine(caller: Agent, request: PauseRoutineRequest): Promise<PauseRoutineResult> {
+    return this.setRoutineStatus(caller, request.routineId, 'paused', request.signal)
+  }
+
+  /**
+   * Lead-authorized Host Routine resume (P4 US3 T022 / FR-004).
+   * Persists `status: active` so the row is eligible for Host cron wake again.
+   * Idempotent when already active. Electron Main must not invent resume flags (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - routine id and cancellation.
+   * @returns Host-owned Routine projection after resume.
+   */
+  async resumeRoutine(caller: Agent, request: ResumeRoutineRequest): Promise<ResumeRoutineResult> {
+    return this.setRoutineStatus(caller, request.routineId, 'active', request.signal)
+  }
+
+  /**
+   * Persist one Host Routine lifecycle status on the Lead journal catalog.
+   * @param caller - exact live Lead Agent.
+   * @param routineId - catalog row id.
+   * @param status - next durable status (`paused` suppresses wake; `active` restores eligibility).
+   * @param signal - cancellation.
+   * @returns projected row after the durable write.
+   */
+  private async setRoutineStatus(
+    caller: Agent,
+    routineId: RoutineId,
+    status: RoutineStatus,
+    signal: AbortSignal,
+  ): Promise<PauseRoutineResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError(
+        `only the Team Lead can ${status === 'paused' ? 'pause' : 'resume'} a routine`,
+        'TEAM_LEAD_REQUIRED',
+      )
+    }
+    signal.throwIfAborted()
+    const id = RoutineId(String(routineId).trim())
+    if (id.length === 0) {
+      throw new TeamError('routineId must be non-empty', 'TEAM_INVALID_ARGUMENT')
+    }
+    const root = membership.root
+    const routine = await this.journal.transact(root.id, async () => {
+      signal.throwIfAborted()
+      const current = this.journal.state(root).routines.find(row => row.routineId === id)
+      if (current === undefined) {
+        throw new TeamError(
+          `routine "${id}" not found`,
+          'TEAM_ROUTINE_NOT_FOUND',
+        )
+      }
+      const row: RoutineRecord = {
+        ...current,
+        status,
+        updatedAt: Date.now(),
+      }
+      await this.journal.appendAndFlush(root, 'team/routine', {
+        version: 2,
+        teamId: TeamId(root.id),
+        routine: row,
+      })
+      return row
+    })
+    return { routine: projectRoutine(routine) }
+  }
+
+  /**
    * Lead-authorized Host skill attach (FR-003 / FR-005 / T020).
    * Appends `{ botId, skillId }` onto that Bot’s ordered `skillAttachments` (multi-attach allowed).
    * Requires the skill to exist in Host `ctx.skills`; does not auto-attach other bots.
@@ -1160,6 +1245,40 @@ export class TeamService extends TypertRemoteService {
     return this.botIdentityMutationResult(
       Promise.resolve(this.listRoutinesByBot(agent, { ...request, signal })),
     )
+  }
+
+  /**
+   * Pause one Host Routine through the generated Remote API (P4 US3 T022 / FR-003).
+   * Persists `status: paused`; Host cron wake MUST NOT fire while paused.
+   * @param agent - exact live Lead Agent authorizing pause.
+   * @param request - routine id.
+   * @param signal - Remote call cancellation.
+   * @returns the Routine projection or a typed Team rejection.
+   */
+  @Remote('pauseRoutine')
+  remotePauseRoutine(
+    agent: Agent,
+    request: PauseRoutineInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<PauseRoutineResult>> {
+    return this.botIdentityMutationResult(this.pauseRoutine(agent, { ...request, signal }))
+  }
+
+  /**
+   * Resume one Host Routine through the generated Remote API (P4 US3 T022 / FR-004).
+   * Persists `status: active` so the row is eligible for Host cron wake again.
+   * @param agent - exact live Lead Agent authorizing resume.
+   * @param request - routine id.
+   * @param signal - Remote call cancellation.
+   * @returns the Routine projection or a typed Team rejection.
+   */
+  @Remote('resumeRoutine')
+  remoteResumeRoutine(
+    agent: Agent,
+    request: ResumeRoutineInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<ResumeRoutineResult>> {
+    return this.botIdentityMutationResult(this.resumeRoutine(agent, { ...request, signal }))
   }
 
   /**
