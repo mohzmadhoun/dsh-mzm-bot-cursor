@@ -14,7 +14,8 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamAssignSectionActionResult, type TeamCreateBotActionResult,
+  type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
+  type TeamCreateBotActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
@@ -192,6 +193,26 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
           id: 'worker-id' as SessionId,
           sectionId: 'section-1' as SidebarSectionId,
           member: { ...view.members[1]!, sectionId: 'section-1' as SidebarSectionId },
+        },
+      },
+    }),
+    attachSkill: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          skillAttachments: [{
+            botId: 'worker-id' as SessionId,
+            skillId: 'mzm-thin-pack' as SkillId,
+          }],
+          member: {
+            ...view.members[1]!,
+            skillAttachments: [{
+              botId: 'worker-id' as SessionId,
+              skillId: 'mzm-thin-pack' as SkillId,
+            }],
+          },
         },
       },
     }),
@@ -2126,5 +2147,204 @@ describe('TeamAction', () => {
       expect(document.querySelector('[data-team-skill="mzm-thin-pack"]')
         ?.getAttribute('data-skill-available')).toBe('true')
     })
+  })
+
+  it('attaches an available skill to a bot and shows it on that bot’s skills surface (T023)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const peerId = 'peer-id' as SessionId
+    const priorWorker = { ...view.members[1]!, displayName: 'Attach Target' }
+    const peer = {
+      id: peerId,
+      name: 'peer',
+      role: 'teammate' as const,
+      status: 'inactive' as const,
+      model: 'model-b',
+      modelSelection: { provider: 'fixture', model: 'model-b' },
+      displayName: 'Peer Bot',
+      diagnostics: [] as string[],
+    }
+    const attachment = { botId: workerId, skillId: 'mzm-thin-pack' as SkillId }
+    const savedWorker = { ...priorWorker, skillAttachments: [attachment] }
+    const attachSkill = vi.fn((): Promise<TeamAttachSkillActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          skillAttachments: [attachment],
+          member: savedWorker,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          members: [view.members[0]!, priorWorker, peer],
+          unassignedBotIds: [SESSION, workerId, peerId],
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          members: [view.members[0]!, savedWorker, peer],
+          unassignedBotIds: [SESSION, workerId, peerId],
+        },
+      })
+    render(<TeamAction {...props(actions({ load, attachSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Attach Target')
+    expect(document.querySelector(`[data-team-bot-skills="${workerId}"]`)).not.toBeNull()
+    expect(document.querySelector(`[data-team-bot-skills-empty="${workerId}"]`)?.textContent)
+      .toBe(zh.botSkillsEmpty)
+    expect(document.querySelector(`[data-team-bot-skills="${peerId}"] [data-team-bot-skills-empty]`))
+      .not.toBeNull()
+    fireEvent.click(document.querySelector('[data-team-skill-load="mzm-thin-pack"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill-available="mzm-thin-pack"]')).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector(`[data-team-attach-skill="${workerId}"]`)!)
+    expect(screen.getByText(zh.attachSkillHint)).toBeTruthy()
+    const select = document.querySelector('[data-team-attach-skill-select]') as HTMLSelectElement
+    fireEvent.change(select, { target: { value: 'mzm-thin-pack' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(attachSkill).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        skillId: 'mzm-thin-pack',
+      })
+    })
+    const workerRow = await waitFor(() => {
+      const row = document.querySelector(
+        `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+      )
+      expect(row).not.toBeNull()
+      return row!
+    })
+    expect(workerRow.querySelector('[data-team-bot-skill-label]')?.textContent).toBe('MzM thin pack')
+    expect(document.querySelector(
+      `[data-team-bot-skills="${peerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+    )).toBeNull()
+  })
+
+  it('marks an attached skill session-active via dedicated Run control (T024)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const attachment = { botId: workerId, skillId: 'mzm-thin-pack' as SkillId }
+    const member = {
+      ...view.members[1]!,
+      displayName: 'Active Target',
+      skillAttachments: [attachment],
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, member] },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Active Target')
+    const row = document.querySelector(
+      `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+    )
+    expect(row?.getAttribute('data-skill-active')).toBe('false')
+    fireEvent.click(document.querySelector('[data-team-skill-run="mzm-thin-pack"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill-active="mzm-thin-pack"]')).not.toBeNull()
+    })
+    expect(screen.getByText(zh.skillActive)).toBeTruthy()
+    expect(document.querySelector(
+      '[data-team-bot-skill="mzm-thin-pack"]',
+    )?.getAttribute('data-skill-active')).toBe('true')
+    expect(document.querySelector('[data-team-skill-run="mzm-thin-pack"]')).toBeNull()
+  })
+
+  it('keeps prior attachments and shows failure when attachSkill is unavailable (T025)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorAttachment = { botId: workerId, skillId: 'mzm-thin-pack' as SkillId }
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Retain Target',
+      skillAttachments: [priorAttachment],
+    }
+    const attachSkill = vi.fn((): Promise<TeamAttachSkillActionResult> => Promise.resolve(
+      remoteFailure('attach Host offline') as TeamAttachSkillActionResult,
+    ))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: {
+        ...view,
+        members: [view.members[0]!, priorMember],
+        skills: [
+          ...view.skills,
+          {
+            id: 'my-playbook' as SkillId,
+            displayName: 'My playbook',
+            source: 'user' as const,
+          },
+        ],
+      },
+    })
+    render(<TeamAction {...props(actions({ load, attachSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Retain Target')
+    expect(document.querySelector(
+      `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+    )).not.toBeNull()
+    fireEvent.click(document.querySelector('[data-team-skill-load="my-playbook"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill-available="my-playbook"]')).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector(`[data-team-attach-skill="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-attach-skill-select]')!, {
+      target: { value: 'my-playbook' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('attach Host offline (gateway/internal)')).toBeTruthy()
+    expect(document.querySelector(
+      `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+    )).not.toBeNull()
+    expect(document.querySelector(
+      `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="my-playbook"]`,
+    )).toBeNull()
+    expect(screen.getByText(zh.attachSkillHint)).toBeTruthy()
+  })
+
+  it('shows Team rejection for attachSkill without mutating prior attachments (T025)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorAttachment = { botId: workerId, skillId: 'mzm-thin-pack' as SkillId }
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Reject Target',
+      skillAttachments: [priorAttachment],
+    }
+    const attachSkill = vi.fn((): Promise<TeamAttachSkillActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'skill is not in the Host catalog' },
+      },
+    }))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, attachSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Reject Target')
+    fireEvent.click(document.querySelector('[data-team-skill-load="mzm-thin-pack"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill-available="mzm-thin-pack"]')).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector(`[data-team-attach-skill="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-attach-skill-select]')!, {
+      target: { value: 'mzm-thin-pack' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('skill is not in the Host catalog (team-rejected)')).toBeTruthy()
+    expect(document.querySelector(
+      `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="mzm-thin-pack"]`,
+    )).not.toBeNull()
+    expect(screen.getByText(zh.attachSkillHint)).toBeTruthy()
   })
 })

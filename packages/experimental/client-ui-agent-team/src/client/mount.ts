@@ -2,6 +2,7 @@
 
 import type {
   AssignSectionInput,
+  AttachSkillInput,
   CreateBotInput,
   CreateSectionInput,
   DeleteBotInput,
@@ -28,7 +29,8 @@ import {
 } from './HandoffNotices.tsx'
 import {
   TeamAction, type TeamActionInjected, type TeamActionResult,
-  type TeamAssignSectionActionResult, type TeamCreateBotActionResult,
+  type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
+  type TeamCreateBotActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
@@ -37,7 +39,7 @@ import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, sections, skills library, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
+    /** Agent Teams roster, sections, skills library/attach/run, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -82,6 +84,9 @@ function registerUi(ctx: ClientContext): void {
     },
     async assignSection(sessionId, input: AssignSectionInput): Promise<TeamAssignSectionActionResult> {
       return await ctx.remote.agentTeams.assignSection(leadSessionId(sessionId), input)
+    },
+    async attachSkill(sessionId, input: AttachSkillInput): Promise<TeamAttachSkillActionResult> {
+      return await ctx.remote.agentTeams.attachSkill(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)
