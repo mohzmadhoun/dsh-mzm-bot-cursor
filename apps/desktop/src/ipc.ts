@@ -18,6 +18,9 @@ import type { IpcMainInvokeEvent } from 'electron'
  * There is no identity, persona, section-membership, avatar, rename, or bot-delete channel —
  * Host Agent Teams owns durable bot identity mutations (research R1 / T010;
  * `specs/002-identity-personas/contracts/`).
+ * There is no skill-catalog, skill-attachment, or skill-authoring channel —
+ * Host owns durable skill catalog and attachments (research R2/R4 / T013;
+ * `specs/003-skills-ux/contracts/`).
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
