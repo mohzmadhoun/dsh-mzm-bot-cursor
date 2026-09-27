@@ -33,7 +33,7 @@ kind: "package-reference"
 
 ### 创建带 model 赋值的 Bot
 
-**新建 Bot** 打开表单，要求非空 `displayName` 以及 provider 与 model id，然后调用 Host Remote `agentTeams/createBot`。Electron Main 不得发明 bot 记录或 LLM 路由。Create rejection 保留为显式 business result；成功后会重新加载 roster。当 create 或 chat 表面出现 Host `MISSING_CREDENTIAL` 时，面板展示应用内 Models 凭据引导，并通过 `ctx.settingsShell.openSection('models')` 提供**打开模型设置**控件——不以 1Password / 外部保险库为主路径。同一 code 的 chat 轮次失败在 `ui-chat` 使用相同交接。表单展示 locale 持有的 Verifier 说明：多模型 Pass 需要环境中至少两个不同的已配置 `(provider, model)` 赋值（不是固定营销目录）。同赋值仍可创建；草稿与 roster 已有赋值重复时显示软提示。Roster 提示跟踪这些不同赋值是否已就绪。
+**新建 Bot** 打开表单，要求非空 `displayName` 以及 provider 与 model id，然后调用 Host Remote `agentTeams/createBot`。Electron Main 不得发明 bot 记录或 LLM 路由。Create rejection 保留为显式 business result；成功后会重新加载 roster。当 create 或 chat 表面出现 Host `MISSING_CREDENTIAL`、`AUTH` 或 `INVALID_CREDENTIAL` 时，面板展示应用内 Models 凭据引导，并通过 `ctx.settingsShell.openSection('models')` 提供**打开模型设置**控件——不以 1Password / 外部保险库为主路径。相同 code 的 chat 轮次失败在 `ui-chat` 使用相同交接。表单展示 locale 持有的 Verifier 说明：多模型 Pass 需要环境中至少两个不同的已配置 `(provider, model)` 赋值（不是固定营销目录）。同赋值仍可创建；草稿与 roster 已有赋值重复时显示软提示。Roster 提示跟踪这些不同赋值是否已就绪。
 
 当草稿同时有两个 id，且 roster 上的 Bot 已有赋值时，表单会说明该草稿是否为新的不同赋值。面板只统计同时暴露 LLM provider 与 model 的 teammate 行；Lead 行以及没有该配对的后端 id 不计入。不完整草稿不显示该比较。
 
