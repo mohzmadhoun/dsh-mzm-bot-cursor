@@ -58,4 +58,4 @@ Record stdout + SHA under [evidence/t023-handoff-projections/](./evidence/t023-h
 - Data model: [../data-model.md](../data-model.md) (Host mailbox message)
 - T021 send path: [t021-mailbox-send.md](./t021-mailbox-send.md)
 - T022 durable fields: [t022-mailbox-persist.md](./t022-mailbox-persist.md)
-- Scenario 3 (T025): `scenario-3-mailbox.md` (when present)
+- Scenario 3 (T025): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
