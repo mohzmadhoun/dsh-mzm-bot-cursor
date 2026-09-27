@@ -4,7 +4,7 @@ Verdict: PASS (SC-003 / quickstart Scenario 3)
 Stamp: 2026-09-27
 Product tip: origin/master @ abf79caad5
   (includes Host T025 #161 + Client T027 #163)
-Evidence tip: cursor/p4-t028-cron-fire-recipe-fe1d (this stamp)
+Evidence tip: cursor/p4-t028-cron-fire-recipe-fe1d @ 508635206608
 Linear: MOH-221 (T028) — left In Progress (PO closes after SO12 embed / merge)
 Recipe: specs/004-routines-cron/verifier/scenario-4-cron-fire.md
 Evidence home: specs/004-routines-cron/verifier/evidence/scenario-3/
