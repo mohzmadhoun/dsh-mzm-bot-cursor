@@ -660,9 +660,21 @@
   font-weight: 600;
 }
 
-.botRoutineLastRun {
+.botRoutineLastRunNever {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
+}
+
+.botRoutineLastRunFired {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .botRoutineAction {
