@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
-import { teamProjectionDefinition, projectSidebarSections, projectSkillCatalog } from '../src/projection.ts'
+import {
+  teamProjectionDefinition,
+  projectRoutine,
+  projectRoutines,
+  projectSidebarSections,
+  projectSkillCatalog,
+} from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
 import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId, RoutineId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
@@ -574,6 +580,55 @@ describe('Agent Teams projection events', () => {
       },
     } as unknown as SessionEvent
     expect(isEmptyState(projectTeam(ROOT, [inherited]))).toBe(true)
+  })
+})
+
+describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
+  it('projects intent/identity, scheduleLabel, status, and lastRunAt from Host rows', () => {
+    const active = {
+      routineId: RoutineId('routine-active'),
+      botId: CHILD,
+      intent: 'Ping status',
+      scheduleExpr: '@every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const paused = {
+      routineId: RoutineId('routine-paused'),
+      botId: SessionId('child-b'),
+      intent: 'Nightly digest',
+      scheduleExpr: '@daily',
+      status: 'paused' as const,
+      lastRunAt: 99,
+      createdAt: 20,
+      updatedAt: 30,
+    }
+    expect(projectRoutine(active)).toEqual({
+      ...active,
+      identity: 'Ping status',
+      scheduleLabel: 'Every 5m',
+    })
+    expect(projectRoutine(paused)).toEqual({
+      ...paused,
+      identity: 'Nightly digest',
+      scheduleLabel: 'Every day',
+    })
+    const state = {
+      id: TEAM,
+      members: [],
+      sections: [],
+      routines: [active, paused],
+      tasks: [],
+      nextTaskNumber: 1,
+      messages: [],
+      delivered: [],
+    }
+    expect(projectRoutines(state, CHILD)).toEqual([projectRoutine(active)])
+    expect(projectRoutines(state, SessionId('child-b'))).toEqual([projectRoutine(paused)])
+    expect(projectRoutines(state)).toEqual([projectRoutine(active), projectRoutine(paused)])
+    expect(projectRoutines(state, SessionId('missing'))).toEqual([])
   })
 })
 
