@@ -177,6 +177,10 @@ export abstract class CredentialProvider extends Service {
    * consumers re-resolve at each operation and must not cache across
    * operations — that per-operation read is what makes a changed credential
    * reach the next operation without a restart.
+   *
+   * Resolves **only** the named reference. Providers MUST NOT substitute
+   * another reference's value (no silent peer / cross-bot fallback): when
+   * `ref` is unconfigured, return `undefined` even if other refs hold secrets.
    * @param ref - the reference to resolve.
    * @returns the value and its source, or `undefined` while unconfigured.
    */

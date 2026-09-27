@@ -34,7 +34,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Orient implementers to existing seams; create Verifier recipe home; no product behavior yet
 
-- [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `architecture.md`, `quickstart.md`, `contracts/*`) under `specs/001-multi-model-bots/` and point implementers at [contracts/README.md](./contracts/README.md)
+- [x] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `architecture.md`, `quickstart.md`, `contracts/*`) under `specs/001-multi-model-bots/` and point implementers at [contracts/README.md](./contracts/README.md)
 - [ ] T002 [P] Inventory Shell↔Host spawn/IPC/document surfaces in `apps/desktop/src/host-process.ts`, `apps/desktop/src/host-protocol.ts`, `apps/desktop/src/ipc.ts`, `apps/desktop/src/web-document.ts`, and `apps/desktop-host/src/index.ts` against [contracts/topology-handshake.md](./contracts/topology-handshake.md)
 - [x] T003 [P] Inventory Host reuse touch points for P1: `packages/core/agent/src/model-selection.ts`, `packages/experimental/agent-team/src/{types,roster,mailbox,index}.ts`, `packages/experimental/agent-team-profile/cordis.patch.yml`, `packages/credentials/credentials-local/`, `packages/client/ui-settings-models/src/client/`, `packages/client/ui-chat/`, `packages/experimental/client-ui-agent-team/`
 - [ ] T004 Create Verifier recipe directory `specs/001-multi-model-bots/verifier/README.md` listing Scenario 0–5 owners (Electron / Verifier / Runtime / Client) mapped to [quickstart.md](./quickstart.md)
@@ -116,8 +116,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 3
 
 - [x] T027 [US3] Ensure Desktop Electron thin shell loads Web client (`dsh-app://`) without adding mailbox/credential/model router in Main — verify `apps/desktop/src/main.ts`, `apps/desktop/src/web-document.ts`, `apps/desktop/src/backend-controller.ts` stay lifecycle/HTTP-forward only
-- [ ] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
-- [ ] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
+- [x] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
+- [x] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
 - [ ] T030 [US3] Deliver final result in chat on turn completion / assistant (or handoff) result from session log; support optional `linkedMailboxMessageId` attribution when turn is caused by mailbox message ([data-model.md](./data-model.md) Chat turn)
 - [x] T031 [US3] Make 1:1 handoff / recipient action understandable on relevant chat surfaces without leaving the app — wire US2 projections from `packages/experimental/client-ui-agent-team/` into `packages/client/ui-chat/` / `packages/client/ui-conversation/` under Desktop
 - [ ] T032 [US3] Add Verifier Scenario 4 recipe in `specs/001-multi-model-bots/verifier/scenario-4-progress-final.md` for SC-004 (≥1 progress + final)
@@ -136,7 +136,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T033 [US4] Implement/confirm Models / settings write-only credential entry UI in `packages/client/ui-settings-models/src/client/` storing secrets via Host `CredentialRef` in `packages/credentials/credentials-local/` — UI may show non-secret `CredentialInfo` only
 - [x] T034 [P] [US4] Ensure preload/renderer never receive raw secrets: audit `apps/desktop/src/preload-*.ts` and `apps/desktop/src/ipc.ts` for absence of credential secret APIs ([contracts/in-app-credentials.md](./contracts/in-app-credentials.md))
-- [ ] T035 [US4] On missing credential for needed provider, direct user to in-app entry (not 1Password connector product flow) via `packages/client/ui-settings-models/src/client/` navigation; on invalid/revoked mid-session show clear failure + re-entry offer in that UI with no silent fallback to another bot’s credentials in Host resolve under `packages/credentials/`
+- [x] T035 [US4] On missing credential for needed provider, direct user to in-app entry (not 1Password connector product flow) via `packages/client/ui-settings-models/src/client/` navigation; on invalid/revoked mid-session show clear failure + re-entry offer in that UI with no silent fallback to another bot’s credentials in Host resolve under `packages/credentials/`
 - [x] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
 - [x] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets
 
