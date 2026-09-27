@@ -2118,6 +2118,40 @@ describe('ChatView', () => {
     expect(tool.innerHTML).toBe(beforeHtml)
   })
 
+  it('renders Host-stream chat progress (≥1 update) before the turn settles (T029 / FR-006)', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'q')],
+      partial: { turn: 1, step: 1, blocks: [{ kind: 'text', text: 'first progress' }] },
+    }, { running: true })
+    const view = render(<h.ChatView {...h.props} />)
+    const progress = view.container.querySelectorAll('[data-chat-progress="host-stream"]')
+    expect(progress.length).toBeGreaterThanOrEqual(1)
+    expect(view.getByText('first progress')).toBeTruthy()
+    expect(view.container.querySelector('[data-streaming="true"]')).toBeTruthy()
+
+    act(() => {
+      h.setChat({
+        partial: { turn: 1, step: 1, blocks: [{ kind: 'text', text: 'first progress then more' }] },
+      })
+    })
+    expect(view.getByText('first progress then more')).toBeTruthy()
+    expect(view.container.querySelectorAll('[data-chat-progress="host-stream"]').length)
+      .toBeGreaterThanOrEqual(1)
+
+    act(() => {
+      h.set({
+        nodes: [user(1, 'q'), assistant(2, 'final from Host log', 1, 1)],
+        partial: null,
+        running: false,
+        turnEnds: new Map([[1, 3]]),
+      })
+      h.setSession({ running: false })
+    })
+    expect(view.getByText('final from Host log')).toBeTruthy()
+    expect(view.container.querySelector('[data-streaming="true"]')).toBeNull()
+    expect(view.container.querySelector('[data-chat-progress="host-stream"]')).toBeNull()
+  })
+
   it('streaming leaves neighbor tool rows and history items at zero re-renders', () => {
     const h = makeHarness({
       nodes: [user(1, 'q'), assistant(2, 'old'), toolResult(3, 'a')],

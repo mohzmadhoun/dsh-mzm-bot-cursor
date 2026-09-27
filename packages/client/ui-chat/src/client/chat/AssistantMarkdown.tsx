@@ -132,7 +132,13 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     }
   }
   return (
-    <div className={css.root} data-streaming={streaming || undefined}>
+    <div
+      className={css.root}
+      data-streaming={streaming || undefined}
+      // Host session/agent stream events (`assistant/live-chunk`) drive in-flight
+      // progress; shell MUST NOT invent a parallel progress bus (T029 / FR-006).
+      data-chat-progress={streaming ? 'host-stream' : undefined}
+    >
       <div className={css.body}>
         {rendered}
         {interrupted && <span className={css.stopped}>{t('message.stopped')}</span>}

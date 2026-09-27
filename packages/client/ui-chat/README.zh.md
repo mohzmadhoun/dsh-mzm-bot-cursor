@@ -18,6 +18,7 @@ kind: "package-reference"
 - [系统提示词行](#system-prompt-row)
 - [轮次 token 用量](#turn-token-usage)
 - [已完成轮次的页脚](#completed-turn-footer)
+- [Host 流式聊天进度](#host-stream-chat-progress)
 - [轮次过程折叠](#turn-process-folding)
 - [滚动归属](#scroll-ownership)
 - [模型体验](#model-experience)
@@ -53,6 +54,11 @@ Assistant 回复结算后，已完成轮次的计时对话框不显示 TTFT 和�
 已完成轮次的操作页脚位于前方正文或扩展内容下方 20px。
 
 Host code 为 `MISSING_CREDENTIAL` 的终止轮次失败会展示本地化的应用内 Models 凭据引导，以及调用 `ctx.settingsShell.openSection('models')` 的**打开模型设置**控件——不以 1Password / 外部保险库为主路径。
+
+<a id="host-stream-chat-progress"></a>
+## Host 流式聊天进度
+
+进行中的进度仅来自 Host session/agent 流事件（`assistant/live-chunk` 与打开轮次的 session running 状态）。流式 Assistant 行与轮次状态标签暴露 `data-chat-progress="host-stream"`，便于 Verifier 在完成前观察到至少一次进度更新。Electron Main 不得另造并行的 chat-progress IPC 总线。
 
 -----
 

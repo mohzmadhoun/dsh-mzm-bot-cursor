@@ -18,6 +18,7 @@ File-mention providers receive the viewed Session ID with the closing-turn owner
 - [System prompt row](#system-prompt-row)
 - [Turn token usage](#turn-token-usage)
 - [Completed-turn footer](#completed-turn-footer)
+- [Host-stream chat progress](#host-stream-chat-progress)
 - [Turn Process Folding](#turn-process-folding)
 - [Scroll ownership](#scroll-ownership)
 - [Model Experience](#model-experience)
@@ -51,6 +52,11 @@ After Assistant replies settle, the completed-turn timing dialog omits TTFT and 
 The completed-turn action footer starts 20px below the preceding prose or extension content.
 
 Terminal turn failures with Host code `MISSING_CREDENTIAL` show localized in-app Models credential guidance and an **Open Models settings** control that calls `ctx.settingsShell.openSection('models')` — not a 1Password / external vault primary path.
+
+<a id="host-stream-chat-progress"></a>
+## Host-stream chat progress
+
+In-flight progress is Host session/agent stream events only (`assistant/live-chunk` and open-turn session running state). Streaming Assistant rows and the turn-status label expose `data-chat-progress="host-stream"` so Verifier can observe ≥1 progress update before completion. Electron Main MUST NOT invent a parallel chat-progress IPC bus.
 
 -----
 
