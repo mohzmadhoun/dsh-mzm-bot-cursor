@@ -1,0 +1,42 @@
+# T039 VERDICT — Document non-goals absence checks
+
+branch: cursor/p1-t039-non-goals-92fa
+commit: f9fc1dcdc66d09118ba5353d5bd29e4abb1584be
+date_utc: 2026-09-27T10:12:00Z
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/50
+Linear: MOH-84 (left In Progress; Verifier does not merge)
+
+## Verdict: PASS
+
+T039 acceptance is docs-only: recipe documents the four Out of Scope absence
+check groups with Pass/Fail rules and is indexed from verifier README.
+
+## Acceptance criteria checked
+
+| Criterion | Result | Evidence tag |
+|-----------|--------|--------------|
+| Recipe at `verifier/non-goals.md` | Present | measured |
+| Four non-goal groups documented with Pass/Fail | Pass | measured |
+| Indexed from `verifier/README.md` | Pass | measured |
+| Docs-only PR (no product code) | Pass | measured |
+| Absence scans hold on HEAD | Pass | measured |
+| Optional `profile-mcp.spec.ts` | Pass (1/1) | measured |
+
+### Four non-goal groups (task wording ↔ recipe)
+
+1. Box/Shell — sections Box/computer-use + Shell; Global + per-section Pass/Fail
+2. MCP/1Password vault — MCP client mount + 1Password sections with Pass/Fail
+3. Personas/skills/routines/memory product UX — product-surface scan + infra table + Fail
+4. Pixel Grok chrome — section with Pass/Fail
+
+## Evidence files
+
+- measured-checks.txt — rg outputs for Box, MCP, 1Password, product-surface, Grok + README index
+- vitest-profile-mcp.log — `vitest run apps/desktop/tests/profile-mcp.spec.ts` (1 passed)
+
+## Notes
+
+- Shell tool rows remain in dsh-base (T010 posture): not a T039 Fail.
+- MCP hits limited to absence assertion in profile-mcp.spec.ts.
+- 1Password hits are negative guidance only (in-app Models primary).
+- MOH-84 left In Progress per Verifier gate (PO/Lead owns Done/merge).

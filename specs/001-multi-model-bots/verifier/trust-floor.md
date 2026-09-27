@@ -77,7 +77,7 @@ Cross-link T015 recipe for durable bind + peer isolation detail: [t015-model-bin
 | Agent Teams tools | Nine tools: `spawn_teammate`, `send_message`, `list_agents`, `wait_agent`, `interrupt_agent`, `team_task_*` — Host coordination only (`packages/experimental/tool-agent-team/src/index.ts`) |
 | Shell / Box | Not required for P1 acceptance — [non-goals.md](./non-goals.md) (FR-010) |
 | Base `tool-web` | `packages/bundle/base/cordis.patch.yml` mounts `web` / `web-search-deepseek` / `web-fetch-http` / `tool-web`. **Pass rule:** presence alone does not fail FR-012; Fail only if a Scenario 1–5 recipe **requires** those (or any external-send) tools to Pass |
-| MCP product UX | Explicit non-goal — Out of Scope; T039 polish |
+| MCP product UX | Explicit non-goal — Out of Scope; [non-goals.md](./non-goals.md) T039 Pass |
 
 ### Fail rules
 

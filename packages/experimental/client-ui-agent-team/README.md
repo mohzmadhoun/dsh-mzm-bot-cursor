@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, create a Host-owned Bot with a model/provider assignment, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -37,6 +37,10 @@ Opening the panel calls `agentTeams/view`. Roster rows show product `displayName
 
 When the draft has both ids and roster bots already have pairs, the form says whether that draft is a new distinct assignment. The panel counts only teammate rows that expose both an LLM provider and a model; the Lead row and a backend id without that pair are omitted. An incomplete draft does not show that comparison.
 
+### Observe Host mailbox handoffs
+
+Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
+
 ### Manage the task board
 
 The task board shows task identity, owner, blockers, readiness, advisory write scopes, and overlap warnings. A user can create, edit, assign or unassign, complete, reopen, and delete tasks through `agentTeams/createTask` and `agentTeams/updateTask`. Every update sends the displayed revision, and create or update rejections remain explicit business results.
@@ -49,14 +53,15 @@ The task board shows task identity, owner, blockers, readiness, advisory write s
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-The Client export mounts the generated `ctx.remote.agentTeams` contribution from [`@deepseek-ai/dsh-experimental-agent-team/remote`](../agent-team/README.md), then registers its locale dictionaries and one conversation-header slot through Cordis effects. Disposing the plugin fiber removes both registrations.
+The Client export mounts the generated `ctx.remote.agentTeams` contribution from [`@deepseek-ai/dsh-experimental-agent-team/remote`](../agent-team/README.md), then registers its locale dictionaries, conversation-header Team action, and `conversation.session.notices` handoff strip through Cordis effects. Disposing the plugin fiber removes those registrations.
 
 Starting a create or update invalidates older refreshes. Success reloads the complete Team view so every task's derived fields stay current. A `team-task-conflict` result displays a stale-state notice only after that reload succeeds; a reload failure remains visible instead. Editing task text or scopes and changing dependencies use two sequential compare-and-set mutations because the Team service exposes them as separate actions.
 
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host bot-create, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, and task-board interaction state |
+| [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
 
@@ -87,7 +92,7 @@ No direct effect; the Team tools and ordinary conversation submission own any la
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; it has no live event subscription or mailbox timeline.
+- **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; handoffs come from the latest `agentTeams/view` snapshot and have no live event subscription.
 - **Ordinary child continuation** — a human message sent after navigation uses the stable addressed-subagent prompt path, not the Team peer mailbox.
 - **No rename/delete/interrupt controls** — the panel creates bots through Host `createBot` but cannot rename, delete, or interrupt teammates; write scopes remain advisory metadata.
 
@@ -101,4 +106,4 @@ None.
 
 </details>
 
-**Runtime invariant:** No companion is published. RPC is authoritative and the package owns only one disposable slot registration.
+**Runtime invariant:** No companion is published. RPC is authoritative and the package owns disposable slot registrations for the header action and handoff notices.
