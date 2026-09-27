@@ -1,0 +1,97 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ✓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > treats trimmed (provider, model) tuples as distinct and ignores reasoningEffort 1ms
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > rejects an empty provider or model through required text
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > does not project the Lead pair as an inactive teammate modelSelection
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects missing and failed authoritative Team projections
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects deployment limits that are not positive safe integers
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > supports direct-constructor defaults and recovers roots that already exist
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > creates fresh and fork teammates with immutable names and bounded roster size
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > applies per-teammate LLM agentOptions at create without sharing the Lead route
+ ✓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > creates a Host-owned bot from displayName plus required model assignment 115ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects Host bot create without displayName or model assignment 11ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects non-Lead Host bot create and surfaces Remote createBot rejections 76ms
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > binds Bot ModelSelection via installModelSelection for subsequent chats only
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > flushes the accepted child prompt before committing the active roster edge
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > checkpoints live and detached inbox receipts and aborts an unresolved checkpoint
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > drains an accepted child when its initial durability checkpoint fails
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > records failed provisioning durably, reserves its name, and counts it against the limit
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > records non-Error provider failures and contains a reversed provisioning settlement race
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > cleans up a child when recovery settles its provisioning record first
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > handles a continuation that settles before the active roster view or conflict cleanup lookup
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > validates names and permits only the Lead to create or interrupt teammates
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > validates teammate text fields and pre-provisioning cancellation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > treats an ordinary fork as a new Root Team and filters inherited Team state
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects stale Agent identities and non-Team subagent children
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > does not reinterpret an orphaned provider child or malformed parent stream as a Team root
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > fails loudly when the durable numeric task id space is exhausted
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > bounds non-deleted tasks while retaining deleted task ids as tombstones
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > enforces CAS, ownership, dependencies, transitions, and write-scope warnings
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > rejects malformed scopes and every invalid dependency relation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > rejects incomplete mutations, invalid transitions, and deletion of a live blocker
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > supports Lead reassignment, completion, reopen, and deletion permissions
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > covers partial edits, Lead ownership, unassignment, and blocked reassignment
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > exports Team views and task mutations from the owning service
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > preserves Team task rejections and propagates unexpected failures
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > steers a message addressed to the Lead and checkpoints its receipt
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > acknowledges steered messages persisted by a busy Lead before model claim
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > flushes a live pending receipt before acknowledgement without inserting a duplicate
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > acknowledges steered messages accepted by a busy target inbox
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > serializes concurrent Steer delivery admission for one target
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > delivers persisted mail before the later message that cold-resumes its target
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > deduplicates live target history and contains inspection and delivery failures
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > cold-resumes an inactive sibling with sender attribution
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > enforces message byte and pending-count limits without encouraging retry after enqueue
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > interrupts only the current turn and retains an already accepted follow-up
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > waits for one change, supports cancellation, times out, and releases waiters on HMR disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > disposes live teammate Activations and their waits when the Team service unloads
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > closes creation admission and drains an in-flight spawn before unload completes
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > retains an in-flight creation cleanup failure during disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > recognizes wrapped and coded runtime cancellation during disposal settlement
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > disposes a live child even after its durable member edge becomes failed
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > aborts and awaits an admitted cold mailbox dispatch during disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > awaits an admitted asynchronous acknowledgement before disposal completes
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > bounds Team runtime disposal when a continuation drain never settles
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > bounds disposal while an admitted creation ignores cancellation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > contains recovery callback failures and ignores work scheduled after disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > reports contained teardown failures without retaining the Team service
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > reconciles mismatched persisted children and ignores a concurrently settled member
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > ignores a stale Team load after the conversation switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > loads roster/task diagnostics on open and navigates a healthy teammate
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a Host-owned bot from displayName plus provider/model assignment 158ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > still calls createBot when the draft repeats a roster distinct-models assignment 46ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a distinct draft message when the draft differs from roster bots 34ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the distinct-models check cannot pass yet for one teammate pair 13ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the roster meets the distinct-models rule for two teammate pairs 11ms
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > warns when the draft (provider, model) duplicates an existing roster assignment
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows createBot Remote and Team rejections and ignores a late success after session switch 117ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful createBot after its reload switches sessions 82ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > cancels bot create without calling Host createBot 27ms
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps only the newest overlapping refresh for one session
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a successful task mutation newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a created task newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps task and create failures newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > tracks simultaneous create and task mutations independently
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads derived fields for every task after a mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a task from normalized blocker and write-scope lists
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > assigns, edits, completes, reopens, and deletes with contiguous CAS revisions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads and warns instead of retrying a stale task mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps reload failures visible after task and dependency conflicts
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders roster/task state variants and contains navigation, refresh, and close actions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows load and create failures and ignores a create result after a session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains stale-session and ordinary task failures without retrying
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not publish a task conflict after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful task after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains edit and dependency failures and supports form cancellation and unassignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a Remote carrier failure from the dependency mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > skips the dependency mutation when an edit keeps the same blockers
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads a dependency conflict and ignores dependency settlement after a session switch
+
+ Test Files  2 passed (2)
+      Tests  12 passed | 74 skipped (86)
+   Start at  08:30:49
+   Duration  2.93s (transform 2.50s, setup 363ms, import 3.07s, tests 693ms, environment 377ms)
