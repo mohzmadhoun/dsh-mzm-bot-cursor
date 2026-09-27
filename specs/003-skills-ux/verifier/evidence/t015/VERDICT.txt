@@ -1,0 +1,39 @@
+T015 Host skill catalog gate — DH Verifier
+==========================================
+Verdict: PASS (Host catalog / projection only)
+Stamp: 2026-09-27
+Branch: cursor/p3-us1-host-catalog-fe1d @ a08c6fb7e9
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/118 (OPEN)
+Linear: MOH-162 left untouched (per PO gate order)
+
+Acceptance (T015 / discover-load Host obligations)
+--------------------------------------------------
+[x] projectSkillCatalog maps mzm-thin-pack → managed + "MzM thin pack"
+[x] user-authored skills project as source: user
+[x] listSkills / remoteListSkills (skills/list) return thin-pack + user skills
+[x] Fail loud when Host skills registry absent (no silent empty on listSkills)
+[x] No Client UI in master...HEAD diff
+
+Evidence (measured)
+-------------------
+Command:
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/projection-events.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'projectSkillCatalog|skill catalog'
+
+Result: 3 passed | 81 skipped (2 files)
+  - projectSkillCatalog (T015) > maps thin-pack + bundled to managed…
+  - projectSkillCatalog (T015) > forces thin-pack id to managed…
+  - Team Remote API > projects Host skill catalog with mzm-thin-pack managed + user skills (T015)
+
+Diff scope (master...HEAD): 7 files, all under
+  packages/experimental/agent-team/{src,tests,README*} + specs/003-skills-ux/tasks.md
+  Zero paths under client-ui / packages/client / apps/web / apps/desktop UI.
+
+Scope lock
+----------
+Does NOT stamp SC-001 / Scenario 1 product Done.
+Client discovery/load (T016–T018) + FR-012 desktop evidence remain open.
+CI rollup on PR #118 had many FAILURE/QUEUED jobs at gate time — fork/workflow
+noise not used as T015 Pass bar; local focused vitest is the Host gate evidence.
