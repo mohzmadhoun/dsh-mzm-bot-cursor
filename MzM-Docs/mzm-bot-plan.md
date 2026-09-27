@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas open (MOH-88); Lead kickoff authorizes Spec Kit specify |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas (MOH-88) In Progress — tasks merged; analyze + taskstoissues current |
 | **Date** | 2026-09-25 (living §10 updated 2026-09-27) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
@@ -203,9 +203,11 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 3. ~~`/speckit-specify` for P1 only~~ **DONE** (branch `cursor/p1-specify-92fa`).
 4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** SC-005 live Desktop full replay remains **Deferred** (recipe + stubs on master; does **not** block P2 specify).
 5. ~~P2 Spec Kit **specify**~~ **DONE** — [MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas) / PR #67 → `specs/002-identity-personas/`.
-6. ~~P2 Spec Kit **clarify**~~ **DONE** — [MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68 @ `86aebfadb3`; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass.
-7. **Current — P2 plan authorized:** DH Spec Spec Kit **`plan` only** ([MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas), branch `cursor/p2-plan-92fa`). Scope locked to §4 P2 In/Out. Verifier plan gate [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Todo until draft PR.
-8. After plan draft + Verifier Pass: **tasks** → analyze → `taskstoissues` on **DeepSeek Harness - Cursor** only; Architect seam map after plan; Electron/Runtime only after Spec+Architect gates for P2.
+6. ~~P2 Spec Kit **clarify**~~ **DONE** — [MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass.
+7. ~~P2 Spec Kit **plan**~~ **DONE** — [MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) / PR #70; Verifier [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Pass.
+8. ~~P2 Spec Kit **tasks**~~ **DONE** — [MOH-96](https://linear.app/momadhoun/issue/MOH-96/p2-spec-kit-tasks-identity-personas) / PR #72 @ `837152b248`; Verifier [MOH-97](https://linear.app/momadhoun/issue/MOH-97/p2-verifier-gate-tasks-002-identity-personas) Pass.
+9. **Current — P2 analyze + taskstoissues:** DH Spec ([MOH-98](https://linear.app/momadhoun/issue/MOH-98/p2-spec-kit-analyze-taskstoissues), branch `cursor/p2-analyze-92fa`). Verifier gate [MOH-99](https://linear.app/momadhoun/issue/MOH-99/p2-verifier-gate-analyze-taskstoissues) Todo until Spec output. Tracker: **DeepSeek Harness - Cursor** only.
+10. After analyze + Verifier Pass: **implement fan-out** — Architect seam map, then Electron/Runtime slices only after Spec+Architect gates for P2.
 
 ---
 
