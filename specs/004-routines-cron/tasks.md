@@ -128,7 +128,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T022 [US3] Host pauseRoutine / resumeRoutine persist `status` on `RoutineRecord`; paused routines MUST NOT receive cron wakes (FR-003/004)
 - [x] T023 [P] [US3] Client pause/resume controls on routines pane in `packages/experimental/client-ui-agent-team/src/client/` via Host RPC
-- [ ] T024 [US3] Add Verifier Scenario 2/3 recipe in `specs/004-routines-cron/verifier/scenario-3-pause-resume.md` covering SC-002 and **requiring** FR-010/011 evidence of both states under `specs/004-routines-cron/verifier/evidence/scenario-3/` (or `scenario-2/` if numbering follows quickstart Scenario 2)
+- [x] T024 [US3] Add Verifier Scenario 2/3 recipe in `specs/004-routines-cron/verifier/scenario-3-pause-resume.md` covering SC-002 and **requiring** FR-010/011 evidence of both states under `specs/004-routines-cron/verifier/evidence/scenario-3/` (or `scenario-2/` if numbering follows quickstart Scenario 2)
 
 **Checkpoint**: US3 pause/resume independently testable.
 

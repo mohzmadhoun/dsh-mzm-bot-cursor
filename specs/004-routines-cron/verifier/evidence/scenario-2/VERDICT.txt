@@ -1,76 +1,70 @@
-T023 Client US3 pause/resume — DH Verifier
-==========================================
-Verdict: PASS (Client product UI slice only)
+T024 Verifier Scenario 2 pause/resume (SC-002) — DH Verifier
+============================================================
+Verdict: PASS (SC-002 / quickstart Scenario 2)
 Stamp: 2026-09-27
-Product tip: origin/cursor/p4-us3-client-pause-fe1d @ 06b8795e56
-  (requested tip 18036a025c was pre-rebase; Host #157 merged → base master)
-Evidence tip: this stamp commit on same PR branch
-PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/158 (OPEN)
-Linear: MOH-216 — left In Progress (PO closes after SO12 embed / merge)
+Product tip: origin/master @ 97880d2791
+  (includes Host T022 #157 + Client T023 #158)
+Evidence tip: this stamp commit on cursor/p4-t024-pause-resume-recipe-fe1d
+Linear: MOH-217 (T024) — left In Progress (PO closes after SO12 embed / merge)
+Recipe: specs/004-routines-cron/verifier/scenario-3-pause-resume.md
 
-Acceptance (T023 / Client product UI — not full SC-002 Scenario Done)
---------------------------------------------------------------------
-[x] Routines pane exposes pause/resume controls calling Host Remotes
-    agentTeams/pauseRoutine + agentTeams/resumeRoutine
-    (data-team-routine-pause / data-team-routine-resume).
-[x] UI projects refreshed Host status active|paused after each control.
-[x] Locale-owned copy (t('pauseRoutine'|'resumeRoutine'|routineStatus.*)
-    in locales.ts; no hardcoded product strings in TeamAction).
-[x] Focused client-ui-agent-team T023 tests pass (10 passed).
-[x] SO11 Desktop visual: screenshots + mp4 of pause and resume states.
-[x] SO12: evidence committed under verifier/evidence/us3-client-t023/
-    and scenario-2/; PO must embed absolute /opt/cursor/artifacts paths
-    in PR #158 body via ManagePullRequest.
+Acceptance (SC-002 / US3 Scenario path)
+---------------------------------------
+[x] Pause → pane shows paused (Host-projected status + Resume control).
+[x] No Host cron wake while paused — measured via isRoutineEligibleForWake /
+    routinesEligibleForWake + Host pauseRoutine journal (T022); not a 5m wait.
+[x] Resume → pane shows active (Pause control restored).
+[x] Status durable across leave/return (Client re-read of Host projection).
+[x] FR-010 desktop screenshots + walkthrough of real Desktop (SO 11).
+[x] FR-011 media committed under verifier/evidence/scenario-2/ (SO 12 commit).
+[!] SO12 PR HTML embeds via absolute /opt/cursor/artifacts/… — PO / ManagePullRequest.
 
-Evidence (measured)
--------------------
-Commands @ 06b8795e56 (/workspace):
+Evidence reuse (measured)
+-------------------------
+Desktop FR-010 frames + walkthrough: Client T023 Verifier CDP hard-assert
+  (#158 / us3-client-t023 mirror) already under this directory:
+  02-active-before-pause.png · 03-paused.png · 04-active-after-resume.png
+  05-after-return-active.png · 06-after-return-paused.png
+  pause-resume-walkthrough.mp4 · panel-state.json (pass=true)
+  CDP: DISPLAY=:1 · pnpm run start:desktop · targetRoutineId=routine-7093c327-…
+
+Host no-wake while paused (this stamp @ 97880d2791):
   pnpm exec vitest run \
-    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
-    packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts \
-    -t 'T023'
-  → 10 passed | 76 skipped
-
-Desktop (Standing Order 11 / FR-010) — Verifier CDP hard-assert:
-  DISPLAY=:1 · pnpm run start:desktop · CDP :9222
-  node /tmp/p4-us3-t023-verifier-cdp.mjs
-  panel-state.json:
-    targetRoutineId=routine-7093c327-…
-    beforePause=active (+ Pause)
-    afterPause=paused (+ Resume)
-    afterResume=active (+ Pause)
-    afterReturn=active
-    afterReturnPaused=paused
-    pass=true
-  Screenshots under this dir + scenario-2/ + /opt/cursor/artifacts/p4-us3-t023-*
-  Recording: pause-resume-walkthrough.mp4
-    (= /opt/cursor/artifacts/p4-us3-t023-pause-resume-walkthrough.mp4)
-
-Standing Order 12 / FR-011
---------------------------
-[x] Evidence committed under verifier/evidence/us3-client-t023/ and
-    verifier/evidence/scenario-2/ on PR branch.
-[!] PR #158 body needs absolute /opt/cursor/artifacts/… HTML embeds.
-    Recommended embeds for PO / product-owner assistant:
-      <img src="/opt/cursor/artifacts/p4-us3-t023-02-active-before-pause.png" alt="active with Pause" />
-      <img src="/opt/cursor/artifacts/p4-us3-t023-03-paused.png" alt="paused with Resume" />
-      <img src="/opt/cursor/artifacts/p4-us3-t023-04-active-after-resume.png" alt="active after resume" />
-      <video src="/opt/cursor/artifacts/p4-us3-t023-pause-resume-walkthrough.mp4" controls></video>
+    packages/experimental/agent-team/tests/routine-cron.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'US3 T022|wake-eligible'
+  → 2 passed | 76 skipped
+    - US3 T022: only active routines are wake-eligible
+    - US3 T022: pauseRoutine / resumeRoutine persist status; paused is not wake-eligible
+  Logs: p4-t024-host-wake-eligibility.log · p4-t024-host-t022-verbose.log
+  (also under /opt/cursor/artifacts/)
 
 Claims
 ------
-- Client pause/resume controls → Host Remotes: **measured** (vitest + Desktop CDP).
-- Status projection active|paused: **measured** (CDP data-team-routine-status).
-- Locale-owned copy: **measured** (locales.ts + t() usage; vitest zh strings).
-- Leave/return status durability (Client projection): **measured** (CDP).
-- SO11 desktop visual: **measured** (screenshots + mp4).
-- SO12 commit: **measured**. SO12 PR HTML embeds: **Fail until PO updates #158 body**.
-- Host wake-suppression while paused: **not stamped here** (Host #157 / T022;
-  Client UI only shows status; no cron-interval no-fire proof in this stamp).
-- Full Scenario 2 / SC-002 Done: **not stamped** (T024).
+- Pause UI → paused: **measured** (Desktop CDP + screenshots).
+- Resume UI → active: **measured** (Desktop CDP + screenshots).
+- Leave/return durability: **measured** (Desktop CDP 05/06).
+- Host wake suppression while paused: **measured** (isRoutineEligibleForWake + T022 journal).
+- Full wall-clock cron interval while paused: **not run** (prefer Host gate per recipe;
+  last-run still “Not run yet” on 03-paused.png is supporting UI only).
+- FR-010 desktop visual: **measured**. FR-011 commit: **measured**.
+- FR-011 PR HTML embeds: **Fail until PO updates PR body**.
+- SC-003 cron fire / last-run: **not stamped** (T028).
+
+Standing Order 12 / FR-011 — recommended PR embeds
+--------------------------------------------------
+<img src="/opt/cursor/artifacts/p4-t024-02-active-before-pause.png" alt="active with Pause" />
+<img src="/opt/cursor/artifacts/p4-t024-03-paused.png" alt="paused with Resume" />
+<img src="/opt/cursor/artifacts/p4-t024-04-active-after-resume.png" alt="active after resume" />
+<img src="/opt/cursor/artifacts/p4-t024-06-after-return-paused.png" alt="paused after leave/return" />
+<video src="/opt/cursor/artifacts/p4-t024-pause-resume-walkthrough.mp4" controls></video>
+
+In-repo evidence paths
+----------------------
+specs/004-routines-cron/verifier/evidence/scenario-2/
+specs/004-routines-cron/verifier/scenario-3-pause-resume.md
 
 Scope lock
 ----------
-Does NOT stamp Scenario 2 / SC-002 Done. Does NOT close MOH-216.
-Does NOT claim Host cron wake-suppression beyond Client status labels.
-Leave MOH-216 In Progress until PO merges #158 and fixes SO12 embeds.
+Does NOT stamp SC-003 / Scenario 3 cron fire. Does NOT close MOH-217.
+Does NOT merge. Leave MOH-217 In Progress until PO merges + SO12 embeds.
