@@ -4,6 +4,7 @@
 **Owners:** DH Verifier (this recipe + evidence recording) · DH Electron (`topology-handshake.spec.ts`)
 **Acceptance:** Spec FR-013, SC-007
 **Contract:** [../contracts/topology-handshake.md](../contracts/topology-handshake.md)
+**Quickstart:** [../quickstart.md](../quickstart.md) Scenario 0
 **Architect criteria:** [../architecture.md](../architecture.md#verifier-criteria--topology-handshake)
 **Gate home:** [README.md](./README.md#handshake-pass-gate-sc-007--fr-013)
 **Evidence:** [evidence/scenario-0/](./evidence/scenario-0/)

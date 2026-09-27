@@ -30,7 +30,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
 | **3** Host mailbox 1:1 | Scenario 3 | [scenario-3-mailbox.md](./scenario-3-mailbox.md) (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
 | **4** Progress + final | Scenario 4 | [scenario-4-progress-final.md](./scenario-4-progress-final.md) (T032; SC-004 keyless **Pass** — [evidence/scenario-4/](./evidence/scenario-4/)) | **Verifier** + Client | SC-004 / FR-006 |
-| **5** Full Phase 1 replay | Scenario 5 | [scenario-5-full-replay.md](./scenario-5-full-replay.md) (T038; evidence stubs under [evidence/scenario-5/](./evidence/scenario-5/) — Deferred until full desktop replay) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
+| **5** Full Phase 1 replay | Scenario 5 | [scenario-5-full-replay.md](./scenario-5-full-replay.md) (T038; T042 quickstart validation; evidence stubs under [evidence/scenario-5/](./evidence/scenario-5/) — Deferred until full desktop replay) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
 Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of Scope absence checks Pass), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
 
@@ -59,6 +59,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
 | **T035** Missing/invalid credential UX | [t035-cred-ux.md](./t035-cred-ux.md) | **Electron/Client** + **Verifier** | FR-008 failure UX: Models re-entry for missing + invalid/revoked; no peer resolve fallback |
+| **T038** Scenario 5 full Phase 1 replay | [scenario-5-full-replay.md](./scenario-5-full-replay.md) | **Verifier** | SC-005 evidence expansion on T042 outline; requires Scenario 0 Pass first |
 
 ## Fan-out policy
 
