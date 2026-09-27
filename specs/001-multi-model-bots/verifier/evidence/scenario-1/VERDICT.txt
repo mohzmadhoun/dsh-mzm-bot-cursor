@@ -1,0 +1,28 @@
+VERDICT: Pass
+SC: SC-006
+SHA: 4fc3d1f6ee96e45fc851cfe85865da6c28dd9bf5
+BRANCH: cursor/p1-t037-scenario1-92fa
+UTC: 2026-09-27T10:17:11Z
+OPERATOR: DH Verifier (acting as Mohammed)
+MACHINE: linux cloud agent; Node v24.21.0; Vitest 4.1.8
+RECIPE: specs/001-multi-model-bots/verifier/scenario-1-credentials.md
+COMMAND_HOST: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/llm-route.spec.ts
+STDOUT_HOST: evidence/scenario-1/vitest-llm-route.stdout.txt (Test Files 1 passed; Tests 2 passed; EXIT:0)
+COMMAND_CLIENT: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/client/ui-settings-models/tests/components.client.spec.tsx -t 'write-only|credential-only onboarding|stores a typed key'
+STDOUT_CLIENT: evidence/scenario-1/vitest-models-write.stdout.txt (Test Files 1 passed; Tests 2 passed | 84 skipped; EXIT:0)
+COMMAND_EXPORT: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/session-query/session-log-export/tests/archive.host.spec.ts -t 'streams a ZIP with the root log serialized as canonical JSONL'
+STDOUT_EXPORT: evidence/scenario-1/vitest-export-archive.stdout.txt (Test Files 1 passed; Tests 1 passed | 39 skipped; EXIT:0)
+COMMAND_IPC: rg -n -i 'credential|secret|api[_-]?key|password' apps/desktop/src/preload-*.ts apps/desktop/src/ipc.ts
+STDOUT_IPC: evidence/scenario-1/credentials-ipc-rg.txt (JSDoc-only hits in ipc.ts; no secret channel / preload bridge)
+CRITERIA_CHECKED:
+  1. In-app Models write-only via credentials.set; status copy does not echo secret — Pass (measured; Client vitest)
+  2. Bot auth resolves Host credential for own ref — Pass (measured; llm-route)
+  3. MISSING_CREDENTIAL + no peer secret reuse — Pass (measured; llm-route)
+  4. Session event dump contains no raw provider secret (SECRET_A) — Pass (measured; llm-route dump assert) [SC-006]
+  5. Transcript export ZIP streams session JSONL/attachments only (no credentials store) — Pass (measured ZIP smoke + inferred from archive.ts serializeSessionLog/readSessionLogText) [SC-006 export]
+  6. No Electron credential secret IPC — Pass (measured; rg vs credentials-ipc.md baseline)
+  7. FR-009 primary=in-app / env secondary — Pass (measured; recipe table; package README product-role wording may still land via T036 merge-forward)
+CLAIM: measured (Host dump + Models write + IPC rg); export composition measured ZIP + inferred no credentials-store read
+SCOPE_OUT: live Desktop GUI /export click-path operator dump (optional); T034 no-secret-ipc.spec.ts automation (not on master at this SHA); T036 credentials-local README product-role merge; SC-001/Scenario 2
+NOTE_T036: Built on T036 stub outline (FR-009 table + stub notes). Stub not on master; may need merge-forward when T036 lands.
+BLOCKER: none for T037 recipe Pass. Ask PO: no PR per task — hold for merge decision.
