@@ -12,7 +12,7 @@
 
 | Gate artifact | Location (when present) |
 |---------------|-------------------------|
-| Instruction-bind doc (T009) | `instruction-bind.md` |
+| Instruction-bind doc (T009) | [instruction-bind.md](./instruction-bind.md) |
 | Sidebar store pick (T012) | `sidebar-store.md` |
 | Non-goals absence checks (T024 / T038 / T040) | `non-goals.md` |
 | Foundational Pass checklist (T011) | this README (section added by T011) |
