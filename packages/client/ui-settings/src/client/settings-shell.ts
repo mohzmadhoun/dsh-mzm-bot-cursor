@@ -32,15 +32,19 @@ export interface ISettingsShell {
 /**
  * Settings shell navigation controller.
  * The shell registers its open handler; other plugins only call `openSection`.
+ * Handler state lives in a constructor-owned box so Cordis method wrapping
+ * cannot split bind/open/unbind across divergent `this` identities.
  */
 export class SettingsShellController extends Service implements ISettingsShell {
-  private handler: ((id: string) => void) | undefined
+  private readonly binding: { handler: ((id: string) => void) | undefined }
 
   /**
    * @param ctx - providing plugin context.
    */
   constructor(ctx: Context) {
+    const binding: { handler: ((id: string) => void) | undefined } = { handler: undefined }
     super(ctx, 'settingsShell')
+    this.binding = binding
   }
 
   /**
@@ -48,7 +52,7 @@ export class SettingsShellController extends Service implements ISettingsShell {
    * @param id - registered section id.
    */
   openSection(id: string): void {
-    this.handler?.(id)
+    this.binding.handler?.(id)
   }
 
   /**
@@ -57,9 +61,10 @@ export class SettingsShellController extends Service implements ISettingsShell {
    * @returns disposer clearing this binding only.
    */
   bindOpenSection(handler: (id: string) => void): () => void {
-    this.handler = handler
+    const { binding } = this
+    binding.handler = handler
     return () => {
-      if (this.handler === handler) this.handler = undefined
+      if (binding.handler === handler) binding.handler = undefined
     }
   }
 }

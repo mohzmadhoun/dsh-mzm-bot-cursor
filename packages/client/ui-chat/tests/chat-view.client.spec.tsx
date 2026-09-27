@@ -1324,7 +1324,7 @@ describe('ChatView', () => {
     expect(status.textContent).toContain(zh['message.failure.missingCredential'])
     expect(status.textContent).toMatch(/应用内|模型/u)
     const handoff = view.getByRole('button', { name: zh['message.failure.missingCredential.action'] })
-    expect(handoff.getAttribute('data-missing-credential-handoff')).toBe('')
+    expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
     fireEvent.click(handoff)
     expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
   })

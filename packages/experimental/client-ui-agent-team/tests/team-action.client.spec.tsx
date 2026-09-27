@@ -393,7 +393,7 @@ describe('TeamAction', () => {
     expect(alert.textContent).toContain(zh.missingCredential)
     expect(alert.textContent).toMatch(/应用内|模型/u)
     const handoff = screen.getByRole('button', { name: zh.openModelsSettings })
-    expect(handoff.getAttribute('data-missing-credential-handoff')).toBe('')
+    expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
     fireEvent.click(handoff)
     expect(openModelsSettings).toHaveBeenCalledTimes(1)
   })
