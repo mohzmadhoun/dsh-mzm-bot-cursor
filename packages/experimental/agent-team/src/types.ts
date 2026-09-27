@@ -69,6 +69,12 @@ export interface BotPersonaProfile {
   readonly antiJobs: readonly string[]
 }
 
+/** Fixed Host avatar shape preset ids (clarify lock 3 — no image upload). */
+export type AvatarShapeId = 'circle' | 'square' | 'triangle' | 'hexagon'
+
+/** Fixed Host avatar color preset ids (clarify lock 3 — no image upload). */
+export type AvatarColorId = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gray'
+
 /**
  * Preset avatar marker (shape and/or color ids).
  * When a user sets an avatar for Pass, at least one of shape or color is required.
@@ -76,9 +82,9 @@ export interface BotPersonaProfile {
  */
 export interface AvatarMarker {
   /** Preset shape id from the fixed Host set. */
-  readonly shape?: string
+  readonly shape?: AvatarShapeId
   /** Preset color id from the fixed Host set. */
-  readonly color?: string
+  readonly color?: AvatarColorId
 }
 
 /** Whole durable value written on every teammate lifecycle change. */

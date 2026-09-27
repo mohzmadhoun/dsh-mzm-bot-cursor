@@ -104,9 +104,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Implement Host rename mutation: new `displayName` MUST be non-empty (reject/block empty rename; prior name unchanged); duplicates allowed; persist on Bot identity in `packages/experimental/agent-team/src/{types,index,roster}.ts` ([contracts/rename-avatar.md](./contracts/rename-avatar.md); FR-004)
-- [ ] T021 [US2] Implement Host avatar-marker mutation for preset `shape` and/or `color` enum/ids (at least one of shape or color required when user sets an avatar for Pass); **no** image-file/URL upload path required for Pass — `packages/experimental/agent-team/src/{types,index,roster}.ts` (clarify lock 3; FR-005)
-- [ ] T022 [P] [US2] Project `displayName` + avatar marker to Client roster/sidebar/overview views in `packages/experimental/agent-team/src/projection.ts`
+- [x] T020 [US2] Implement Host rename mutation: new `displayName` MUST be non-empty (reject/block empty rename; prior name unchanged); duplicates allowed; persist on Bot identity in `packages/experimental/agent-team/src/{types,index,roster}.ts` ([contracts/rename-avatar.md](./contracts/rename-avatar.md); FR-004)
+- [x] T021 [US2] Implement Host avatar-marker mutation for preset `shape` and/or `color` enum/ids (at least one of shape or color required when user sets an avatar for Pass); **no** image-file/URL upload path required for Pass — `packages/experimental/agent-team/src/{types,index,roster}.ts` (clarify lock 3; FR-005)
+- [x] T022 [P] [US2] Project `displayName` + avatar marker to Client roster/sidebar/overview views in `packages/experimental/agent-team/src/projection.ts`
 - [ ] T023 [US2] Add Client rename control + preset avatar picker (shape and/or color) in `packages/experimental/client-ui-agent-team/src/client/` so sidebar and overview render updated identity after save
 - [ ] T024 [US2] Ensure unsupported custom image upload (if present) MUST NOT block preset-marker Pass — gate or omit upload UI for P2 in `packages/experimental/client-ui-agent-team/src/client/` and note non-goal in `specs/002-identity-personas/verifier/non-goals.md`
 - [x] T025 [US2] Add Verifier Scenario 2 recipe in `specs/002-identity-personas/verifier/scenario-2-rename-avatar.md` for SC-003 (rename + preset marker survive restart/reload on sidebar and overview; image upload not required)
