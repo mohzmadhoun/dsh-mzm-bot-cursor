@@ -1,0 +1,57 @@
+T015–T016 Host createRoutine validate / per-bot — DH Verifier
+==============================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-27
+Product tip gated: origin/master @ a10070d4c2 (#151 squash-merged)
+Evidence PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/152
+Verify branch: cursor/p4-us1-host-create-verify-1df7 (evidence-only on master)
+Linear: MOH-208 (T015), MOH-209 (T016) — left In Progress (PO closes after evidence merge)
+
+Rebase / rebuild note
+---------------------
+#151 product squash-merged to master as a10070d4c2. This evidence tip is rebuilt
+on origin/master with only verifier/evidence/us1-host-t015-t016/** (no product
+delta). Vitest was measured at pre-squash tip e52eafa37c ≡ squash content.
+
+Acceptance (T015–T016 / Host product — not SC-001 / Scenario 1)
+---------------------------------------------------------------
+[x] T015 createRoutine rejects empty/whitespace intent with clear reason; no catalog write.
+[x] T015 createRoutine rejects unsupported scheduleExpr (@every 1m / garbage / empty)
+    with clear reason (incl. Remote team-rejected); no catalog write.
+[x] T015 successful create persists status: active; projects intent + scheduleExpr;
+    identity derives from intent (projection.identity = routine.intent).
+[x] T016 create keyed by botId — listRoutinesByBot / remoteList for bot B empty of A's rows.
+[x] T016 CreateRoutineInput is botId + intent + scheduleExpr only (no confirm / displayName).
+[x] Diff scope Host-only under packages/experimental/agent-team (no Client UI in this PR).
+
+Evidence (measured)
+-------------------
+Commands @ e52eafa37c (pre-squash ≡ a10070d4c2):
+  pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'US1 T015|US1 T016'
+  → 2 passed | 70 skipped (1 file)
+    - Team Remote API > US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active
+    - Team Remote API > US1 T016: createRoutine is per-botId; no confirm or displayName required
+
+Logs: p4-us1-host-t015-t016-vitest.log · p4-us1-host-t015-t016-vitest-verbose.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (origin/master...HEAD): 6 files, all under
+  packages/experimental/agent-team/{src,tests,README*}
+  Zero Client UI / apps/desktop paths in this Host slice.
+
+Claims
+------
+- Empty intent / bad schedule loud reject + no write: **measured**
+- Persist active + identity from intent: **measured**
+- Per-botId isolation (SC-006 Host half): **measured**
+- No confirm / displayName required (SC-007 Host half): **measured**
+- Desktop Scenario 1 / SC-001 / Client T017 pane chrome: **not run** (out of scope this gate)
+
+Scope lock
+----------
+Does NOT stamp SC-001 / SC-006 / SC-007 product Done or Scenario 1 desktop FR-010/011.
+Does NOT gate Client create UI (T017 already on master via #150) or pane list (T019+).
+CI rollup FAILURE/QUEUED noise on PR #151 not used as this Host Pass bar.
+Next: Scenario 1 desktop FR-010/011 after Client pane path is ready (T018 recipe + T019/T020 as needed).
+Leave MOH-208 / MOH-209 In Progress until PO merges evidence #152.
