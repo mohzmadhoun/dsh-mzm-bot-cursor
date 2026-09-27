@@ -127,7 +127,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T027 [US4] Add Client delete flow with explicit confirmation step (`idle` → `pending-confirm` → `cancelled` | `deleted` per [data-model.md](./data-model.md)) in `packages/experimental/client-ui-agent-team/src/client/` — cancel/dismiss returns to idle with profile unchanged
 - [ ] T028 [P] [US4] If product chooses shell-hosted native confirm, keep Electron Main lifecycle-only (no identity store) via optional dialog bridge in `apps/desktop/src/` — confirm step still required before Host delete; prefer Client confirm if shell dialog unused
 - [ ] T029 [US4] On Host delete failure mid-flight, show clear failure and keep bot listed until successful removal — Client + Host error path in `packages/experimental/client-ui-agent-team/src/client/` and `packages/experimental/agent-team/src/index.ts`
-- [ ] T030 [US4] Add Verifier Scenario 4 recipe in `specs/002-identity-personas/verifier/scenario-4-delete-confirm.md` for SC-005 (confirm required; cancel safe; identity removal; **do not** fail Pass solely because transcripts/mailbox remain)
+- [x] T030 [US4] Add Verifier Scenario 4 recipe in `specs/002-identity-personas/verifier/scenario-4-delete-confirm.md` for SC-005 (confirm required; cancel safe; identity removal; **do not** fail Pass solely because transcripts/mailbox remain)
 
 **Checkpoint**: US4 independently testable; exit path create/rename/delete (with confirm) covered with US1–US2
 
