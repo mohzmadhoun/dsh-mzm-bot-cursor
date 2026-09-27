@@ -2861,11 +2861,14 @@ describe('TeamAction', () => {
       value: { ...view, routines: [listed] },
     })
     render(<TeamAction {...props(actions({ load }))} />)
-    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    const openTrigger = () => {
+      fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${zh.trigger}`) }))
+    }
+    openTrigger()
     expect(await screen.findByText('Durable ping')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: zh.close }))
     expect(screen.queryByText('Durable ping')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    openTrigger()
     expect(await screen.findByText('Durable ping')).toBeTruthy()
     expect(load.mock.calls.length).toBeGreaterThanOrEqual(2)
     expect(document.querySelector(
