@@ -47,6 +47,16 @@ export function requiredDisplayName(value: string): string {
 }
 
 /**
+ * Normalize one required named sidebar section title (FR-006).
+ * Empty / whitespace-only names reject create and rename without writing.
+ * @param value - raw section name from Host create/rename.
+ * @returns trimmed non-empty title.
+ */
+export function requiredSectionName(value: string): string {
+  return requiredText(value, 'section name', 200)
+}
+
+/**
  * Derive the durable lower-kebab Team roster name from a product displayName.
  * @param displayName - already-normalized non-empty display name.
  * @returns roster name accepted by teammate name rules.

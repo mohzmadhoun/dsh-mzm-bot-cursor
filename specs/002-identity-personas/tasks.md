@@ -141,9 +141,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Implement Host Sidebar section entity (`id` opaque; `name` non-empty string; `botIds` ordered list; a bot in at most one named section) using the store chosen in T012 under Host surfaces (`packages/experimental/agent-team/src/` and/or `packages/settings/settings/`) — reject empty section name on create/rename ([data-model.md](./data-model.md); [contracts/sidebar-sections.md](./contracts/sidebar-sections.md))
-- [ ] T032 [US3] Implement assign / move / unassign so `sectionId` null/absent ⇒ Unassigned/default grouping (not necessarily a stored section row); empty named sections may remain after last-bot remove — Host mutations in `packages/experimental/agent-team/src/` (clarify lock 4)
-- [ ] T033 [P] [US3] Project section names + membership (+ Unassigned) to Client sidebar views in `packages/experimental/agent-team/src/projection.ts`
+- [x] T031 [US3] Implement Host Sidebar section entity (`id` opaque; `name` non-empty string; `botIds` ordered list; a bot in at most one named section) using the store chosen in T012 under Host surfaces (`packages/experimental/agent-team/src/` and/or `packages/settings/settings/`) — reject empty section name on create/rename ([data-model.md](./data-model.md); [contracts/sidebar-sections.md](./contracts/sidebar-sections.md))
+- [x] T032 [US3] Implement assign / move / unassign so `sectionId` null/absent ⇒ Unassigned/default grouping (not necessarily a stored section row); empty named sections may remain after last-bot remove — Host mutations in `packages/experimental/agent-team/src/` (clarify lock 4)
+- [x] T033 [P] [US3] Project section names + membership (+ Unassigned) to Client sidebar views in `packages/experimental/agent-team/src/projection.ts`
 - [ ] T034 [US3] Add Client sidebar section UI: create named section, assign/move/unassign bots, render Unassigned/default for never-assigned bots in `packages/experimental/client-ui-agent-team/src/client/` (collapse/expand chrome helpful but not required for Pass)
 - [ ] T035 [US3] Add Verifier Scenario 3 recipe in `specs/002-identity-personas/verifier/scenario-3-sidebar-sections.md` for SC-004 (named section + assign survives restart/reload; Unassigned visible for unassigned bots)
 

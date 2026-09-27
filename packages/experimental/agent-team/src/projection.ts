@@ -8,6 +8,9 @@ and preset avatar markers; `listMembers` / `agentTeams/view` re-read those
 fields for Client roster / sidebar / overview (T022 / FR-004 / FR-005).
 Host `deleteBot` appends an `active` → `deleted` tombstone (clears `sectionId`);
 Client roster / overview omit deleted rows (T026 / FR-008 / clarify lock 5).
+Named sidebar sections persist as `team/section` catalog rows; membership is
+Bot.`sectionId`. Unassigned/default is null/absent sectionId — no catalog row
+(T031–T033 / FR-006 / clarify lock 4).
 */
 
 import { z } from 'zod'
@@ -20,6 +23,8 @@ import type {
   AvatarMarker,
   BotPersonaProfile,
   HostMailboxMessage,
+  SidebarSectionSnapshot,
+  SidebarSectionView,
   TeamId,
   TeamMemberSnapshot,
   TeamMessageId,
@@ -162,10 +167,23 @@ const teamMessageDeliveredEventSchema = z.object({
   targetId: sessionIdSchema,
 }).strict() as z.ZodType<SessionEventMap['team/message/delivered']>
 
+const sidebarSectionSnapshotSchema = z.object({
+  id: sidebarSectionIdSchema,
+  name: z.string().min(1),
+}).strict() as z.ZodType<SidebarSectionSnapshot>
+
+const teamSectionEventSchema = z.object({
+  version: z.literal(2),
+  teamId: teamIdSchema,
+  section: sidebarSectionSnapshotSchema,
+}).strict() as z.ZodType<SessionEventMap['team/section']>
+
 /** Current Team state selected by durable Team identity. */
 export interface TeamState {
   readonly id: TeamId
   readonly members: TeamMemberSnapshot[]
+  /** Named sidebar section catalog only — Unassigned has no row (clarify lock 4). */
+  readonly sections: SidebarSectionSnapshot[]
   readonly tasks: TeamTaskSnapshot[]
   readonly messages: TeamMessageSnapshot[]
   readonly delivered: TeamMessageId[]
@@ -181,6 +199,7 @@ export function emptyTeamState(rootId: SessionId): TeamProjectionState {
   return {
     id: toTeamId(rootId),
     members: [],
+    sections: [],
     tasks: [],
     messages: [],
     delivered: [],
@@ -202,6 +221,7 @@ declare module '@deepseek-ai/dsh-session-projection/types' {
 const teamProjectionEntrySchema = z.object({
   id: teamIdSchema,
   members: z.array(teamMemberSnapshotSchema),
+  sections: z.array(sidebarSectionSnapshotSchema),
   tasks: z.array(teamTaskSnapshotSchema),
   messages: z.array(teamMessageSnapshotSchema),
   delivered: z.array(teamMessageIdSchema),
@@ -213,6 +233,7 @@ const teamProjectionEntrySchema = z.object({
 export type TeamEventType =
   | 'team/member'
   | 'team/task'
+  | 'team/section'
   | 'team/message/queued'
   | 'team/message/delivered'
 
@@ -227,6 +248,7 @@ type TeamSessionEvent = SessionEvent<TeamEventType>
 export function isTeamEvent(event: SessionEvent): event is TeamSessionEvent {
   return event.type === 'team/member'
     || event.type === 'team/task'
+    || event.type === 'team/section'
     || event.type === 'team/message/queued'
     || event.type === 'team/message/delivered'
 }
@@ -247,6 +269,8 @@ function parseCurrentTeamEvent(event: TeamSessionEvent): TeamSessionEvent {
       return { ...event, data: parsePersisted(event.type, teamMemberEventSchema, event.data) }
     case 'team/task':
       return { ...event, data: parsePersisted(event.type, teamTaskEventSchema, event.data) }
+    case 'team/section':
+      return { ...event, data: parsePersisted(event.type, teamSectionEventSchema, event.data) }
     case 'team/message/queued':
       return { ...event, data: parsePersisted(event.type, teamMessageQueuedEventSchema, event.data) }
     case 'team/message/delivered':
@@ -340,6 +364,16 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       else state.tasks[index] = task
       break
     }
+    case 'team/section': {
+      const section = event.data.section
+      if (section.name.trim().length === 0) {
+        throw new Error(`sidebar section "${section.id}" name must be non-empty`)
+      }
+      const index = state.sections.findIndex(candidate => candidate.id === section.id)
+      if (index < 0) state.sections.push(section)
+      else state.sections[index] = section
+      break
+    }
     case 'team/message/queued': {
       const message = event.data.message
       if (state.messages.some(candidate => candidate.id === message.id)) {
@@ -408,7 +442,8 @@ function sameSectionId(
 /** Host-only Team projection selected by the projected Session identity. */
 export const teamProjectionDefinition = {
   key: 'agentTeam',
-  stateVersion: 3,
+  // Bumped when named section catalog joined TeamState (T031).
+  stateVersion: 4,
   stateSchema: teamProjectionEntrySchema,
   init: header => emptyTeamState(header.id),
   apply: (state, event) => {
@@ -416,6 +451,31 @@ export const teamProjectionDefinition = {
     return state
   },
 } satisfies ProjectionDefinition<'agentTeam', TeamProjectionState>
+
+/**
+ * Derive Client sidebar section views from the Host catalog + roster membership.
+ * Unassigned/default is {@link unassignedBotIds} — never a stored section row (clarify lock 4).
+ * @param state - projected Team state (named catalog + members).
+ * @returns named sections with roster-ordered botIds, plus Unassigned bot ids.
+ */
+export function projectSidebarSections(state: TeamState): {
+  readonly sections: readonly SidebarSectionView[]
+  readonly unassignedBotIds: readonly SessionId[]
+} {
+  const catalogIds = new Set(state.sections.map(section => section.id))
+  const teammates = state.members.filter(member => member.phase !== 'deleted')
+  const sections: SidebarSectionView[] = state.sections.map(section => ({
+    id: section.id,
+    name: section.name,
+    botIds: teammates
+      .filter(member => member.sectionId === section.id)
+      .map(member => member.id),
+  }))
+  const unassignedBotIds = teammates
+    .filter(member => member.sectionId == null || !catalogIds.has(member.sectionId))
+    .map(member => member.id)
+  return { sections, unassignedBotIds }
+}
 
 /**
  * Project Client-visible Host mailbox handoffs from Lead Session events plus

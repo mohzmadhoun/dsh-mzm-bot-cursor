@@ -2,6 +2,7 @@
 
 import { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
+import { randomUUID } from 'node:crypto'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
@@ -20,17 +21,20 @@ import {
   type PersonaBindRef,
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
-import { projectMailboxHandoffs, teamProjectionDefinition } from './projection.ts'
+import { projectMailboxHandoffs, projectSidebarSections, teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { TeamId, TeamTaskId } from './types.ts'
+import { SidebarSectionId, TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotRequest,
   CreateBotResult,
+  CreateSectionInput,
+  CreateSectionRequest,
+  CreateSectionResult,
   CreateTeamTaskRequest,
   AssignSectionInput,
   AssignSectionRequest,
@@ -44,11 +48,15 @@ import type {
   RenameBotInput,
   RenameBotRequest,
   RenameBotResult,
+  RenameSectionInput,
+  RenameSectionRequest,
+  RenameSectionResult,
   SendTeamMessageRequest,
   SendTeamMessageResult,
   SetAvatarInput,
   SetAvatarRequest,
   SetAvatarResult,
+  SidebarSectionView,
   SpawnTeammateRequest,
   SpawnTeammateResult,
   TeamMemberView,
@@ -66,6 +74,7 @@ import {
   normalizePersonaProfile,
   requiredDisplayName,
   requiredModelSelection,
+  requiredSectionName,
   teammateNameFromDisplayName,
 } from './validation.ts'
 
@@ -78,7 +87,7 @@ export {
   HOST_MAILBOX_MESSAGE_SOURCE,
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
-export { projectMailboxHandoffs } from './projection.ts'
+export { projectMailboxHandoffs, projectSidebarSections } from './projection.ts'
 export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -369,17 +378,152 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host section assign / unassign stub (FR-006).
-   * `sectionId: null` places the bot under Unassigned/default.
+   * Lead-authorized Host named sidebar section create (FR-006 / T031).
+   * Persists a catalog row `{ id, name }` on the Team journal; Unassigned is never stored.
+   * Empty / whitespace-only names reject without writing.
+   * Electron Main must not invent section records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - non-empty section name and cancellation.
+   * @returns Host-owned named section with empty membership.
+   */
+  async createSection(caller: Agent, request: CreateSectionRequest): Promise<CreateSectionResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can create a sidebar section', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const name = requiredSectionName(request.name)
+    const root = membership.root
+    const section = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const id = SidebarSectionId(`section-${randomUUID()}`)
+      const row = { id, name }
+      await this.journal.appendAndFlush(root, 'team/section', {
+        version: 2,
+        teamId: TeamId(root.id),
+        section: row,
+      })
+      return row
+    })
+    return {
+      id: section.id,
+      name: section.name,
+      section: { id: section.id, name: section.name, botIds: [] },
+    }
+  }
+
+  /**
+   * Lead-authorized Host named sidebar section rename (FR-006 / T031).
+   * Empty / whitespace-only names reject without writing; missing section id rejects.
+   * Electron Main must not invent section records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - section id, replacement name, and cancellation.
+   * @returns Host-owned named section after rename (membership unchanged).
+   */
+  async renameSection(caller: Agent, request: RenameSectionRequest): Promise<RenameSectionResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can rename a sidebar section', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const name = requiredSectionName(request.name)
+    const root = membership.root
+    const section = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).sections.find(row => row.id === request.sectionId)
+      if (current === undefined) {
+        throw new TeamError(
+          `sidebar section "${request.sectionId}" not found`,
+          'TEAM_SECTION_NOT_FOUND',
+        )
+      }
+      const row = { id: current.id, name }
+      await this.journal.appendAndFlush(root, 'team/section', {
+        version: 2,
+        teamId: TeamId(root.id),
+        section: row,
+      })
+      return row
+    })
+    const view = this.sectionView(root, section.id)
+    /* v8 ignore next 3 -- journal commit above retains the catalog row. */
+    if (view === undefined) {
+      throw new TeamError(`sidebar section "${section.id}" not found`, 'TEAM_SECTION_NOT_FOUND')
+    }
+    return { id: section.id, name: section.name, section: view }
+  }
+
+  /**
+   * Lead-authorized Host section assign / move / unassign (FR-006 / T032).
+   * `sectionId: null` places the bot under Unassigned/default without a catalog row.
+   * Non-null id must name an existing named section; empty named sections may remain.
    * Electron Main must not invent section membership — Host owns the durable write (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - bot id, section id or null, and cancellation.
    * @returns updated Host Bot identity after section membership change.
    */
   async assignSection(caller: Agent, request: AssignSectionRequest): Promise<AssignSectionResult> {
-    void caller
-    void request
-    throw new TeamError('Host assignSection is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can assign a sidebar section', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const root = membership.root
+    const updated = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const state = this.journal.state(root)
+      if (request.sectionId !== null
+        && !state.sections.some(section => section.id === request.sectionId)) {
+        throw new TeamError(
+          `sidebar section "${request.sectionId}" not found`,
+          'TEAM_SECTION_NOT_FOUND',
+        )
+      }
+      const current = state.members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const member = { ...current, sectionId: request.sectionId }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return member
+    })
+    const view = this.roster.list(membership).find(row => row.id === updated.id)
+    /* v8 ignore next 3 -- journal commit above retains the active roster row. */
+    if (view === undefined) {
+      throw new TeamError(`active teammate "${updated.id}" not found`, 'TEAM_MEMBER_NOT_FOUND')
+    }
+    return { id: updated.id, sectionId: request.sectionId, member: view }
+  }
+
+  /**
+   * Project named sidebar sections + Unassigned bot ids for one Lead (T033).
+   * @param caller - exact live Team member.
+   * @returns named section views and Unassigned bot ids (no Unassigned catalog row).
+   */
+  listSections(caller: Agent): {
+    readonly sections: readonly SidebarSectionView[]
+    readonly unassignedBotIds: readonly SessionId[]
+  } {
+    const membership = this.roster.membership(caller)
+    return projectSidebarSections(this.journal.state(membership.root))
+  }
+
+  /**
+   * Build one named section Client view from current journal + roster membership.
+   * @param root - exact live Team Lead.
+   * @param sectionId - named catalog id.
+   * @returns section view, or undefined when the catalog row is absent.
+   */
+  private sectionView(root: Agent, sectionId: SidebarSectionId): SidebarSectionView | undefined {
+    const projected = projectSidebarSections(this.journal.state(root))
+    return projected.sections.find(section => section.id === sectionId)
   }
 
   /**
@@ -506,19 +650,22 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Read the current roster, non-deleted task board, and Host mailbox handoffs
-   * through the generated Remote API (FR-005). Handoffs reconstruct from Lead
-   * Session + target Session logs — never Main-synthesized IPC.
+   * Read the current roster, non-deleted task board, sidebar sections + Unassigned,
+   * and Host mailbox handoffs through the generated Remote API (FR-005 / FR-006).
+   * Handoffs reconstruct from Lead Session + target Session logs — never Main-synthesized IPC.
    * @param agent - exact live Team member used as the authority credential.
    * @param signal - cancellation for cold target Session reads.
-   * @returns detached current roster, task, and handoff views.
+   * @returns detached current roster, task, section, and handoff views.
    */
   @Remote('view')
   async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView> {
     const membership = this.roster.membership(agent)
+    const { sections, unassignedBotIds } = projectSidebarSections(this.journal.state(membership.root))
     return {
       members: this.listMembers(agent),
       tasks: this.listTasks(agent),
+      sections,
+      unassignedBotIds,
       handoffs: await this.listHandoffs(membership.root, signal),
     }
   }
@@ -637,6 +784,38 @@ export class TeamService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<BotIdentityMutationResult<SetAvatarResult>> {
     return this.botIdentityMutationResult(this.setAvatar(agent, { ...request, signal }))
+  }
+
+  /**
+   * Create one named sidebar section through the generated Remote API (FR-006).
+   * @param agent - exact live Lead Agent authorizing create.
+   * @param request - non-empty section name.
+   * @param signal - Remote call cancellation.
+   * @returns the created section or a typed Team rejection.
+   */
+  @Remote('createSection')
+  remoteCreateSection(
+    agent: Agent,
+    request: CreateSectionInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<CreateSectionResult>> {
+    return this.botIdentityMutationResult(this.createSection(agent, { ...request, signal }))
+  }
+
+  /**
+   * Rename one named sidebar section through the generated Remote API (FR-006).
+   * @param agent - exact live Lead Agent authorizing rename.
+   * @param request - section id and non-empty replacement name.
+   * @param signal - Remote call cancellation.
+   * @returns the renamed section or a typed Team rejection.
+   */
+  @Remote('renameSection')
+  remoteRenameSection(
+    agent: Agent,
+    request: RenameSectionInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<RenameSectionResult>> {
+    return this.botIdentityMutationResult(this.renameSection(agent, { ...request, signal }))
   }
 
   /**

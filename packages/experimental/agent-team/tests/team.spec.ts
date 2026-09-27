@@ -17,7 +17,7 @@ import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
 import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
-import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
+import TeamService, { SidebarSectionId, TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
 import {
   modelAssignmentsAreDistinct,
   normalizeAvatarMarker,
@@ -39,6 +39,7 @@ afterEach(() => {
 /** Detached durable Team read through the same projection definition as the service. */
 function durable(agent: Agent): {
   members: TeamMemberSnapshot[]
+  sections: import('../src/index.ts').SidebarSectionSnapshot[]
   tasks: TeamTaskSnapshot[]
   pendingMessages: TeamMessageSnapshot[]
 } {
@@ -48,6 +49,7 @@ function durable(agent: Agent): {
   const state = projected
   return {
     members: state.members,
+    sections: state.sections,
     tasks: state.tasks,
     pendingMessages: state.messages.filter(message => !state.delivered.includes(message.id)),
   }
@@ -467,28 +469,118 @@ describe('Team identity and provisioning', () => {
     })
   })
 
-  it('exposes remaining Host identity mutation stubs as team-rejected Remotes without Main invention', async () => {
-    const { ctx, lead } = await setup([textResponse('identity stub bot')])
-    const created = await ctx.agentTeams.createBot(lead, {
-      displayName: 'Identity Stub',
-      modelSelection: { provider: 'mock', model: 'mock' },
+  it('persists createSection / assignSection / unassign and projects Unassigned without a catalog row', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('section bot a'),
+      textResponse('section bot b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Section Alpha',
+      modelSelection: { provider: 'mock', model: 'sec-a' },
       signal: SIGNAL,
     })
-    await waitNoAgent(ctx, created.id)
+    await waitNoAgent(ctx, alpha.id)
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Section Beta',
+      modelSelection: { provider: 'mock', model: 'sec-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, beta.id)
 
-    expect(await ctx.agentTeams.remoteAssignSection(lead, {
-      botId: created.id,
+    await expect(ctx.agentTeams.createSection(lead, {
+      name: '   ',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT' })
+
+    const created = await ctx.agentTeams.createSection(lead, {
+      name: ' Reviews ',
+      signal: SIGNAL,
+    })
+    expect(created).toMatchObject({
+      name: 'Reviews',
+      section: { name: 'Reviews', botIds: [] },
+    })
+    expect(durable(lead).sections).toEqual([{ id: created.id, name: 'Reviews' }])
+    // Clarify lock 4: no Unassigned catalog row.
+    expect(durable(lead).sections.some(row => /unassigned/i.test(row.name))).toBe(false)
+
+    const assigned = await ctx.agentTeams.assignSection(lead, {
+      botId: alpha.id,
+      sectionId: created.id,
+      signal: SIGNAL,
+    })
+    expect(assigned).toMatchObject({
+      id: alpha.id,
+      sectionId: created.id,
+      member: { id: alpha.id, sectionId: created.id },
+    })
+    expect(durable(lead).members.find(row => row.id === alpha.id)?.sectionId).toBe(created.id)
+
+    const renamed = await ctx.agentTeams.renameSection(lead, {
+      sectionId: created.id,
+      name: 'Code Reviews',
+      signal: SIGNAL,
+    })
+    expect(renamed).toMatchObject({
+      id: created.id,
+      name: 'Code Reviews',
+      section: { id: created.id, name: 'Code Reviews', botIds: [alpha.id] },
+    })
+
+    await expect(ctx.agentTeams.renameSection(lead, {
+      sectionId: created.id,
+      name: '',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT' })
+    expect(durable(lead).sections.find(row => row.id === created.id)?.name).toBe('Code Reviews')
+
+    await expect(ctx.agentTeams.assignSection(lead, {
+      botId: alpha.id,
+      sectionId: SidebarSectionId('missing-section'),
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_SECTION_NOT_FOUND' })
+
+    const moved = await ctx.agentTeams.remoteAssignSection(lead, {
+      botId: alpha.id,
       sectionId: null,
-    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
+    }, SIGNAL)
+    expect(moved).toMatchObject({
+      ok: true,
+      value: { id: alpha.id, sectionId: null },
+    })
+    expect(durable(lead).members.find(row => row.id === alpha.id)?.sectionId).toBeNull()
+    // Empty named section may remain after last-bot remove.
+    expect(durable(lead).sections).toEqual([{ id: created.id, name: 'Code Reviews' }])
 
-    // Prior create identity remains Host-durable; stubs do not invent Electron records.
-    expect(durable(lead).members.find(row => row.id === created.id)).toMatchObject({
-      displayName: 'Identity Stub',
-      phase: 'active',
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.sections).toEqual([{
+      id: created.id,
+      name: 'Code Reviews',
+      botIds: [],
+    }])
+    expect(view.unassignedBotIds).toEqual(expect.arrayContaining([alpha.id, beta.id]))
+    expect(view.members.find(row => row.id === alpha.id)?.sectionId).toBeNull()
+    expect(view.members.find(row => row.id === beta.id)?.sectionId).toBeUndefined()
+
+    const reassigned = await ctx.agentTeams.assignSection(lead, {
+      botId: beta.id,
+      sectionId: created.id,
+      signal: SIGNAL,
     })
-    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
-      displayName: 'Identity Stub',
+    expect(reassigned.sectionId).toBe(created.id)
+    expect(ctx.agentTeams.listSections(lead)).toEqual({
+      sections: [{ id: created.id, name: 'Code Reviews', botIds: [beta.id] }],
+      unassignedBotIds: [alpha.id],
     })
+
+    const remoteCreate = await ctx.agentTeams.remoteCreateSection(lead, {
+      name: 'Ops',
+    }, SIGNAL)
+    expect(remoteCreate).toMatchObject({ ok: true, value: { name: 'Ops' } })
+    expect(await ctx.agentTeams.remoteRenameSection(lead, {
+      sectionId: created.id,
+      name: '',
+    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
   })
 
   it('persists deleteBot tombstone, omits identity from view, and rejects without removing prior', async () => {
@@ -1662,6 +1754,8 @@ describe('Team Remote API', () => {
     await expect(ctx.agentTeams.remoteView(lead, SIGNAL)).resolves.toEqual({
       members: [expect.objectContaining({ name: 'lead', role: 'lead', status: 'idle' })],
       tasks: [],
+      sections: [],
+      unassignedBotIds: [],
       handoffs: [],
     })
 

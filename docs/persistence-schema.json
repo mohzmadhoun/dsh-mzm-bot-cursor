@@ -9659,7 +9659,7 @@
       "kind": "event",
       "event": "team/member",
       "surface": false,
-      "digest": "23816d42f6bc3bec5b35499d6d6219a204362a4afe71997e9af82706acdddb73",
+      "digest": "0f881efa48fd91cd463e221c78f7727d543fe6355944c8ee901e5c77cd7f5739",
       "schema": {
         "root": 0,
         "nodes": [
@@ -9673,22 +9673,22 @@
               },
               {
                 "name": "ignorable",
-                "type": 18,
+                "type": 19,
                 "optional": true
               },
               {
                 "name": "seq",
-                "type": 19,
+                "type": 20,
                 "optional": false
               },
               {
                 "name": "time",
-                "type": 19,
+                "type": 20,
                 "optional": false
               },
               {
                 "name": "type",
-                "type": 20,
+                "type": 21,
                 "optional": false
               }
             ],
@@ -9709,7 +9709,7 @@
               },
               {
                 "name": "version",
-                "type": 17,
+                "type": 18,
                 "optional": false
               }
             ],
@@ -9775,7 +9775,7 @@
               },
               {
                 "name": "sectionId",
-                "type": 15,
+                "type": 16,
                 "optional": true
               }
             ],
@@ -9867,12 +9867,17 @@
             "types": [
               12,
               13,
-              14
+              14,
+              15
             ]
           },
           {
             "kind": "literal",
             "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
           },
           {
             "kind": "literal",
@@ -9886,7 +9891,7 @@
             "kind": "union",
             "types": [
               4,
-              16
+              17
             ]
           },
           {
@@ -10379,6 +10384,106 @@
           {
             "kind": "literal",
             "value": "team/message/queued"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:team/section",
+      "kind": "event",
+      "event": "team/section",
+      "surface": false,
+      "digest": "27206cbd5061857f14b7a386b1a5ed746f948fb9c112fcaeb9a708755609a2eb",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 7,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "id",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "team/section"
           }
         ]
       }
@@ -15057,7 +15162,7 @@
         "event:team/message/delivered.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:533"
+        "packages/experimental/agent-team/src/types.ts:627"
       ]
     },
     {
@@ -15420,7 +15525,7 @@
         "event:team/message/queued.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:531"
+        "packages/experimental/agent-team/src/types.ts:625"
       ]
     },
     {
@@ -16498,6 +16603,269 @@
       "sources": [
         "packages/attachment/attachment/src/types.ts:28"
       ]
+    },
+    {
+      "digest": "0f881efa48fd91cd463e221c78f7727d543fe6355944c8ee901e5c77cd7f5739",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 21,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "member",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 18,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 16,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 4,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 4,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 4
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              17
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "team/member"
+          }
+        ]
+      },
+      "names": [
+        "event:team/member"
+      ],
+      "sources": []
     },
     {
       "digest": "10e386801903f9d424602c31d3ff837a94aef623c8b391376d8d9e253525fabe",
@@ -20115,7 +20483,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSource"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:207"
+        "packages/experimental/agent-team/src/types.ts:250"
       ]
     },
     {
@@ -20144,264 +20512,6 @@
         ]
       },
       "names": [],
-      "sources": []
-    },
-    {
-      "digest": "23816d42f6bc3bec5b35499d6d6219a204362a4afe71997e9af82706acdddb73",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "data",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "ignorable",
-                "type": 18,
-                "optional": true
-              },
-              {
-                "name": "seq",
-                "type": 19,
-                "optional": false
-              },
-              {
-                "name": "time",
-                "type": 19,
-                "optional": false
-              },
-              {
-                "name": "type",
-                "type": 20,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "member",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 17,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 9,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 11,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 15,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              6,
-              7
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 10,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 4,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 4
-          },
-          {
-            "kind": "union",
-            "types": [
-              12,
-              13,
-              14
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "union",
-            "types": [
-              4,
-              16
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "literal",
-            "value": "team/member"
-          }
-        ]
-      },
-      "names": [
-        "event:team/member"
-      ],
       "sources": []
     },
     {
@@ -22851,6 +22961,106 @@
       "sources": []
     },
     {
+      "digest": "27206cbd5061857f14b7a386b1a5ed746f948fb9c112fcaeb9a708755609a2eb",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 7,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "id",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "team/section"
+          }
+        ]
+      },
+      "names": [
+        "event:team/section"
+      ],
+      "sources": []
+    },
+    {
       "digest": "2765e9119edf5816ac1ab4c95c5ee32c90403f3742962eff11544f7752d59d2e",
       "schema": {
         "root": 0,
@@ -24348,6 +24558,65 @@
       ],
       "sources": [
         "packages/attachment/attachment/src/types.ts:8"
+      ]
+    },
+    {
+      "digest": "2f6e08b27ab708052ff6d560a61d9558c31b74f3f0109443cbc99c6309fdea16",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "id",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/section.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:623"
       ]
     },
     {
@@ -27301,6 +27570,45 @@
       "sources": []
     },
     {
+      "digest": "317c75d8f871a95e7b0a3709d65af7152fcffa1ab4ba845483f7e3e1d0c8b70d",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#TeamMemberPhase"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:49"
+      ]
+    },
+    {
       "digest": "326a9bfda27dda5882fb3cbe6e715df41dae2298fdae3d66437457268a665693",
       "schema": {
         "root": 0,
@@ -29240,7 +29548,7 @@
         "packages/experimental/agent-team/src/types.ts#BotPersonaProfile"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:63"
+        "packages/experimental/agent-team/src/types.ts:67"
       ]
     },
     {
@@ -32519,7 +32827,7 @@
         "packages/core/session/src/types.ts:19",
         "packages/experimental/agent-team/src/types.ts:21",
         "packages/experimental/agent-team/src/types.ts:33",
-        "packages/experimental/agent-team/src/types.ts:48",
+        "packages/experimental/agent-team/src/types.ts:52",
         "packages/experimental/agent-team/src/types.ts:9",
         "packages/feedback/message-feedback/src/types.ts:14",
         "packages/goal/goal/src/types.ts:17",
@@ -34070,7 +34378,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:161"
+        "packages/experimental/agent-team/src/types.ts:173"
       ]
     },
     {
@@ -35151,7 +35459,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:198"
+        "packages/experimental/agent-team/src/types.ts:241"
       ]
     },
     {
@@ -35318,8 +35626,8 @@
       },
       "names": [
         "SessionEventEnvelope[39].sourceEventSeqs",
-        "SessionEventEnvelope[52].sourceEventSeqs",
-        "SessionEventEnvelope[55].sourceEventSeqs",
+        "SessionEventEnvelope[53].sourceEventSeqs",
+        "SessionEventEnvelope[56].sourceEventSeqs",
         "event:assistant/attempt.data.stream[0][0].dt",
         "event:assistant/attempt.data.stream[0][1].dt",
         "event:assistant/attempt.data.stream[0][2].dt",
@@ -35498,7 +35806,7 @@
         "packages/experimental/agent-team/src/types.ts#AvatarMarker"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:77"
+        "packages/experimental/agent-team/src/types.ts:89"
       ]
     },
     {
@@ -35779,223 +36087,6 @@
       ],
       "sources": [
         "packages/subagent/subagent/src/descriptor.ts:61"
-      ]
-    },
-    {
-      "digest": "60d7439469125842f557c3d2894d47424f947d8de6d878b2b604bb557eec4d6d",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "member",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 16,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 10,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 14,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              5,
-              6
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 9,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 3,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 3
-          },
-          {
-            "kind": "union",
-            "types": [
-              11,
-              12,
-              13
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "union",
-            "types": [
-              3,
-              15
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          }
-        ]
-      },
-      "names": [
-        "event:team/member.data"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:527"
       ]
     },
     {
@@ -40460,198 +40551,6 @@
       ]
     },
     {
-      "digest": "78b78abd82d9c8f7df2f33e1556176ffd228ffa42b280ad6075ec030980621cf",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 1,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 6,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 9,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 13,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 2,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              4,
-              5
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 2,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 8,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 2,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 2
-          },
-          {
-            "kind": "union",
-            "types": [
-              10,
-              11,
-              12
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "union",
-            "types": [
-              2,
-              14
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          }
-        ]
-      },
-      "names": [
-        "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:85"
-      ]
-    },
-    {
       "digest": "79650cfa10aa3c52440328d85e8a25f0ffadc8d7efd784e3c0819d8bb74a1985",
       "schema": {
         "root": 0,
@@ -43054,6 +42953,203 @@
       ]
     },
     {
+      "digest": "8a9f8bf5f64870225a8af626235463024dd7f1a811ddadc089c2d44b456d866d",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 6,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 14,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 2,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 2,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 2
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11,
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              15
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:97"
+      ]
+    },
+    {
       "digest": "8ad45ad053b4d89f8865c17cc9ff3b8748e86045f3f0fb816269a34af2619141",
       "schema": {
         "root": 0,
@@ -45178,8 +45274,8 @@
       },
       "names": [
         "SessionEventEnvelope[39]",
-        "SessionEventEnvelope[52]",
-        "SessionEventEnvelope[55]"
+        "SessionEventEnvelope[53]",
+        "SessionEventEnvelope[56]"
       ],
       "sources": []
     },
@@ -45317,6 +45413,228 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "9b2fec29aeb2e4e0a20ca05bcfe6e0206f7a487e8711047809edaa5117d4f979",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "member",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 17,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 15,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              6
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 3
+          },
+          {
+            "kind": "union",
+            "types": [
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              16
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/member.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:616"
+      ]
     },
     {
       "digest": "9b4fd974c124c83743efe030ba4e1250e087505f3f74588716a521fb8d453267",
@@ -47161,6 +47479,20 @@
       "sources": []
     },
     {
+      "digest": "a21ea3a9dd7ce4ab2831d4f7d8d0ee1ee9eca9d6d073a160be44461743ed61a7",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "team/section"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "a2b49331716ba0a7078b026d145306a70eae64b7313c3e6204bd931e75ec3bb1",
       "schema": {
         "root": 0,
@@ -47523,7 +47855,7 @@
         "event:team/task.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:529"
+        "packages/experimental/agent-team/src/types.ts:618"
       ]
     },
     {
@@ -50101,6 +50433,40 @@
       ]
     },
     {
+      "digest": "b0b7b7f4d127101c49bfd0128e6f37c4627ebbc8baddf5b2e9edff1dac8c84b8",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "id",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#SidebarSectionSnapshot"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:202"
+      ]
+    },
+    {
       "digest": "b158f3ff6923714807c0d73882f0b05dc87f8fa85c9e90814852d48bbc866081",
       "schema": {
         "root": 0,
@@ -50312,7 +50678,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskStatus"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:158"
+        "packages/experimental/agent-team/src/types.ts:170"
       ]
     },
     {
@@ -57388,40 +57754,6 @@
       "sources": []
     },
     {
-      "digest": "dfce5db4aa42b7ebe0bb79eca92553587287e18c06b9eba85cbfb9d332e26acd",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "union",
-            "types": [
-              1,
-              2,
-              3
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          }
-        ]
-      },
-      "names": [
-        "packages/experimental/agent-team/src/types.ts#TeamMemberPhase"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:45"
-      ]
-    },
-    {
       "digest": "e0a787e6ec76c7c94fecbc501b489164ab0293db05bc947914077ad01e674f05",
       "schema": {
         "root": 0,
@@ -59100,10 +59432,11 @@
         "SessionEventEnvelope[4]",
         "SessionEventEnvelope[50]",
         "SessionEventEnvelope[51]",
-        "SessionEventEnvelope[53]",
+        "SessionEventEnvelope[52]",
         "SessionEventEnvelope[54]",
-        "SessionEventEnvelope[56]",
+        "SessionEventEnvelope[55]",
         "SessionEventEnvelope[57]",
+        "SessionEventEnvelope[58]",
         "SessionEventEnvelope[5]",
         "SessionEventEnvelope[7]",
         "SessionEventEnvelope[8]",

@@ -365,8 +365,62 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       {
         signature: 'async spawnTeammate(caller: Agent, request: SpawnTeammateRequest): Promise<SpawnTeammateResult>',
         description: 'Create one named, continuable direct child of the Team Lead.',
-        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'immutable name, description, prompt, context mode, provider, and cancellation.' }],
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'immutable name, description, prompt, context mode, subagent provider, optional LLM `agentOptions`, and cancellation.' }],
         returns: 'the active roster row.',
+      },
+      {
+        signature: 'async createBot(caller: Agent, request: CreateBotRequest): Promise<CreateBotResult>',
+        description: 'Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment. Persists the Bot on the Host Team roster with durable `modelSelection`, spawns with `agentOptions`, and binds the live Agent through `installModelSelection` so subsequent chats keep that assignment. Model calls resolve through Host `ctx.llm` adapters under `packages/llm/` using that assignment and Host `ctx.credentials` resolve — Electron Main must not invent bot records or route models.',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'displayName, ModelSelection, and cancellation.' }],
+        returns: 'Host-owned Bot identity, derived roster name, retained model assignment, and roster row.',
+      },
+      {
+        signature: 'async renameBot(caller: Agent, request: RenameBotRequest): Promise<RenameBotResult>',
+        description: 'Lead-authorized Host rename (FR-004). Persists a non-empty `displayName` on the Bot identity without changing the kebab roster `name`. Duplicate display names are allowed; empty/whitespace-only names reject without writing. Electron Main must not invent rename records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'bot id, replacement displayName, and cancellation.' }],
+        returns: 'updated Host Bot identity after rename.',
+      },
+      {
+        signature: 'async updatePersona(caller: Agent, request: UpdatePersonaRequest): Promise<UpdatePersonaResult>',
+        description: 'Lead-authorized Host persona update (FR-002 / FR-003 / FR-013). Replaces job / voice / antiJobs on the Bot; empty fields are allowed. Persists on the Team journal and refreshes live instruction bind when the Bot Agent is up. Rejects without writing when the caller is not Lead, the Bot is missing/inactive, or the signal is aborted — prior durable persona values stay unchanged (T018 Host reject path). Electron Main must not invent persona records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'bot id, persona fields, and cancellation.' }],
+        returns: 'updated Host Bot identity after persona save.',
+      },
+      {
+        signature: 'async setAvatar(caller: Agent, request: SetAvatarRequest): Promise<SetAvatarResult>',
+        description: 'Lead-authorized Host avatar-marker set (FR-005 / clarify lock 3). Replaces the Bot’s preset shape and/or color marker; at least one field required. Image-file / URL upload is out of Pass scope — Host accepts only fixed preset ids. Electron Main must not invent avatar records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'bot id, avatar marker, and cancellation.' }],
+        returns: 'updated Host Bot identity after avatar set.',
+      },
+      {
+        signature: 'async createSection(caller: Agent, request: CreateSectionRequest): Promise<CreateSectionResult>',
+        description: 'Lead-authorized Host named sidebar section create (FR-006 / T031). Persists a catalog row `{ id, name }` on the Team journal; Unassigned is never stored. Empty / whitespace-only names reject without writing. Electron Main must not invent section records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'non-empty section name and cancellation.' }],
+        returns: 'Host-owned named section with empty membership.',
+      },
+      {
+        signature: 'async renameSection(caller: Agent, request: RenameSectionRequest): Promise<RenameSectionResult>',
+        description: 'Lead-authorized Host named sidebar section rename (FR-006 / T031). Empty / whitespace-only names reject without writing; missing section id rejects. Electron Main must not invent section records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'section id, replacement name, and cancellation.' }],
+        returns: 'Host-owned named section after rename (membership unchanged).',
+      },
+      {
+        signature: 'async assignSection(caller: Agent, request: AssignSectionRequest): Promise<AssignSectionResult>',
+        description: 'Lead-authorized Host section assign / move / unassign (FR-006 / T032). `sectionId: null` places the bot under Unassigned/default without a catalog row. Non-null id must name an existing named section; empty named sections may remain. Electron Main must not invent section membership — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'bot id, section id or null, and cancellation.' }],
+        returns: 'updated Host Bot identity after section membership change.',
+      },
+      {
+        signature: 'listSections(caller: Agent): { readonly sections: readonly SidebarSectionView[] readonly unassignedBotIds: readonly SessionId[] }',
+        description: 'Project named sidebar sections + Unassigned bot ids for one Lead (T033).',
+        parameters: [{ name: 'caller', description: 'exact live Team member.' }],
+        returns: 'named section views and Unassigned bot ids (no Unassigned catalog row).',
+      },
+      {
+        signature: 'async deleteBot(caller: Agent, request: DeleteBotRequest): Promise<DeleteBotResult>',
+        description: 'Lead-authorized Host delete (FR-007 / FR-008 / clarify lock 5). Appends an `active` → `deleted` identity tombstone and clears section membership. Client roster / overview / section projections omit the Bot after commit. Transcript and mailbox cleanup MAY follow Host/session rules later and MUST NOT block this mutation or Pass — this path does not wipe them. Mid-flight reject / abort leaves the prior active row listed (T029 Host). Electron Main must not invent delete records — Host owns the durable write (research R1).',
+        parameters: [{ name: 'caller', description: 'exact live Lead Agent.' }, { name: 'request', description: 'bot id and cancellation.' }],
+        returns: 'acknowledgement after durable identity removal.',
       },
       {
         signature: 'async sendMessage(caller: Agent, request: SendTeamMessageRequest): Promise<SendTeamMessageResult>',
@@ -417,16 +471,70 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'Team membership, or undefined for non-Team subagents and stale identities.',
       },
       {
-        signature: '@Remote(\'view\') remoteView(agent: Agent): TeamView',
-        description: 'Read the current roster and non-deleted task board through the generated Remote API.',
-        parameters: [{ name: 'agent', description: 'exact live Team member used as the authority credential.' }],
-        returns: 'detached current roster and task views.',
+        signature: '@Remote(\'view\') async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView>',
+        description: 'Read the current roster, non-deleted task board, sidebar sections + Unassigned, and Host mailbox handoffs through the generated Remote API (FR-005 / FR-006). Handoffs reconstruct from Lead Session + target Session logs — never Main-synthesized IPC.',
+        parameters: [{ name: 'agent', description: 'exact live Team member used as the authority credential.' }, { name: 'signal', description: 'cancellation for cold target Session reads.' }],
+        returns: 'detached current roster, task, section, and handoff views.',
+      },
+      {
+        signature: 'async listHandoffs(root: Agent, signal: AbortSignal): Promise<HostMailboxMessage[]>',
+        description: 'Project Host mailbox handoffs for one Lead from session/RPC projections.',
+        parameters: [{ name: 'root', description: 'exact live Team Lead.' }, { name: 'signal', description: 'cancellation for persisted target Session reads.' }],
+        returns: 'product {@link HostMailboxMessage} rows in Lead queue order.',
       },
       {
         signature: '@Remote(\'createTask\') remoteCreateTask(agent: Agent, request: CreateTeamTaskRequest): Promise<TeamTaskMutationResult>',
         description: 'Create one shared task through the generated Remote API.',
         parameters: [{ name: 'agent', description: 'exact live Team member creating the task.' }, { name: 'request', description: 'task text, blockers, and advisory write scopes.' }],
         returns: 'the revision-one task or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'createBot\') remoteCreateBot( agent: Agent, request: CreateBotInput, signal: AbortSignal, ): Promise<CreateBotMutationResult>',
+        description: 'Create one product Bot through the generated Remote API (FR-001 / FR-002).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing create.' }, { name: 'request', description: 'displayName and exactly one model/provider assignment.' }, { name: 'signal', description: 'Remote call cancellation forwarded to teammate provisioning.' }],
+        returns: 'the retained Bot or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'renameBot\') remoteRenameBot( agent: Agent, request: RenameBotInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<RenameBotResult>>',
+        description: 'Rename one product Bot through the generated Remote API (FR-004).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing rename.' }, { name: 'request', description: 'bot id and non-empty replacement displayName.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the renamed Bot or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'updatePersona\') remoteUpdatePersona( agent: Agent, request: UpdatePersonaInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<UpdatePersonaResult>>',
+        description: 'Update one product Bot persona through the generated Remote API (FR-002 / FR-003).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing the update.' }, { name: 'request', description: 'bot id plus job / voice / antiJobs (empty allowed).' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the updated Bot or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'setAvatar\') remoteSetAvatar( agent: Agent, request: SetAvatarInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<SetAvatarResult>>',
+        description: 'Set one product Bot avatar marker through the generated Remote API (FR-005).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing the update.' }, { name: 'request', description: 'bot id and preset avatar marker.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the updated Bot or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'createSection\') remoteCreateSection( agent: Agent, request: CreateSectionInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<CreateSectionResult>>',
+        description: 'Create one named sidebar section through the generated Remote API (FR-006).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing create.' }, { name: 'request', description: 'non-empty section name.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the created section or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'renameSection\') remoteRenameSection( agent: Agent, request: RenameSectionInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<RenameSectionResult>>',
+        description: 'Rename one named sidebar section through the generated Remote API (FR-006).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing rename.' }, { name: 'request', description: 'section id and non-empty replacement name.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the renamed section or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'assignSection\') remoteAssignSection( agent: Agent, request: AssignSectionInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<AssignSectionResult>>',
+        description: 'Assign or unassign one product Bot sidebar section through the generated Remote API (FR-006).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing the update.' }, { name: 'request', description: 'bot id and section id or `null` for Unassigned/default.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'the updated Bot or a typed Team rejection.',
+      },
+      {
+        signature: '@Remote(\'deleteBot\') remoteDeleteBot( agent: Agent, request: DeleteBotInput, signal: AbortSignal, ): Promise<BotIdentityMutationResult<DeleteBotResult>>',
+        description: 'Delete one product Bot identity through the generated Remote API (FR-007 / FR-008).',
+        parameters: [{ name: 'agent', description: 'exact live Lead Agent authorizing delete.' }, { name: 'request', description: 'bot id to remove.' }, { name: 'signal', description: 'Remote call cancellation.' }],
+        returns: 'deletion acknowledgement or a typed Team rejection.',
       },
       {
         signature: '@Remote(\'updateTask\') remoteUpdateTask(agent: Agent, request: UpdateTeamTaskRequest): Promise<TeamTaskMutationResult>',
@@ -781,7 +889,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     methods: [
       {
         signature: 'abstract resolve(ref: CredentialRef): Promise<ResolvedCredential | undefined>',
-        description: 'Resolve one reference to its current value. Resolution is per call: consumers re-resolve at each operation and must not cache across operations — that per-operation read is what makes a changed credential reach the next operation without a restart.',
+        description: 'Resolve one reference to its current value. Resolution is per call: consumers re-resolve at each operation and must not cache across operations — that per-operation read is what makes a changed credential reach the next operation without a restart.\n\nResolves **only** the named reference. Providers MUST NOT substitute another reference\'s value (no silent peer / cross-bot fallback): when `ref` is unconfigured, return `undefined` even if other refs hold secrets.',
         parameters: [{ name: 'ref', description: 'the reference to resolve.' }],
         returns: 'the value and its source, or `undefined` while unconfigured.',
       },
@@ -4129,6 +4237,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface AssembledSection {\n    name: string;\n    text: string;\n    interpolate?: boolean;\n}',
   },
   {
+    name: 'AssignSectionInput',
+    declaration: 'export interface AssignSectionInput {\n    readonly botId: SessionId;\n    readonly sectionId: SidebarSectionId | null;\n}',
+  },
+  {
+    name: 'AssignSectionRequest',
+    declaration: 'export interface AssignSectionRequest extends AssignSectionInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'AssignSectionResult',
+    declaration: 'export interface AssignSectionResult {\n    readonly id: SessionId;\n    readonly sectionId: SidebarSectionId | null;\n    readonly member: TeamMemberView;\n}',
+  },
+  {
     name: 'AssistantMessage',
     declaration: 'export interface AssistantMessage extends Message {\n    readonly role: \'assistant\';\n    readonly source: ModelMessageSource;\n}',
   },
@@ -4209,6 +4329,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type AuthorizationStatus = \'authorized\' | \'cancelled\';',
   },
   {
+    name: 'AvatarMarker',
+    declaration: 'export interface AvatarMarker {\n    readonly shape?: string;\n    readonly color?: string;\n}',
+  },
+  {
     name: 'BackendRegistry',
     declaration: 'export class BackendRegistry {\n    register(name: string, backend: StorageBackend): () => void;\n    get(name: string): StorageBackend;\n    names(): string[];\n}',
   },
@@ -4223,6 +4347,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'BashEnvVariableInfo',
     declaration: 'export interface BashEnvVariableInfo extends BashEnvVariable {\n    contributor: string;\n    key: DshEnvironmentKey;\n}',
+  },
+  {
+    name: 'BotIdentityMutationResult',
+    declaration: 'export type BotIdentityMutationResult<T> = {\n    readonly ok: true;\n    readonly value: T;\n} | {\n    readonly ok: false;\n    readonly error: {\n        readonly code: \'team-rejected\';\n        readonly message: string;\n    };\n};',
+  },
+  {
+    name: 'BotPersonaProfile',
+    declaration: 'export interface BotPersonaProfile {\n    readonly job: string;\n    readonly voice: string;\n    readonly antiJobs: readonly string[];\n}',
   },
   {
     name: 'Branded',
@@ -4485,12 +4617,40 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface CreateAgentOptions {\n    readonly sessionId: SessionId;\n    readonly parentAgent?: Agent;\n    readonly meta?: {\n        readonly cwd?: string;\n        readonly parentSession?: SessionId;\n        readonly isSeeded?: boolean;\n        readonly origin?: \'subagent\';\n        readonly delegationDepth?: number;\n        readonly agentPreset?: string;\n    };\n    readonly inheritedEventCount?: SessionLogOffset;\n    readonly seed?: readonly SessionEvent[];\n    readonly agentOptions?: AgentOptions;\n    readonly signal?: AbortSignal;\n    readonly setup?: AgentSetup;\n}',
   },
   {
+    name: 'CreateBotInput',
+    declaration: 'export interface CreateBotInput {\n    readonly displayName: string;\n    readonly modelSelection: ModelSelection;\n}',
+  },
+  {
+    name: 'CreateBotMutationResult',
+    declaration: 'export type CreateBotMutationResult = {\n    readonly ok: true;\n    readonly value: CreateBotResult;\n} | {\n    readonly ok: false;\n    readonly error: {\n        readonly code: \'team-rejected\';\n        readonly message: string;\n    };\n};',
+  },
+  {
+    name: 'CreateBotRequest',
+    declaration: 'export interface CreateBotRequest extends CreateBotInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'CreateBotResult',
+    declaration: 'export interface CreateBotResult {\n    readonly id: SessionId;\n    readonly displayName: string;\n    readonly name: string;\n    readonly modelSelection: ModelSelection;\n    readonly member: TeamMemberView;\n}',
+  },
+  {
     name: 'CreateGoalRequest',
     declaration: 'export interface CreateGoalRequest {\n    readonly objective: string;\n    readonly maxGoalRounds?: number;\n}',
   },
   {
     name: 'CreateGoalResult',
     declaration: 'export interface CreateGoalResult {\n    readonly ref: GoalRef;\n}',
+  },
+  {
+    name: 'CreateSectionInput',
+    declaration: 'export interface CreateSectionInput {\n    readonly name: string;\n}',
+  },
+  {
+    name: 'CreateSectionRequest',
+    declaration: 'export interface CreateSectionRequest extends CreateSectionInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'CreateSectionResult',
+    declaration: 'export interface CreateSectionResult {\n    readonly id: SidebarSectionId;\n    readonly name: string;\n    readonly section: SidebarSectionView;\n}',
   },
   {
     name: 'CreateSessionOptions',
@@ -4539,6 +4699,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'DeepSeekLlmApiJson',
     declaration: 'export type DeepSeekLlmApiJson = null | boolean | number | string | DeepSeekLlmApiJson[] | {\n    [key: string]: DeepSeekLlmApiJson;\n};',
+  },
+  {
+    name: 'DeleteBotInput',
+    declaration: 'export interface DeleteBotInput {\n    readonly botId: SessionId;\n}',
+  },
+  {
+    name: 'DeleteBotRequest',
+    declaration: 'export interface DeleteBotRequest extends DeleteBotInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'DeleteBotResult',
+    declaration: 'export interface DeleteBotResult {\n    readonly id: SessionId;\n}',
   },
   {
     name: 'DiffCallView',
@@ -4815,6 +4987,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'HostConnectionRpc',
     declaration: 'export interface HostConnectionRpc {\n    handle(channel: string, handler: ConnectionRpcHandler): () => Promise<void>;\n    intercept(channel: \'/api\', matches: ConnectionRpcEndpointMatcher, handler: ConnectionRpcHandler): () => Promise<void>;\n}',
+  },
+  {
+    name: 'HostMailboxMessage',
+    declaration: 'export interface HostMailboxMessage {\n    readonly id: TeamMessageId;\n    readonly fromBotId: SessionId;\n    readonly toBotId: SessionId;\n    readonly body: ContentBlock[];\n    readonly createdAt: number;\n    readonly deliveryState: TeamMailboxDeliveryState;\n    readonly source: HostMailboxMessageSource;\n}',
+  },
+  {
+    name: 'HostMailboxMessageSource',
+    declaration: 'export interface HostMailboxMessageSource {\n    readonly kind: \'host-mailbox\';\n}',
   },
   {
     name: 'ImageAttachmentLimits',
@@ -5517,6 +5697,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface RemoteEventHostInfo {\n    readonly home: string;\n}',
   },
   {
+    name: 'RenameBotInput',
+    declaration: 'export interface RenameBotInput {\n    readonly botId: SessionId;\n    readonly displayName: string;\n}',
+  },
+  {
+    name: 'RenameBotRequest',
+    declaration: 'export interface RenameBotRequest extends RenameBotInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'RenameBotResult',
+    declaration: 'export interface RenameBotResult {\n    readonly id: SessionId;\n    readonly displayName: string;\n    readonly member: TeamMemberView;\n}',
+  },
+  {
+    name: 'RenameSectionInput',
+    declaration: 'export interface RenameSectionInput {\n    readonly sectionId: SidebarSectionId;\n    readonly name: string;\n}',
+  },
+  {
+    name: 'RenameSectionRequest',
+    declaration: 'export interface RenameSectionRequest extends RenameSectionInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'RenameSectionResult',
+    declaration: 'export interface RenameSectionResult {\n    readonly id: SidebarSectionId;\n    readonly name: string;\n    readonly section: SidebarSectionView;\n}',
+  },
+  {
     name: 'RenderedDocumentBytes',
     declaration: 'export interface RenderedDocumentBytes extends WorkspaceFileBytes {\n    readonly missingFonts: string[];\n    readonly generation: OfficeToPdfGeneration;\n}',
   },
@@ -6161,6 +6365,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface SessionWireHeader {\n    readonly version: number;\n    readonly id: SessionId;\n    readonly createdAt: number;\n    readonly cwd?: string;\n    readonly parentSession?: SessionId;\n    readonly isSeeded: boolean;\n    readonly origin?: \'subagent\';\n    readonly delegationDepth?: number;\n    readonly agentPreset?: string;\n}',
   },
   {
+    name: 'SetAvatarInput',
+    declaration: 'export interface SetAvatarInput {\n    readonly botId: SessionId;\n    readonly avatar: AvatarMarker;\n}',
+  },
+  {
+    name: 'SetAvatarRequest',
+    declaration: 'export interface SetAvatarRequest extends SetAvatarInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'SetAvatarResult',
+    declaration: 'export interface SetAvatarResult {\n    readonly id: SessionId;\n    readonly avatar: AvatarMarker;\n    readonly member: TeamMemberView;\n}',
+  },
+  {
     name: 'SettingsApplies',
     declaration: 'export type SettingsApplies = \'live\' | \'restart\';',
   },
@@ -6241,6 +6457,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ShellSandboxInfo {\n    mode: SandboxMode;\n    denied: boolean;\n    enforcement?: SandboxEnforcement;\n    runnerFailed?: boolean;\n}',
   },
   {
+    name: 'SidebarSectionId',
+    declaration: 'export type SidebarSectionId = Branded<\'SidebarSectionId\'>;',
+  },
+  {
+    name: 'SidebarSectionView',
+    declaration: 'export interface SidebarSectionView {\n    readonly id: SidebarSectionId;\n    readonly name: string;\n    readonly botIds: readonly SessionId[];\n}',
+  },
+  {
     name: 'SkillCandidate',
     declaration: 'export interface SkillCandidate extends SkillSummary {\n    readonly rank: number;\n    readonly locator: unknown;\n    readonly metadata?: Readonly<Record<string, unknown>>;\n}',
   },
@@ -6306,7 +6530,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SpawnTeammateRequest',
-    declaration: 'export interface SpawnTeammateRequest {\n    readonly name: string;\n    readonly description: string;\n    readonly prompt: ContentBlock[];\n    readonly context: \'fresh\' | \'fork\';\n    readonly provider: string;\n    readonly signal: AbortSignal;\n}',
+    declaration: 'export interface SpawnTeammateRequest {\n    readonly name: string;\n    readonly description: string;\n    readonly displayName?: string;\n    readonly prompt: ContentBlock[];\n    readonly context: \'fresh\' | \'fork\';\n    readonly provider: string;\n    readonly agentOptions?: ModelSelection;\n    readonly signal: AbortSignal;\n}',
   },
   {
     name: 'SpawnTeammateResult',
@@ -6537,12 +6761,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type TeamId = Branded<\'TeamId\'>;',
   },
   {
+    name: 'TeamMailboxDeliveryState',
+    declaration: 'export type TeamMailboxDeliveryState = \'queued\' | \'delivered\' | \'acted\' | \'visible-pending\';',
+  },
+  {
     name: 'TeamMembership',
     declaration: 'export interface TeamMembership {\n    readonly root: Agent;\n    readonly id: TeamId;\n    readonly role: \'lead\' | \'teammate\';\n    readonly name: string;\n}',
   },
   {
     name: 'TeamMemberView',
-    declaration: 'export interface TeamMemberView {\n    readonly id: SessionId;\n    readonly name: string;\n    readonly role: \'lead\' | \'teammate\';\n    readonly status: \'running\' | \'idle\' | \'inactive\' | \'provisioning\' | \'failed\';\n    readonly description?: string;\n    readonly provider?: string;\n    readonly context?: \'fresh\' | \'fork\';\n    readonly model?: string;\n    readonly diagnostics: string[];\n}',
+    declaration: 'export interface TeamMemberView {\n    readonly id: SessionId;\n    readonly name: string;\n    readonly role: \'lead\' | \'teammate\';\n    readonly status: \'running\' | \'idle\' | \'inactive\' | \'provisioning\' | \'failed\';\n    readonly description?: string;\n    readonly displayName?: string;\n    readonly provider?: string;\n    readonly context?: \'fresh\' | \'fork\';\n    readonly model?: string;\n    readonly modelSelection?: Pick<ModelSelection, \'provider\' | \'model\'>;\n    readonly persona?: BotPersonaProfile;\n    readonly avatar?: AvatarMarker;\n    readonly sectionId?: SidebarSectionId | null;\n    readonly diagnostics: string[];\n}',
   },
   {
     name: 'TeamMessageId',
@@ -6570,7 +6798,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TeamView',
-    declaration: 'export interface TeamView {\n    readonly members: TeamMemberView[];\n    readonly tasks: TeamTaskView[];\n}',
+    declaration: 'export interface TeamView {\n    readonly members: TeamMemberView[];\n    readonly tasks: TeamTaskView[];\n    readonly sections: readonly SidebarSectionView[];\n    readonly unassignedBotIds: readonly SessionId[];\n    readonly handoffs: HostMailboxMessage[];\n}',
   },
   {
     name: 'TeamWaitResult',
@@ -6919,6 +7147,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'TypertTypeModel',
     declaration: 'export interface TypertTypeModel {\n    readonly name: string;\n    readonly declaration: string;\n}',
+  },
+  {
+    name: 'UpdatePersonaInput',
+    declaration: 'export interface UpdatePersonaInput {\n    readonly botId: SessionId;\n    readonly job: string;\n    readonly voice: string;\n    readonly antiJobs: readonly string[];\n}',
+  },
+  {
+    name: 'UpdatePersonaRequest',
+    declaration: 'export interface UpdatePersonaRequest extends UpdatePersonaInput {\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'UpdatePersonaResult',
+    declaration: 'export interface UpdatePersonaResult {\n    readonly id: SessionId;\n    readonly persona: BotPersonaProfile;\n    readonly member: TeamMemberView;\n}',
   },
   {
     name: 'UpdateTeamTaskRequest',
