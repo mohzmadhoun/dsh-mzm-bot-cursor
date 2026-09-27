@@ -96,7 +96,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Implement/confirm Host mailbox send path Bot A→Bot B using Agent Teams Lead-log mailbox → target inbox in `packages/experimental/agent-team/src/mailbox.ts` / `session-message.ts` / `SendTeamMessageRequest` in `packages/experimental/agent-team/src/types.ts` (`deliveryState`: `queued` → `delivered` → `acted` | `visible-pending`)
+- [x] T021 [US2] Implement/confirm Host mailbox send path Bot A→Bot B using Agent Teams Lead-log mailbox → target inbox in `packages/experimental/agent-team/src/mailbox.ts` / `session-message.ts` / `SendTeamMessageRequest` in `packages/experimental/agent-team/src/types.ts` (`deliveryState`: `queued` → `delivered` → `acted` | `visible-pending`)
 - [ ] T022 [P] [US2] Persist durable Host mailbox message fields (`id`, `fromBotId`, `toBotId`, `body`, `createdAt`, `deliveryState`, `source` Host-only) per [data-model.md](./data-model.md) — `source` MUST NOT be Electron IPC
 - [ ] T023 [US2] Expose handoff observability to Client via Host session/RPC projections (not Main-synthesized IPC) in `packages/experimental/agent-team/src/projection.ts` and `packages/experimental/client-ui-agent-team/`
 - [ ] T024 [US2] Render user-visible handoff / pending / recipient follow-up in Desktop Web chat surfaces under `packages/client/ui-chat/` / `packages/client/ui-conversation/` and Agent Team UI so copy-paste is not required

@@ -120,6 +120,7 @@ The [Agent Teams Agent Note](../../../.agents/notes/implemented/feature/2026-08-
 | [`src/index.ts`](src/index.ts) | Plugin entry: `Config` schema, service registration, recovery scheduling |
 | [`src/roster.ts`](src/roster.ts) | Team identity, membership resolution, provisioning, and roster teardown |
 | [`src/mailbox.ts`](src/mailbox.ts) | Durable queue, target-local dispatch, acknowledgement, and recovery |
+| [`src/delivery-state.ts`](src/delivery-state.ts) | Product `deliveryState` observation from Lead + target session logs |
 | [`src/task-board.ts`](src/task-board.ts) | Task CAS commands, DAG validation, and derived views |
 | [`src/journal.ts`](src/journal.ts) | Serialized Lead-log transactions and commit notification |
 | [`src/projection.ts`](src/projection.ts) | Strict replay projection that decodes and validates Team events |
@@ -134,6 +135,8 @@ Every ordinary runtime root is the implicit Lead of a Team whose `TeamId` equals
 ### Durable mailbox
 
 `sendMessage()` validates peer membership, appends `team/message/queued`, and flushes before attempting delivery. The target message begins with `Team message <id> from <name>:` and keeps the same id and sender in `TeamMessageSource`. A target receipt is acknowledged with `team/message/delivered` only after the target Session durably holds the message identity in its pending inbox or recorded history. Immediate admissions are serialized per target in durable queue order; recovery dispatches queued-minus-delivered records in the same order. Delivery folds both live and persisted target inbox/history state before retrying, so a crash between inbox acceptance and model claim does not duplicate the message. The guarantee is process-local retry plus target-Session de-duplication, not cross-process exactly-once delivery.
+
+Product `deliveryState` (`queued` → `delivered` → `acted` | `visible-pending`) is reconstructed from those Lead-log edges plus the target Session log via `observeMailboxDeliveryState` — never from Electron IPC. `visible-pending` means the recipient holds a durable handoff without a follow-up turn; `acted` means a later `request/header` follows the team-message receipt.
 
 Lead delivery calls `Agent.steer()` directly. Teammate delivery uses the continuation owner's host-only Steer path, which preserves the Team sender source while authorizing the Lead-to-child edge and cold-resuming inactive targets. Sibling messages never impersonate the Lead through the public adjacent-Agent messaging operation.
 

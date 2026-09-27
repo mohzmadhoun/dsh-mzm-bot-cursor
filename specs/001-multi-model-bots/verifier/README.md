@@ -45,6 +45,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Verifier** + Client | FR-003 rule + Client messaging (T018 Pass); live SC-001/002 remain Verifier |
 | **T019** Clean-machine TTFT path (SC-001) | [scenario-2-multi-model.md](./scenario-2-multi-model.md#t019--clean-machine-ttft-path-sc-001) | **Spec** (path/fields) · **Verifier** (wall-clock) | Ordered path + recording fields; live timed run may be Deferred until Verifier measures |
 | **T020** Missing-credential → Models handoff | [t020-cred-handoff.md](./t020-cred-handoff.md) | **Electron/Client** + **Verifier** | FR-008 failure UX (in-app Models); dump hygiene stays Scenario 1 / US4 |
+| **T021** Host mailbox send path A→B | [t021-mailbox-send.md](./t021-mailbox-send.md) | **Runtime** + **Verifier** | FR-004 Host Lead-log mailbox → target inbox; `deliveryState` from session logs; not SC-003 UI Pass |
 
 ## Fan-out policy
 
