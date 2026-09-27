@@ -171,7 +171,7 @@ Mohammed’s active cron routine fires on schedule while the desktop product is 
 - Confirm card on create/change is optional UX; Pass does not require it (locked in Clarifications 2026-09-27).
 - Edit and delete routine are optional UX, not Pass gates (locked in Clarifications 2026-09-27).
 - Human-readable identity MAY be derived from intent; separate display-name field not required (locked in Clarifications 2026-09-27).
-- Plan-time seam hint (not a user-facing requirement rewrite): Host `dsh-jobs` / `dsh-schedule` ownership; pane projects Host state; no Electron parallel routines bus as source of truth — Architect locks at `/speckit-plan`.
+- Plan-time seam lock (Architect Option 3 on MOH-191): Host-owned Routine catalog + Host cron wake; pane projects Host via HTTP/WS; no Electron parallel routines bus; `dsh-schedule` is session reminders only (not Routines SoT); optional `dsh-jobs` for in-flight fire visibility only.
 - Standing order 11: GUI Verifier Pass requires real desktop screenshots and/or short screen recordings—not unit/jsdom alone (FR-010).
 - Standing order 12: those artifacts MUST be committed under `verifier/evidence/` and embedded in the GUI PR body via ManagePullRequest absolute `/opt/cursor/artifacts/…` paths (FR-011).
 - Linear issues for implementation are created only after Spec Kit `tasks` → `taskstoissues`, hung on project **DeepSeek Harness - Cursor** under epic MOH-188 (never DeepSeek Harness - GrokBot). This clarify step does not invent implement tickets.
