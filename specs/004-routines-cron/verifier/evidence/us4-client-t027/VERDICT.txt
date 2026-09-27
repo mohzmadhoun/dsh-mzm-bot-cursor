@@ -1,0 +1,20 @@
+PASS — Client US4 T027 last-run / fire indicator (product UI slice)
+
+Tip: cursor/p4-us4-client-last-run-fe1d @ 464f36ac70
+Linear: MOH-220 (leave Done to PO)
+Date: 2026-09-27
+
+Measured:
+- Desktop CDP hard-assert: data-team-routine-fire-indicator never|fired from Host lastRunAt
+- never row: Not run yet (paused catalog row)
+- fired row: Last run 2026-09-27T19:51:05.247Z (Host numeric lastRunAt)
+- leave/return keeps fired indicator (Host TeamView.routines projection)
+- focused vitest: T027 / T020 / T023 filters green
+- no Electron Main routines bus (apps/desktop no-electron-routines-bus.spec.ts)
+
+Not claimed:
+- Full SC-003 / quickstart Scenario 3 Done (T028 Verifier recipe)
+- T026 jobs visibility
+- Linear Done
+
+SO11 evidence: this directory + /opt/cursor/artifacts/p4-us4-t027-*
