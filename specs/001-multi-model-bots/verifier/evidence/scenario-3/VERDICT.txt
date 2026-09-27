@@ -1,0 +1,42 @@
+VERDICT: Pass
+SC: SC-003
+SHA: 19914ea45752255c50409f8a2b0cd7b39fa43fb4
+BRANCH: cursor/p1-t025-scenario3-92fa
+UTC: 2026-09-27T10:08:11Z
+OPERATOR: DH Verifier (Composer acting as Mohammed)
+LINEAR: MOH-70 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/scenario-3-mailbox.md
+BASE_MASTER: 4e61aae8c4 (Phase 1 - T024 - render handoff pending in Desktop chat UI #44)
+T021: Pass (measured)
+COMMAND_T021: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/mailbox-send.spec.ts packages/experimental/agent-team/tests/delivery-state.spec.ts
+STDOUT_T021: evidence/scenario-3/vitest-t021.log (Test Files 2 passed; Tests 9 passed; EXIT:0)
+T022: Pass (measured)
+COMMAND_T022: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/host-mailbox-message.spec.ts packages/experimental/agent-team/tests/mailbox-persist.spec.ts
+STDOUT_T022: evidence/scenario-3/vitest-t022.log (Test Files 2 passed; Tests 8 passed; EXIT:0)
+T023: Pass (measured)
+COMMAND_T023: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/mailbox-handoff-projection.spec.ts packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'T023|handoff|empty handoffs'
+STDOUT_T023: evidence/scenario-3/vitest-t023.log (Test Files 2 passed; Tests 6 passed | 31 skipped; EXIT:0)
+T024: Pass (measured)
+COMMAND_T024: ./node_modules/.bin/vitest run packages/client/ui-chat/tests/team-message-source.client.spec.ts packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'T024|T023|handoff|empty handoffs|team-message'
+STDOUT_T024: evidence/scenario-3/vitest-t024.log (Test Files 4 passed; Tests 10 passed | 123 skipped; EXIT:0)
+SKELETON_NOTICES_SEAT: Pass (measured)
+COMMAND_SKELETON: ./node_modules/.bin/vitest run packages/client/ui-conversation/tests/skeleton.client.spec.tsx -t 'active phase: fixed header'
+STDOUT_SKELETON: evidence/scenario-3/vitest-skeleton.log (Test Files 1 passed; Tests 1 passed | 23 skipped; EXIT:0)
+TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND_TOPOLOGY: ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT_TOPOLOGY: evidence/scenario-3/vitest-topology-negative.log (Test Files 1 passed; Tests 1 passed | 4 skipped; EXIT:0)
+LIVE: Deferred
+DEFER_REASON: Keyless composite Pass recorded; live Desktop dual-bot operator path not run on this Verifier host
+EVIDENCE: evidence/scenario-3/
+CRITERIA_CHECKED:
+  1. Host A→B send + deliveryState fold (T021) — Pass (measured)
+  2. Durable Host-only product fields (T022) — Pass (measured)
+  3. Host session/RPC TeamView.handoffs + Client panel (T023) — Pass (measured)
+  4. Chat + notices strip visible handoff without copy-paste (T024 + skeleton) — Pass (measured)
+  5. Fake Electron mailbox IPC rejected (topology negative) — Pass (measured)
+  6. Live Desktop dual-bot operator observation — Deferred
+CLAIM: measured (self-prove keyless composite @ 19914ea457)
+SCOPE_OUT: T026 Electron bus regression guard file; live Desktop SC-003 operator stamp
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; mock LLM / component fixtures — no provider API secrets
+BLOCKER: none
+LINEAR_STATUS: leave MOH-70 In Progress until PO opens PR and second Pass cycle
