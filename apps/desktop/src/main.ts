@@ -22,6 +22,7 @@ import {
   type MenuItemConstructorOptions,
 } from 'electron'
 import { resolveDesktopPaths } from './paths.ts'
+import { developmentPrimaryRuntimePath } from './development-runtime.ts'
 import { DesktopProjectManager } from './project-manager.ts'
 import { DesktopHostProcess, DesktopHostUncleanExitError } from './host-process.ts'
 import { installDesktopDirectoryPicker } from './directory-picker.ts'
@@ -252,7 +253,7 @@ async function main(): Promise<void> {
     const hostInspectPort = developmentHostInspectPort(development)
     const host = new DesktopHostProcess(resources.node, resources.dsh, activeProject,
       hostInspectPort, process.env, onFailure,
-      development ? join(app.getAppPath(), '.desktop-build', 'targets', `${process.platform === 'darwin' ? 'mac' : 'win'}-${process.arch}`, 'runtime', 'primary-runtime')
+      development ? developmentPrimaryRuntimePath(app.getAppPath())
         : join(process.resourcesPath, 'runtime', 'primary-runtime'),
       development ? 'link' : 'runtime', resources)
     return {

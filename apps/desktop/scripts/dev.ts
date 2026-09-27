@@ -1,14 +1,16 @@
 /** Build and launch the unpackaged Electron shell against the current workspace. */
 
 import { spawn, execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { join, resolve } from 'node:path'
+import { join, resolve, dirname } from 'node:path'
 import { parseArgs } from 'node:util'
+import { developmentPrimaryRuntimePath } from '../src/development-runtime.ts'
 import { DESKTOP_HOST_PROTOCOL_VERSION } from '../src/host-protocol.ts'
 import type { DesktopRelease } from '../src/release.ts'
+import { tryResolveDesktopBuildTarget } from './desktop-build-paths.mjs'
 import { prepareDevelopmentProject } from './development-project.ts'
-import { preparePrimaryRuntime } from './prepare-primary-runtime.ts'
+import { prepareOfficeSkillAssets, preparePrimaryRuntime } from './prepare-primary-runtime.ts'
 
 const APP_ROOT = resolve(import.meta.dirname, '..')
 const REPOSITORY_ROOT = resolve(APP_ROOT, '..', '..')
@@ -109,7 +111,22 @@ async function main(): Promise<void> {
     dependencyDir: join(REPOSITORY_ROOT, 'node_modules', '.pnpm', 'node_modules'),
     release,
   })
-  await preparePrimaryRuntime()
+  if (tryResolveDesktopBuildTarget() !== null) {
+    await preparePrimaryRuntime()
+  } else {
+    // Linux (and other non-packaging hosts): skip interpreter payload; still stage Office
+    // skill assets beside the development primary-runtime path so Desktop Host can boot.
+    const primaryRuntime = developmentPrimaryRuntimePath(APP_ROOT)
+    const officeSkills = join(dirname(primaryRuntime), 'office-skills')
+    const hostRequire = createRequire(join(REPOSITORY_ROOT, 'apps', 'desktop-host', 'package.json'))
+    const assets = join(dirname(hostRequire.resolve('@deepseek-ai/dsh-skill-office/package.json')), 'assets')
+    mkdirSync(dirname(officeSkills), { recursive: true })
+    await prepareOfficeSkillAssets(assets, officeSkills)
+    console.warn(
+      'desktop development: primary-runtime packaging unsupported on this host; '
+      + `staged office-skills at ${officeSkills} (Office load_workspace_dependencies unavailable)`,
+    )
+  }
   await launchElectron()
 }
 
