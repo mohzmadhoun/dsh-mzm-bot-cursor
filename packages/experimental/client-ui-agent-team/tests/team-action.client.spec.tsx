@@ -33,13 +33,22 @@ const task: TeamTask = {
 }
 const view: TeamView = {
   members: [
-    { id: SESSION, name: 'lead', role: 'lead', status: 'idle', model: 'model-a', diagnostics: [] },
+    {
+      id: SESSION,
+      name: 'lead',
+      role: 'lead',
+      status: 'idle',
+      model: 'model-a',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+      diagnostics: [],
+    },
     {
       id: 'worker-id' as SessionId,
       name: 'worker',
       role: 'teammate',
       status: 'inactive',
       model: 'model-a',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
       diagnostics: [],
     },
   ],
@@ -149,6 +158,7 @@ describe('TeamAction', () => {
       status: 'inactive' as const,
       displayName: 'Research Bot',
       model: 'model-b',
+      modelSelection: { provider: 'fixture', model: 'model-b' },
       diagnostics: [] as string[],
     }
     const createBot = vi.fn(() => Promise.resolve({
@@ -173,7 +183,9 @@ describe('TeamAction', () => {
     render(<TeamAction {...props(actions({ load, createBot }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
+    expect(screen.getByText(zh.multiModelPending)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    expect(screen.getByText(zh.distinctModelsHint)).toBeTruthy()
     fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), {
       target: { value: ' Research Bot ' },
     })
@@ -192,7 +204,28 @@ describe('TeamAction', () => {
     })
     expect(await screen.findByText('Research Bot')).toBeTruthy()
     expect(screen.getByText(/research-bot ·/u)).toBeTruthy()
+    expect(await screen.findByText(zh.multiModelReady)).toBeTruthy()
     expect(screen.queryByPlaceholderText(zh.displayNamePlaceholder)).toBeNull()
+  })
+
+  it('warns when the draft (provider, model) duplicates an existing roster assignment', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: 'fixture' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-a' },
+    })
+    expect(await screen.findByText(zh.duplicateAssignment)).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-b' },
+    })
+    await waitFor(() => {
+      expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
+    })
   })
 
   it('shows createBot Remote and Team rejections and ignores a late success after session switch', async () => {

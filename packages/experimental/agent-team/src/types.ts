@@ -69,9 +69,18 @@ export interface TeamMemberView {
   readonly description?: string
   /** Product-facing Bot label when create retained one. */
   readonly displayName?: string
+  /**
+   * Subagent backend id used to spawn this teammate (not the LLM provider).
+   * LLM route identity lives on {@link modelSelection}.
+   */
   readonly provider?: string
   readonly context?: 'fresh' | 'fork'
   readonly model?: string
+  /**
+   * LLM `(provider, model)` assignment when known from the live Agent route.
+   * Verifier “different models” compares these pairs (FR-003 / SC-002).
+   */
+  readonly modelSelection?: Pick<ModelSelection, 'provider' | 'model'>
   readonly diagnostics: string[]
 }
 

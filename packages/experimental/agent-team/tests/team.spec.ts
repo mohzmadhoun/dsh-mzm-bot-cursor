@@ -242,7 +242,11 @@ describe('Team identity and provisioning', () => {
     })
     const alphaLive = await waitRunning(ctx, alpha.member.id)
     expect(alphaLive.options).toMatchObject({ provider: 'mock', model: 'alpha-model' })
-    expect(alpha.member).toMatchObject({ name: 'alpha-bot', model: 'alpha-model' })
+    expect(alpha.member).toMatchObject({
+      name: 'alpha-bot',
+      model: 'alpha-model',
+      modelSelection: { provider: 'mock', model: 'alpha-model' },
+    })
     expect(lead.options.model).toBe('mock')
 
     const beta = await spawn(ctx, lead, 'beta-bot', {
@@ -250,7 +254,11 @@ describe('Team identity and provisioning', () => {
     })
     const betaLive = await waitRunning(ctx, beta.member.id)
     expect(betaLive.options).toMatchObject({ provider: 'mock', model: 'beta-model' })
-    expect(beta.member).toMatchObject({ name: 'beta-bot', model: 'beta-model' })
+    expect(beta.member).toMatchObject({
+      name: 'beta-bot',
+      model: 'beta-model',
+      modelSelection: { provider: 'mock', model: 'beta-model' },
+    })
     expect(alphaLive.options.model).toBe('alpha-model')
 
     const alphaDescriptor = (await storedEvents(ctx, alpha.member.id))
@@ -277,6 +285,7 @@ describe('Team identity and provisioning', () => {
         name: 'research-bot',
         displayName: 'Research Bot',
         model: 'research-model',
+        modelSelection: { provider: 'mock', model: 'research-model' },
         role: 'teammate',
       },
     })
@@ -285,6 +294,7 @@ describe('Team identity and provisioning', () => {
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
       displayName: 'Research Bot',
       model: 'research-model',
+      modelSelection: { provider: 'mock', model: 'research-model' },
     })
 
     const second = await ctx.agentTeams.createBot(lead, {

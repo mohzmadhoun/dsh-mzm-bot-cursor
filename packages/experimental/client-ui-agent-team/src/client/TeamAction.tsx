@@ -89,6 +89,26 @@ function failureText(error: { readonly code: string; readonly message: string })
   return `${error.message} (${error.code})`
 }
 
+/** Stable key for one Verifier `(provider, model)` assignment. */
+function assignmentKey(provider: string, model: string): string {
+  return `${provider}\0${model}`
+}
+
+/**
+ * Collect distinct LLM `(provider, model)` keys from a Team roster.
+ * @param members - current TeamMemberView rows.
+ * @returns set of assignment keys present on the roster.
+ */
+function rosterAssignmentKeys(members: readonly TeamRosterMember[]): Set<string> {
+  const keys = new Set<string>()
+  for (const member of members) {
+    const selection = member.modelSelection
+    if (selection === undefined) continue
+    keys.add(assignmentKey(selection.provider, selection.model))
+  }
+  return keys
+}
+
 function statusKey(status: TeamTask['status']): TeamKey {
   switch (status) {
     case 'pending': return 'status.pending'
@@ -308,6 +328,7 @@ export function TeamAction({
 
   const teammates = view?.members.filter(member => member.role === 'teammate') ?? []
   const assignable = view?.members.filter(member => member.status !== 'failed' && member.status !== 'provisioning') ?? []
+  const assignmentKeys = view === null ? new Set<string>() : rosterAssignmentKeys(view.members)
 
   return (
     <div className={css.root} data-team-action>
@@ -348,11 +369,15 @@ export function TeamAction({
                     <IconPlusOutline16 size={13} /> {t('createBot')}
                   </button>
                 </div>
+                <div className={css.notice} data-team-distinct-models>
+                  {assignmentKeys.size >= 2 ? t('multiModelReady') : t('multiModelPending')}
+                </div>
                 {creatingBot && (
                   <BotCreateForm
                     draft={botDraft}
                     setDraft={setBotDraft}
                     pending={pendingTasks.has('create-bot')}
+                    existingAssignments={assignmentKeys}
                     onSave={() => { void submitCreateBot() }}
                     onCancel={() => { setCreatingBot(false) }}
                     t={t}
@@ -376,7 +401,9 @@ export function TeamAction({
                         <small>
                           {member.displayName !== undefined ? `${member.name} · ` : ''}
                           {t(memberStatusKey(member.status))}
-                          {member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
+                          {member.modelSelection !== undefined
+                            ? ` · ${t('model')}: ${member.modelSelection.provider}/${member.modelSelection.model}`
+                            : member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
                         </small>
                         {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
                       </span>
@@ -488,18 +515,24 @@ interface BotCreateFormProps {
   draft: BotDraft
   setDraft: (draft: BotDraft) => void
   pending: boolean
+  existingAssignments: ReadonlySet<string>
   onSave: () => void
   onCancel: () => void
   t: TeamActionProps['t']
 }
 
-function BotCreateForm({ draft, setDraft, pending, onSave, onCancel, t }: BotCreateFormProps) {
+function BotCreateForm({
+  draft, setDraft, pending, existingAssignments, onSave, onCancel, t,
+}: BotCreateFormProps) {
   const field = (key: keyof BotDraft, value: string): void => { setDraft({ ...draft, [key]: value }) }
-  const ready = draft.displayName.trim() !== ''
-    && draft.provider.trim() !== ''
-    && draft.model.trim() !== ''
+  const provider = draft.provider.trim()
+  const model = draft.model.trim()
+  const ready = draft.displayName.trim() !== '' && provider !== '' && model !== ''
+  const duplicatesExisting = provider !== '' && model !== ''
+    && existingAssignments.has(assignmentKey(provider, model))
   return (
     <div className={css.form} data-team-create-bot>
+      <p className={css.hint} data-team-distinct-models-hint>{t('distinctModelsHint')}</p>
       <input
         value={draft.displayName}
         aria-label={t('displayName')}
@@ -518,6 +551,11 @@ function BotCreateForm({ draft, setDraft, pending, onSave, onCancel, t }: BotCre
         placeholder={t('modelIdPlaceholder')}
         onChange={(event: ChangeEvent<HTMLInputElement>) => { field('model', event.target.value) }}
       />
+      {duplicatesExisting && (
+        <div className={css.warning} role="status" data-team-duplicate-assignment>
+          {t('duplicateAssignment')}
+        </div>
+      )}
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>

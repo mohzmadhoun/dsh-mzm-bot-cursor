@@ -238,3 +238,10 @@
   padding: 9px;
   font-size: 12px;
 }
+
+.hint {
+  margin: 0 0 6px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 1.35;
+}

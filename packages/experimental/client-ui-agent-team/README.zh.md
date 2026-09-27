@@ -33,7 +33,7 @@ kind: "package-reference"
 
 ### 创建带 model 赋值的 Bot
 
-**新建 Bot** 打开表单，要求非空 `displayName` 以及 provider 与 model id，然后调用 Host Remote `agentTeams/createBot`。Electron Main 不得发明 bot 记录或 LLM 路由。Create rejection 保留为显式 business result；成功后会重新加载 roster。
+**新建 Bot** 打开表单，要求非空 `displayName` 以及 provider 与 model id，然后调用 Host Remote `agentTeams/createBot`。Electron Main 不得发明 bot 记录或 LLM 路由。Create rejection 保留为显式 business result；成功后会重新加载 roster。表单展示 locale 持有的 Verifier 说明：多模型 Pass 需要环境中至少两个不同的已配置 `(provider, model)` 赋值（不是固定营销目录）。同赋值仍可创建；草稿与 roster 已有赋值重复时显示软提示。Roster 提示跟踪这些不同赋值是否已就绪。
 
 ### 管理任务板
 
