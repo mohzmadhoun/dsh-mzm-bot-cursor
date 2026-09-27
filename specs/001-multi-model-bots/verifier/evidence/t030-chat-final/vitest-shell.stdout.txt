@@ -4,8 +4,63 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
 
  RUN  v4.1.8 /workspace
 
+ ❯ |thread-safe| apps/desktop/tests/no-shell-chat-final-ipc.spec.ts (3 tests | 1 failed) 8ms
+     × documents Host session-log finals only — DESKTOP_IPC stays lifecycle/chrome 5ms
 
- Test Files  1 passed (1)
-      Tests  3 passed (3)
-   Start at  10:40:14
-   Duration  257ms (transform 132ms, setup 148ms, import 12ms, tests 5ms, environment 0ms)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| apps/desktop/tests/no-shell-chat-final-ipc.spec.ts > no Electron chat-final IPC bus (T030 / FR-006) > documents Host session-log finals only — DESKTOP_IPC stays lifecycle/chrome
+AssertionError: expected '/** Node IPC lifecycle protocol betwe…' to match /authenticated Host HTTP\/WS/WS
+
+- Expected:
+/authenticated Host HTTP\/WS/i
+
++ Received:
+"/** Node IPC lifecycle protocol between Electron Main and the Desktop Host child. */
+
+/** Lifecycle protocol generation recorded in Desktop release metadata. */
+export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
+
+/**
+ * Child→Main event `type` values accepted on the Host Node IPC channel.
+ * Application chat, mailbox, bot-message, chat-progress / assistant-stream, and chat-final
+ * payloads are not members and must not be added; that traffic stays on the authenticated Host
+ * HTTP/WS data plane (Agent Teams + session/agent streams and session-log finals for Client
+ * `ui-chat`; `contracts/chat-progress-final.md`).
+ */
+export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
+  'ready',
+  'fatal',
+  'shutdown-complete',
+  'update-tasks',
+] as const
+
+/**
+ * Main→Child control `type` values sent on the Host Node IPC channel.
+ * There is no mailbox or bot-message control type on this channel.
+ */
+export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
+
+/** Union of child→Main lifecycle event type strings. */
+export type DesktopHostChildEventType = (typeof DESKTOP_HOST_CHILD_EVENT_TYPES)[number]
+
+/** Union of Main→Child control type strings. */
+export type DesktopHostControlType = (typeof DESKTOP_HOST_CONTROL_TYPES)[number]
+"
+
+ ❯ apps/desktop/tests/no-shell-chat-final-ipc.spec.ts:64:28
+     62|     expect(ipcSource).toMatch(/session log/i)
+     63|     expect(protocolSource).toMatch(/chat-final/i)
+     64|     expect(protocolSource).toMatch(/authenticated Host HTTP\/WS/i)
+       |                            ^
+     65|   })
+     66|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  10:48:18
+   Duration  269ms (transform 145ms, setup 158ms, import 15ms, tests 8ms, environment 0ms)
+
