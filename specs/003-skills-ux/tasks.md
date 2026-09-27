@@ -61,11 +61,11 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Orient implementers to P3 seams; create Verifier recipe home; lock thin-pack id; no product behavior yet
 
-- [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/*`, `checklists/requirements.md`) under `specs/003-skills-ux/` and point implementers at [contracts/README.md](./contracts/README.md)
+- [x] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/*`, `checklists/requirements.md`) under `specs/003-skills-ux/` and point implementers at [contracts/README.md](./contracts/README.md)
 - [ ] T002 [P] Inventory Host skill-catalog touch points in `packages/skill/skill/src/`, `packages/skill/skill-filesystem/src/`, `packages/skill/tool-skill/src/`, and Desktop Host profile mounts under `apps/desktop-host/` against [data-model.md](./data-model.md) Skill / Thin managed pack — record findings in `specs/003-skills-ux/verifier/host-skills-inventory.md`
 - [ ] T003 [P] Inventory bot-attachment + instruction-bind candidates in `packages/experimental/agent-team/src/{types,roster,index,projection}.ts`, `packages/preset/persona/src/`, and `packages/core/system-prompt/src/` for FR-003/014 / [contracts/attach-run.md](./contracts/attach-run.md) — `specs/003-skills-ux/verifier/attachment-bind-inventory.md`
-- [ ] T004 Create Verifier recipe directory `specs/003-skills-ux/verifier/README.md` listing Scenario 1–5 owners (Runtime / Client / Verifier) mapped to [quickstart.md](./quickstart.md) and mandating FR-012 desktop screenshots/recordings under `verifier/evidence/`
-- [ ] T005 Record thin-pack skill pick (`mzm-thin-pack` / display `MzM thin pack` / ship path `apps/desktop-host/managed-skills/mzm-thin-pack/SKILL.md`) in `specs/003-skills-ux/verifier/thin-pack-skill.md` (research R1; FR-008)
+- [x] T004 Create Verifier recipe directory `specs/003-skills-ux/verifier/README.md` listing Scenario 1–5 owners (Runtime / Client / Verifier) mapped to [quickstart.md](./quickstart.md) and mandating FR-012 desktop screenshots/recordings under `verifier/evidence/`
+- [x] T005 Record thin-pack skill pick (`mzm-thin-pack` / display `MzM thin pack` / ship path `apps/desktop-host/managed-skills/mzm-thin-pack/SKILL.md`) in `specs/003-skills-ux/verifier/thin-pack-skill.md` (research R1; FR-008)
 
 ---
 
