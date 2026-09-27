@@ -1,0 +1,69 @@
+T019 Host listRoutinesByBot RoutineProjection — DH Verifier
+============================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-27
+Product tip gated: origin/master @ 42ddd6ea3d (#153 squash-merged)
+Evidence branch: cursor/p4-us2-host-t019-verify-be35 (evidence-only on master)
+Linear: MOH-212 (T019) — left In Progress (PO closes after evidence merge)
+
+Rebase / rebuild note
+---------------------
+#153 product squash-merged to master as 42ddd6ea3d. This evidence tip is rebuilt
+on origin/master with only verifier/evidence/us2-host-t019/** (no product
+delta). Vitest was measured at pre-squash tip b49a51fa29 ≡ squash content.
+
+Acceptance (T019 / Host product — not SC-001 / Scenario 1 Done)
+---------------------------------------------------------------
+[x] listRoutinesByBot returns RoutineProjection with intent, identity (from intent),
+    scheduleExpr, scheduleLabel, status, lastRunAt from Host journal catalog.
+[x] Remote agentTeams/listRoutinesByBot projects same fields over authenticated path.
+[x] agentTeams/view.routines exposes the same Host projection set.
+[x] Per-bot isolation (SC-006 Host half): bot B list excludes bot A routineId.
+[x] Re-list durability: second remoteList equals first; view filter matches listed rows.
+[x] Architect Option 3 Host SoT: journal path team/routine; no @deepseek-ai/dsh-schedule
+    dependency; Electron Main host-protocol/ipc forbid routine-catalog payloads.
+[x] Diff scope Host-only under packages/experimental/agent-team (+ tasks.md checkbox).
+
+Evidence (measured)
+-------------------
+Commands @ b49a51fa29 (pre-squash ≡ 42ddd6ea3d):
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    packages/experimental/agent-team/tests/projection-events.spec.ts \
+    -t 'US2 T019|projectRoutine / projectRoutines'
+  → 2 passed | 92 skipped (2 files)
+    - projectRoutine / projectRoutines (US2 T019 / FR-002) > projects intent/identity,
+      scheduleLabel, status, and lastRunAt from Host rows
+    - Team Remote API > US2 T019: listRoutinesByBot projects RoutineProjection over
+      Remote from Host catalog
+
+Logs: p4-us2-host-t019-vitest.log · p4-us2-host-t019-vitest-verbose.log
+      p4-us2-host-t019-option3.log · p4-us2-host-t019-rebase.log
+      p4-us2-host-t019-diff-scope.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (pre-squash c6579edabf..b49a51fa29): 9 files, all under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/004-routines-cron/tasks.md
+  Zero Client UI / apps/desktop product paths in this Host slice.
+
+Claims
+------
+- RoutineProjection fields (intent/identity/schedule/status/lastRunAt): **measured**
+- Remote list + view.routines Host catalog only: **measured**
+- Per-bot isolation + re-list durability: **measured**
+- Option 3 Host SoT (team/routine; not dsh-schedule; no Electron bus): **measured**
+- Desktop Scenario 1 / SC-001 / Client T020 pane chrome: **not run** (out of scope)
+
+Caveat for PO
+-------------
+Product tip tasks.md marks T020 [x] in the same commit as T019, but #153 has zero
+Client UI delta. Do **not** treat that checkbox as T020 Pass. Gate Client pane
+separately (MOH-213 / T020).
+
+Scope lock
+----------
+Does NOT stamp SC-001 / SC-006 / SC-007 product Done or Scenario 1 desktop FR-010/011.
+Does NOT gate Client pane list (T020) or Verifier Scenario extension (T021).
+Next: Client T020 gate + T021/Scenario desktop FR-010/011.
+Leave MOH-212 In Progress until PO merges evidence.

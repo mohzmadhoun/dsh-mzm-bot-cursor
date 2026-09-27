@@ -1,0 +1,9 @@
+packages/experimental/agent-team/README.i18n.yaml
+packages/experimental/agent-team/README.md
+packages/experimental/agent-team/README.zh.md
+packages/experimental/agent-team/src/index.ts
+packages/experimental/agent-team/src/projection.ts
+packages/experimental/agent-team/src/types.ts
+packages/experimental/agent-team/tests/projection-events.spec.ts
+packages/experimental/agent-team/tests/team.spec.ts
+specs/004-routines-cron/tasks.md
