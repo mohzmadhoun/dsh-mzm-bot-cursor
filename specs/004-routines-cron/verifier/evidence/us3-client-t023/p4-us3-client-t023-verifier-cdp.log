@@ -1,5 +1,6 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
 {
-  "tip": "06b8795e56",
+  "tip": "18036a025c",
   "paneCount": 3,
   "steps": {
     "beforePause": {
@@ -29,8 +30,5 @@
   },
   "targetBotId": "c92d4a8c-a423-4bc4-b015-79167899239d",
   "targetRoutineId": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
-  "pass": true,
-  "evidenceTip": "verifier-stamp",
-  "pr": 158,
-  "linear": "MOH-216"
+  "pass": true
 }
