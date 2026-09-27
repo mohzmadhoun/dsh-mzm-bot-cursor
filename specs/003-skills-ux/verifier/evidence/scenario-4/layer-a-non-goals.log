@@ -1,0 +1,11 @@
+=== Layer A on-disk ===
+apps/desktop-host/managed-skills/mzm-thin-pack
+A1_COUNT=1_OK
+A1_DIR_OK
+6:Follow the MzM thin-pack playbook for Pass.
+=== Non-goals B1 ===
+specs/003-skills-ux/verifier/scenario-4-thin-pack.md:58:| B1 | Full inventory §6 / site-playbook completeness **not** required | Absence does not Fail | Scenario Pass blocked on missing catalog theater | **measured** (docs) |
+=== Non-goals B2 ===
+B2_NO_HITS_OK
+=== Non-goals B3 ===
+B3_NO_HITS_OK

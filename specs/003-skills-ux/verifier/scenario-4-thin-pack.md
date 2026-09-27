@@ -1,6 +1,6 @@
 # Scenario 4 — Thin pack / non-goals (checklist stub)
 
-**Status:** Checklist stub delivered (T034) — product SC-004 **not** stamped (await T032 Layer C exactly-one discovery count + T033 absence green)
+**Status:** Product SC-004 **PASS** stamped — evidence `verifier/evidence/scenario-4/` (T032 Layer C managedCount===1 + T033 non-goals green)
 **Owners:** DH Verifier (this checklist + Pass stamp) · DH Runtime (thin pack / Pass-environment count) · PO (scope)
 **Linear:** T034 [MOH-181](https://linear.app/momadhoun/issue/MOH-181) · T032 [MOH-179](https://linear.app/momadhoun/issue/MOH-179) · T033 [MOH-180](https://linear.app/momadhoun/issue/MOH-180) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T034 — Verifier Scenario 4 checklist linking thin-pack count + non-goals
@@ -16,7 +16,7 @@
 |-------|----------|
 | Stub present | This file links thin-pack count + non-goals with Pass/Fail rows |
 | SC coverage | SC-004 — single thin-pack managed skill; absences do not Fail |
-| Product SC stamp | Deferred until Layer C discovery count = 1 and non-goals checklist green |
+| Product SC stamp | **PASS** — `evidence/scenario-4/VERDICT.txt` (tip ≥ 43fb328e56) |
 
 ---
 
@@ -27,7 +27,7 @@
 | Foundational Pass (T014) | Any product SC | **measured:** [README.md](./README.md#foundational-pass-checklist--recorded) |
 | Thin-pack ship + mount (T006/T007) | Managed skill present | **measured:** `mzm-thin-pack` on Desktop Host |
 | T032 measurement doc + Host on-disk guard | Count path defined | **measured:** [thin-pack-skill.md](./thin-pack-skill.md) Layer A |
-| T032 product discovery count = 1 | SC-004 count half | **measured** gap: SC-001 saw `managedCount=4` (office-*); Layer C open |
+| T032 product discovery count = 1 | SC-004 count half | **measured** Pass — Desktop Layer C `managedCount=1` (`evidence/scenario-4/`) |
 | T033 non-goals recipe | Absence half | **measured:** [non-goals.md](./non-goals.md) delivered |
 
 ---
@@ -40,7 +40,7 @@
 |---|-------|------|------|---------------|
 | A1 | On-disk `apps/desktop-host/managed-skills/` has exactly one child: `mzm-thin-pack` | Sole dir + greppable `SKILL.md` | Zero or extra managed-skills dirs | **measured** (Host guard / vitest) |
 | A2 | Discovery / catalog lists `mzm-thin-pack` with display `MzM thin pack` and `source=managed` | Thin pack visible | Missing / wrong id or label | **measured** (SC-001 + T015) |
-| A3 | Pass environment lists **exactly one** `source=managed` skill | Count === 1 and id is `mzm-thin-pack` | Count 0, or count > 1 without Runtime Pass-env closure | **measured** open — SC-001 `managedCount=4` (office-docx/pptx/xlsx) |
+| A3 | Pass environment lists **exactly one** `source=managed` skill | Count === 1 and id is `mzm-thin-pack` | Count 0, or count > 1 without Runtime Pass-env closure | **measured** Pass — `managedCount=1` (`evidence/scenario-4/step-metrics.json`) |
 
 **Rerun A1:**
 

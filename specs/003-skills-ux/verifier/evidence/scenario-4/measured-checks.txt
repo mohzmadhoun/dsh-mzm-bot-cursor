@@ -1,0 +1,33 @@
+Scenario 4 non-goals spot-checks (SC-004 / T033)
+================================================
+Stamp: 2026-09-27 · tip 728fd23a31 (≥ 43fb328e56 / #130)
+
+B1 — Full inventory §6 / site-playbook completeness not required
+----------------------------------------------------------------
+Command (from non-goals.md):
+  rg -n -i 'inventory.?§6.*(required|must)|full managed catalog.*(required|must).*Pass' \
+    specs/003-skills-ux/verifier/scenario-*.md \
+    specs/003-skills-ux/verifier/README.md
+
+Result: single hit is Scenario 4 checklist Pass-bar prose ("**not** required") —
+not a Pass criterion requiring catalog completeness. **measured** Pass (docs).
+
+B2 — Learn-from-demonstration not required
+------------------------------------------
+Command:
+  rg -n -i 'learn.?from.?demo|screen.?recording.?→.?skill|demo.?to.?skill|record.?demo.?skill' \
+    packages/experimental/client-ui-agent-team/src apps/desktop/src apps/desktop-host/src \
+    --glob '!**/node_modules/**' --glob '!**/lib/**' --glob '!**/tests/**' --glob '!**/README*.md'
+
+Result: no hits. **measured** Pass.
+
+B3 — Plugin / connector skills not required
+-------------------------------------------
+Command:
+  rg -n -i 'plugin skills?|connector skills?|mcp skill catalog|plugin/connector' \
+    packages/experimental/client-ui-agent-team/src apps/desktop/src apps/desktop-host/src \
+    --glob '!**/node_modules/**' --glob '!**/lib/**' --glob '!**/tests/**' --glob '!**/README*.md'
+
+Result: no hits. **measured** Pass.
+
+Log: layer-a-non-goals.log
