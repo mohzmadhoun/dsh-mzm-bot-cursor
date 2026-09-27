@@ -136,10 +136,14 @@ function optionalPersonaText(value: string, field: string): string {
  * Normalize one Host preset avatar marker for durable replace (FR-005).
  * At least one of shape or color is required; both must be ids from the fixed Host preset sets.
  * Image-file / URL fields are not part of {@link AvatarMarker} — no upload path for Pass.
- * @param avatar - candidate marker from Host `setAvatar`.
+ * Accepts untyped wire/JSON candidates and returns a validated durable marker.
+ * @param avatar - candidate marker from Host `setAvatar` (may be untyped at wire).
  * @returns durable marker retaining only present, validated preset fields.
  */
-export function normalizeAvatarMarker(avatar: AvatarMarker): AvatarMarker {
+export function normalizeAvatarMarker(avatar: {
+  readonly shape?: string
+  readonly color?: string
+}): AvatarMarker {
   if (avatar === null || typeof avatar !== 'object' || Array.isArray(avatar)) {
     throw new TeamError('avatar must be an object', 'TEAM_INVALID_ARGUMENT')
   }
