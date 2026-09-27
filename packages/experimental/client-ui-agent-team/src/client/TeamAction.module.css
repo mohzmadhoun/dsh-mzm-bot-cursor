@@ -98,6 +98,30 @@
   gap: 6px;
 }
 
+.sectionGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+}
+
+.sectionGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}
+
 .memberCard {
   display: flex;
   flex-direction: column;
@@ -416,7 +440,8 @@
 
 .taskActions select,
 .form input,
-.form textarea {
+.form textarea,
+.form select {
   box-sizing: border-box;
   border: 0.5px solid var(--dsw-alias-border-l4);
   border-radius: 6px;
@@ -447,7 +472,8 @@
 }
 
 .form input,
-.form textarea {
+.form textarea,
+.form select {
   width: 100%;
   padding: 6px 8px;
   font-size: 12px;

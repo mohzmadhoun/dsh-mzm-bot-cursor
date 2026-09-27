@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
+  AssignSectionInput,
+  AssignSectionResult,
   AvatarColorId,
   AvatarMarker,
   AvatarShapeId,
@@ -8,13 +10,19 @@ import type {
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
+  CreateSectionInput,
+  CreateSectionResult,
   DeleteBotInput,
   DeleteBotResult,
   HostMailboxMessage,
   RenameBotInput,
   RenameBotResult,
+  RenameSectionInput,
+  RenameSectionResult,
   SetAvatarInput,
   SetAvatarResult,
+  SidebarSectionId,
+  SidebarSectionView,
   TeamMailboxDeliveryState,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
@@ -56,6 +64,15 @@ export type TeamSetAvatarActionResult = RemoteResult<BotIdentityMutationResult<S
 /** Generated Remote result whose business value preserves Team deleteBot rejections. */
 export type TeamDeleteBotActionResult = RemoteResult<BotIdentityMutationResult<DeleteBotResult>>
 
+/** Generated Remote result whose business value preserves Team createSection rejections. */
+export type TeamCreateSectionActionResult = RemoteResult<BotIdentityMutationResult<CreateSectionResult>>
+
+/** Generated Remote result whose business value preserves Team renameSection rejections. */
+export type TeamRenameSectionActionResult = RemoteResult<BotIdentityMutationResult<RenameSectionResult>>
+
+/** Generated Remote result whose business value preserves Team assignSection rejections. */
+export type TeamAssignSectionActionResult = RemoteResult<BotIdentityMutationResult<AssignSectionResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -64,6 +81,9 @@ export interface TeamActionInjected {
   renameBot: (sessionId: SessionId, input: RenameBotInput) => Promise<TeamRenameBotActionResult>
   setAvatar: (sessionId: SessionId, input: SetAvatarInput) => Promise<TeamSetAvatarActionResult>
   deleteBot: (sessionId: SessionId, input: DeleteBotInput) => Promise<TeamDeleteBotActionResult>
+  createSection: (sessionId: SessionId, input: CreateSectionInput) => Promise<TeamCreateSectionActionResult>
+  renameSection: (sessionId: SessionId, input: RenameSectionInput) => Promise<TeamRenameSectionActionResult>
+  assignSection: (sessionId: SessionId, input: AssignSectionInput) => Promise<TeamAssignSectionActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -128,11 +148,20 @@ interface AvatarDraft {
   color: AvatarColorId | ''
 }
 
+/** Draft fields for Host named sidebar section create / rename (non-empty name). */
+interface SectionNameDraft {
+  name: string
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
 const EMPTY_RENAME_DRAFT: RenameDraft = { displayName: '' }
 const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
+const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
+
+/** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
+const UNASSIGNED_OPTION = ''
 
 /** Fixed Host avatar shape presets mirrored for the Client picker (FR-005). */
 const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
@@ -299,9 +328,10 @@ function memberLabel(
   return member.displayName ?? member.name
 }
 
-/** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
+/** Render the live Team roster, sidebar sections, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
-  sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot, createTask, updateTask,
+  sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
+  createSection, renameSection, assignSection, createTask, updateTask,
   openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
@@ -319,6 +349,11 @@ export function TeamAction({
   const [avatarDraft, setAvatarDraft] = useState<AvatarDraft>(EMPTY_AVATAR_DRAFT)
   /** Delete confirmation phase: null = idle; SessionId = pending-confirm (data-model.md). */
   const [pendingDelete, setPendingDelete] = useState<SessionId | null>(null)
+  const [creatingSection, setCreatingSection] = useState(false)
+  const [sectionDraft, setSectionDraft] = useState<SectionNameDraft>(EMPTY_SECTION_NAME_DRAFT)
+  const [editingSectionId, setEditingSectionId] = useState<SidebarSectionId | null>(null)
+  const [sectionRenameDraft, setSectionRenameDraft] = useState<SectionNameDraft>(EMPTY_SECTION_NAME_DRAFT)
+  const [assigningBotId, setAssigningBotId] = useState<SessionId | null>(null)
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -358,6 +393,11 @@ export function TeamAction({
     setEditingAvatar(null)
     setAvatarDraft(EMPTY_AVATAR_DRAFT)
     setPendingDelete(null)
+    setCreatingSection(false)
+    setSectionDraft(EMPTY_SECTION_NAME_DRAFT)
+    setEditingSectionId(null)
+    setSectionRenameDraft(EMPTY_SECTION_NAME_DRAFT)
+    setAssigningBotId(null)
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
     setEditing(null)
@@ -603,6 +643,107 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleCreateSection = useCallback(async (
+    operation: () => Promise<TeamCreateSectionActionResult>,
+  ): Promise<CreateSectionResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add('create-section'))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const created = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return created
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete('create-section')
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
+  const settleRenameSection = useCallback(async (
+    sectionId: SidebarSectionId,
+    operation: () => Promise<TeamRenameSectionActionResult>,
+  ): Promise<RenameSectionResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`rename-section:${sectionId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`rename-section:${sectionId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
+  const settleAssignSection = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamAssignSectionActionResult>,
+  ): Promise<AssignSectionResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`assign-section:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`assign-section:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -628,6 +769,7 @@ export function TeamAction({
     setEditingRename(null)
     setEditingAvatar(null)
     setPendingDelete(null)
+    setAssigningBotId(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -648,6 +790,7 @@ export function TeamAction({
     setEditingAvatar(null)
     setEditingPersona(null)
     setPendingDelete(null)
+    setAssigningBotId(null)
   }
 
   const submitRename = async (member: TeamRosterMember): Promise<void> => {
@@ -672,6 +815,7 @@ export function TeamAction({
     setEditingRename(null)
     setEditingPersona(null)
     setPendingDelete(null)
+    setAssigningBotId(null)
   }
 
   const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
@@ -693,6 +837,7 @@ export function TeamAction({
     setEditingRename(null)
     setEditingAvatar(null)
     setEditingPersona(null)
+    setAssigningBotId(null)
   }
 
   /** Cancel / dismiss confirm → idle with profile unchanged (data-model cancelled → idle). */
@@ -706,6 +851,57 @@ export function TeamAction({
     }))
     if (deleted === undefined) return
     setPendingDelete(null)
+  }
+
+  const submitCreateSection = async (): Promise<void> => {
+    const name = sectionDraft.name.trim()
+    /* v8 ignore next -- SectionNameForm disables Save while the normalized name is empty. */
+    if (name === '') return
+    const created = await settleCreateSection(() => createSection(sessionId, { name }))
+    if (created === undefined) return
+    setSectionDraft(EMPTY_SECTION_NAME_DRAFT)
+    setCreatingSection(false)
+  }
+
+  const startRenameSection = (section: SidebarSectionView): void => {
+    setEditingSectionId(section.id)
+    setSectionRenameDraft({ name: section.name })
+    setCreatingSection(false)
+    setAssigningBotId(null)
+  }
+
+  const submitRenameSection = async (section: SidebarSectionView): Promise<void> => {
+    const name = sectionRenameDraft.name.trim()
+    /* v8 ignore next -- SectionNameForm disables Save while the normalized name is empty. */
+    if (name === '') return
+    const saved = await settleRenameSection(section.id, () => renameSection(sessionId, {
+      sectionId: section.id,
+      name,
+    }))
+    if (saved === undefined) return
+    setEditingSectionId(null)
+    setSectionRenameDraft(EMPTY_SECTION_NAME_DRAFT)
+  }
+
+  const startAssignSection = (member: TeamRosterMember): void => {
+    setAssigningBotId(member.id)
+    setEditingRename(null)
+    setEditingAvatar(null)
+    setEditingPersona(null)
+    setPendingDelete(null)
+    setEditingSectionId(null)
+  }
+
+  const submitAssignSection = async (
+    member: TeamRosterMember,
+    sectionId: SidebarSectionId | null,
+  ): Promise<void> => {
+    const saved = await settleAssignSection(member.id, () => assignSection(sessionId, {
+      botId: member.id,
+      sectionId,
+    }))
+    if (saved === undefined) return
+    setAssigningBotId(null)
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -764,6 +960,194 @@ export function TeamAction({
   const teammates = view?.members.filter(member => member.role === 'teammate') ?? []
   const assignable = view?.members.filter(member => member.status !== 'failed' && member.status !== 'provisioning') ?? []
   const assignmentKeys = view === null ? new Set<string>() : rosterAssignmentKeys(view.members)
+  const membersById = view === null
+    ? new Map<SessionId, TeamRosterMember>()
+    : new Map(view.members.map(member => [member.id, member]))
+
+  const renderMemberCard = (member: TeamRosterMember): ReactNode => {
+    const antiJobs = member.persona?.antiJobs ?? []
+    const canEditIdentity = member.role === 'teammate'
+      && member.status !== 'failed'
+      && member.status !== 'provisioning'
+    const personaPending = pendingTasks.has(`persona:${member.id}`)
+    const renamePending = pendingTasks.has(`rename:${member.id}`)
+    const avatarPending = pendingTasks.has(`avatar:${member.id}`)
+    const deletePending = pendingTasks.has(`delete:${member.id}`)
+    const assignPending = pendingTasks.has(`assign-section:${member.id}`)
+    const identityBusy = personaPending || renamePending || avatarPending || deletePending || assignPending
+    const confirmPending = pendingDelete === member.id
+    const assignOpen = assigningBotId === member.id
+    return (
+      <div
+        key={member.id}
+        className={css.memberCard}
+        data-team-member={member.id}
+        data-section-id={member.sectionId ?? ''}
+      >
+        <button
+          type="button"
+          className={css.member}
+          disabled={member.role === 'lead' || member.status === 'failed' || member.status === 'provisioning'}
+          title={member.role === 'teammate' ? t('open') : undefined}
+          onClick={() => {
+            void openTeammate(sessionId, member).catch((reason: unknown) => {
+              setError(String(reason))
+              setCredentialFailureCode(null)
+            })
+          }}
+        >
+          {member.avatar !== undefined && (
+            <span
+              className={css.avatarMarker}
+              data-team-avatar=""
+              data-avatar-shape={member.avatar.shape ?? ''}
+              data-avatar-color={member.avatar.color ?? ''}
+              title={[
+                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
+                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
+              ].filter(Boolean).join(' · ')}
+              aria-label={[
+                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
+                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
+              ].filter(Boolean).join(' · ')}
+            />
+          )}
+          <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
+          <span className={css.memberText}>
+            <span data-team-display-name>{member.displayName ?? member.name}</span>
+            <small>
+              {member.displayName !== undefined ? `${member.name} · ` : ''}
+              {t(memberStatusKey(member.status))}
+              {member.modelSelection !== undefined
+                ? ` · ${t('model')}: ${member.modelSelection.provider}/${member.modelSelection.model}`
+                : member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
+            </small>
+            {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
+          </span>
+        </button>
+        {antiJobs.length > 0 && (
+          <div className={css.antiJobs} data-team-anti-jobs>
+            <span className={css.antiJobsLabel}>{t('antiJobs')}</span>
+            <ul>
+              {antiJobs.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {canEditIdentity && editingRename === member.id && (
+          <RenameForm
+            draft={renameDraft}
+            setDraft={setRenameDraft}
+            pending={renamePending}
+            onSave={() => { void submitRename(member) }}
+            onCancel={() => {
+              setEditingRename(null)
+              setRenameDraft(EMPTY_RENAME_DRAFT)
+            }}
+            t={t}
+          />
+        )}
+        {canEditIdentity && editingAvatar === member.id && (
+          <AvatarForm
+            draft={avatarDraft}
+            setDraft={setAvatarDraft}
+            pending={avatarPending}
+            onSave={() => { void submitAvatar(member) }}
+            onCancel={() => {
+              setEditingAvatar(null)
+              setAvatarDraft(EMPTY_AVATAR_DRAFT)
+            }}
+            t={t}
+          />
+        )}
+        {canEditIdentity && editingPersona === member.id && (
+          <PersonaForm
+            draft={personaDraft}
+            setDraft={setPersonaDraft}
+            pending={personaPending}
+            onSave={() => { void submitPersona(member) }}
+            onCancel={() => {
+              setEditingPersona(null)
+              setPersonaDraft(EMPTY_PERSONA_DRAFT)
+            }}
+            t={t}
+          />
+        )}
+        {canEditIdentity && confirmPending && (
+          <DeleteConfirmForm
+            pending={deletePending}
+            onConfirm={() => { void confirmDelete(member) }}
+            onCancel={cancelDelete}
+            t={t}
+          />
+        )}
+        {canEditIdentity && assignOpen && view !== null && (
+          <AssignSectionForm
+            sections={view.sections}
+            currentSectionId={member.sectionId ?? null}
+            pending={assignPending}
+            onAssign={(sectionId) => { void submitAssignSection(member, sectionId) }}
+            onCancel={() => { setAssigningBotId(null) }}
+            t={t}
+          />
+        )}
+        {canEditIdentity && editingRename !== member.id
+          && editingAvatar !== member.id
+          && editingPersona !== member.id
+          && !confirmPending
+          && !assignOpen && (
+          <div className={css.identityActions}>
+            <button
+              type="button"
+              className={css.personaButton}
+              disabled={identityBusy}
+              data-team-rename={member.id}
+              onClick={() => { startRename(member) }}
+            >
+              <IconEditOutline16 size={13} /> {t('rename')}
+            </button>
+            <button
+              type="button"
+              className={css.personaButton}
+              disabled={identityBusy}
+              data-team-edit-avatar={member.id}
+              onClick={() => { startEditAvatar(member) }}
+            >
+              <IconEditOutline16 size={13} /> {t('editAvatar')}
+            </button>
+            <button
+              type="button"
+              className={css.personaButton}
+              disabled={identityBusy}
+              data-team-edit-persona={member.id}
+              onClick={() => { startEditPersona(member) }}
+            >
+              <IconEditOutline16 size={13} /> {t('editPersona')}
+            </button>
+            <button
+              type="button"
+              className={css.personaButton}
+              disabled={identityBusy}
+              data-team-assign-section={member.id}
+              onClick={() => { startAssignSection(member) }}
+            >
+              <IconEditOutline16 size={13} /> {t('assignSection')}
+            </button>
+            <button
+              type="button"
+              className={css.deleteBotButton}
+              disabled={identityBusy}
+              data-team-delete={member.id}
+              onClick={() => { startDelete(member) }}
+            >
+              <IconTrashOutline16 size={13} /> {t('deleteBot')}
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className={css.root} data-team-action>
@@ -838,168 +1222,101 @@ export function TeamAction({
                     t={t}
                   />
                 )}
-                <div className={css.roster}>
-                  {view.members.map((member) => {
-                    const antiJobs = member.persona?.antiJobs ?? []
-                    const canEditIdentity = member.role === 'teammate'
-                      && member.status !== 'failed'
-                      && member.status !== 'provisioning'
-                    const personaPending = pendingTasks.has(`persona:${member.id}`)
-                    const renamePending = pendingTasks.has(`rename:${member.id}`)
-                    const avatarPending = pendingTasks.has(`avatar:${member.id}`)
-                    const deletePending = pendingTasks.has(`delete:${member.id}`)
-                    const identityBusy = personaPending || renamePending || avatarPending || deletePending
-                    const confirmPending = pendingDelete === member.id
+                <div className={css.sectionTitle}>
+                  <h3>{t('sections')}</h3>
+                  <button
+                    type="button"
+                    className={css.smallButton}
+                    data-team-create-section
+                    onClick={() => {
+                      setCreatingSection(true)
+                      setEditingSectionId(null)
+                    }}
+                  >
+                    <IconPlusOutline16 size={13} /> {t('createSection')}
+                  </button>
+                </div>
+                {creatingSection && (
+                  <SectionNameForm
+                    draft={sectionDraft}
+                    setDraft={setSectionDraft}
+                    pending={pendingTasks.has('create-section')}
+                    hintKey="sectionHint"
+                    placeholderKey="sectionNamePlaceholder"
+                    onSave={() => { void submitCreateSection() }}
+                    onCancel={() => {
+                      setCreatingSection(false)
+                      setSectionDraft(EMPTY_SECTION_NAME_DRAFT)
+                    }}
+                    t={t}
+                    editor="create"
+                  />
+                )}
+                <div className={css.sectionGroups} data-team-sections>
+                  {view.sections.map((section) => {
+                    const renamePending = pendingTasks.has(`rename-section:${section.id}`)
                     return (
                       <div
-                        key={member.id}
-                        className={css.memberCard}
-                        data-team-member={member.id}
+                        key={section.id}
+                        className={css.sectionGroup}
+                        data-team-section={section.id}
+                        data-section-name={section.name}
                       >
-                        <button
-                          type="button"
-                          className={css.member}
-                          disabled={member.role === 'lead' || member.status === 'failed' || member.status === 'provisioning'}
-                          title={member.role === 'teammate' ? t('open') : undefined}
-                          onClick={() => {
-                            void openTeammate(sessionId, member).catch((reason: unknown) => {
-                              setError(String(reason))
-                              setCredentialFailureCode(null)
-                            })
-                          }}
-                        >
-                          {member.avatar !== undefined && (
-                            <span
-                              className={css.avatarMarker}
-                              data-team-avatar=""
-                              data-avatar-shape={member.avatar.shape ?? ''}
-                              data-avatar-color={member.avatar.color ?? ''}
-                              title={[
-                                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
-                                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
-                              ].filter(Boolean).join(' · ')}
-                              aria-label={[
-                                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
-                                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
-                              ].filter(Boolean).join(' · ')}
-                            />
+                        <div className={css.sectionGroupHeader}>
+                          <strong data-team-section-name>{section.name}</strong>
+                          <span className={css.spacer} />
+                          {editingSectionId !== section.id && (
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              disabled={renamePending}
+                              data-team-rename-section={section.id}
+                              onClick={() => { startRenameSection(section) }}
+                            >
+                              <IconEditOutline16 size={13} /> {t('renameSection')}
+                            </button>
                           )}
-                          <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
-                          <span className={css.memberText}>
-                            <span data-team-display-name>{member.displayName ?? member.name}</span>
-                            <small>
-                              {member.displayName !== undefined ? `${member.name} · ` : ''}
-                              {t(memberStatusKey(member.status))}
-                              {member.modelSelection !== undefined
-                                ? ` · ${t('model')}: ${member.modelSelection.provider}/${member.modelSelection.model}`
-                                : member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
-                            </small>
-                            {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
-                          </span>
-                        </button>
-                        {antiJobs.length > 0 && (
-                          <div className={css.antiJobs} data-team-anti-jobs>
-                            <span className={css.antiJobsLabel}>{t('antiJobs')}</span>
-                            <ul>
-                              {antiJobs.map(item => (
-                                <li key={item}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {canEditIdentity && editingRename === member.id && (
-                          <RenameForm
-                            draft={renameDraft}
-                            setDraft={setRenameDraft}
+                        </div>
+                        {editingSectionId === section.id && (
+                          <SectionNameForm
+                            draft={sectionRenameDraft}
+                            setDraft={setSectionRenameDraft}
                             pending={renamePending}
-                            onSave={() => { void submitRename(member) }}
+                            hintKey="renameSectionHint"
+                            placeholderKey="renameSectionPlaceholder"
+                            onSave={() => { void submitRenameSection(section) }}
                             onCancel={() => {
-                              setEditingRename(null)
-                              setRenameDraft(EMPTY_RENAME_DRAFT)
+                              setEditingSectionId(null)
+                              setSectionRenameDraft(EMPTY_SECTION_NAME_DRAFT)
                             }}
                             t={t}
+                            editor="rename"
                           />
                         )}
-                        {canEditIdentity && editingAvatar === member.id && (
-                          <AvatarForm
-                            draft={avatarDraft}
-                            setDraft={setAvatarDraft}
-                            pending={avatarPending}
-                            onSave={() => { void submitAvatar(member) }}
-                            onCancel={() => {
-                              setEditingAvatar(null)
-                              setAvatarDraft(EMPTY_AVATAR_DRAFT)
-                            }}
-                            t={t}
-                          />
-                        )}
-                        {canEditIdentity && editingPersona === member.id && (
-                          <PersonaForm
-                            draft={personaDraft}
-                            setDraft={setPersonaDraft}
-                            pending={personaPending}
-                            onSave={() => { void submitPersona(member) }}
-                            onCancel={() => {
-                              setEditingPersona(null)
-                              setPersonaDraft(EMPTY_PERSONA_DRAFT)
-                            }}
-                            t={t}
-                          />
-                        )}
-                        {canEditIdentity && confirmPending && (
-                          <DeleteConfirmForm
-                            pending={deletePending}
-                            onConfirm={() => { void confirmDelete(member) }}
-                            onCancel={cancelDelete}
-                            t={t}
-                          />
-                        )}
-                        {canEditIdentity && editingRename !== member.id
-                          && editingAvatar !== member.id
-                          && editingPersona !== member.id
-                          && !confirmPending && (
-                          <div className={css.identityActions}>
-                            <button
-                              type="button"
-                              className={css.personaButton}
-                              disabled={identityBusy}
-                              data-team-rename={member.id}
-                              onClick={() => { startRename(member) }}
-                            >
-                              <IconEditOutline16 size={13} /> {t('rename')}
-                            </button>
-                            <button
-                              type="button"
-                              className={css.personaButton}
-                              disabled={identityBusy}
-                              data-team-edit-avatar={member.id}
-                              onClick={() => { startEditAvatar(member) }}
-                            >
-                              <IconEditOutline16 size={13} /> {t('editAvatar')}
-                            </button>
-                            <button
-                              type="button"
-                              className={css.personaButton}
-                              disabled={identityBusy}
-                              data-team-edit-persona={member.id}
-                              onClick={() => { startEditPersona(member) }}
-                            >
-                              <IconEditOutline16 size={13} /> {t('editPersona')}
-                            </button>
-                            <button
-                              type="button"
-                              className={css.deleteBotButton}
-                              disabled={identityBusy}
-                              data-team-delete={member.id}
-                              onClick={() => { startDelete(member) }}
-                            >
-                              <IconTrashOutline16 size={13} /> {t('deleteBot')}
-                            </button>
-                          </div>
-                        )}
+                        <div className={css.roster}>
+                          {section.botIds.map((botId) => {
+                            const member = membersById.get(botId)
+                            return member === undefined ? null : renderMemberCard(member)
+                          })}
+                        </div>
                       </div>
                     )
                   })}
+                  <div
+                    className={css.sectionGroup}
+                    data-team-section-unassigned=""
+                  >
+                    <div className={css.sectionGroupHeader}>
+                      <strong data-team-unassigned-label>{t('unassigned')}</strong>
+                    </div>
+                    <p className={css.hint}>{t('unassignedHint')}</p>
+                    <div className={css.roster}>
+                      {view.unassignedBotIds.map((botId) => {
+                        const member = membersById.get(botId)
+                        return member === undefined ? null : renderMemberCard(member)
+                      })}
+                    </div>
+                  </div>
                 </div>
               </section>
               <section data-team-handoffs>
@@ -1217,6 +1534,105 @@ function RenameForm({
       />
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface SectionNameFormProps {
+  draft: SectionNameDraft
+  setDraft: (draft: SectionNameDraft) => void
+  pending: boolean
+  hintKey: 'sectionHint' | 'renameSectionHint'
+  placeholderKey: 'sectionNamePlaceholder' | 'renameSectionPlaceholder'
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+  /** Marker attribute for create vs rename editors (Verifier / tests). */
+  editor: 'create' | 'rename'
+}
+
+/** Host named sidebar section create / rename editor (FR-006; empty name blocked). */
+function SectionNameForm({
+  draft, setDraft, pending, hintKey, placeholderKey, onSave, onCancel, t, editor,
+}: SectionNameFormProps) {
+  const ready = draft.name.trim() !== ''
+  return (
+    <div
+      className={css.form}
+      {...editor === 'create'
+        ? { 'data-team-create-section-editor': true }
+        : { 'data-team-rename-section-editor': true }}
+    >
+      <p className={css.hint}>{t(hintKey)}</p>
+      <input
+        value={draft.name}
+        aria-label={t('sectionName')}
+        placeholder={t(placeholderKey)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          setDraft({ name: event.target.value })
+        }}
+      />
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface AssignSectionFormProps {
+  sections: readonly SidebarSectionView[]
+  currentSectionId: SidebarSectionId | null
+  pending: boolean
+  onAssign: (sectionId: SidebarSectionId | null) => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host section assign / move / unassign picker (FR-006 / clarify lock 4).
+ * Empty option ⇒ Unassigned/default (`sectionId: null`); never a catalog row.
+ */
+function AssignSectionForm({
+  sections, currentSectionId, pending, onAssign, onCancel, t,
+}: AssignSectionFormProps) {
+  const [selected, setSelected] = useState(
+    currentSectionId === null ? UNASSIGNED_OPTION : currentSectionId,
+  )
+  const changed = selected === UNASSIGNED_OPTION
+    ? currentSectionId !== null
+    : selected !== currentSectionId
+  return (
+    <div className={css.form} data-team-assign-section-editor>
+      <p className={css.hint}>{t('assignSectionHint')}</p>
+      <select
+        aria-label={t('assignSection')}
+        data-team-assign-section-select=""
+        value={selected}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+          setSelected(event.target.value === UNASSIGNED_OPTION
+            ? UNASSIGNED_OPTION
+            : event.target.value as SidebarSectionId)
+        }}
+      >
+        <option value={UNASSIGNED_OPTION}>{t('unassigned')}</option>
+        {sections.map(section => (
+          <option key={section.id} value={section.id}>{section.name}</option>
+        ))}
+      </select>
+      <div className={css.formActions}>
+        <button
+          type="button"
+          disabled={pending || !changed}
+          onClick={() => {
+            onAssign(selected === UNASSIGNED_OPTION ? null : selected as SidebarSectionId)
+          }}
+        >
+          {t('save')}
+        </button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>

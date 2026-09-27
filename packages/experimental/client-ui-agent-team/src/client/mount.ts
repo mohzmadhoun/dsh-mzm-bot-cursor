@@ -1,9 +1,12 @@
 /** Source-safe Agent Teams browser registration and Remote mount lifecycle. */
 
 import type {
+  AssignSectionInput,
   CreateBotInput,
+  CreateSectionInput,
   DeleteBotInput,
   RenameBotInput,
+  RenameSectionInput,
   SetAvatarInput,
   TeamMemberView as TeamRosterMember,
   TeamView,
@@ -24,15 +27,17 @@ import {
   HandoffNotices, type HandoffNoticesInjected,
 } from './HandoffNotices.tsx'
 import {
-  TeamAction, type TeamActionInjected, type TeamActionResult, type TeamCreateBotActionResult,
-  type TeamDeleteBotActionResult, type TeamRenameBotActionResult, type TeamSetAvatarActionResult,
-  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  TeamAction, type TeamActionInjected, type TeamActionResult,
+  type TeamAssignSectionActionResult, type TeamCreateBotActionResult,
+  type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
+  type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
+  type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
+    /** Agent Teams roster, sections, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -68,6 +73,15 @@ function registerUi(ctx: ClientContext): void {
     },
     async deleteBot(sessionId, input: DeleteBotInput): Promise<TeamDeleteBotActionResult> {
       return await ctx.remote.agentTeams.deleteBot(leadSessionId(sessionId), input)
+    },
+    async createSection(sessionId, input: CreateSectionInput): Promise<TeamCreateSectionActionResult> {
+      return await ctx.remote.agentTeams.createSection(leadSessionId(sessionId), input)
+    },
+    async renameSection(sessionId, input: RenameSectionInput): Promise<TeamRenameSectionActionResult> {
+      return await ctx.remote.agentTeams.renameSection(leadSessionId(sessionId), input)
+    },
+    async assignSection(sessionId, input: AssignSectionInput): Promise<TeamAssignSectionActionResult> {
+      return await ctx.remote.agentTeams.assignSection(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)
