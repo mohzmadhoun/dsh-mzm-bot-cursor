@@ -5,6 +5,7 @@ import { registerCommandConversationNode } from './command.ts'
 import { registerCompactionConversationNode } from './compaction.ts'
 import { registerUnknownConversationFallback } from './fallback.ts'
 import { registerInboxConversationNodes } from './inbox.ts'
+import { registerLinkedMailboxConversationNode } from './linked-mailbox.ts'
 import { registerMessageConversationNode } from './message.ts'
 import { registerRequestPromptConversationNode } from './request-prompt.ts'
 import { registerRetryConversationNode } from './retry.ts'
@@ -21,6 +22,7 @@ import { registerTurnTailConversationNode } from './turn-tail.ts'
 export function registerConversationNodes(ctx: Context): void {
   registerInboxConversationNodes(ctx)
   registerMessageConversationNode(ctx)
+  registerLinkedMailboxConversationNode(ctx)
   registerRequestPromptConversationNode(ctx)
   registerAssistantConversationNode(ctx)
   registerTurnProcess(ctx)

@@ -5,14 +5,7 @@ import type {
 import { isAppendSurfaceEvent, isReplacementSurfaceEvent } from '@deepseek-ai/dsh-session/surface'
 import type { InboxState } from './inbox.ts'
 import { chatNode } from './common.ts'
-import { contextForm, contextProducer, readLinkedMailboxMessageId } from './event-projection.ts'
-
-declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
-  interface ConversationTurnDataMap {
-    /** Host mailbox message id when a mid-turn team-message receipt caused work. */
-    linkedMailboxMessageId: string
-  }
-}
+import { contextForm, contextProducer } from './event-projection.ts'
 
 interface ReferencedUserMessageNode extends UserMessageNode {
   /** Labels cited by the immediately following session-reference context. */
@@ -90,24 +83,6 @@ export const messageDefinition: ConversationNodeDefinition<MessageNode> = {
       }
   },
   update: context => context.state,
-  buildLocationData: (context, scope) => {
-    // Mid-turn Host mailbox steer: publish Chat-turn attribution while the
-    // receipt sits inside an open Turn (cold-resume uses turn-tail start).
-    if (scope !== 'turn' || context.state === undefined) return null
-    const linked = readLinkedMailboxMessageId(context.state.source)
-    if (linked === null) return null
-    const location = context.start?.location ?? context.matches[0]?.location
-    const turn = location?.kind === 'turn' || location?.kind === 'step'
-      ? location.turn.turn
-      : undefined
-    if (turn === undefined) return null
-    return {
-      kind: 'turn',
-      turn,
-      key: 'linkedMailboxMessageId',
-      value: linked,
-    }
-  },
   buildViewNode: (context) => {
     if (context.state === undefined) return null
     return chatNode(context, context.state.kind, context.state.seq, context.state)

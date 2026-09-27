@@ -22,6 +22,7 @@ import { commandDefinition } from '../src/client/conversation-nodes/command.ts'
 import { compactionDefinition } from '../src/client/conversation-nodes/compaction.ts'
 import { unknownFallbackDefinition } from '../src/client/conversation-nodes/fallback.ts'
 import { nextStepInboxDefinition } from '../src/client/conversation-nodes/inbox.ts'
+import { linkedMailboxDefinition } from '../src/client/conversation-nodes/linked-mailbox.ts'
 import { messageDefinition } from '../src/client/conversation-nodes/message.ts'
 import { inspectRequestPrompt } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { requestPromptDefinition, systemMessageDefinition } from '../src/client/conversation-nodes/request-prompt.ts'
@@ -38,6 +39,7 @@ import type {
 const DEFINITIONS: readonly ConversationNodeDefinition[] = [
   nextStepInboxDefinition,
   messageDefinition,
+  linkedMailboxDefinition,
   systemMessageDefinition(inspectSystemPrompt),
   requestPromptDefinition(inspectRequestPrompt),
   assistantDefinition,
@@ -839,9 +841,10 @@ describe('built-in conversation node Definitions', () => {
       at(6, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
     ])
     const current = snapshot(value)
+    // Mid-turn steer publishes the Location key; turn-tail cannot see peer
+    // Location data in the same flush — Chat presentation reads this key.
     expect(current.timeline.turns.get(1)?.data.get('linkedMailboxMessageId')).toBe('msg-mailbox-steer')
     const tail = current.timeline.turns.get(1)?.data.get('turn-tail') as TurnTailChatData | undefined
-    expect(tail?.linkedMailboxMessageId).toBe('msg-mailbox-steer')
     expect(tail?.closing).toMatchObject({ status: 'settled' })
   })
 
