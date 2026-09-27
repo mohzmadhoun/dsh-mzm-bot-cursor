@@ -25,7 +25,7 @@ Accepted edges for this slice:
 1. The open team panel states the rule: different models means any two distinct configured `(provider, model)` assignments, not a fixed catalog.
 2. When teammate rows expose fewer than 2 distinct pairs, the panel says a multi-model distinct-models check cannot pass yet. When they expose ≥2, it says the roster meets that rule. This is messaging, not a chat blocker.
 3. Near New bot, a complete draft says whether it is a new distinct assignment relative to bots that already have both ids. The same assignment still submits. An incomplete draft (empty or longer than 200 characters after trim) does not show that comparison.
-4. Host roster rows set `modelSelection` from the live Agent route only. An unloaded teammate does not inherit the Lead pair.
+4. Host roster rows prefer the bot's durable `modelSelection`. If that field is absent, the row projects the live Agent route. The Lead pair is never a teammate assignment.
 
 Does **not** prove SC-001 wall-clock under 30 minutes. Does **not** add TTFT recording fields. Those belong to T019.
 
