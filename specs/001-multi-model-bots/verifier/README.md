@@ -51,6 +51,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of
 | **T024** Chat handoff / pending UI | [t024-chat-handoff.md](./t024-chat-handoff.md) | **Electron/Client** + **Verifier** | FR-005 chat + Conversation notices + Agent Team strip; Host projections only; not SC-003 Scenario 3 Pass |
 | **T026** No Electron bot↔bot bus | [t026-no-ipc-bus.md](./t026-no-ipc-bus.md) | **Electron** + **Verifier** | FR-004 negative — Main invents no mailbox IPC; Host mailbox only; complements T007 |
 | **T027** Thin Electron shell (no Main routers) | [t027-thin-shell.md](./t027-thin-shell.md) | **Electron** + **Verifier** | FR-007 Main lifecycle/`dsh-app://` HTTP forward only; not SC-004 Pass; leaves T026/T034 files alone |
+| **T029** Chat progress from Host streams | [t029-chat-progress.md](./t029-chat-progress.md) | **Electron/Client** + **Verifier** | FR-006 in-flight half; `data-chat-progress="host-stream"`; no shell progress IPC; not SC-004 Pass (T030/T032) |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
 
