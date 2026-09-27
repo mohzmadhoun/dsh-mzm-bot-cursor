@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  handoffBodyPreview, readTeamMessageSource,
+  chatHandoffDeliveryState, handoffBodyPreview, readTeamMessageSource,
 } from '../src/client/chat/team-message-source.ts'
 
 describe('readTeamMessageSource', () => {
@@ -45,5 +45,33 @@ describe('handoffBodyPreview', () => {
 
   it('returns empty string when no text block is present', () => {
     expect(handoffBodyPreview([{ type: 'image' }])).toBe('')
+  })
+})
+
+describe('chatHandoffDeliveryState (T031)', () => {
+  const nodes = {
+    get(key: string): { readonly kind: string } | undefined {
+      if (key === 'handoff') return { kind: 'context' }
+      if (key === 'assistant') return { kind: 'assistant-step' }
+      if (key === 'other-context') return { kind: 'context' }
+      return undefined
+    },
+  }
+
+  it('stays visible-pending when no later turn Node follows the handoff', () => {
+    expect(chatHandoffDeliveryState(['handoff'], nodes, 'handoff')).toBe('visible-pending')
+    expect(chatHandoffDeliveryState(
+      ['handoff', 'other-context'], nodes, 'handoff',
+    )).toBe('visible-pending')
+  })
+
+  it('folds to acted when a later assistant/turn Node follows the handoff', () => {
+    expect(chatHandoffDeliveryState(
+      ['handoff', 'assistant'], nodes, 'handoff',
+    )).toBe('acted')
+  })
+
+  it('returns visible-pending when the handoff key is absent from order', () => {
+    expect(chatHandoffDeliveryState(['assistant'], nodes, 'handoff')).toBe('visible-pending')
   })
 })

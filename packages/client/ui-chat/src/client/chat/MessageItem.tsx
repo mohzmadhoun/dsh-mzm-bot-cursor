@@ -9,7 +9,7 @@ import { CompactionItem } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
 import { MailboxHandoffRow } from './MailboxHandoffRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
-import { readTeamMessageSource } from './team-message-source.ts'
+import { chatHandoffDeliveryState, readTeamMessageSource } from './team-message-source.ts'
 import css from './MessageItem.module.css'
 
 type UserImage = Extract<UserMessageNode['content'][number], { type: 'image' }>
@@ -358,15 +358,23 @@ export const UserMessageNodeView = memo(function UserMessageNodeView({
 })
 
 /** Injected-context keyed Chat renderer. */
-export const ContextMessageNodeView = memo(function ContextMessageNodeView({ node, t }: ChatNodeViewProps<'context'>) {
+export const ContextMessageNodeView = memo(function ContextMessageNodeView({
+  node, t, useChat,
+}: ChatNodeViewProps<'context'>) {
   const data = node.data
   // Host mailbox peer receipt: show handoff chrome instead of generic inject.
+  // Delivery folds to `acted` when a later turn Node exists (Host request/header
+  // after receipt) so recipient action is visible without leaving chat (T031).
+  const deliveryState = useChat(snapshot =>
+    readTeamMessageSource(data.source) === null
+      ? 'visible-pending'
+      : chatHandoffDeliveryState(snapshot.order, snapshot.nodes, node.key))
   if (readTeamMessageSource(data.source) !== null) {
     return (
       <MailboxHandoffRow
         content={data.content}
         source={data.source}
-        deliveryState="visible-pending"
+        deliveryState={deliveryState}
         t={t}
       />
     )
