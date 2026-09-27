@@ -1945,6 +1945,83 @@ describe('Team Remote API', () => {
     expect(view.routines).toHaveLength(2)
     expect(view.routines.every(row => row.botId === alpha.id)).toBe(true)
   })
+
+  it('US2 T019: listRoutinesByBot projects RoutineProjection over Remote from Host catalog', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('routine list a'),
+      textResponse('routine list b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'List Alpha',
+      modelSelection: { provider: 'mock', model: 'list-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'List Beta',
+      modelSelection: { provider: 'mock', model: 'list-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, beta.id)
+
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toEqual([])
+
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Inbox sweep',
+      scheduleExpr: '@hourly',
+      signal: SIGNAL,
+    })
+    await ctx.agentTeams.createRoutine(lead, {
+      botId: beta.id,
+      intent: 'Beta only',
+      scheduleExpr: '@daily',
+      signal: SIGNAL,
+    })
+
+    // Remote list projects FR-002 pane fields from Host catalog (intent/identity, schedule, status, lastRunAt).
+    const listed = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: alpha.id }, SIGNAL)
+    expect(listed).toMatchObject({ ok: true })
+    if (!listed.ok) throw new Error('listRoutinesByBot failed')
+    expect(listed.value.routines).toEqual([{
+      routineId: created.routine.routineId,
+      botId: alpha.id,
+      intent: 'Inbox sweep',
+      identity: 'Inbox sweep',
+      scheduleExpr: '@hourly',
+      scheduleLabel: 'Every hour',
+      status: 'active',
+      lastRunAt: null,
+      createdAt: created.routine.createdAt,
+      updatedAt: created.routine.updatedAt,
+    }])
+
+    // Leave/return durability: a second list (and Team view) re-projects the same Host rows.
+    const relisted = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: alpha.id }, SIGNAL)
+    expect(relisted).toEqual(listed)
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.routines.filter(row => row.botId === alpha.id)).toEqual(listed.value.routines)
+    expect(view.routines.some(row => row.botId === beta.id)).toBe(true)
+
+    // Per-bot isolation (SC-006): beta’s list never includes alpha’s routineId.
+    const betaListed = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: beta.id }, SIGNAL)
+    expect(betaListed).toMatchObject({ ok: true })
+    if (!betaListed.ok) throw new Error('listRoutinesByBot beta failed')
+    expect(betaListed.value.routines).toHaveLength(1)
+    expect(betaListed.value.routines[0]).toMatchObject({
+      botId: beta.id,
+      intent: 'Beta only',
+      identity: 'Beta only',
+      scheduleExpr: '@daily',
+      scheduleLabel: 'Every day',
+      status: 'active',
+      lastRunAt: null,
+    })
+    expect(betaListed.value.routines.some(row => row.routineId === created.routine.routineId))
+      .toBe(false)
+  })
+
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {
     const userSkillsRoot = mkdtempSync(join(tmpdir(), 'dsh-team-user-skills-'))
     roots.push(userSkillsRoot)

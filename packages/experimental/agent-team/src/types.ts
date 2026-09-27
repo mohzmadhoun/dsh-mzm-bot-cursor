@@ -682,7 +682,7 @@ export interface CreateRoutineResult {
 }
 
 /**
- * Host list-routines-by-bot input (P4 FR-002 / T009).
+ * Host list-routines-by-bot input (P4 US2 T019 / FR-002).
  * Returns only that bot’s Host catalog rows (SC-006).
  */
 export interface ListRoutinesByBotInput {

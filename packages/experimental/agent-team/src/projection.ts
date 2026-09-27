@@ -555,7 +555,8 @@ export function projectSidebarSections(state: TeamState): {
 }
 
 /**
- * Project Host Routine catalog rows for Client pane list (P4 FR-002 / T009).
+ * Project Host Routine catalog rows for Client pane list (P4 US2 T019 / FR-002).
+ * Host journal SoT only — never invent rows from Electron Main or `ui-schedule`.
  * @param state - projected Team state.
  * @param botId - when set, restrict to that bot’s routines (SC-006); omit for full catalog.
  * @returns Client {@link RoutineProjection} rows in catalog order.
@@ -571,9 +572,10 @@ export function projectRoutines(
 }
 
 /**
- * Map one durable {@link RoutineRecord} to a Client projection.
+ * Map one durable {@link RoutineRecord} to a Client pane {@link RoutineProjection}.
+ * Identity derives from intent; scheduleLabel is human-readable; status and lastRunAt pass through.
  * @param routine - Host catalog row.
- * @returns pane-ready projection (identity derives from intent).
+ * @returns pane-ready projection (US2 T019 / FR-002).
  */
 export function projectRoutine(routine: RoutineRecord): RoutineProjection {
   return {

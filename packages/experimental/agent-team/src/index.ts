@@ -634,7 +634,9 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Project Host routines for one bot (P4 FR-002 / T009; SC-006).
+   * Project Host routines for one bot (P4 US2 T019 / FR-002; SC-006).
+   * Returns {@link RoutineProjection} rows (intent/identity, schedule, status, lastRunAt)
+   * from the Host journal catalog only — never Electron Main or `dsh-schedule`.
    * @param caller - exact live Team member.
    * @param request - bot id and cancellation.
    * @returns that bot’s Host Routine projections only.
@@ -1142,7 +1144,8 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * List Host Routines for one bot through the generated Remote API (P4 T009).
+   * List Host Routines for one bot through the generated Remote API (P4 US2 T019 / FR-002).
+   * Projects intent/identity, scheduleExpr/scheduleLabel, status, and lastRunAt over authenticated HTTP/WS.
    * @param agent - exact live Team member authorizing the read.
    * @param request - bot id filter.
    * @param signal - Remote call cancellation.
