@@ -60,7 +60,7 @@ kind: "package-reference"
 
 请 Lead 创建 teammate：给它一个唯一的小写名字（例如 `reviewer`）并描述其职责。teammate 可以 fresh 启动（不携带 Lead 对话的任何记忆），也可以作为 fork 启动（继承 Lead 已完成的轮次）；创建请求决定用哪种。teammate 名字是永久的——即使创建失败的 teammate 也保留其名字，任何名字都不会被复用。Host 调用方还可在 spawn 时传入按 teammate 区分的 LLM `agentOptions`（`provider` + `model`[以及可选的推理强度]），使每个 bot 保留自己的模型路由；该字段与 subagent 后端 `provider` 不同，Electron Main 不得发明或改写它。
 
-产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 保留在 Host member 快照上。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。
+产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 与该 `modelSelection` 保留在 Host member 快照上。创建时（以及冷恢复时），Agent Teams 通过 `installModelSelection` 绑定 live Bot，使后续对话只使用该 bot 自己的赋值——绝不回落到 Lead 路由。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
 
