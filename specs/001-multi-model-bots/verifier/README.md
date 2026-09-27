@@ -40,6 +40,7 @@ Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor
 |-------|--------|----------------|-------|
 | **T014** Host bot-create | [t014-host-bot-create.md](./t014-host-bot-create.md) | **Runtime** + **Verifier** | FR-001 Host half; not SC-001/002 Pass |
 | **T015** Bot ModelSelection bind | [t015-model-bind.md](./t015-model-bind.md) | **Runtime** + **Verifier** | FR-002 Host bind via `installModelSelection`; not SC-001/002 Pass |
+| **T016** Bot llm route + credentials | [t016-llm-route.md](./t016-llm-route.md) | **Runtime** + **Verifier** | FR-002 Host `ctx.llm` + credential resolve; Main invents neither bots nor routes |
 
 ## Fan-out policy
 
