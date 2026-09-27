@@ -2,9 +2,11 @@
 
 Architect Option 3: Host owns cron evaluation — not `dsh-schedule` session reminders.
 Supports product shorthands (`@every 5m`, `@hourly`, `@daily`) and 5-field cron.
+Wake eligibility (US3 T022): only `status: active` routines may receive cron wakes.
 */
 
 import { TeamError } from './error.ts'
+import type { RoutineRecord, RoutineStatus } from './types.ts'
 
 /** Minimum `@every` interval accepted for Pass (clarify — no sub-5m test schedule). */
 export const MIN_EVERY_INTERVAL_MS = 5 * 60 * 1000
@@ -126,6 +128,30 @@ export function nextFireAt(parsed: ParsedScheduleExpr, fromMs: number): number {
     `scheduleExpr "${parsed.expr}" has no fire within 8 days of ${fromMs}`,
     'TEAM_INVALID_ARGUMENT',
   )
+}
+
+/**
+ * Whether a Host Routine may receive a cron wake (P4 US3 T022 / FR-003).
+ * Paused routines MUST NOT fire; active routines remain eligible (FR-004).
+ * Host cron evaluator (US4 T025) MUST gate every wake through this check.
+ * @param routine - catalog row (or any status-bearing projection of it).
+ * @returns true only when status is `active`.
+ */
+export function isRoutineEligibleForWake(
+  routine: { readonly status: RoutineStatus },
+): boolean {
+  return routine.status === 'active'
+}
+
+/**
+ * Filter Host catalog rows to those eligible for cron wake (FR-003 / FR-004).
+ * @param routines - durable catalog rows.
+ * @returns only `status: active` rows; paused rows are omitted.
+ */
+export function routinesEligibleForWake(
+  routines: readonly RoutineRecord[],
+): readonly RoutineRecord[] {
+  return routines.filter(isRoutineEligibleForWake)
 }
 
 /**

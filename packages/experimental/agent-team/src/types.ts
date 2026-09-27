@@ -700,6 +700,44 @@ export interface ListRoutinesByBotResult {
 }
 
 /**
+ * Host pause-routine input (P4 US3 T022 / FR-003).
+ * Sets durable `status: paused` so Host cron wake MUST NOT fire for that row.
+ * Client T023 calls Host Remote `pauseRoutine` with this input over HTTP/WS.
+ */
+export interface PauseRoutineInput {
+  readonly routineId: RoutineId
+}
+
+/** Lead-authorized Host routine pause, including cancellation. */
+export interface PauseRoutineRequest extends PauseRoutineInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Routine after a successful pause (`status: paused`). */
+export interface PauseRoutineResult {
+  readonly routine: RoutineProjection
+}
+
+/**
+ * Host resume-routine input (P4 US3 T022 / FR-004).
+ * Sets durable `status: active` so the row is eligible for Host cron wake again.
+ * Client T023 calls Host Remote `resumeRoutine` with this input over HTTP/WS.
+ */
+export interface ResumeRoutineInput {
+  readonly routineId: RoutineId
+}
+
+/** Lead-authorized Host routine resume, including cancellation. */
+export interface ResumeRoutineRequest extends ResumeRoutineInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Routine after a successful resume (`status: active`). */
+export interface ResumeRoutineResult {
+  readonly routine: RoutineProjection
+}
+
+/**
  * Host delete input (FR-007 / FR-008 / clarify lock 5).
  * Confirm UX is Client-owned; this mutation performs identity removal when invoked.
  * Pass = absence from sidebar / overview / section membership — not transcript wipe.

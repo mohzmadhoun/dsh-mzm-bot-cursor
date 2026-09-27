@@ -1,12 +1,16 @@
 /** Host scheduleExpr validation and next-fire (P4 T008). */
 
 import { describe, expect, it } from 'vitest'
+import { SessionId } from '@deepseek-ai/dsh-session'
 import { TeamError } from '../src/error.ts'
+import { RoutineId } from '../src/types.ts'
 import {
   describeScheduleExpr,
+  isRoutineEligibleForWake,
   MIN_EVERY_INTERVAL_MS,
   nextFireAt,
   parseScheduleExpr,
+  routinesEligibleForWake,
 } from '../src/routine-cron.ts'
 
 describe('routine-cron scheduleExpr stub', () => {
@@ -33,5 +37,22 @@ describe('routine-cron scheduleExpr stub', () => {
     expect(() => parseScheduleExpr('@every 1m')).toThrow(/at least 5 minutes/)
     expect(() => parseScheduleExpr('@weekly')).toThrow(/unsupported/)
     expect(() => parseScheduleExpr('not-a-cron')).toThrow(/unsupported/)
+  })
+
+  it('US3 T022: only active routines are wake-eligible', () => {
+    const active = {
+      routineId: RoutineId('r-active'),
+      botId: SessionId('bot-a'),
+      intent: 'Ping',
+      scheduleExpr: '@every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const paused = { ...active, routineId: RoutineId('r-paused'), status: 'paused' as const }
+    expect(isRoutineEligibleForWake(active)).toBe(true)
+    expect(isRoutineEligibleForWake(paused)).toBe(false)
+    expect(routinesEligibleForWake([active, paused])).toEqual([active])
   })
 })
