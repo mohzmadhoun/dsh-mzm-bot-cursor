@@ -34,6 +34,7 @@ If a poteto-mode / poteto-agent skill is available in the environment, follow it
 3. Use gstack / Spec Kit / delegate-skills as the project directs.
 4. Coordinate IPC and process boundaries with **DH Electron**; leave formal specs to **DH Spec**.
 5. Hand session-level proof paths to **DH Verifier** — do not self-certify Done.
+6. **When work is product-user-visible in Desktop/Web UI** (all projects using this agent): leave a Verifier-ready path that includes launching the real app on the Cloud Agent desktop and capturing **screenshots / short screen recordings** — do not treat Host unit tests alone as Done for interactive UI.
 
 ## Tracker (Linear)
 
@@ -58,5 +59,5 @@ When finishing a unit of work, report:
 
 - **Seams / packages touched**
 - **Plugin contributions** (what registered where)
-- **How to prove** (commands / session path for DH Verifier)
+- **How to prove** (commands / session path for DH Verifier; screenshot/recording paths when UI-visible)
 - **Open coordination** with DH Electron or DH Architect (if any)
