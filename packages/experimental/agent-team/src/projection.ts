@@ -68,6 +68,7 @@ const teamMemberSnapshotSchema = z.object({
   id: sessionIdSchema,
   name: z.string(),
   description: z.string(),
+  displayName: z.string().optional(),
   provider: z.string(),
   context: z.enum(['fresh', 'fork']),
   phase: z.enum(['provisioning', 'active', 'failed']),
@@ -247,7 +248,10 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       if (prior === undefined) {
         if (member.phase !== 'provisioning') throw new Error(`teammate "${member.name}" must begin provisioning`)
       } else {
-        if (prior.name !== member.name || prior.provider !== member.provider || prior.context !== member.context) {
+        if (prior.name !== member.name
+          || prior.provider !== member.provider
+          || prior.context !== member.context
+          || prior.displayName !== member.displayName) {
           throw new Error(`teammate "${member.id}" changed immutable identity fields`)
         }
         if (prior.phase !== 'provisioning' || member.phase === 'provisioning') {

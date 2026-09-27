@@ -60,6 +60,8 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 
 Ask the Lead to create a teammate: give it a unique lowercase name such as `reviewer` and describe its job. A teammate starts fresh with no memory of the Lead's conversation, or as a fork that inherits the Lead's completed turns; the creation request chooses which. Teammate names are permanent — even a teammate whose creation failed keeps its name, and no name is ever reused. Host callers may also pass per-teammate LLM `agentOptions` (`provider` + `model` [+ optional reasoning effort]) at spawn so each bot keeps its own model route; that field is distinct from the subagent backend `provider`, and Electron Main must not invent or rewrite it.
 
+Product bot create uses Host `createBot(displayName, modelSelection)`: the Lead-authorized API requires a non-empty `displayName` and exactly one model/provider assignment, derives the durable kebab roster name, and retains `displayName` on the Host member snapshot. Call it through `ctx.agentTeams.createBot` or the generated `agentTeams/createBot` Remote; Electron Main must not invent bot records.
+
 The roster shows every member with its role (`lead` or `teammate`) and current status: `running`, `idle`, `inactive` (a member that exists but is not loaded), `provisioning`, or `failed`. A member that is not loaded receives its messages when it wakes.
 
 Only the Lead can create teammates or interrupt them.
@@ -169,7 +171,7 @@ Read these pages when the package-level contract is not enough. They move from t
 
 ### Browser Remote
 
-`TeamService` owns the generated `agentTeams/view`, `agentTeams/createTask`, and `agentTeams/updateTask` Remote methods beside the roster, mailbox, task, and lifecycle operations. The `./remote` export supplies the Client contribution mounted by the Web UI, while `./client` re-exports the request, view, and task-mutation result types that are safe in a browser compilation face. Typert retains transport failures in its outer `RemoteResult`; create and update rejections remain explicit domain results inside a successful transport response, with stale update revisions distinguished as task conflicts.
+`TeamService` owns the generated `agentTeams/view`, `agentTeams/createBot`, `agentTeams/createTask`, and `agentTeams/updateTask` Remote methods beside the roster, mailbox, task, and lifecycle operations. The `./remote` export supplies the Client contribution mounted by the Web UI, while `./client` re-exports the request, view, and task-mutation result types that are safe in a browser compilation face. Typert retains transport failures in its outer `RemoteResult`; create and update rejections remain explicit domain results inside a successful transport response, with stale update revisions distinguished as task conflicts.
 
 ## Model Experience
 
