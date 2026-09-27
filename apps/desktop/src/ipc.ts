@@ -9,6 +9,10 @@ import type { IpcMainInvokeEvent } from 'electron'
  * over authenticated HTTP/WS after Node IPC `ready` (see `host-protocol.ts`).
  * There is also no bot-create, model-selection, llm-route, or provider-credential secret channel —
  * Host agentTeams / llm / credentials own those routes (T016).
+ * There is no chat-progress / assistant-stream channel — Client `ui-chat` renders progress from
+ * Host session/agent stream events only (`contracts/chat-progress-final.md`, T029).
+ * FR-008 / T034: preload and renderer never receive raw provider secrets
+ * (`contracts/in-app-credentials.md`); Host credential resolve stays off this surface.
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',

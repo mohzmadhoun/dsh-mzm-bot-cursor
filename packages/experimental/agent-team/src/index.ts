@@ -3,6 +3,7 @@
 import { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type { Agent } from '@deepseek-ai/dsh-agent'
+import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import { TeamActivity } from './activity.ts'
@@ -14,7 +15,8 @@ import {
   bindTeammateModelSelection,
   resolveTeammateModelSelection,
 } from './model-selection-bind.ts'
-import { teamProjectionDefinition } from './projection.ts'
+import { readPersistedSession } from './persisted.ts'
+import { projectMailboxHandoffs, teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
@@ -26,6 +28,7 @@ import type {
   CreateBotRequest,
   CreateBotResult,
   CreateTeamTaskRequest,
+  HostMailboxMessage,
   SendTeamMessageRequest,
   SendTeamMessageResult,
   SpawnTeammateRequest,
@@ -52,6 +55,7 @@ export {
   HOST_MAILBOX_MESSAGE_SOURCE,
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
+export { projectMailboxHandoffs } from './projection.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -289,15 +293,61 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Read the current roster and non-deleted task board through the generated Remote API.
+   * Read the current roster, non-deleted task board, and Host mailbox handoffs
+   * through the generated Remote API (FR-005). Handoffs reconstruct from Lead
+   * Session + target Session logs — never Main-synthesized IPC.
    * @param agent - exact live Team member used as the authority credential.
-   * @returns detached current roster and task views.
+   * @param signal - cancellation for cold target Session reads.
+   * @returns detached current roster, task, and handoff views.
    */
   @Remote('view')
-  remoteView(agent: Agent): TeamView {
+  async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView> {
+    const membership = this.roster.membership(agent)
     return {
       members: this.listMembers(agent),
       tasks: this.listTasks(agent),
+      handoffs: await this.listHandoffs(membership.root, signal),
+    }
+  }
+
+  /**
+   * Project Host mailbox handoffs for one Lead from session/RPC projections.
+   * @param root - exact live Team Lead.
+   * @param signal - cancellation for persisted target Session reads.
+   * @returns product {@link HostMailboxMessage} rows in Lead queue order.
+   */
+  async listHandoffs(root: Agent, signal: AbortSignal): Promise<HostMailboxMessage[]> {
+    const state = this.journal.state(root)
+    const leadEvents = root.session.snapshotEvents()
+    const targetIds = [...new Set(state.messages.map(message => message.targetId))]
+    const targetEventsById = new Map<SessionId, readonly SessionEvent[]>()
+    for (const targetId of targetIds) {
+      targetEventsById.set(targetId, await this.targetEventsFor(targetId, signal))
+    }
+    return projectMailboxHandoffs(leadEvents, targetEventsById, state.id)
+  }
+
+  /**
+   * Read one target Session log for handoff deliveryState fold.
+   * Prefers the live Agent snapshot; falls back to short-lived persistence read.
+   * @param targetId - recipient Bot Session identity.
+   * @param signal - cancellation for the persistence open/read.
+   * @returns detached events, or `[]` when the target log is unavailable.
+   */
+  private async targetEventsFor(
+    targetId: SessionId,
+    signal: AbortSignal,
+  ): Promise<readonly SessionEvent[]> {
+    const live = this.ctx.agents.get(targetId)
+    if (live !== undefined) return live.session.snapshotEvents()
+    try {
+      const stored = await readPersistedSession(this.ctx.sessionPersistence, targetId, signal)
+      return stored.events
+    } catch (error: unknown) {
+      this.ctx.logger.warn(
+        `cannot read Team handoff target "${targetId}": ${errorMessage(error)}`,
+      )
+      return []
     }
   }
 

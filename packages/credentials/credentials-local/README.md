@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-`dsh-credentials-local` keeps API keys and other secrets in a private file under your harness home. You can save credentials through the configuration UI or edit the file directly; changes reload automatically and saved values survive restarts. Credential lookup follows a fixed precedence: the launch environment wins, followed by the stored file, the project's `.env`, and the harness-home `.env`; a newly saved value immediately overrides older `.env` values. Only your OS user can read the file, but agent tool processes run as that same user, so this store cannot isolate secrets from the agent.
+`dsh-credentials-local` keeps API keys and other secrets in a private file under your harness home. You can save credentials through the configuration UI or edit the file directly; changes reload automatically and saved values survive restarts. In-app save to the stored file is the product primary auth path; launch-environment and `.env` layers remain for development and CI only. Credential lookup follows a fixed precedence: the launch environment wins, followed by the stored file, the project's `.env`, and the harness-home `.env`; a newly saved value immediately overrides older `.env` values. Only your OS user can read the file, but agent tool processes run as that same user, so this store cannot isolate secrets from the agent.
 
 ## Table of Contents
 
@@ -70,14 +70,18 @@ A key you save is usable by the next request that names it, and `describe` repor
 
 Keys are resolved in one fixed order — the first place that has a value wins:
 
-| Place | Writable? | Wins over |
-|---|---|---|
-| The environment you launched in (`DEEPSEEK_API_KEY=… dsh`) | no | everything |
-| The stored file | yes (`set`/`unset`) | both `.env` files |
-| Your project's `.env` (`<invocation cwd>/.env`) | not here | your home `.env` |
-| Your home `.env` (`$DSH_HOME/.env`) | not here | nothing |
+| Place | Product role | Writable? | Wins over |
+|---|---|---|---|
+| The environment you launched in (`DEEPSEEK_API_KEY=… dsh`) | Secondary (dev/CI only) | no | everything |
+| The stored file | **Primary** (in-app Models / settings) | yes (`set`/`unset`) | both `.env` files |
+| Your project's `.env` (`<invocation cwd>/.env`) | Secondary (dev/CI only) | not here | your home `.env` |
+| Your home `.env` (`$DSH_HOME/.env`) | Secondary (dev/CI only) | not here | nothing |
 
-The launching environment wins because a per-run override — `DEEPSEEK_API_KEY=… dsh`, a CI secret, a container `-e` — is this run's explicit intent; it cannot be edited from inside the product, so it is reported read-only and writes to it are refused. Everything else loses to the stored file, which is why a key you save takes effect immediately even when an older key sits in a `.env`; those two `.env` layers resolve when nothing is stored. The environment layer is the launcher's snapshot taken at launch ([environment snapshot](../../util/launch-environment/README.md)), so a variable exported after startup is not seen.
+**Product primary path.** Operators enter and store provider credentials in-app (Models / settings write-only UI). That path writes the managed file under harness home via `set` / `unset`. Document and teach that path as the product auth path for Desktop and Host compositions.
+
+**Secondary path (development and CI only).** Launch-environment variables and the two `.env` layers may supply keys for local development, CI secrets, and container `-e` overrides. They MUST NOT be documented or taught as the product primary auth path. When a launch-environment value is set for a reference, it wins for that process (read-only); that override is a per-run intent, not the product story.
+
+The launching environment wins in resolve order because a per-run override — `DEEPSEEK_API_KEY=… dsh`, a CI secret, a container `-e` — is this run's explicit intent; it cannot be edited from inside the product, so it is reported read-only and writes to it are refused. Everything else loses to the stored file, which is why a key you save takes effect immediately even when an older key sits in a `.env`; those two `.env` layers resolve when nothing is stored. The environment layer is the launcher's snapshot taken at launch ([environment snapshot](../../util/launch-environment/README.md)), so a variable exported after startup is not seen.
 
 ### The credential file
 
@@ -147,7 +151,7 @@ This section explains the design decisions behind the provider and points at the
 
 ### Resolution and write paths
 
-`resolve` and `describe` read the inherited environment snapshot, the parsed document snapshot, and the `.env` fallbacks in precedence order. `set`/`unset` queue onto one exclusive operation chain: entry checks reject early (disposed, empty value, environment-shadowed), and the queue re-judges them at run time before a read-modify-write under the writer lock commits and fires `credentials/reference-updated` exactly once.
+`resolve` and `describe` read the inherited environment snapshot, the parsed document snapshot, and the `.env` fallbacks in precedence order. Each call names one `CredentialRef`: a miss for that ref is `undefined` even when peer refs hold secrets (no silent cross-bot substitution). `set`/`unset` queue onto one exclusive operation chain: entry checks reject early (disposed, empty value, environment-shadowed), and the queue re-judges them at run time before a read-modify-write under the writer lock commits and fires `credentials/reference-updated` exactly once.
 
 `modifyRecord` runs on the same chain and lock: it re-reads the document, passes the record as it stands to the mutation, admits the result — a non-empty API key, a grant payload that survives a JSON round trip — renders the record wholesale, and commits, firing `credentials/record-updated` once. A composition the product CLI did not boot has only the inherited environment as its layer.
 

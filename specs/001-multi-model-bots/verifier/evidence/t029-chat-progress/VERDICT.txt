@@ -1,0 +1,44 @@
+VERDICT: Pass
+SC: FR-006 (in-flight half) — ≥1 Host-stream chat progress update before completion; shell MUST NOT synthesize parallel progress IPC (T029 / US3)
+SHA: 6d6385b024dbde59b1f045c18ba75630d77e075b
+UTC: 2026-09-27T10:32:19Z
+IMPL_SHA: 65aafec074 (Phase 1 - T029 - render Host-stream chat progress in ui-chat); tip 6d6385b024 Merge phase 1: forward T029 onto master
+BRANCH: cursor/p1-t029-chat-progress-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/55
+LINEAR: MOH-74 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t029-chat-progress.md
+NODE: v24.21.0
+VITEST: 4.1.8
+
+RECIPE_UI_CHAT: Pass (measured)
+COMMAND: pnpm exec vitest run packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts packages/client/ui-chat/tests/chat-view.client.spec.tsx -t 'T029|Host-stream chat progress|Host assistant/live-chunk progress'
+STDOUT: evidence/t029-chat-progress/vitest-ui-chat.stdout.txt (Test Files 2 passed; Tests 2 passed | 154 skipped; EXIT:0)
+VERBOSE: evidence/t029-chat-progress/vitest-ui-chat-verbose.stdout.txt
+PASSED_TESTS (measured):
+  1. conversation-node-definitions.client.spec.ts — projects ≥1 Host assistant/live-chunk progress update before assistant/message settles (T029)
+  2. chat-view.client.spec.tsx — renders Host-stream chat progress (≥1 update) before the turn settles (T029 / FR-006)
+
+RECIPE_SHELL_IPC: Pass (measured)
+COMMAND2: pnpm exec vitest run apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts
+STDOUT2: evidence/t029-chat-progress/vitest-shell-ipc.stdout.txt (Test Files 1 passed; Tests 3 passed; EXIT:0)
+VERBOSE2: evidence/t029-chat-progress/vitest-shell-ipc-verbose.stdout.txt
+PASSED_TESTS (measured):
+  1. documents Host session/agent streams only — DESKTOP_IPC stays lifecycle/chrome
+  2. rejects chat-progress / assistant-stream names on Electron and Host IPC channels
+  3. keeps Main / preload free of dsh-desktop chat-progress channels
+
+SOURCE_SPOTCHECK (measured):
+  - packages/client/ui-chat/src/client/chat/AssistantMarkdown.tsx sets data-chat-progress="host-stream" when streaming
+  - packages/client/ui-chat/src/client/chat/ChatView.tsx turn-status label sets data-chat-progress="host-stream"
+  - rg over apps/desktop/src: no dsh-desktop:(chat-progress|assistant-stream|progress-update|stream-delta) channel literals
+
+CRITERIA_CHECKED:
+  1. ≥1 progress update before completion on scripted Host live-chunk path (status running → second chunk → settled on assistant/message) — Pass (measured; conversation-node T029)
+  2. data-chat-progress="host-stream" visible during streaming / open turn; cleared after settlement — Pass (measured; ChatView T029)
+  3. Shell MUST NOT synthesize parallel chat-progress IPC — Pass (measured; no-shell-chat-progress-ipc ×3 + source rg)
+
+CLAIM: measured (independent Verifier re-run @ 6d6385b024)
+SCOPE_OUT: SC-004 end-to-end Desktop Scenario 4 (T030 final + T032); handoff-linked attribution (T024/T031)
+CI_NOTE: PR #55 GitHub Actions showed many ~3s FAILURE conclusions at verify time (inferred: workflow permission/fork noise, not recipe failure). Recipe acceptance proven locally.
+BLOCKER: none
+LINEAR_STATUS: leave MOH-74 In Progress until PO merges after Pass

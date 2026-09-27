@@ -1,0 +1,37 @@
+VERDICT: Pass
+SC: FR-005 Expose handoff observability via Host session/RPC projections (T023 / US2)
+SHA: 5f06ea34160b313d3de6ac56bdb294475d8f8b83
+UTC: 2026-09-27T09:44:45Z
+IMPL_SHA: 5f06ea3416 (Phase 1 - T023 - expose Host handoff projections to Client)
+BRANCH: cursor/p1-t023-handoff-proj-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/43
+LINEAR: MOH-68 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t023-handoff-projections.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/mailbox-handoff-projection.spec.ts packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'T023|handoff|empty handoffs'
+STDOUT: evidence/t023-handoff-projections/focused-suites.log (Test Files 2 passed; Tests 6 passed | 31 skipped; EXIT:0)
+VERBOSE: evidence/t023-handoff-projections/focused-suites-verbose.log
+PASSED_TESTS (measured):
+  mailbox-handoff-projection.spec.ts (4):
+    1. projectMailboxHandoffs (T023) > projects Host-only handoffs in Lead queue order with deliveryState fold
+    2. projectMailboxHandoffs (T023) > uses empty target logs when a recipient map entry is absent
+    3. remoteView handoffs (T023) > exposes visible-pending handoff on agentTeams/view after A→B send
+    4. remoteView handoffs (T023) > folds acted handoff after B cold-resumes on the mailbox message
+  team-action.client.spec.tsx (2):
+    1. renders Host mailbox handoffs from agentTeams/view with deliveryState (T023)
+    2. shows the empty handoffs notice when the Host projection has none
+OPTIONAL_REMOTE_API: Pass (measured)
+COMMAND2: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'Team Remote API'
+STDOUT2: evidence/t023-handoff-projections/optional-remote-api.log (Test Files 1 passed; Tests 2 passed | 54 skipped; EXIT:0)
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND3: ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT3: evidence/t023-handoff-projections/optional-topology-mailbox.log (1 passed | 4 skipped; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; mock LLM — no provider API secrets
+CRITERIA_CHECKED:
+  1. After Bot A→B Host mailbox send, agentTeams/view returns handoffs: HostMailboxMessage[] from Lead + target Session logs — Pass (measured; remoteView handoffs A→B send → visible-pending product fields)
+  2. projectMailboxHandoffs folds deliveryState (queued | delivered | visible-pending | acted) and always sets source { kind: 'host-mailbox' } — Pass (measured; pure projection unit + remoteView acted fold; HOST_MAILBOX_MESSAGE_SOURCE)
+  3. Client Agent Team panel consumes TeamView.handoffs and renders delivery state + Host-only source markers (data-team-handoff, data-delivery-state, data-handoff-source) — Pass (measured; team-action.client.spec.tsx T023 + empty handoffs)
+  4. Observability path is Host session/RPC only — no Main-synthesized mailbox IPC — Pass (measured; topology rejects fake mailbox; projection reads Session logs only)
+CLAIM: measured (independent Verifier re-run @ 5f06ea3416)
+SCOPE_OUT: T024 Desktop chat-surface polish; T025 Scenario 3 recipe; T026 Electron bus regression guard (topology negative already green)
+BLOCKER: none

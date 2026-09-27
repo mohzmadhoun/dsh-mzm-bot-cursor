@@ -7,7 +7,9 @@ import type { ChatNodeOwnerProps, ChatNodeViewProps, ChatViewSlotProps } from '.
 import type { ModelRetryNode, TurnErrorNode, UserMessageNode } from '../contract/snapshot.ts'
 import { CompactionItem } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
+import { MailboxHandoffRow } from './MailboxHandoffRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
+import { readTeamMessageSource } from './team-message-source.ts'
 import css from './MessageItem.module.css'
 
 type UserImage = Extract<UserMessageNode['content'][number], { type: 'image' }>
@@ -53,8 +55,14 @@ function failureMessage(
   t: ChatViewSlotProps['t'],
 ): string {
   if (code === 'AUTH') return t('message.failure.auth')
+  if (code === 'INVALID_CREDENTIAL') return t('message.failure.invalidCredential')
   if (code === 'MISSING_CREDENTIAL') return t('message.failure.missingCredential')
   return message
+}
+
+/** Host codes that offer in-app Models re-entry (not 1Password). */
+function isCredentialReentryCode(code: unknown): code is 'MISSING_CREDENTIAL' | 'AUTH' | 'INVALID_CREDENTIAL' {
+  return code === 'MISSING_CREDENTIAL' || code === 'AUTH' || code === 'INVALID_CREDENTIAL'
 }
 
 function ModelRetryItem({ node, active, t }: {
@@ -129,7 +137,8 @@ function TurnErrorItem({ node, t, openModelsSettings }: {
   t: ChatViewSlotProps['t']
   openModelsSettings?: () => void
 }) {
-  const missingCredential = node.code === 'MISSING_CREDENTIAL'
+  const reentry = isCredentialReentryCode(node.code)
+  const missing = node.code === 'MISSING_CREDENTIAL'
   return (
     <div
       className={css.turnErrorRow}
@@ -140,14 +149,16 @@ function TurnErrorItem({ node, t, openModelsSettings }: {
       <div className={css.turnErrorCopy}>
         <span className={css.turnErrorTitle}>{t('message.turnError')}</span>
         <span className={css.turnErrorMessage}>{failureMessage(node.message, node.code, t)}</span>
-        {missingCredential && openModelsSettings !== undefined && (
+        {reentry && openModelsSettings !== undefined && (
           <button
             type="button"
             className={css.turnErrorAction}
-            data-missing-credential-handoff
+            {...missing
+              ? { 'data-missing-credential-handoff': true }
+              : { 'data-invalid-credential-handoff': true }}
             onClick={openModelsSettings}
           >
-            {t('message.failure.missingCredential.action')}
+            {t('message.failure.credentialReentry.action')}
           </button>
         )}
       </div>
@@ -358,6 +369,17 @@ export const UserMessageNodeView = memo(function UserMessageNodeView({
 /** Injected-context keyed Chat renderer. */
 export const ContextMessageNodeView = memo(function ContextMessageNodeView({ node, t }: ChatNodeViewProps<'context'>) {
   const data = node.data
+  // Host mailbox peer receipt: show handoff chrome instead of generic inject.
+  if (readTeamMessageSource(data.source) !== null) {
+    return (
+      <MailboxHandoffRow
+        content={data.content}
+        source={data.source}
+        deliveryState="visible-pending"
+        t={t}
+      />
+    )
+  }
   return (
     <ContextInjectionRow
       content={data.content}

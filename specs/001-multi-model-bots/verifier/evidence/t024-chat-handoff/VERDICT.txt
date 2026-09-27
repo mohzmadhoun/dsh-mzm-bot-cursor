@@ -1,0 +1,46 @@
+VERDICT: Pass
+SC: FR-005 Render user-visible handoff / pending / recipient follow-up in Desktop Web chat surfaces (T024 / US2)
+SHA: 467022464903feb0719845faa336e79e00b54614
+UTC: 2026-09-27T09:59:02Z
+IMPL_SHA: 4670224649 (Phase 1 - docs - clarify T024 Verifier vitest filters; tip includes T024 impl)
+BRANCH: cursor/p1-t024-chat-handoff-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/44
+LINEAR: MOH-69 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t024-chat-handoff.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run packages/client/ui-chat/tests/team-message-source.client.spec.ts packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'T024|T023|handoff|empty handoffs|team-message'
+STDOUT: evidence/t024-chat-handoff/vitest-focused.log (Test Files 4 passed; Tests 10 passed | 123 skipped; EXIT:0)
+VERBOSE: evidence/t024-chat-handoff/vitest-focused-verbose.log
+PASSED_TESTS (measured):
+  chat-view.client.spec.tsx (2):
+    1. renders durable team-message context as a Host mailbox handoff (T024)
+    2. renders pending inbox team-message as a visible handoff without copy-paste (T024)
+  handoff-notices.client.spec.tsx (2):
+    1. renders TeamView.handoffs for the viewed Session with Host deliveryState (T024)
+    2. hides the strip when no handoff involves the viewed Session
+  team-action.client.spec.tsx (2):
+    1. renders Host mailbox handoffs from agentTeams/view with deliveryState (T023)
+    2. shows the empty handoffs notice when the Host projection has none
+  team-message-source.client.spec.ts (4):
+    1. reads a complete team-message source
+    2. rejects non-team sources and incomplete team-message rows
+    3. handoffBodyPreview > returns the first non-empty text block
+    4. handoffBodyPreview > returns empty string when no text block is present
+SKELETON_NOTICES_SEAT: Pass (measured)
+COMMAND2: ./node_modules/.bin/vitest run packages/client/ui-conversation/tests/skeleton.client.spec.tsx -t 'active phase: fixed header'
+STDOUT2: evidence/t024-chat-handoff/vitest-skeleton.log (Test Files 1 passed; Tests 1 passed | 23 skipped; EXIT:0)
+  - active phase: fixed header outside the scrollport; sticky composer seat inside it
+  - asserts slotCalls contain conversation.session.notices (measured in skeleton.client.spec.tsx)
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND3: ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT3: evidence/t024-chat-handoff/vitest-topology-negative.log (1 passed | 4 skipped; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; component fixtures / mock Host view — no provider API secrets
+CRITERIA_CHECKED:
+  1. Chat renders durable team-message context and pending inbox peer receipts as handoff rows (data-chat-handoff, data-handoff-source=host-mailbox, delivery labels) — Pass (measured; chat-view T024 ×2)
+  2. Conversation exposes conversation.session.notices; Agent Teams mounts HandoffNotices from Host agentTeams/view → TeamView.handoffs (data-chat-handoff-notices, data-delivery-state, Host-only source) — Pass (measured; skeleton seat + handoff-notices T024; mount.ts registers slot)
+  3. Agent Team panel handoff rows from T023 remain green — Pass (measured; team-action T023 + empty handoffs)
+  4. No Main-synthesized mailbox IPC channel — Pass (measured; topology rejects fake mailbox)
+CLAIM: measured (independent Verifier re-run @ 4670224649)
+SCOPE_OUT: T025 Scenario 3 end-to-end recipe; T026 Electron bus regression guard (topology negative already green)
+BLOCKER: none
+LINEAR_STATUS: leave MOH-69 In Progress until PO merges after Pass

@@ -1,0 +1,28 @@
+VERDICT: Pass
+SC: FR-008 preload/renderer no raw secrets (T034 / US4 shell half)
+SHA: bda79c856a22b063b96175ae92f4d981559bf6cd
+UTC: 2026-09-27T10:04:15Z
+IMPL_SHA: aaf2b96428 (Phase 1 - T034 - audit preload IPC for no raw secrets)
+BRANCH: cursor/p1-t034-no-secret-ipc-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/47
+LINEAR: MOH-79 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t034-no-secret-ipc.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run apps/desktop/tests/no-secret-ipc.spec.ts
+STDOUT: evidence/t034-no-secret-ipc/vitest-no-secret-ipc.stdout.txt (Test Files 1 passed; Tests 3 passed; EXIT:0)
+PASSED_TESTS (measured):
+  no-secret-ipc.spec.ts (3):
+    1. keeps DESKTOP_IPC on the lifecycle/chrome allowlist only
+    2. audits every preload-*.ts and ipc.ts for absence of credential secret APIs
+    3. exposes only allowlisted contextBridge globals from preload sources
+COMMAND2: rg -n -i 'credential|secret|api[_-]?key|password' apps/desktop/src/preload-*.ts apps/desktop/src/ipc.ts
+STDOUT2: evidence/t034-no-secret-ipc/credentials-ipc-rg.txt (JSDoc-only forbid mentions in ipc.ts; no preload hits; EXIT:0)
+NOTE: Vitest 4.1.8; Node v24.21.0; static audit — no provider API secrets required
+CRITERIA_CHECKED:
+  1. DESKTOP_IPC stays on lifecycle/chrome allowlist only — Pass (measured; 9 channels match ALLOWED_DESKTOP_IPC_CHANNELS)
+  2. Every preload-*.ts + ipc.ts matches no credential-secret API patterns — Pass (measured; FORBIDDEN_CREDENTIAL_SECRET_PATTERNS clean; rg hits are JSDoc forbid-only)
+  3. contextBridge.exposeInMainWorld globals stay on product/chrome allowlist — Pass (measured; 5 allowlisted bridges; no credential bridge)
+CLAIM: measured (independent Verifier re-run @ bda79c856a)
+SCOPE_OUT: T033 Models write-only UI; T035 missing-cred navigation; T037 Scenario 1 SC-006 dump
+BLOCKER: none
+TRACKER: leave MOH-79 In Progress (do not merge; do not mark Done)

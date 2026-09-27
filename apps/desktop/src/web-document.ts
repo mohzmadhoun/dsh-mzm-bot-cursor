@@ -1,4 +1,7 @@
-/** Local Web document and authenticated HTTP forwarding for the application window. */
+/**
+ * Local Web document and authenticated HTTP forwarding for the application window.
+ * Forwards bytes to the owned Host; does not interpret mailbox, credential, or model routes.
+ */
 import { readFile } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 

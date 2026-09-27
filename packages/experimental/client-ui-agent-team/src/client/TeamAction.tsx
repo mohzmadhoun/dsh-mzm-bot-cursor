@@ -4,6 +4,8 @@ import type {
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
+  HostMailboxMessage,
+  TeamMailboxDeliveryState,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
   TeamTaskId,
@@ -52,8 +54,9 @@ export interface TeamActionInjected {
   }) => Promise<TeamTaskActionResult>
   openTeammate: (sessionId: SessionId, member: TeamRosterMember) => Promise<void>
   /**
-   * Open Settings → Models for in-app credential entry.
-   * Used when create/chat surfaces Host `MISSING_CREDENTIAL` (not 1Password).
+   * Open Settings → Models for in-app credential entry / re-entry.
+   * Used when create/chat surfaces Host `MISSING_CREDENTIAL`, `AUTH`, or
+   * `INVALID_CREDENTIAL` (not 1Password).
    */
   openModelsSettings: () => void
 }
@@ -94,8 +97,22 @@ function failureText(error: { readonly code: string; readonly message: string })
   return `${error.message} (${error.code})`
 }
 
-/** Host LLM missing-credential code (stable; consumers route on code, never message text). */
-const MISSING_CREDENTIAL = 'MISSING_CREDENTIAL'
+/** Host LLM credential-failure codes that offer in-app Models re-entry. */
+const CREDENTIAL_REENTRY_CODES = new Set(['MISSING_CREDENTIAL', 'AUTH', 'INVALID_CREDENTIAL'])
+
+function credentialReentryCopy(
+  code: string,
+  t: TeamActionProps['t'],
+): string {
+  switch (code) {
+    case 'AUTH':
+      return t('invalidCredential')
+    case 'INVALID_CREDENTIAL':
+      return t('invalidCredential')
+    default:
+      return t('missingCredential')
+  }
+}
 
 /**
  * Trim and length limits match Host `requiredModelSelection`.
@@ -162,7 +179,34 @@ function memberStatusKey(status: TeamRosterMember['status']): TeamKey {
   }
 }
 
-/** Render the live Team roster, Host bot-create form, and compare-and-set task board. */
+function deliveryStateKey(state: TeamMailboxDeliveryState): TeamKey {
+  switch (state) {
+    case 'queued': return 'deliveryState.queued'
+    case 'delivered': return 'deliveryState.delivered'
+    case 'visible-pending': return 'deliveryState.visible-pending'
+    case 'acted': return 'deliveryState.acted'
+  }
+}
+
+/** First text block from a Host mailbox body for the handoff list preview. */
+function handoffBodyPreview(body: HostMailboxMessage['body']): string {
+  for (const block of body) {
+    if (block.type === 'text' && block.text.trim() !== '') return block.text
+  }
+  return ''
+}
+
+/** Resolve a Bot display label from the current Team roster when known. */
+function memberLabel(
+  members: readonly TeamRosterMember[],
+  id: HostMailboxMessage['fromBotId'],
+): string {
+  const member = members.find(row => row.id === id)
+  if (member === undefined) return id
+  return member.displayName ?? member.name
+}
+
+/** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
   sessionId, load, createBot, createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
@@ -170,7 +214,7 @@ export function TeamAction({
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<TeamView | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [credentialHandoff, setCredentialHandoff] = useState(false)
+  const [credentialFailureCode, setCredentialFailureCode] = useState<string | null>(null)
   const [creatingBot, setCreatingBot] = useState(false)
   const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
   const [creating, setCreating] = useState(false)
@@ -184,17 +228,17 @@ export function TeamAction({
 
   const clearError = useCallback((): void => {
     setError(null)
-    setCredentialHandoff(false)
+    setCredentialFailureCode(null)
   }, [])
 
   const reportFailure = useCallback((failure: { readonly code: string; readonly message: string }): void => {
-    if (failure.code === MISSING_CREDENTIAL) {
-      setError(t('missingCredential'))
-      setCredentialHandoff(true)
+    if (CREDENTIAL_REENTRY_CODES.has(failure.code)) {
+      setError(credentialReentryCopy(failure.code, t))
+      setCredentialFailureCode(failure.code)
       return
     }
     setError(failureText(failure))
-    setCredentialHandoff(false)
+    setCredentialFailureCode(null)
   }, [t])
 
   useEffect(() => {
@@ -254,7 +298,7 @@ export function TeamAction({
           if (sessionRef.current !== requestedSession) return undefined
           if (reloaded) {
             setError(t('conflict'))
-            setCredentialHandoff(false)
+            setCredentialFailureCode(null)
           }
         } else {
           reportFailure(result.value.error)
@@ -414,14 +458,16 @@ export function TeamAction({
             <div
               className={css.error}
               role="alert"
-              {...credentialHandoff ? { 'data-team-error': MISSING_CREDENTIAL } : {}}
+              {...credentialFailureCode !== null ? { 'data-team-error': credentialFailureCode } : {}}
             >
               <span>{error}</span>
-              {credentialHandoff && (
+              {credentialFailureCode !== null && (
                 <button
                   type="button"
                   className={css.credentialHandoff}
-                  data-missing-credential-handoff
+                  {...credentialFailureCode === 'MISSING_CREDENTIAL'
+                    ? { 'data-missing-credential-handoff': true }
+                    : { 'data-invalid-credential-handoff': true }}
                   onClick={openModelsSettings}
                 >
                   {t('openModelsSettings')}
@@ -464,7 +510,7 @@ export function TeamAction({
                       onClick={() => {
                         void openTeammate(sessionId, member).catch((reason: unknown) => {
                           setError(String(reason))
-                          setCredentialHandoff(false)
+                          setCredentialFailureCode(null)
                         })
                       }}
                     >
@@ -481,6 +527,34 @@ export function TeamAction({
                         {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
                       </span>
                     </button>
+                  ))}
+                </div>
+              </section>
+              <section data-team-handoffs>
+                <div className={css.sectionTitle}>
+                  <h3>{t('handoffs')}</h3>
+                </div>
+                {view.handoffs.length === 0 && <div className={css.notice}>{t('handoffsEmpty')}</div>}
+                <div className={css.handoffs}>
+                  {view.handoffs.map(handoff => (
+                    <article
+                      key={handoff.id}
+                      className={css.handoff}
+                      data-team-handoff
+                      data-handoff-id={handoff.id}
+                      data-delivery-state={handoff.deliveryState}
+                      data-handoff-source={handoff.source.kind}
+                    >
+                      <div className={css.taskTitle}>
+                        <strong>{handoffBodyPreview(handoff.body) || handoff.id}</strong>
+                        <span>{t(deliveryStateKey(handoff.deliveryState))}</span>
+                      </div>
+                      <div className={css.meta}>
+                        <span>{t('handoffFrom')}: {memberLabel(view.members, handoff.fromBotId)}</span>
+                        <span>{t('handoffTo')}: {memberLabel(view.members, handoff.toBotId)}</span>
+                        <span>{handoff.id}</span>
+                      </div>
+                    </article>
                   ))}
                 </div>
               </section>
