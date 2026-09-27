@@ -15,6 +15,10 @@ import {
   bindTeammateModelSelection,
   resolveTeammateModelSelection,
 } from './model-selection-bind.ts'
+import {
+  bindTeammatePersona,
+  type PersonaBindRef,
+} from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
 import { projectMailboxHandoffs, teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
@@ -32,6 +36,7 @@ import type {
   AssignSectionRequest,
   AssignSectionResult,
   BotIdentityMutationResult,
+  BotPersonaProfile,
   DeleteBotInput,
   DeleteBotRequest,
   DeleteBotResult,
@@ -57,6 +62,7 @@ import type {
   UpdateTeamTaskRequest,
 } from './types.ts'
 import {
+  normalizePersonaProfile,
   requiredDisplayName,
   requiredModelSelection,
   teammateNameFromDisplayName,
@@ -114,6 +120,8 @@ export class TeamService extends TypertRemoteService {
   private readonly roster: TeamRoster
   private readonly mailbox: TeamMailbox
   private readonly tasks: TeamTaskBoard
+  /** Live teammate persona refs for instruction bind updates after Host save. */
+  private readonly personaBinds = new Map<SessionId, PersonaBindRef>()
 
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'agentTeams')
@@ -148,6 +156,7 @@ export class TeamService extends TypertRemoteService {
     ctx.on('session/event', (session, event) => { this.mailbox.observeSessionEvent(session, event) })
     ctx.on('agent/created', ({ agent }) => {
       this.bindTeammateModelSelection(agent)
+      this.bindTeammatePersona(agent)
       this.scheduleRecovery(agent)
     })
     ctx.on('agent/status', ({ agent }) => {
@@ -243,17 +252,48 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host persona update stub (FR-002 / FR-003).
+   * Lead-authorized Host persona update (FR-002 / FR-003 / FR-013).
    * Replaces job / voice / antiJobs on the Bot; empty fields are allowed.
+   * Persists on the Team journal and refreshes live instruction bind when the Bot Agent is up.
+   * Rejects without writing when the caller is not Lead, the Bot is missing/inactive, or the
+   * signal is aborted — prior durable persona values stay unchanged (T018 Host reject path).
    * Electron Main must not invent persona records — Host owns the durable write (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - bot id, persona fields, and cancellation.
    * @returns updated Host Bot identity after persona save.
    */
   async updatePersona(caller: Agent, request: UpdatePersonaRequest): Promise<UpdatePersonaResult> {
-    void caller
-    void request
-    throw new TeamError('Host updatePersona is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can update teammate persona', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const persona = normalizePersonaProfile(request.job, request.voice, request.antiJobs)
+    const root = membership.root
+    const updated = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const member = { ...current, persona }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return member
+    })
+    this.refreshTeammatePersonaBind(updated.id, persona)
+    const view = this.roster.list(membership).find(row => row.id === updated.id)
+    /* v8 ignore next 3 -- journal commit above retains the active roster row. */
+    if (view === undefined) {
+      throw new TeamError(`active teammate "${updated.id}" not found`, 'TEAM_MEMBER_NOT_FOUND')
+    }
+    return { id: updated.id, persona, member: view }
   }
 
   /**
@@ -615,6 +655,34 @@ export class TeamService extends TypertRemoteService {
     const selection = resolveTeammateModelSelection(agent, member)
     if (selection === undefined) return
     bindTeammateModelSelection(agent, selection)
+  }
+
+  /**
+   * Bind one teammate Agent's durable Host persona into system-prompt assembly (FR-013).
+   * Lead Agents and non-Team children are left unbound. Empty persona contributes no prose.
+   * @param agent - newly created or resumed exact live Agent.
+   */
+  private bindTeammatePersona(agent: Agent): void {
+    const membership = this.roster.tryMembership(agent)
+    if (membership === undefined || membership.role !== 'teammate') return
+    const member = this.journal.state(membership.root).members.find(row => row.id === agent.id)
+    const ref: PersonaBindRef = { current: member?.persona }
+    this.personaBinds.set(agent.id, ref)
+    bindTeammatePersona(agent, ref, () => {
+      this.personaBinds.delete(agent.id)
+    })
+  }
+
+  /**
+   * Push a saved persona onto the live Agent bind when the Bot is currently activated.
+   * Cold resume rebinds from the durable snapshot via {@link bindTeammatePersona}.
+   * @param botId - teammate Session identity.
+   * @param persona - newly committed Host persona profile.
+   */
+  private refreshTeammatePersonaBind(botId: SessionId, persona: BotPersonaProfile): void {
+    const existing = this.personaBinds.get(botId)
+    if (existing === undefined) return
+    existing.current = persona
   }
 
   /** Reconcile roster provisioning before retrying that member's pending mailbox. */

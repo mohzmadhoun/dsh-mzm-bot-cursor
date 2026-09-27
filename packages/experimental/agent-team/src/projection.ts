@@ -1,4 +1,9 @@
-/** Host-only Team state projected incrementally from committed Session events. */
+/** Host-only Team state projected incrementally from committed Session events.
+
+Persona (`job` / `voice` / `antiJobs`), avatar, displayName, and sectionId on
+`team/member` snapshots are Host→Client readable here — Electron Main must not
+invent a parallel identity store (T015 / FR-002 / FR-003).
+*/
 
 import { z } from 'zod'
 import { brandString } from '@deepseek-ai/dsh-brand'

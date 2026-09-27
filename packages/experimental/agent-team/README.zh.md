@@ -62,7 +62,7 @@ kind: "package-reference"
 
 产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 与该 `modelSelection` 保留在 Host member 快照上。创建时（以及冷恢复时），Agent Teams 通过 `installModelSelection` 绑定 live Bot，使后续对话只使用该 bot 自己的赋值——绝不回落到 Lead 路由。随后的模型调用经 Host `ctx.llm` 适配器（`packages/llm/`）按该赋值解析，并由 Host `ctx.credentials` 解析该 provider 凭据——绝不静默使用同伴 bot 的凭据，也绝不由 Electron Main 发明 bot 记录或改写路由。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用。
 
-持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（`shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。在 create 之外，Host 暴露 `renameBot`、`updatePersona`、`setAvatar`、`assignSection` 与 `deleteBot`（及对应 Remote）；基础桩在故事实现落地前以 `TEAM_NOT_IMPLEMENTED` 拒绝。Electron Main 不得发明身份记录。
+持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（`shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。Host `updatePersona` 会替换活跃 Bot 上的 job／voice／anti-jobs，经 `listMembers`／`agentTeams/view` 投影，并在 create 与冷恢复时把非空字段绑定进该 Bot 作用域的 `deployment:persona-prefix` 指令文本（空字段不贡献文案；Verifier 观察装配接线，不评分 LLM 回复措辞）。其余身份 Remote（`renameBot`、`setAvatar`、`assignSection`、`deleteBot`）在对应故事任务落地前仍以 `TEAM_NOT_IMPLEMENTED` 拒绝。Electron Main 不得发明身份记录。
 
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
@@ -207,7 +207,7 @@ Peer 消息追加在 target 可复用历史前缀之后。冷恢复会先复用�
 - **实验原型，无稳定性承诺**——本包公开发布，但孵化期间约定仍可自由变更。
 - **单进程、共享 checkout**——成员共享 cwd，修改立即可见；本包不提供 worktree、远端成员、merge 或文件锁。
 - **write scope 仅作提示**——Bash、formatter、代码生成器与直接外部写入可以绕过文件版本检查；Lead 必须协调 owner 并检查最终 diff。
-- **扁平 roster，Host 身份变更为进行中**——只有 Lead 可以创建直接 teammate；kebab `name` 永不复用。产品侧 `displayName`／persona／avatar／section 变更由 Host 拥有的 Remote 承担（故事任务落地前为桩）；Electron Main 不得发明并行身份存储。
+- **扁平 roster，Host 身份变更为进行中**——只有 Lead 可以创建直接 teammate；kebab `name` 永不复用。Host `updatePersona` 已持久化并投影 persona；其余 `displayName`／avatar／section 变更在对应故事任务落地前仍为桩。Electron Main 不得发明并行身份存储。
 - **不会自动释放 owner**——idle、interrupt、进程退出与工作失败都不会释放任务 owner。
 - **mailbox 不保证跨进程 exactly-once**——不支持多个 harness 进程并发操作同一 Team。
 
