@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
+import { readFile, readdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
@@ -1785,10 +1786,12 @@ describe('Team Remote API', () => {
   })
 
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {
+    const userSkillsRoot = mkdtempSync(join(tmpdir(), 'dsh-team-user-skills-'))
+    roots.push(userSkillsRoot)
     const { ctx, lead } = await setup([
       textResponse('skill create'),
       textResponse('skill follow-up'),
-    ])
+    ], { userSkillsRoot })
     const created = await ctx.agentTeams.createBot(lead, {
       displayName: 'Skill Bot',
       modelSelection: { provider: 'mock', model: 'skill-model' },
@@ -1909,6 +1912,127 @@ describe('Team Remote API', () => {
       id: 'my-playbook',
       displayName: 'My Playbook',
       source: 'user',
+    })
+  })
+
+  it('persists user skills Host-durably and keeps rejected empty saves out of discovery (T027/T028)', async () => {
+    const userSkillsRoot = mkdtempSync(join(tmpdir(), 'dsh-team-author-'))
+    roots.push(userSkillsRoot)
+    const { ctx, lead } = await setup([], { userSkillsRoot })
+
+    const catalog = new Map<string, { name: string; description: string; source: string; content: string }>()
+    ctx.provide('skills', {
+      async list() {
+        return [...catalog.values()].map(({ name, description, source }) => ({ name, description, source }))
+      },
+      async get(name: string) {
+        return catalog.get(name)
+      },
+      register(skill: { name: string; description: string; content: string; source: string }) {
+        catalog.set(skill.name, {
+          name: skill.name,
+          description: skill.description,
+          source: skill.source,
+          content: skill.content,
+        })
+        return () => { catalog.delete(skill.name) }
+      },
+    })
+
+    await expect(ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: '',
+      instructionalBody: 'body',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({
+      code: 'TEAM_INVALID_ARGUMENT',
+      message: expect.stringContaining('displayName must be non-empty'),
+    })
+    await expect(ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: 'Ghost',
+      instructionalBody: '  ',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({
+      code: 'TEAM_INVALID_ARGUMENT',
+      message: expect.stringContaining('instructionalBody must be non-empty'),
+    })
+    expect(await readdir(userSkillsRoot)).toEqual([])
+    expect(catalog.size).toBe(0)
+    expect(await ctx.agentTeams.listSkills(lead, SIGNAL)).toEqual([])
+    expect((await ctx.agentTeams.remoteView(lead, SIGNAL)).skills).toEqual([])
+
+    const remoteReject = await ctx.agentTeams.remoteUpsertUserSkill(lead, {
+      displayName: '   ',
+      instructionalBody: 'still empty name',
+    }, SIGNAL)
+    expect(remoteReject).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringContaining('displayName') },
+    })
+    expect(await readdir(userSkillsRoot)).toEqual([])
+    expect(catalog.size).toBe(0)
+
+    const authored = await ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: 'Reusable Playbook',
+      instructionalBody: 'Follow this authored playbook.',
+      signal: SIGNAL,
+    })
+    expect(authored.skill).toMatchObject({
+      id: 'reusable-playbook',
+      displayName: 'Reusable Playbook',
+      source: 'user',
+      description: 'Reusable Playbook',
+    })
+    const skillPath = join(userSkillsRoot, 'reusable-playbook', 'SKILL.md')
+    const onDisk = await readFile(skillPath, 'utf8')
+    expect(onDisk).toContain('name: reusable-playbook')
+    expect(onDisk).toContain('description: Reusable Playbook')
+    expect(onDisk).toContain('Follow this authored playbook.')
+
+    const listed = await ctx.agentTeams.listSkills(lead, SIGNAL)
+    expect(listed).toEqual([
+      expect.objectContaining({
+        id: 'reusable-playbook',
+        displayName: 'Reusable Playbook',
+        source: 'user',
+      }),
+    ])
+    expect((await ctx.agentTeams.remoteView(lead, SIGNAL)).skills).toEqual(listed)
+
+    const updated = await ctx.agentTeams.upsertUserSkill(lead, {
+      skillId: 'reusable-playbook',
+      displayName: 'Reusable Playbook v2',
+      instructionalBody: 'Updated instructional body.',
+      signal: SIGNAL,
+    })
+    expect(updated.skill.displayName).toBe('Reusable Playbook v2')
+    const rewritten = await readFile(skillPath, 'utf8')
+    expect(rewritten).toContain('description: Reusable Playbook v2')
+    expect(rewritten).toContain('Updated instructional body.')
+    expect(rewritten).not.toContain('Follow this authored playbook.')
+
+    const remoteOk = await ctx.agentTeams.remoteUpsertUserSkill(lead, {
+      displayName: 'Remote Authored',
+      instructionalBody: 'Remote body.',
+    }, SIGNAL)
+    expect(remoteOk).toMatchObject({
+      ok: true,
+      value: {
+        skill: expect.objectContaining({ id: 'remote-authored', source: 'user' }),
+      },
+    })
+    expect(await readFile(join(userSkillsRoot, 'remote-authored', 'SKILL.md'), 'utf8'))
+      .toContain('Remote body.')
+  })
+
+  it('rejects upsertUserSkill when userSkillsRoot is not configured', async () => {
+    const { ctx, lead } = await setup([])
+    await expect(ctx.agentTeams.upsertUserSkill(lead, {
+      displayName: 'No Root',
+      instructionalBody: 'body',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({
+      code: 'TEAM_INVALID_CONFIG',
+      message: expect.stringContaining('user skills root is not configured'),
     })
   })
 

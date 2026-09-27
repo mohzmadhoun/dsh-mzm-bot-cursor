@@ -137,8 +137,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Implement Host user-skill create/update writing to the Host-durable user skills root (filesystem provider user directory or equivalent under Desktop Host / `dsh-skill-filesystem`) with validation: `displayName` MUST be non-empty; `instructionalBody` MUST be non-empty; reject otherwise with clear reason — `packages/experimental/agent-team/src/` and/or skill-filesystem write helpers ([contracts/skill-authoring.md](./contracts/skill-authoring.md); FR-013)
-- [ ] T028 [US3] Ensure rejected empty saves do **not** appear as saved discoverable skills in catalog projection — `packages/experimental/agent-team/src/projection.ts` / skill provider watch path
+- [x] T027 [US3] Implement Host user-skill create/update writing to the Host-durable user skills root (filesystem provider user directory or equivalent under Desktop Host / `dsh-skill-filesystem`) with validation: `displayName` MUST be non-empty; `instructionalBody` MUST be non-empty; reject otherwise with clear reason — `packages/experimental/agent-team/src/` and/or skill-filesystem write helpers ([contracts/skill-authoring.md](./contracts/skill-authoring.md); FR-013)
+- [x] T028 [US3] Ensure rejected empty saves do **not** appear as saved discoverable skills in catalog projection — `packages/experimental/agent-team/src/projection.ts` / skill provider watch path
 - [ ] T029 [US3] Add Client skill-authoring create/edit surface under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `locales.ts`) with clear reject messaging for empty name or body
 - [ ] T030 [US3] Wire authored skills into discovery (US1 surface) and attach/run (US2 path) so user skills behave like managed for Pass — `packages/experimental/client-ui-agent-team/src/client/`
 - [x] T031 [US3] Add Verifier Scenario 3 recipe in `specs/003-skills-ux/verifier/scenario-3-skill-authoring.md` covering SC-003 (reject empty + happy-path author + discovery) and **requiring** FR-012 desktop evidence under `specs/003-skills-ux/verifier/evidence/scenario-3/`

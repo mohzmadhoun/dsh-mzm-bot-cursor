@@ -32,6 +32,9 @@ import {
   type SkillProviderObservation,
   type SkillSource,
 } from '@deepseek-ai/dsh-skill'
+import { writeSkillBundle, type WriteSkillBundleInput } from './write-skill-bundle.ts'
+
+export { writeSkillBundle, type WriteSkillBundleInput }
 
 const PROJECT_DSH_RANK = 100
 const PROJECT_AGENTS_RANK = 200

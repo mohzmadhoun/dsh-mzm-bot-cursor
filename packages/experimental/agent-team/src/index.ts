@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
+import { writeSkillBundle } from '@deepseek-ai/dsh-skill-filesystem'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import { TeamActivity } from './activity.ts'
 import { errorMessage, TeamError } from './error.ts'
@@ -143,10 +144,13 @@ export class TeamService extends TypertRemoteService {
     maxPendingMessagesPerMember: z.number().step(1).min(1).default(DEFAULT_MAX_PENDING_MESSAGES),
     maxMessageBytes: z.number().step(1).min(1).default(DEFAULT_MAX_MESSAGE_BYTES),
     disposalTimeoutMs: z.number().step(1).min(1).default(DEFAULT_DISPOSAL_TIMEOUT_MS),
+    userSkillsRoot: z.string().min(1),
   })
 
   /** Validated deployment limits used by every Team operation. */
-  private readonly config: Required<Config>
+  private readonly config: Required<Omit<Config, 'userSkillsRoot'>> & {
+    readonly userSkillsRoot: string | undefined
+  }
 
   private readonly activity: TeamActivity
   private readonly lifecycle: TeamRuntimeLifecycle
@@ -158,9 +162,12 @@ export class TeamService extends TypertRemoteService {
   private readonly personaBinds = new Map<SessionId, PersonaBindRef>()
   /** Live teammate skill-instruction refs for FR-014 bind updates after Host attach. */
   private readonly skillBinds = new Map<SessionId, SkillBindRef>()
+  /** Disposers for Host-authored runtime skill registrations (re-register on update). */
+  private readonly userSkillRegistrations = new Map<string, () => void>()
 
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'agentTeams')
+    const userSkillsRoot = config.userSkillsRoot?.trim()
     this.config = {
       maxMembers: positiveLimit('maxMembers', config.maxMembers ?? DEFAULT_MAX_MEMBERS),
       maxTasks: positiveLimit('maxTasks', config.maxTasks ?? DEFAULT_MAX_TASKS),
@@ -173,6 +180,9 @@ export class TeamService extends TypertRemoteService {
         'disposalTimeoutMs',
         config.disposalTimeoutMs ?? DEFAULT_DISPOSAL_TIMEOUT_MS,
       ),
+      userSkillsRoot: userSkillsRoot === undefined || userSkillsRoot.length === 0
+        ? undefined
+        : userSkillsRoot,
     }
 
     this.activity = new TeamActivity()
@@ -624,14 +634,15 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host user-skill create/update stub (FR-006 / FR-013).
-   * Rejects empty `displayName` or `instructionalBody` without writing.
-   * When `ctx.skills` is present, registers a runtime catalog entry for this Host process
-   * (T027 owns Host-durable filesystem authoring under the Desktop user skills root).
+   * Lead-authorized Host user-skill create/update (FR-006 / FR-013 / T027).
+   * Rejects empty `displayName` or `instructionalBody` without writing (T028).
+   * Persists a directory-bundle `SKILL.md` under Config `userSkillsRoot`, then
+   * registers a runtime catalog entry when `ctx.skills` is mounted so discovery
+   * sees the skill before the filesystem watcher refreshes.
    * Electron Main must not invent skill records (research R3).
    * @param caller - exact live Lead Agent.
    * @param request - display name, instructional body, optional skill id, and cancellation.
-   * @returns Host-owned skill catalog summary after validation (+ optional runtime register).
+   * @returns Host-owned skill catalog summary after durable write (+ optional runtime register).
    */
   async upsertUserSkill(caller: Agent, request: UpsertUserSkillRequest): Promise<UpsertUserSkillResult> {
     const membership = this.roster.membership(caller)
@@ -641,6 +652,13 @@ export class TeamService extends TypertRemoteService {
     request.signal.throwIfAborted()
     const displayName = requiredSkillDisplayName(request.displayName)
     const instructionalBody = requiredSkillInstructionalBody(request.instructionalBody)
+    const userSkillsRoot = this.config.userSkillsRoot
+    if (userSkillsRoot === undefined) {
+      throw new TeamError(
+        'user skills root is not configured: set agent-team Config.userSkillsRoot to the Host-durable authoring directory',
+        'TEAM_INVALID_CONFIG',
+      )
+    }
     const skillId = request.skillId === undefined || String(request.skillId).trim().length === 0
       ? skillIdFromDisplayName(displayName)
       : requiredSkillId(String(request.skillId))
@@ -651,14 +669,30 @@ export class TeamService extends TypertRemoteService {
       source: 'user',
       description,
     }
+    request.signal.throwIfAborted()
+    try {
+      await writeSkillBundle(userSkillsRoot, {
+        name: skillId,
+        description,
+        body: instructionalBody,
+      })
+    } catch (error) {
+      throw new TeamError(
+        `failed to persist user skill "${skillId}": ${errorMessage(error)}`,
+        'TEAM_INVALID_ARGUMENT',
+        { cause: error },
+      )
+    }
     const skills = this.ctx.get('skills')
     if (skills !== undefined) {
-      skills.register({
+      this.userSkillRegistrations.get(skillId)?.()
+      const dispose = skills.register({
         name: skillId,
         description,
         content: instructionalBody,
         source: 'user-dsh',
       })
+      this.userSkillRegistrations.set(skillId, dispose)
     }
     return { skill }
   }

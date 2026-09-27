@@ -53,6 +53,7 @@ kind: "package-reference"
 | `maxPendingMessagesPerMember` | `64` | 单个成员最多可排队的消息数 |
 | `maxMessageBytes` | `65,536` | 单条发送消息的最大尺寸 |
 | `disposalTimeoutMs` | `5,000` | 关闭清理允许的时间 |
+| `userSkillsRoot` | — | `upsertUserSkill` 目录包所用的绝对 Host 持久根 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-experimental-agent-team)是每个受支持字段及其 JSDoc 的穷尽式真源。
 
@@ -65,6 +66,8 @@ kind: "package-reference"
 持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（来自固定 Host 预设 id 的 `shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。Host `updatePersona` 会替换活跃 Bot 上的 job／voice／anti-jobs，经 `listMembers`／`agentTeams/view` 投影，并在 create 与冷恢复时把非空字段绑定进该 Bot 作用域的 `deployment:persona-prefix` 指令文本（空字段不贡献文案；Verifier 观察装配接线，不评分 LLM 回复措辞）。Host `renameBot` 持久化非空 `displayName`（允许重名；kebab `name` 不可变；空 rename 拒绝且不写入）。Host `setAvatar` 替换预设 shape 与／或 color 标记（至少一项；图片文件／URL 上传不在 Pass 范围——clarify lock 3）。二者均经 `listMembers`／`agentTeams/view` 投影。Host `createSection`／`renameSection` 把具名侧边栏目录行持久化到 `team/section`（空名称拒绝）；Host `assignSection` 将 Bot.`sectionId` 设为具名目录 id，或设为 `null` 表示 Unassigned／default，且不存储 Unassigned 行（clarify lock 4）。`agentTeams/view` 投影 `sections`（名称＋按 roster 顺序的 `botIds`）与 `unassignedBotIds`。Host `deleteBot` 追加 `active` → `deleted` 身份墓碑（清除 `sectionId`）；Client roster／overview／section membership 省略该 Bot，而 transcript 与 mailbox 行在 Pass 中保持不动（clarify lock 5）。Electron Main 不得发明身份或 section 记录。
 
 Host 技能发现经 `projectSkillCatalog` 把 `ctx.skills` 投影到 `agentTeams/view.skills` 与会失败响亮的 `agentTeams/listSkills` Remote（`listSkills`）：thin-pack id `mzm-thin-pack` 始终为 `managed` 且显示名为 `MzM thin pack`，其余注册行映射为 `user`；缺失 skills registry 时 `listSkills` 失败响亮（非 Desktop 组合上 `view` 软返回空）。Electron Main 不得发明目录行。
+
+Host `upsertUserSkill` 创建或更新用户编写的技能：`displayName` 与 `instructionalBody` 必须非空（FR-013）；空字段带明确原因拒绝且不写入持久内容（T028）。成功时经 `dsh-skill-filesystem` 的 `writeSkillBundle` 写入 `<userSkillsRoot>/<skillId>/SKILL.md`（Config `userSkillsRoot`；Desktop profile 设为 `dshHomePath('desktop-user-skills')` 以匹配 Host 挂载），并在 `ctx.skills` 上注册以便立即发现。Electron Main 不得发明技能文件。
 
 Host `attachSkill(botId, skillId)` 仅把有序 `{ botId, skillId }` 追加到该 Bot 的持久 `skillAttachments`（允许多附；绝不自动附到其他 Bot）。技能必须存在于 Host `ctx.skills`，否则失败响亮且不写入。`listMembers` / `agentTeams/view` 将这些附件投影给 Client 的 bot skills/overview — 绝不用 Electron Main 存储。附上之后（以及 create / 冷恢复时），Agent Teams 把非空的附属技能说明正文绑定到该 Bot 作用域内的 `agent-teams:skill-instructions` system-prompt 段（Candidate B，与 P2 persona 前缀并列；空/缺失正文不贡献文案；Verifier 只观察装配接线，不评判 LLM 回复措辞）。
 
