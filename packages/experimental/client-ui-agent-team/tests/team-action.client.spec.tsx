@@ -6,6 +6,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
   HostMailboxMessage,
   SidebarSectionId,
+  SkillId,
   TeamMessageId,
   TeamTaskId, TeamTaskView as TeamTask, TeamView,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -62,7 +63,14 @@ const view: TeamView = {
   sections: [],
   unassignedBotIds: [SESSION, 'worker-id' as SessionId],
   handoffs: [],
-  skills: [],
+  skills: [
+    {
+      id: 'mzm-thin-pack' as SkillId,
+      displayName: 'MzM thin pack',
+      source: 'managed',
+      description: 'Thin managed skill for Skills UX Pass',
+    },
+  ],
 }
 
 function taskSuccess(value: TeamTask): TeamTaskActionResult {
@@ -2034,5 +2042,89 @@ describe('TeamAction', () => {
     expect(await screen.findByText('Host offline (gateway/internal)')).toBeTruthy()
     const unassigned = document.querySelector('[data-team-section-unassigned]')
     expect(unassigned?.querySelector(`[data-team-member="${workerId}"]`)).not.toBeNull()
+  })
+
+  it('lists Host managed and user skills in the discovery library (T016)', async () => {
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: {
+        ...view,
+        skills: [
+          {
+            id: 'mzm-thin-pack' as SkillId,
+            displayName: 'MzM thin pack',
+            source: 'managed' as const,
+          },
+          {
+            id: 'my-playbook' as SkillId,
+            displayName: 'My playbook',
+            source: 'user' as const,
+            description: 'User-authored instructional body',
+          },
+        ],
+      },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText(zh.skills)
+    const thin = document.querySelector('[data-team-skill="mzm-thin-pack"]')
+    const user = document.querySelector('[data-team-skill="my-playbook"]')
+    expect(thin).not.toBeNull()
+    expect(user).not.toBeNull()
+    expect(thin?.getAttribute('data-skill-source')).toBe('managed')
+    expect(user?.getAttribute('data-skill-source')).toBe('user')
+    expect(thin?.querySelector('[data-team-skill-display-name]')?.textContent).toBe('MzM thin pack')
+    expect(user?.querySelector('[data-team-skill-display-name]')?.textContent).toBe('My playbook')
+    expect(document.querySelector('[data-team-skills-catalog-unavailable]')).toBeNull()
+  })
+
+  it('selects a discovered skill as available-to-attach without a load wizard (T017)', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('MzM thin pack')
+    const skill = document.querySelector('[data-team-skill="mzm-thin-pack"]')
+    expect(skill?.getAttribute('data-skill-available')).toBe('false')
+    fireEvent.click(document.querySelector('[data-team-skill-load="mzm-thin-pack"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill="mzm-thin-pack"]')
+        ?.getAttribute('data-skill-available')).toBe('true')
+    })
+    expect(document.querySelector('[data-team-skill-available="mzm-thin-pack"]')).not.toBeNull()
+    expect(screen.getByText(zh.skillAvailable)).toBeTruthy()
+    expect(document.querySelector('[data-team-skill-load="mzm-thin-pack"]')).toBeNull()
+  })
+
+  it('shows a clear failure when the Host skill catalog is empty (T018)', async () => {
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, skills: [] },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText(zh.skills)
+    const alert = document.querySelector('[data-team-skills-catalog-unavailable]')
+    expect(alert).not.toBeNull()
+    expect(alert?.textContent).toBe(zh.skillsCatalogUnavailable)
+    expect(document.querySelector('[data-team-skills-list]')).toBeNull()
+    expect(screen.queryByText(zh.skillMakeAvailable)).toBeNull()
+  })
+
+  it('keeps available-to-attach across refresh when the skill remains in the catalog (T017)', async () => {
+    const load = vi.fn().mockResolvedValue({ ok: true as const, value: view })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('MzM thin pack')
+    fireEvent.click(document.querySelector('[data-team-skill-load="mzm-thin-pack"]')!)
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill-available="mzm-thin-pack"]')).not.toBeNull()
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.refresh }))
+    await waitFor(() => {
+      expect(load.mock.calls.length).toBeGreaterThanOrEqual(2)
+    })
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill="mzm-thin-pack"]')
+        ?.getAttribute('data-skill-available')).toBe('true')
+    })
   })
 })

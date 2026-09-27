@@ -100,9 +100,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 1
 
 - [x] T015 [US1] Ensure Host skill catalog returns the managed thin-pack skill (and user-authored skills when present) to Client via projection / `skills/list` path used by Desktop Web — `packages/experimental/agent-team/src/projection.ts` and/or `packages/api/session-controller/` ([contracts/discover-load.md](./contracts/discover-load.md))
-- [ ] T016 [US1] Add Client/Web skills discovery/library surface under `packages/experimental/client-ui-agent-team/src/client/` (and locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) listing managed + user skills with human-readable names — happy path, no config-file edit
-- [ ] T017 [US1] Implement load = select / make-available-to-attach in Client (no separate multi-step load wizard required) under `packages/experimental/client-ui-agent-team/src/client/` so a discovered skill can enter the attach flow (clarify lock 2; FR-002)
-- [ ] T018 [US1] On Host catalog unavailable, show clear user-visible failure (no silent empty success) in `packages/experimental/client-ui-agent-team/src/client/` + Host error path
+- [x] T016 [US1] Add Client/Web skills discovery/library surface under `packages/experimental/client-ui-agent-team/src/client/` (and locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) listing managed + user skills with human-readable names — happy path, no config-file edit
+- [x] T017 [US1] Implement load = select / make-available-to-attach in Client (no separate multi-step load wizard required) under `packages/experimental/client-ui-agent-team/src/client/` so a discovered skill can enter the attach flow (clarify lock 2; FR-002)
+- [x] T018 [US1] On Host catalog unavailable, show clear user-visible failure (no silent empty success) in `packages/experimental/client-ui-agent-team/src/client/` + Host error path
 - [x] T019 [US1] Add Verifier Scenario 1 recipe in `specs/003-skills-ux/verifier/scenario-1-discover-load.md` covering SC-001 (discover `mzm-thin-pack`, available-to-attach, survive restart/reload) and **requiring** desktop screenshot(s) and/or short screen recording under `specs/003-skills-ux/verifier/evidence/scenario-1/` (FR-012; unit/jsdom alone fails)
 
 **Checkpoint**: US1 independently testable after foundational Pass

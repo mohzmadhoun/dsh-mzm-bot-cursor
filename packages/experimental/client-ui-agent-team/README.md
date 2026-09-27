@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, discover Host skill catalog summaries and make skills available to attach, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -55,6 +55,10 @@ When the draft has both ids and roster bots already have pairs, the form says wh
 
 **New section** creates a Host named sidebar section via `agentTeams/createSection` (non-empty name required). Named sections render from `TeamView.sections` with Host-derived membership. Bots with null/absent `sectionId` appear under **Unassigned** from `TeamView.unassignedBotIds` — Host never persists an Unassigned catalog row (clarify lock 4). **Rename section** calls `agentTeams/renameSection`. **Move to section** on a healthy teammate calls `agentTeams/assignSection` with a named section id or `null` for Unassigned/default. Electron Main does not invent section records or membership.
 
+### Discover and load skills (available-to-attach)
+
+Opening the panel loads `TeamView.skills` from Host `agentTeams/view` (managed thin pack + user skills). The **Skills library** lists each skill with its human-readable `displayName` and source. **Make available to attach** selects a discovered skill for the attach flow with no multi-step load wizard (clarify lock 2 / FR-002). Availability is Client selection state; Host catalog remount owns restart survival for managed skills. When the Host catalog returns no skills (registry unavailable / empty), the library shows a clear failure — never a silent empty success. Electron Main does not invent skill catalog rows.
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -78,7 +82,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/load (available-to-attach), Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
@@ -113,6 +117,7 @@ No direct effect; the Team tools and ordinary conversation submission own any la
 - **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; handoffs come from the latest `agentTeams/view` snapshot and have no live event subscription.
 - **Ordinary child continuation** — a human message sent after navigation uses the stable addressed-subagent prompt path, not the Team peer mailbox.
 - **No interrupt controls** — the panel creates bots, edits identity, organizes sections, and deletes with confirm through Host Remotes but cannot interrupt teammates; write scopes remain advisory metadata.
+- **Skills attach/run UI** — US1 discovery/load marks skills available-to-attach; per-bot attach/run surfaces are US2. Host still returns `skills: []` when `ctx.skills` is absent — Client treats that empty catalog as unavailable (no silent empty success); an explicit Host error code remains Runtime-owned if needed.
 
 <a id="dev-note"></a>
 ### Dev Note
