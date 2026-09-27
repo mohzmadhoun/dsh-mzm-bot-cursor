@@ -1,0 +1,7 @@
+ RUN  v4.1.8 /workspace
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 4 skipped (5)
+   Start at  10:48:49
+   Duration  314ms (transform 149ms, setup 152ms, import 42ms, tests 34ms, environment 0ms)
