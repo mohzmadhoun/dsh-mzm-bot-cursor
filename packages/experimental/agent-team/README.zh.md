@@ -60,7 +60,7 @@ kind: "package-reference"
 
 请 Lead 创建 teammate：给它一个唯一的小写名字（例如 `reviewer`）并描述其职责。teammate 可以 fresh 启动（不携带 Lead 对话的任何记忆），也可以作为 fork 启动（继承 Lead 已完成的轮次）；创建请求决定用哪种。teammate 名字是永久的——即使创建失败的 teammate 也保留其名字，任何名字都不会被复用。Host 调用方还可在 spawn 时传入按 teammate 区分的 LLM `agentOptions`（`provider` + `model`[以及可选的推理强度]），使每个 bot 保留自己的模型路由；该字段与 subagent 后端 `provider` 不同，Electron Main 不得发明或改写它。
 
-产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 保留在 Host member 快照上。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。
+产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 保留在 Host member 快照上。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。该 bot 之后的每次对话，包括 teammate 变为 inactive 后的冷恢复，都通过 `installModelSelection` 组装并路由，且只使用这条已记录的 `ModelSelection`。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
 
@@ -116,6 +116,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | 文件 | 职责 |
 |---|---|
 | [`src/index.ts`](src/index.ts) | 插件入口：`Config` schema、服务注册、恢复调度 |
+| [`src/model-binding.ts`](src/model-binding.ts) | 为每次 teammate 激活安装其已记录的 `ModelSelection`，供后续对话使用 |
 | [`src/roster.ts`](src/roster.ts) | Team 身份、成员关系解析、provisioning 与 roster 拆除 |
 | [`src/mailbox.ts`](src/mailbox.ts) | 持久队列、目标本地投递、确认与恢复 |
 | [`src/task-board.ts`](src/task-board.ts) | 任务 CAS 命令、DAG 校验与派生视图 |

@@ -10,6 +10,7 @@ import { errorMessage, TeamError } from './error.ts'
 import { TeamJournal } from './journal.ts'
 import { TeamRuntimeLifecycle } from './lifecycle.ts'
 import { TeamMailbox } from './mailbox.ts'
+import { bindBotModelSelection } from './model-binding.ts'
 import { teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
@@ -117,7 +118,10 @@ export class TeamService extends TypertRemoteService {
     this.tasks = new TeamTaskBoard(this.journal, this.config.maxTasks)
 
     ctx.on('session/event', (session, event) => { this.mailbox.observeSessionEvent(session, event) })
-    ctx.on('agent/created', ({ agent }) => { this.scheduleRecovery(agent) })
+    ctx.on('agent/created', ({ agent }) => {
+      if (this.roster.tryMembership(agent)?.role === 'teammate') bindBotModelSelection(agent)
+      this.scheduleRecovery(agent)
+    })
     ctx.on('agent/status', ({ agent }) => {
       const membership = this.roster.tryMembership(agent)
       if (membership !== undefined) this.activity.notify(membership.id)
@@ -166,6 +170,7 @@ export class TeamService extends TypertRemoteService {
   /**
    * Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment.
    * Persists the Bot on the Host Team roster; Electron Main must not invent bot records or routes.
+   * Every later activation installs that assignment with `installModelSelection`, so subsequent chats use it only.
    * @param caller - exact live Lead Agent.
    * @param request - displayName, ModelSelection, and cancellation.
    * @returns Host-owned Bot identity, derived roster name, retained model assignment, and roster row.

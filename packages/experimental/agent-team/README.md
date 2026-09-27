@@ -60,7 +60,7 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 
 Ask the Lead to create a teammate: give it a unique lowercase name such as `reviewer` and describe its job. A teammate starts fresh with no memory of the Lead's conversation, or as a fork that inherits the Lead's completed turns; the creation request chooses which. Teammate names are permanent — even a teammate whose creation failed keeps its name, and no name is ever reused. Host callers may also pass per-teammate LLM `agentOptions` (`provider` + `model` [+ optional reasoning effort]) at spawn so each bot keeps its own model route; that field is distinct from the subagent backend `provider`, and Electron Main must not invent or rewrite it.
 
-Product bot create uses Host `createBot(displayName, modelSelection)`: the Lead-authorized API requires a non-empty `displayName` and exactly one model/provider assignment, derives the durable kebab roster name, and retains `displayName` on the Host member snapshot. Call it through `ctx.agentTeams.createBot` or the generated `agentTeams/createBot` Remote; Electron Main must not invent bot records.
+Product bot create uses Host `createBot(displayName, modelSelection)`: the Lead-authorized API requires a non-empty `displayName` and exactly one model/provider assignment, derives the durable kebab roster name, and retains `displayName` on the Host member snapshot. Call it through `ctx.agentTeams.createBot` or the generated `agentTeams/createBot` Remote; Electron Main must not invent bot records. Every later chat on that bot, including a cold resume after the teammate goes inactive, assembles and routes through `installModelSelection` using only that recorded `ModelSelection`.
 
 The roster shows every member with its role (`lead` or `teammate`) and current status: `running`, `idle`, `inactive` (a member that exists but is not loaded), `provisioning`, or `failed`. A member that is not loaded receives its messages when it wakes.
 
@@ -116,6 +116,7 @@ The [Agent Teams Agent Note](../../../.agents/notes/implemented/feature/2026-08-
 | File | Role |
 |---|---|
 | [`src/index.ts`](src/index.ts) | Plugin entry: `Config` schema, service registration, recovery scheduling |
+| [`src/model-binding.ts`](src/model-binding.ts) | Install each teammate activation's recorded `ModelSelection` for later chats |
 | [`src/roster.ts`](src/roster.ts) | Team identity, membership resolution, provisioning, and roster teardown |
 | [`src/mailbox.ts`](src/mailbox.ts) | Durable queue, target-local dispatch, acknowledgement, and recovery |
 | [`src/task-board.ts`](src/task-board.ts) | Task CAS commands, DAG validation, and derived views |

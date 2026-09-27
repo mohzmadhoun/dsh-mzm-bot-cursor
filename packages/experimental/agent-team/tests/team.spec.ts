@@ -6,8 +6,9 @@ import { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
 import { SessionLogOffset, SessionId, type Session, type SessionEvent } from '@deepseek-ai/dsh-session'
+import { SUBAGENT_DESCRIPTOR_VERSION } from '@deepseek-ai/dsh-subagent'
 import JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
 import SubagentService from '@deepseek-ai/dsh-subagent'
 import { deliverSubagentPrompt, type HostPromptDeliverer } from '@deepseek-ai/dsh-subagent/internal'
@@ -15,6 +16,7 @@ import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
 import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
+import { bindBotModelSelection, botModelSelection } from '../src/model-binding.ts'
 import { TeamRuntimeLifecycle } from '../src/lifecycle.ts'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/index.ts'
@@ -294,6 +296,110 @@ describe('Team identity and provisioning', () => {
     })
     expect(second.modelSelection.model).toBe('coding-model')
     expect(second.name).toBe('coding-bot')
+  })
+
+  it('binds later chats to each bot ModelSelection', async () => {
+    const { ctx, lead, adapter } = await setup([
+      textResponse('research first'),
+      textResponse('coding first'),
+      textResponse('research later'),
+      textResponse('coding later'),
+    ])
+    ctx.on('agent/created', ({ agent }) => {
+      if (ctx.agentTeams.tryMembership(agent)?.role !== 'teammate') return
+      expect(bindBotModelSelection(agent)).toBe(false)
+    })
+    let replaceActivationRoute = false
+    ctx.on('agent/created', ({ agent }) => {
+      if (!replaceActivationRoute || agent === lead) return
+      Object.assign(agent.options, {
+        provider: 'mock',
+        model: 'other-bot-model',
+        reasoningEffort: ReasoningEffortId('low'),
+      })
+    })
+
+    const research = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Research Bot',
+      modelSelection: {
+        provider: 'mock',
+        model: 'research-model',
+        reasoningEffort: ReasoningEffortId('high'),
+      },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, research.id)
+    const coding = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Coding Bot',
+      modelSelection: { provider: 'mock', model: 'coding-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, coding.id)
+    expect(bindBotModelSelection(lead)).toBe(false)
+
+    replaceActivationRoute = true
+    Object.assign(lead.options, { provider: 'mock', model: 'lead-switched' })
+    const researchLater = await ctx.agentTeams.sendMessage(lead, {
+      target: research.name,
+      content: content('later research question'),
+      signal: SIGNAL,
+    })
+    expect(researchLater.status).toBe('accepted')
+    await waitNoAgent(ctx, research.id)
+    const codingLater = await ctx.agentTeams.sendMessage(lead, {
+      target: coding.name,
+      content: content('later coding question'),
+      signal: SIGNAL,
+    })
+    expect(codingLater.status).toBe('accepted')
+    await waitNoAgent(ctx, coding.id)
+
+    expect(adapter.requests.map(request => ({
+      provider: request.provider,
+      model: request.model,
+      ...request.reasoningEffort === undefined ? {} : { reasoningEffort: request.reasoningEffort },
+    }))).toEqual([
+      { provider: 'mock', model: 'research-model', reasoningEffort: ReasoningEffortId('high') },
+      { provider: 'mock', model: 'coding-model' },
+      { provider: 'mock', model: 'research-model', reasoningEffort: ReasoningEffortId('high') },
+      { provider: 'mock', model: 'coding-model' },
+    ])
+  })
+
+  it('reads a recorded bot assignment only from a continuable route', () => {
+    const event = (data: object): SessionEvent => ({
+      type: 'subagent/descriptor',
+      data,
+    }) as SessionEvent
+    const continuable = {
+      version: SUBAGENT_DESCRIPTOR_VERSION,
+      mode: 'continuable' as const,
+      provider: 'spawn',
+      label: 'bot',
+    }
+    expect(botModelSelection([])).toBeUndefined()
+    expect(botModelSelection([event({
+      version: SUBAGENT_DESCRIPTOR_VERSION,
+      mode: 'one-shot',
+      provider: 'spawn',
+    })])).toBeUndefined()
+    expect(botModelSelection([event({ ...continuable, agentProvider: 'mock' })])).toBeUndefined()
+    expect(botModelSelection([event({ ...continuable, agentModel: 'only-model' })])).toBeUndefined()
+    expect(botModelSelection([event({
+      ...continuable,
+      agentProvider: 'mock',
+      agentModel: 'coding-model',
+    })])).toEqual({ provider: 'mock', model: 'coding-model' })
+    expect(botModelSelection([event({
+      ...continuable,
+      agentProvider: 'mock',
+      agentModel: 'research-model',
+      agentReasoningEffort: ReasoningEffortId('high'),
+    })])).toEqual({
+      provider: 'mock',
+      model: 'research-model',
+      reasoningEffort: ReasoningEffortId('high'),
+    })
   })
 
   it('rejects Host bot create without displayName or model assignment', async () => {
