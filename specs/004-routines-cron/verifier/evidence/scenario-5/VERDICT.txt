@@ -1,18 +1,19 @@
 T031 Verifier Scenario 5 full replay (SC-005) — DH Verifier
 ===========================================================
-Verdict: BLOCKED (composite SC-005) — partial rows measured below
+Verdict: Pass (composite SC-005)
 Stamp: 2026-09-27
-Product tip: origin/master @ 7294304388 (T028 #164)
-Evidence tip: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
-Linear: MOH-224 (T031) — left In Progress (PO closes after merge / full SC-001)
+Product tip: origin/master @ 85df964e51 (#165 polish)
+Evidence tip: cursor/p4-t018-create-sc005-stamp-fe1d @ d19ddc4525
+Linear: MOH-224 (T031) · Epic MOH-188 — left In Progress (PO closes after merge)
 Recipe: specs/004-routines-cron/verifier/scenario-5-full-replay.md
 Evidence home: specs/004-routines-cron/verifier/evidence/scenario-5/
 
 Composite rows
 --------------
-[x] Foundational Pass (T014) — Pass (README stamp @ 5a53ddac83; bus re-green T033)
-[!] Scenario 1 create/reject/isolation (T018 01–03) — Blocked/Deferred
-    evidence/scenario-1/ README still marks 01–03 Pending; T018 unchecked in tasks.md
+[x] Foundational Pass (T014) — Pass (README stamp @ 5a53ddac83; bus re-green this PR)
+[x] Scenario 1 create/reject/isolation (T018 01–03) — Pass
+    evidence/scenario-1/{01-create-listed-active,02-reject-empty-or-invalid,03-bot-b-isolation}.png
+    + scenario-1-create-walkthrough.mp4 · VERDICT.txt
 [x] Scenario 1 pane durability (T021 04–05) — Pass
     evidence/scenario-1/04-pane-listed-fields.png · 05- · walkthrough.mp4
 [x] Scenario 2 pause/resume (T024) — Pass
@@ -21,37 +22,46 @@ Composite rows
     evidence/scenario-3/ VERDICT + FR-010 media (master #164)
 [x] Scenario 4 non-goals (T029) — Pass
     evidence/non-goals/ VERDICT + measured-checks + T033/T034 logs
-[ ] SC-005 full composite Pass — Blocked until SC-001 create path media lands
+[x] SC-005 full composite Pass — create media + prior stamps satisfy recipe
 
-Supporting logs (this polish)
------------------------------
+Supporting logs (this stamp)
+----------------------------
   replay-pointer.log
-  vitest-electron-bus.log
+  vitest-electron-bus.log (3 passed)
   non-goals-spotcheck.log
   VERDICT.txt (this file)
 
-SO11 mirrors (this polish — logs only; GUI media reused from prior stamps)
---------------------------------------------------------------------------
-  /opt/cursor/artifacts/p4-t031-replay-pointer.log
-  /opt/cursor/artifacts/p4-t033-electron-bus.log
-  /opt/cursor/artifacts/p4-t029-measured-checks.txt
+SO11 mirrors (this PR)
+----------------------
+  /opt/cursor/artifacts/p4-t018-01-create-listed-active.png
+  /opt/cursor/artifacts/p4-t018-02-reject-empty-or-invalid.png
+  /opt/cursor/artifacts/p4-t018-03-bot-b-isolation.png
+  /opt/cursor/artifacts/p4-t018-scenario-1-create-walkthrough.mp4
+  /opt/cursor/artifacts/p4-t018-sc005-replay-pointer.log
+  /opt/cursor/artifacts/p4-t018-sc005-vitest-electron-bus.log
+  /opt/cursor/artifacts/p4-t018-sc005-non-goals-spotcheck.log
 
-Cited prior SO11 GUI media (not re-captured; do not invent product code)
-------------------------------------------------------------------------
-  scenario-1: /opt/cursor/artifacts/p4-t021-* (when mirrored) · in-repo evidence/scenario-1/
+Cited prior SO11 GUI media (not re-captured)
+--------------------------------------------
+  scenario-1 pane: /opt/cursor/artifacts/p4-t021-* · in-repo evidence/scenario-1/04–05
   scenario-2: /opt/cursor/artifacts/p4-t024-* · in-repo evidence/scenario-2/
   scenario-3: /opt/cursor/artifacts/p4-t028-* · in-repo evidence/scenario-3/
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p4-t018-01-create-listed-active.png" alt="SC-001 create" />
+  <img src="/opt/cursor/artifacts/p4-t018-02-reject-empty-or-invalid.png" alt="SC-001 reject" />
+  <img src="/opt/cursor/artifacts/p4-t018-03-bot-b-isolation.png" alt="SC-006 isolation" />
+  <video src="/opt/cursor/artifacts/p4-t018-scenario-1-create-walkthrough.mp4" controls></video>
 
 Claims
 ------
 - Recipe + ordered path documented: **measured**
-- Foundational + SC-002 + SC-003 + SC-004: **measured** from existing evidence
-- SC-001 full create path: **not measured** (Pending media)
-- SC-005 product Done: **Blocked** (honest; not rubber-stamped)
-- New Scenario 5 walkthrough.mp4: **not recorded** this polish (blocker = missing SC-001 01–03)
+- Foundational + SC-001 + SC-002 + SC-003 + SC-004 + SC-006 + SC-007: **measured**
+- SC-005 product composite: **measured** Pass (desktop create path closed gap)
+- FR-010/011 commit: **measured** · PR HTML embeds: **inferred** until PO updates body
 
 Scope lock
 ----------
-Does NOT mark SC-005 Linear Done. Does NOT close MOH-224.
-Does NOT merge. Does NOT invent T018 product/media.
-Leave Done to PO after SC-001 create evidence + SO12 embeds.
+Does NOT mark SC-005 Linear Done. Does NOT close MOH-224 / MOH-211 / epic MOH-188.
+Does NOT merge. Leave Done to PO after merge + SO12 embeds.

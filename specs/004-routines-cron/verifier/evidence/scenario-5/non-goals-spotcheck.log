@@ -1,31 +1,12 @@
-T029 non-goals measured-checks (refined)
-UTC: 2026-09-27T20:05:10Z
-SHA: 72943043888584e6e48cc5e9907a279d0082e2a2
-
-=== Event / memory / box Pass-gates in scenario recipes + README (not non-goals.md itself) ===
--- pattern: event.?listener.*(required|must).*Pass
-(no hits — Pass)
--- pattern: webhook.*(required|must).*Pass
-(no hits — Pass)
--- pattern: memory (profile|log|note|recall).*(required|must).*Pass
-(no hits — Pass)
--- pattern: box.*(required|must).*Pass
-(no hits — Pass)
--- pattern: computer.?use.*(required|must).*Pass
-(no hits — Pass)
--- pattern: jobs.*(required|must).*Pass
-(no hits — Pass)
-
-=== MCP vault UX required for Pass (product) — 1Password mentions are negation (OK) ===
-(no required-vault Pass hits — Pass)
-
-=== Electron bus (T033) ===
- Test Files  1 passed (1)
-      Tests  3 passed (3)
-
-=== schedule-not-routines + optional-jobs docs ===
-schedule-not-routines: OK
-optional-jobs: OK
-non-goals: OK
-
-VERDICT: Pass — SC-004 absence checks hold
+UTC: 2026-09-27T20:09:42Z
+SHA: 85df964e51389cc3c38b8727a0f8762828489b34
+non-goals.md: present
+schedule-not-routines.md: present
+01-create: present
+02-reject: present
+03-isolation: present
+04-pane: present
+05-durability: present
+scenario-2 VERDICT: present
+scenario-3 VERDICT: present
+non-goals VERDICT: present

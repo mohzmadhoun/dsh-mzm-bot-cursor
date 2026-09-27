@@ -1,67 +1,85 @@
-T021 US2 pane-list Scenario path — DH Verifier
-==============================================
-Verdict: Pass (US2 pane-list path only — not full SC-001 Scenario 1 Done)
-Stamp: 2026-09-27 · tip origin/master @ d72ff352f4 (#156 recipe) · Desktop DISPLAY=:1
-Branch: cursor/p4-t021-pane-stamp-fe1d
-Linear: MOH-214 · Epic MOH-188
-Recipe: specs/004-routines-cron/verifier/scenario-2-pane-list.md
+T018 + T021 Scenario 1 create + pane list — DH Verifier
+=======================================================
+Verdict: Pass (full SC-001 / SC-006 / SC-007 create path + US2 pane durability)
+Stamp: 2026-09-27 · tip origin/master @ 85df964e51 (#165 polish on master)
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+Branch: cursor/p4-t018-create-sc005-stamp-fe1d @ d19ddc4525
+Linear: MOH-211 (T018) · Epic MOH-188 — left In Progress (PO closes after merge)
+Recipes:
+  specs/004-routines-cron/verifier/scenario-1-create-list.md (T018)
+  specs/004-routines-cron/verifier/scenario-2-pane-list.md (T021)
 
-Acceptance (T021 / US2 Scenario-path — FR-002 + durability)
------------------------------------------------------------
-[x] Step A — Bot routines pane lists Host-projected rows with identity,
-    schedule, status (+ last-run never) — evidence/scenario-1/04-pane-listed-fields.png
-[x] Step B — Same Host list after leave/return —
-    evidence/scenario-1/05-pane-after-leave-return.png
-[x] Step C — Pass surface is data-team-routines-pane (Agent Team), not
-    ui-schedule header / Electron Main SoT (supporting CDP + screenshots)
-[x] FR-010 (SO 11) — real Desktop screenshots + walkthrough recording
+Acceptance (T018 create path — SC-001 / SC-006 / SC-007)
+-------------------------------------------------------
+[x] Step A — Create valid cron routine on bot A (fixture intent "Check inbox",
+    schedule "@every 5m") listed active on data-team-routines-pane —
+    evidence/scenario-1/01-create-listed-active.png
+[x] Step B — Empty intent/schedule rejected with clear user-visible reason;
+    Save disabled; no new listed row —
+    evidence/scenario-1/02-reject-empty-or-invalid.png
+[x] Step C — Bot B pane does not list Bot A's "Check inbox" routine (SC-006) —
+    evidence/scenario-1/03-bot-b-isolation.png
+[x] Step D — Confirm/edit absence did not fail create path (SC-007)
+[x] FR-010 (SO 11) — real Desktop screenshots + create walkthrough recording
 [x] FR-011 (SO 12) — media committed under verifier/evidence/scenario-1/
     + PR body MUST embed absolute /opt/cursor/artifacts/… paths
 
-Provenance (measured)
----------------------
-Copied byte-identical from merged T020 Client Desktop Verifier frames
-(us2-client-t020/) which already hard-asserted leave/return on Desktop CDP:
+Acceptance (T021 US2 pane durability — FR-002; prior stamp retained)
+-------------------------------------------------------------------
+[x] Step A — Pane lists Host-projected rows with identity/schedule/status —
+    evidence/scenario-1/04-pane-listed-fields.png
+[x] Step B — Same Host list after leave/return —
+    evidence/scenario-1/05-pane-after-leave-return.png
+[x] Pass surface is data-team-routines-pane (not ui-schedule / Electron Main SoT)
 
-  04-pane-listed-fields.png
-    ← us2-client-t020/03-routines-listed.png
-    sha256: 7f1dcb51e322f32d3e8e3ebf08fca3a59a66e055605db510002a524a8860d243
-  05-pane-after-leave-return.png
-    ← us2-client-t020/04-after-return.png
-    sha256: b2060d11c0f696f3257b8bba21b7c7a557979526ebea428342c09e4ddc813673
-  scenario-1-pane-list-walkthrough.mp4
-    ← us2-client-t020/routines-pane-walkthrough.mp4
-  panel-state.json + p4-t021-supporting-cdp.log
-    ← T020 verifier CDP (leaveReturn=true rowsAfter=2)
+Provenance (measured) — T018 create path
+---------------------------------------
+Desktop CDP hard-assert @ tip 85df964e51 (DISPLAY=:1, port 9222):
+  botAId=5c08c574-e488-4645-ad6a-bd27ea9021c8
+  botBId=c92d4a8c-a423-4bc4-b015-79167899239d
+  rejectText includes product-supported schedule requirement; saveDisabled=true
+  created routineId=routine-4e97abca-69ad-4b00-a889-2af545dd199b
+    status=active scheduleExpr=@every 5m text="Check inbox Every 5m Active…"
+  bot B row texts do not contain "Check inbox"; createdId absent on B
+Supporting: p4-t018-create-cdp.log · p4-t018-panel-state.json
+Walkthrough: scenario-1-create-walkthrough.mp4
 
-Visible row fields in 04/05 (measured from frames):
-  - "Summarize inbox every five minutes" · Every 5m · Active · Not run yet
-  - "US2 pane list smoke" · Every 5m · Active · Not run yet
-  - Post-return still lists both (plus peer bot "Hourly status ping")
+Provenance (measured) — T021 pane-list (unchanged bytes)
+-------------------------------------------------------
+  04-pane-listed-fields.png / 05-pane-after-leave-return.png
+  + scenario-1-pane-list-walkthrough.mp4
+  (copied from us2-client-t020/ on prior T021 stamp; leaveReturn=true)
 
 SO11 artifact mirrors (for PR embeds)
 -------------------------------------
+  /opt/cursor/artifacts/p4-t018-01-create-listed-active.png
+  /opt/cursor/artifacts/p4-t018-02-reject-empty-or-invalid.png
+  /opt/cursor/artifacts/p4-t018-03-bot-b-isolation.png
+  /opt/cursor/artifacts/p4-t018-scenario-1-create-walkthrough.mp4
   /opt/cursor/artifacts/p4-t021-04-pane-listed-fields.png
   /opt/cursor/artifacts/p4-t021-05-pane-after-leave-return.png
   /opt/cursor/artifacts/p4-t021-scenario-1-pane-list-walkthrough.mp4
 
 SO12 recommended PR body embeds
 -------------------------------
+  <img src="/opt/cursor/artifacts/p4-t018-01-create-listed-active.png" alt="create listed active" />
+  <img src="/opt/cursor/artifacts/p4-t018-02-reject-empty-or-invalid.png" alt="reject empty or invalid" />
+  <img src="/opt/cursor/artifacts/p4-t018-03-bot-b-isolation.png" alt="bot B isolation" />
+  <video src="/opt/cursor/artifacts/p4-t018-scenario-1-create-walkthrough.mp4" controls></video>
   <img src="/opt/cursor/artifacts/p4-t021-04-pane-listed-fields.png" alt="pane listed fields" />
   <img src="/opt/cursor/artifacts/p4-t021-05-pane-after-leave-return.png" alt="after leave/return" />
-  <video src="/opt/cursor/artifacts/p4-t021-scenario-1-pane-list-walkthrough.mp4" controls></video>
 
 Claims
 ------
-- FR-002 pane list fields: **measured** (Desktop frames 04)
-- US2 leave/return durability: **measured** (Desktop frames 05 + CDP leaveReturn)
+- SC-001 create + reject: **measured** (Desktop frames 01–02 + CDP)
+- SC-006 per-bot isolation: **measured** (Desktop frame 03 + CDP)
+- SC-007 confirm/edit optional: **measured** (create succeeded without confirm)
+- FR-002 pane durability: **measured** (retained T021 frames 04–05)
 - FR-010 desktop visual: **measured**
 - FR-011 commit under scenario-1/: **measured** (this PR)
 - FR-011 PR HTML embeds: **inferred** until product-owner assistant updates PR body
-- Full SC-001 / SC-006 / SC-007 Scenario 1 Done: **not stamped**
-  (still needs T018 01–03 create/reject/isolation media)
 
 Scope lock
 ----------
-Does NOT close MOH-214 — leave In Progress until PO merges this stamp PR.
-Does NOT stamp full Scenario 1 / SC-001 Done.
+Does NOT close MOH-211 — leave In Progress until PO merges this stamp PR.
+Does NOT mark Linear Done. Does NOT merge.
