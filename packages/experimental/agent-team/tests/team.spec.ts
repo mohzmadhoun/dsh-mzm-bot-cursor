@@ -2162,6 +2162,37 @@ describe('Team Remote API', () => {
     expect(remote).toEqual({ ok: true, value: { skills: catalog } })
   })
 
+  it('excludes office bundled skills from listSkills so Pass managed count is one (T032)', async () => {
+    const { ctx, lead } = await setup([])
+    ctx.provide('skills', {
+      async list() {
+        return [
+          {
+            name: 'mzm-thin-pack',
+            description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+            source: 'bundled',
+          },
+          { name: 'office-docx', description: 'Office Word', source: 'bundled' },
+          { name: 'office-pptx', description: 'Office PowerPoint', source: 'bundled' },
+          { name: 'office-xlsx', description: 'Office Excel', source: 'bundled' },
+          {
+            name: 'my-playbook',
+            description: 'User authored playbook',
+            source: 'user-dsh',
+          },
+        ]
+      },
+    })
+
+    const catalog = await ctx.agentTeams.listSkills(lead, SIGNAL)
+    expect(catalog.filter(skill => skill.source === 'managed')).toEqual([
+      expect.objectContaining({ id: 'mzm-thin-pack', source: 'managed' }),
+    ])
+    expect(catalog.map(skill => skill.id)).toEqual(['mzm-thin-pack', 'my-playbook'])
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.skills.filter(skill => skill.source === 'managed')).toHaveLength(1)
+  })
+
   it('preserves Team task rejections and propagates unexpected failures', async () => {
     const { ctx, lead } = await setup([])
     const createRequest = {

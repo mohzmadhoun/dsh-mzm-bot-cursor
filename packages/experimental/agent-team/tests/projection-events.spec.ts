@@ -520,8 +520,8 @@ describe('Agent Teams projection events', () => {
   })
 })
 
-describe('projectSkillCatalog (T015)', () => {
-  it('maps thin-pack + bundled to managed and other sources to user', () => {
+describe('projectSkillCatalog (T015 / T032)', () => {
+  it('maps thin-pack to managed and other sources to user', () => {
     expect(projectSkillCatalog([
       {
         name: 'mzm-thin-pack',
@@ -570,5 +570,32 @@ describe('projectSkillCatalog (T015)', () => {
         description: 'alt',
       },
     ])
+  })
+
+  it('omits office bundled skills from Pass discovery so managed count is exactly one (T032)', () => {
+    const catalog = projectSkillCatalog([
+      {
+        name: 'mzm-thin-pack',
+        description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+        source: 'bundled',
+      },
+      { name: 'office-docx', description: 'Office Word', source: 'bundled' },
+      { name: 'office-pptx', description: 'Office PowerPoint', source: 'bundled' },
+      { name: 'office-xlsx', description: 'Office Excel', source: 'bundled' },
+      {
+        name: 'my-playbook',
+        description: 'User authored playbook',
+        source: 'user-dsh',
+      },
+    ])
+    expect(catalog.filter(skill => skill.source === 'managed')).toEqual([
+      {
+        id: 'mzm-thin-pack',
+        displayName: 'MzM thin pack',
+        source: 'managed',
+        description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+      },
+    ])
+    expect(catalog.map(skill => skill.id)).toEqual(['mzm-thin-pack', 'my-playbook'])
   })
 })

@@ -156,6 +156,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 4
 
 - [x] T032 [US4] Assert Desktop discovery lists exactly one `source=managed` skill (`mzm-thin-pack`) for Pass environments — document measurement in `specs/003-skills-ux/verifier/thin-pack-skill.md` and guard/test as needed under `apps/desktop-host/` or Agent Teams tests ([contracts/thin-managed-pack.md](./contracts/thin-managed-pack.md))
+  - Product Layer B/C filter: `projectSkillCatalog` omits non-thin-pack `bundled` (office-*) from discovery; focused Agent Teams tests cover managed count === 1
+  - Remaining for Verifier/PO: Desktop Scenario 4 stamp (`managedCount === 1`)
 - [x] T033 [US4] Add Verifier non-goals recipe in `specs/003-skills-ux/verifier/non-goals.md` confirming Pass does **not** require full inventory §6 catalog, learn-from-demonstration, or plugin/connector skills (SC-004; FR-009/010)
 - [x] T034 [US4] Add Verifier Scenario 4 checklist stub in `specs/003-skills-ux/verifier/scenario-4-thin-pack.md` linking thin-pack count + non-goals (GUI screenshot optional for this docs/absence scenario)
 

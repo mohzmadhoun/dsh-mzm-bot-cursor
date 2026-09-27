@@ -1,7 +1,7 @@
 # Thin-pack skill — pick lock + T032 count measurement (FR-008 / SC-004)
 
-**Status:** Pick locked (T005) · Measurement path documented (T032) · Product discovery **exactly-one** count **not** stamped (see honest gap)
-**Owners:** DH Verifier (this lock + Scenario 4) · DH Runtime (T006–T007 ship/mount; Pass-environment filter if needed) · DH Client/Web (discovery label) · PO (scope)
+**Status:** Pick locked (T005) · Measurement path documented (T032) · Product Layer C filter landed in `projectSkillCatalog` — Desktop Scenario 4 stamp still Verifier-owned
+**Owners:** DH Verifier (this lock + Scenario 4) · DH Runtime (T006–T007 ship/mount; T032 Pass discovery filter) · DH Client/Web (discovery label) · PO (scope)
 **Linear:** T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152) · T032 [MOH-179](https://linear.app/momadhoun/issue/MOH-179) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T005 pick · T032 assert Pass environments list exactly one `source=managed` skill `mzm-thin-pack`
 **Contract:** [thin-managed-pack.md](../contracts/thin-managed-pack.md)
@@ -82,22 +82,23 @@ Layer A proves the **thin pack** is the only Host-shipped managed skill under `m
 
 ### Layer B — Product catalog projection (discovery)
 
-Agent Teams maps provider sources onto product `managed` | `user` via `projectSkillCatalog` (`packages/experimental/agent-team/src/projection.ts`):
+Agent Teams maps Host registry rows onto product `managed` | `user` via `projectSkillCatalog` (`packages/experimental/agent-team/src/projection.ts`):
 
-- `source === 'bundled'` → product `managed`
 - id `mzm-thin-pack` → always `managed` + display `MzM thin pack`
-- other provider sources → product `user`
+- other provider `bundled` skills (office-*, badges) → **omitted** from Pass discovery (remain in `ctx.skills` for model use)
+- remaining non-bundled rows → product `user`
 
-Focused Host rehearsal (fixture has only thin pack + one user skill):
+Focused Host rehearsal:
 
 ```sh
-pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'projects Host skill catalog with mzm-thin-pack'
+pnpm exec vitest run packages/experimental/agent-team/tests/projection-events.spec.ts -t 'projectSkillCatalog'
+pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'excludes office bundled|projects Host skill catalog'
 ```
 
 | Observation | Claim |
 |-------------|-------|
 | Fixture catalogs map thin pack → `managed`, user skill → `user` | **measured** — T015 team.spec |
-| Real Desktop registry may also expose office bundled skills | **measured** — see honest gap below |
+| Office bundled rows omitted; managed count === 1 | **measured** — T032 Agent Teams tests |
 
 ### Layer C — Desktop discovery count (Pass stamp)
 
@@ -108,7 +109,7 @@ pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'pro
 3. Count rows with `source=managed` (CDP / DOM / `step-metrics.json` style, or Host `remoteView.skills.filter(s => s.source === 'managed')`).
 4. Pass when count === 1 and the sole id is `mzm-thin-pack`.
 
-### Honest gap (SC-001 evidence — do not rubber-stamp T032 product Pass)
+### Historical gap (SC-001 evidence — closed in product by Layer B filter)
 
 **measured** on Scenario 1 Desktop stamp (`evidence/scenario-1/VERDICT.txt` + `step-metrics.json`, tip `c5742bff46`):
 
@@ -116,18 +117,23 @@ pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'pro
 |-------|-------|
 | `managedCount` | **4** |
 | Managed ids | `mzm-thin-pack`, `office-docx`, `office-pptx`, `office-xlsx` |
-| Cause | Office skills ship via `dsh-skill-office` as provider `bundled`; projection maps **all** `bundled` → product `managed` |
+| Cause (then) | Office skills ship via `dsh-skill-office` as provider `bundled`; projection mapped **all** `bundled` → product `managed` |
 
-**Verdict for T032 product count:** **Fail / open** until Runtime (or Pass-environment composition) ensures discovery lists exactly one `source=managed` skill — either by narrowing projection so only the thin pack (and not inventory/office bundled skills) counts as Pass-managed, or by shipping a Pass profile that does not mount office bundled skills into the product catalog.
+**Runtime fix (this PR):** `projectSkillCatalog` omits non-thin-pack `bundled` rows from discovery. Office skills stay in `ctx.skills` for model invocation.
 
-**Do not** treat office bundled rows as SC-001 Fail. **Do not** invent a second thin-pack skill to “fix” the count. Document the gap; leave product SC-004 count stamp to Scenario 4 after Runtime closes Layer C.
+**Verdict for T032 product count:** Layer B/unit path **measured** Pass. Desktop Scenario 4 stamp remains Verifier-owned — rerun Layer C and expect `managedCount === 1`.
+
+**Do not** treat office bundled rows as SC-001 Fail. **Do not** invent a second thin-pack skill to “fix” the count.
 
 | Claim | Tag |
 |-------|-----|
 | On-disk thin pack = 1 | **measured** (Layer A) |
-| SC-001 saw `managedCount=4` (office-*) | **measured** (evidence/scenario-1) |
-| Product discovery exactly-one Pass | **inferred** open — blocked on Layer C |
+| SC-001 saw `managedCount=4` (office-*) | **measured** (evidence/scenario-1; historical) |
+| Product discovery filter (Layer B) | **measured** — Agent Teams T032 tests |
+| Desktop Scenario 4 exactly-one stamp | **inferred** open — Verifier Layer C |
 | Full inventory / learn-from-demo / plugins not required | **measured** via [non-goals.md](./non-goals.md) (docs absence) |
+
+GUI screenshot optional for Scenario 4 (docs/absence). FR-012 remains mandatory for Scenarios 1–3 and 5.
 
 ---
 
@@ -135,7 +141,7 @@ pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'pro
 
 | Role | Owns |
 |------|------|
-| **Runtime** | Ship `SKILL.md` (T006); mount so `ctx.skills` lists `mzm-thin-pack` (T007); close Layer C Pass-environment count if projection still maps office bundled → managed |
+| **Runtime** | Ship `SKILL.md` (T006); mount so `ctx.skills` lists `mzm-thin-pack` (T007); Pass discovery filter so only thin-pack is product `managed` (T032) |
 | **Client** | Show human-readable `MzM thin pack` in discovery |
 | **Verifier** | This pick lock; T032 measurement path; Scenario 4 count + non-goals; FR-012 on GUI scenarios that reference the thin pack |
 | **Electron Main** | Lifecycle / Host mailbox only — **no** parallel skill catalog |
