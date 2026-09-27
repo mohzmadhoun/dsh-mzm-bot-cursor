@@ -123,7 +123,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T023 [US2] Add Client per-bot skills/overview attach UI under `packages/experimental/client-ui-agent-team/src/client/` showing attachments on **that bot’s** surface (global catalog alone insufficient for Pass)
 - [ ] T024 [US2] Add Client run/active indication: dedicated run control **and/or** session-active UI when attached skill applies — `packages/experimental/client-ui-agent-team/src/client/` (clarify lock 4; FR-004); do **not** require LLM reply text match
 - [ ] T025 [US2] On attach while Host unavailable, show clear failure and leave prior attachments unchanged — Client error surface + Host reject path in `packages/experimental/agent-team/src/` / `packages/experimental/client-ui-agent-team/src/client/`
-- [ ] T026 [US2] Add Verifier Scenario 2 recipe in `specs/003-skills-ux/verifier/scenario-2-attach-run.md` covering SC-002 (attach + run/active + persist), SC-006 (per-bot), SC-007 (instruction assembly wiring; **do not** score LLM replies), and **requiring** FR-012 desktop evidence under `specs/003-skills-ux/verifier/evidence/scenario-2/`
+- [x] T026 [US2] Add Verifier Scenario 2 recipe in `specs/003-skills-ux/verifier/scenario-2-attach-run.md` covering SC-002 (attach + run/active + persist), SC-006 (per-bot), SC-007 (instruction assembly wiring; **do not** score LLM replies), and **requiring** FR-012 desktop evidence under `specs/003-skills-ux/verifier/evidence/scenario-2/`
 
 **Checkpoint**: US2 independently testable (needs ≥1 bot from P1/P2 + US1 load path)
 
