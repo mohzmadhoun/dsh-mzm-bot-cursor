@@ -139,7 +139,8 @@ export class TeamRoster {
     }]
     for (const member of state.members) {
       const live = this.ctx.agents.get(member.id)
-      const model = live?.options.model ?? root.options.model
+      // Prefer durable Host assignment (FR-002); never fall back to the Lead route.
+      const model = member.modelSelection?.model ?? live?.options.model
       result.push({
         id: member.id,
         name: member.name,
@@ -263,6 +264,7 @@ export class TeamRoster {
       name,
       description,
       ...request.displayName === undefined ? {} : { displayName: request.displayName },
+      ...request.agentOptions === undefined ? {} : { modelSelection: request.agentOptions },
       provider: requiredText(request.provider, 'provider', 200),
       context: request.context,
       phase: 'provisioning',
@@ -439,6 +441,7 @@ export class TeamRoster {
   /** Build one runtime member row after successful creation. */
   private memberView(member: TeamMemberSnapshot & { readonly phase: 'active' }): TeamMemberView {
     const live = this.ctx.agents.get(member.id)
+    const model = member.modelSelection?.model ?? live?.options.model
     return {
       id: member.id,
       name: member.name,
@@ -448,7 +451,7 @@ export class TeamRoster {
       ...member.displayName === undefined ? {} : { displayName: member.displayName },
       provider: member.provider,
       context: member.context,
-      ...live?.options.model === undefined ? {} : { model: live.options.model },
+      ...model === undefined ? {} : { model },
       diagnostics: [],
     }
   }

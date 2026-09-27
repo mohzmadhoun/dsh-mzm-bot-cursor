@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
+import { ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import type {
@@ -64,11 +64,18 @@ const contentBlockSchema: z.ZodType<ContentBlock> = z.lazy(() => z.union([
   ),
 ])) as z.ZodType<ContentBlock>
 
+const modelSelectionSchema = z.object({
+  provider: z.string().min(1),
+  model: z.string().min(1),
+  reasoningEffort: z.string().min(1).transform(value => ReasoningEffortId(value)).optional(),
+}).strict()
+
 const teamMemberSnapshotSchema = z.object({
   id: sessionIdSchema,
   name: z.string(),
   description: z.string(),
   displayName: z.string().optional(),
+  modelSelection: modelSelectionSchema.optional(),
   provider: z.string(),
   context: z.enum(['fresh', 'fork']),
   phase: z.enum(['provisioning', 'active', 'failed']),
@@ -251,7 +258,8 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
         if (prior.name !== member.name
           || prior.provider !== member.provider
           || prior.context !== member.context
-          || prior.displayName !== member.displayName) {
+          || prior.displayName !== member.displayName
+          || !sameModelSelection(prior.modelSelection, member.modelSelection)) {
           throw new Error(`teammate "${member.id}" changed immutable identity fields`)
         }
         if (prior.phase !== 'provisioning' || member.phase === 'provisioning') {
@@ -305,6 +313,18 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
     default:
       return
   }
+}
+
+/** Compare durable per-bot ModelSelection rows for identity immutability. */
+function sameModelSelection(
+  left: TeamMemberSnapshot['modelSelection'],
+  right: TeamMemberSnapshot['modelSelection'],
+): boolean {
+  if (left === right) return true
+  if (left === undefined || right === undefined) return false
+  return left.provider === right.provider
+    && left.model === right.model
+    && left.reasoningEffort === right.reasoningEffort
 }
 
 /** Host-only Team projection selected by the projected Session identity. */

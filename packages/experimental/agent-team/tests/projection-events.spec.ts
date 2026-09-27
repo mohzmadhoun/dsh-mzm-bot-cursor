@@ -122,6 +122,14 @@ describe('Agent Teams projection events', () => {
     expect(() => projectTeam(ROOT, [base, event('team/member', {
       version: 2,
       teamId: TEAM,
+      member: member({
+        phase: 'active',
+        modelSelection: { provider: 'mock', model: 'other-model' },
+      }),
+    }, SessionSeq(1))])).toThrow(/immutable identity/)
+    expect(() => projectTeam(ROOT, [base, event('team/member', {
+      version: 2,
+      teamId: TEAM,
       member: member({ phase: 'active' }),
     }, SessionSeq(1)), event('team/member', {
       version: 2,
