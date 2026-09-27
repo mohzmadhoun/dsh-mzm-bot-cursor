@@ -327,6 +327,13 @@ export interface Config {
   readonly maxMessageBytes?: number
   /** Maximum milliseconds allowed for Team-owned runtime disposal. */
   readonly disposalTimeoutMs?: number
+  /**
+   * Absolute Host-durable user skills root for `upsertUserSkill` (FR-006 / FR-013).
+   * Desktop mounts the same path via `dsh-skill-filesystem` customSkillDirs
+   * (`desktop-user-skills` under `$DSH_HOME`). Required for durable authoring;
+   * Electron Main must not invent this store.
+   */
+  readonly userSkillsRoot?: string
 }
 
 /** Input for creating one durable teammate. */

@@ -76,6 +76,10 @@ skill 可以是被扫描根目录顶层的目录 bundle `<name>/SKILL.md`，也�
 
 其余 `watch*` 字段用于调节 Chokidar 行为——轮询、稳定窗口、间隔、项目上限与符号链接跟随。生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-skill-filesystem)完整列出了所有字段，是这些字段的真源。
 
+### 编写用户 skill 包
+
+`writeSkillBundle(root, { name, description, body })` 在 Host 持久根下写入一个目录包 `<root>/<name>/SKILL.md`（YAML frontmatter + 说明正文）。Agent Teams 的 `upsertUserSkill` 在 FR-013 非空校验之后调用它；非法 kebab 名称以及空 description／body 会拒绝且不创建文件。Electron Main 不得发明技能文件。
+
 ### 变更检测
 
 现有根目录会被监视，因此新增、改名或删除 skill（或编辑其 frontmatter）会在下一个模型步骤触发目录刷新；`references`、`scripts`、`assets` 等 bundle 资源下的编辑不会触发。当第一方 `write` 与 `edit` 工具的目标可能影响受监视的 skill 时，它们会直接使提供方失效，因此模型无需等待宿主 watcher 即可观察到自身的文件系统变更。外部 IDE、Git 与 shell 变更由宿主 watcher 捕获；尚不存在的根目录会被探测，直至其出现。

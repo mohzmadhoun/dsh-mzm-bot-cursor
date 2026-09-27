@@ -1,0 +1,64 @@
+T027–T028 Host US3 user-skill authoring — DH Verifier
+======================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-27
+Branch: cursor/p3-us3-host-author-fe1d @ b41adc28e0
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/127 (OPEN, MERGEABLE)
+Linear: MOH-174 (T027), MOH-175 (T028) — left In Progress (PO closes after merge)
+
+Rebase note
+-----------
+Tip b41adc28e0 is 0 behind / 1 ahead of origin/master (8e372d3800).
+master is ancestor of HEAD (merge-base --is-ancestor origin/master HEAD = OK).
+No rebase required.
+
+Acceptance (T027–T028 / Host product — not SC-003 / Scenario 3)
+---------------------------------------------------------------
+[x] T027 Host upsertUserSkill: persists non-empty displayName + instructionalBody
+    to Host-durable userSkillsRoot via dsh-skill-filesystem writeSkillBundle
+    (directory-bundle SKILL.md); update overwrites prior body; fails loud when
+    userSkillsRoot is not configured.
+[x] T028 Rejected empty saves do not appear as saved discoverable skills:
+    empty displayName / instructionalBody reject with clear reason; catalog
+    size stays 0; no on-disk write for rejected drafts. writeSkillBundle also
+    rejects invalid name / empty description or body without writing.
+
+Evidence (measured)
+-------------------
+Commands @ b41adc28e0:
+  pnpm exec vitest run \
+    packages/skill/skill-filesystem/tests/write-skill-bundle.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'writeSkillBundle|persists user skills Host-durably|rejects upsertUserSkill when userSkillsRoot|persists attachSkill, projects skillAttachments'
+  → 6 passed | 66 skipped (2 files)
+    - writeSkillBundle > writes a directory-bundle SKILL.md…
+    - writeSkillBundle > rejects invalid skill names and empty description or body…
+    - writeSkillBundle > overwrites an existing bundle on update
+    - Team Remote API > persists attachSkill… and rejects empty author fields
+    - Team Remote API > persists user skills Host-durably… (T027/T028)
+    - Team Remote API > rejects upsertUserSkill when userSkillsRoot is not configured
+
+Logs: p3-us3-host-t027-t028-vitest.log · p3-us3-host-t027-t028-vitest-verbose.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (origin/master...HEAD): 15 files under
+  packages/experimental/agent-team/{src,tests,README*} +
+  packages/skill/skill-filesystem/{src,tests,README*} +
+  packages/experimental/agent-team-profile/cordis.patch.yml +
+  pnpm-lock.yaml + specs/003-skills-ux/tasks.md
+  Zero Client UI paths in this Host slice.
+
+Claims
+------
+- writeSkillBundle persist + empty/invalid reject without write: **measured**
+- upsertUserSkill Host-durable persist + update rewrite: **measured**
+- empty displayName/body reject; catalog absence; no disk for rejects: **measured**
+- missing userSkillsRoot fails loud: **measured**
+- Desktop Scenario 3 / SC-003 / Client T029+: **not run** (out of scope this gate)
+
+Scope lock
+----------
+Does NOT stamp SC-003 / Scenario 3 desktop evidence (FR-012).
+Does NOT gate Client T029–T030 authoring UI.
+CI rollup noise on PR #127 not used as this Host Pass bar.
+Next: Client authoring UI (T029+) + Scenario 3 desktop after PO merges #127.
