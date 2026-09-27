@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-experimental-client-ui-agent-team",
-  "description": "Web Agent Teams roster, task board, and teammate navigation",
+  "description": "Web Agent Teams roster, Host bot create with model assignment, task board, and teammate navigation",
   "version": "0.1.6-alpha.2",
   "publishConfig": {
     "access": "public"

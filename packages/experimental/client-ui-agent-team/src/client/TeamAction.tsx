@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
+  CreateBotInput,
+  CreateBotMutationResult,
+  CreateBotResult,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
   TeamTaskId,
@@ -24,9 +27,13 @@ export type TeamActionResult<T> = RemoteResult<T>
 /** Generated Remote result whose business value preserves Team task rejections. */
 export type TeamTaskActionResult = RemoteResult<TeamTaskMutationResult>
 
+/** Generated Remote result whose business value preserves Team createBot rejections. */
+export type TeamCreateBotActionResult = RemoteResult<CreateBotMutationResult>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
+  createBot: (sessionId: SessionId, input: CreateBotInput) => Promise<TeamCreateBotActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -57,7 +64,14 @@ interface Draft {
   scopes: string
 }
 
+interface BotDraft {
+  displayName: string
+  provider: string
+  model: string
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
+const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 
 function items(value: string): string[] {
   return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]
@@ -95,14 +109,16 @@ function memberStatusKey(status: TeamRosterMember['status']): TeamKey {
   }
 }
 
-/** Render the live Team roster and compare-and-set task board. */
+/** Render the live Team roster, Host bot-create form, and compare-and-set task board. */
 export function TeamAction({
-  sessionId, load, createTask, updateTask, openTeammate, t,
+  sessionId, load, createBot, createTask, updateTask, openTeammate, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<TeamView | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [creatingBot, setCreatingBot] = useState(false)
+  const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -118,6 +134,8 @@ export function TeamAction({
     setLoading(false)
     setView(null)
     setError(null)
+    setCreatingBot(false)
+    setBotDraft(EMPTY_BOT_DRAFT)
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
     setEditing(null)
@@ -186,6 +204,54 @@ export function TeamAction({
       }
     }
   }, [invalidateRefresh, refresh, sessionId, t])
+
+  const settleCreateBot = useCallback(async (
+    operation: () => Promise<TeamCreateBotActionResult>,
+  ): Promise<CreateBotResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add('create-bot'))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        setError(failureText(result.error))
+        return undefined
+      }
+      if (!result.value.ok) {
+        setError(failureText(result.value.error))
+        return undefined
+      }
+      const created = result.value.value
+      setError(null)
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return created
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete('create-bot')
+          return next
+        })
+      }
+    }
+  }, [invalidateRefresh, refresh, sessionId])
+
+  const submitCreateBot = async (): Promise<void> => {
+    const displayName = botDraft.displayName.trim()
+    const provider = botDraft.provider.trim()
+    const model = botDraft.model.trim()
+    /* v8 ignore next -- BotCreateForm disables Save while any normalized field is empty. */
+    if (displayName === '' || provider === '' || model === '') return
+    const created = await settleCreateBot(() => createBot(sessionId, {
+      displayName,
+      modelSelection: { provider, model },
+    }))
+    if (created === undefined) return
+    setBotDraft(EMPTY_BOT_DRAFT)
+    setCreatingBot(false)
+  }
 
   const submitCreate = async (): Promise<void> => {
     const subject = createDraft.subject.trim()
@@ -276,7 +342,22 @@ export function TeamAction({
           {view !== null && (
             <>
               <section>
-                <h3>{t('roster')}</h3>
+                <div className={css.sectionTitle}>
+                  <h3>{t('roster')}</h3>
+                  <button type="button" className={css.smallButton} onClick={() => { setCreatingBot(true) }}>
+                    <IconPlusOutline16 size={13} /> {t('createBot')}
+                  </button>
+                </div>
+                {creatingBot && (
+                  <BotCreateForm
+                    draft={botDraft}
+                    setDraft={setBotDraft}
+                    pending={pendingTasks.has('create-bot')}
+                    onSave={() => { void submitCreateBot() }}
+                    onCancel={() => { setCreatingBot(false) }}
+                    t={t}
+                  />
+                )}
                 <div className={css.roster}>
                   {view.members.map(member => (
                     <button
@@ -291,8 +372,12 @@ export function TeamAction({
                     >
                       <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
                       <span className={css.memberText}>
-                        <span>{member.name}</span>
-                        <small>{t(memberStatusKey(member.status))}{member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}</small>
+                        <span>{member.displayName ?? member.name}</span>
+                        <small>
+                          {member.displayName !== undefined ? `${member.name} · ` : ''}
+                          {t(memberStatusKey(member.status))}
+                          {member.model === undefined ? '' : ` · ${t('model')}: ${member.model}`}
+                        </small>
                         {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
                       </span>
                     </button>
@@ -395,6 +480,48 @@ export function TeamAction({
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+interface BotCreateFormProps {
+  draft: BotDraft
+  setDraft: (draft: BotDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+function BotCreateForm({ draft, setDraft, pending, onSave, onCancel, t }: BotCreateFormProps) {
+  const field = (key: keyof BotDraft, value: string): void => { setDraft({ ...draft, [key]: value }) }
+  const ready = draft.displayName.trim() !== ''
+    && draft.provider.trim() !== ''
+    && draft.model.trim() !== ''
+  return (
+    <div className={css.form} data-team-create-bot>
+      <input
+        value={draft.displayName}
+        aria-label={t('displayName')}
+        placeholder={t('displayNamePlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { field('displayName', event.target.value) }}
+      />
+      <input
+        value={draft.provider}
+        aria-label={t('provider')}
+        placeholder={t('providerPlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { field('provider', event.target.value) }}
+      />
+      <input
+        value={draft.model}
+        aria-label={t('modelId')}
+        placeholder={t('modelIdPlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { field('model', event.target.value) }}
+      />
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
     </div>
   )
 }

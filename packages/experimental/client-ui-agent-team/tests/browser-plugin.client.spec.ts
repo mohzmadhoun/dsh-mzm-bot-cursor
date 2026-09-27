@@ -23,7 +23,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update'
+  remoteFailure?: 'view' | 'update' | 'createBot'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -65,6 +65,31 @@ async function bench(options: {
       return Promise.resolve(options.remoteFailure === 'view'
         ? failure
         : { ok: true as const, value: view })
+    },
+    createBot: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/createBot', args })
+      return Promise.resolve(options.remoteFailure === 'createBot'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              displayName: 'Research Bot',
+              name: 'research-bot',
+              modelSelection: { provider: 'fixture', model: 'model-a' },
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Research Bot',
+                diagnostics: [],
+              },
+            },
+          },
+        })
     },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
@@ -150,7 +175,7 @@ async function bench(options: {
 }
 
 describe('ui-team browser plugin', () => {
-  it('registers one disposable header action with RPC-backed task operations', async () => {
+  it('registers one disposable header action with RPC-backed bot and task operations', async () => {
     const b = await bench()
     expect(inject).toEqual(['sessions', 'uiWorkspace', 'remote', 'slots', 'locale'])
     expect(b.entry()).toMatchObject({
@@ -161,6 +186,10 @@ describe('ui-team browser plugin', () => {
     expect(b.remote.mount).toHaveBeenCalledWith(REMOTE)
     const actions = (b.entry()!.inject as unknown as () => TeamActionInjected)()
     expect((await actions.load(SESSION)).ok).toBe(true)
+    expect((await actions.createBot(SESSION, {
+      displayName: 'Research Bot',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -171,8 +200,16 @@ describe('ui-team browser plugin', () => {
       taskId: TASK_ID, expectedRevision: 2, action: 'reassign', owner: 'worker',
     })).ok).toBe(true)
     expect(b.calls.map(call => call.method)).toEqual([
-      'agentTeams/view', 'agentTeams/createTask', 'agentTeams/updateTask', 'agentTeams/updateTask',
+      'agentTeams/view',
+      'agentTeams/createBot',
+      'agentTeams/createTask',
+      'agentTeams/updateTask',
+      'agentTeams/updateTask',
     ])
+    expect(b.calls[1]?.args[1]).toEqual({
+      displayName: 'Research Bot',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+    })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
     await actions.openTeammate(SESSION, {
@@ -218,6 +255,16 @@ describe('ui-team browser plugin', () => {
       error: { code: 'gateway/internal', message: 'offline' },
     })
 
+    const createBot = await bench({ remoteFailure: 'createBot' })
+    const createActions = (createBot.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(createActions.createBot(SESSION, {
+      displayName: 'Bot',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
     const update = await bench({ remoteFailure: 'update' })
     const updateActions = (update.entry()!.inject as unknown as () => TeamActionInjected)()
     await expect(updateActions.updateTask(SESSION, {
@@ -225,6 +272,22 @@ describe('ui-team browser plugin', () => {
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },
+    })
+  })
+
+  it('routes createBot from an addressed teammate conversation back through its Lead', async () => {
+    const b = await bench({ addressed: true })
+    const actions = (b.entry()!.inject as unknown as () => TeamActionInjected)()
+    await actions.createBot(CHILD, {
+      displayName: 'Research Bot',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+    })
+    expect(b.calls[0]).toEqual({
+      method: 'agentTeams/createBot',
+      args: [SESSION, {
+        displayName: 'Research Bot',
+        modelSelection: { provider: 'fixture', model: 'model-a' },
+      }],
     })
   })
 
