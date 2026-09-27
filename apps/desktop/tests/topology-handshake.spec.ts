@@ -16,7 +16,7 @@ import { DESKTOP_IPC, SCHEME, assertDesktopSender } from '../src/ipc.ts'
 import { DesktopHostProcess } from '../src/host-process.ts'
 import { authenticateWebHost, forwardWebRequest, serveWebDocument } from '../src/web-document.ts'
 import { FIXTURE_SESSION, FIXTURE_TOKEN, installFixtureHost, TOPOLOGY_FIXTURE_HOST } from './topology/fixture-host.ts'
-import { FORBIDDEN_MAILBOX_IPC_PATTERNS, TOPOLOGY_SURFACES } from './topology/surfaces.ts'
+import { FORBIDDEN_MAILBOX_IPC_PATTERNS, FORBIDDEN_MODEL_ROUTER_IPC_PATTERNS, TOPOLOGY_SURFACES } from './topology/surfaces.ts'
 
 const roots: string[] = []
 const hosts: DesktopHostProcess[] = []
@@ -180,5 +180,40 @@ describe('topology handshake (SC-007)', () => {
 
     expect(DESKTOP_HOST_CONTROL_TYPES).not.toContain('mailbox')
     expect(DESKTOP_HOST_CONTROL_TYPES).not.toContain('bot-message')
+  })
+
+  it('exposes no createBot / ModelSelection / provider-credential secret APIs on Electron Main IPC (T016)', () => {
+    for (const channel of Object.values(DESKTOP_IPC)) {
+      for (const pattern of FORBIDDEN_MODEL_ROUTER_IPC_PATTERNS) {
+        expect(channel).not.toMatch(pattern)
+      }
+    }
+    for (const type of [...DESKTOP_HOST_CHILD_EVENT_TYPES, ...DESKTOP_HOST_CONTROL_TYPES]) {
+      for (const pattern of FORBIDDEN_MODEL_ROUTER_IPC_PATTERNS) {
+        expect(type).not.toMatch(pattern)
+      }
+    }
+
+    const shellSources = [
+      'apps/desktop/src/ipc.ts',
+      'apps/desktop/src/host-protocol.ts',
+      'apps/desktop/src/main.ts',
+      'apps/desktop/src/preload-app.ts',
+      'apps/desktop/src/preload-platform.ts',
+      'apps/desktop/src/preload-menu.ts',
+      'apps/desktop/src/preload-theme.ts',
+      'apps/desktop/src/preload-windows.ts',
+      'apps/desktop/src/preload-mandatory.ts',
+      'apps/desktop/src/preload-update-dialog.ts',
+    ].map(path => readFileSync(join(process.cwd(), path), 'utf8'))
+
+    for (const source of shellSources) {
+      expect(source).not.toMatch(/\bcreateBot\b/)
+      expect(source).not.toMatch(/\binstallModelSelection\b/)
+      expect(source).not.toMatch(/\bModelSelection\b/)
+      expect(source).not.toMatch(/\bcredentials\.(?:set|resolve)\b/)
+      expect(source).not.toMatch(/dsh-desktop:(?:create-bot|model-selection|api-key|credential)/i)
+    }
+    expect(shellSources[0]).toMatch(/no bot-create/i)
   })
 })

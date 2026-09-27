@@ -7,6 +7,8 @@ import type { IpcMainInvokeEvent } from 'electron'
  * Channels cover boot, updates, theme, and Windows chrome only.
  * There is no mailbox, bot-message, or agent-chat channel — Host Agent Teams owns that data plane
  * over authenticated HTTP/WS after Node IPC `ready` (see `host-protocol.ts`).
+ * There is also no bot-create, model-selection, llm-route, or provider-credential secret channel —
+ * Host agentTeams / llm / credentials own those routes (T016).
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
