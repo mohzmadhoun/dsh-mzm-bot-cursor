@@ -1,64 +1,56 @@
-# DH Verifier → PO — Host foundational Slice A gate
+# DH Verifier → PO — T014 Foundational Pass stamp
 
-**Branch:** `cursor/p4-foundation-host-fe1d` · **PR:** https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/147
-**Tip claimed / measured:** `3b11313df2632b3666ce371b70184b387eb72c0f`
-**Verdict:** **PASS** (product foundation T006–T013; T014 not stamped)
+**Branch:** `cursor/p4-t014-foundation-stamp-fe1d`
+**Master tip measured:** `5a53ddac837ccf53aab000a1a9f26ece1119a5e2` (merge [#147](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/147) Host foundation + [#145](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/145) Electron T010–T011)
+**Verdict:** **PASS** — T014 foundational checklist stamped
+**Linear:** [MOH-207](https://linear.app/momadhoun/issue/MOH-207) left **In Progress** until PO merges this stamp PR
 
 ## 1. Freshness vs master
 
 | Check | Result | Tag |
 |-------|--------|-----|
-| Behind master | 0 | **measured** |
-| Ahead of master | 1 (`3b11313df2`) | **measured** |
-| Electron #145 merge `fee4c57ac2` in HEAD | yes | **measured** |
-| Tip matches claim `3b11313df2` | yes | **measured** |
+| Stamp branch tip == `origin/master` @ `5a53ddac83` | yes | **measured** |
+| Host foundation #147 merge present | yes (`Phase 4 - T006-T009 T012-T013 - Host Routine catalog foundation`) | **measured** |
+| Electron #145 merge present | yes (`fee4c57ac2`) | **measured** |
 
-No rebase required. Electron #145 already on master and in this tip.
-
-## 2. Option 3 seam honesty
+## 2. Option 3 seam honesty (post-merge)
 
 | Criterion | Evidence | Tag |
 |-----------|----------|-----|
-| Host catalog SoT (`team/routine` / Agent Teams) | `createRoutine` → `journal.appendAndFlush(..., 'team/routine', ...)`; Remotes `agentTeams/createRoutine`, `listRoutinesByBot`; `view.routines` | **measured** |
-| NOT `dsh-schedule` as Routines SoT | Zero imports of `@deepseek-ai/dsh-schedule` under agent-team / desktop-host; Host `routine-cron.ts` owns eval; T012 doc `schedule-not-routines.md` | **measured** |
-| No Electron bus invent | #145 Done on master; `no-electron-routines-bus.spec.ts` 3/3 green on this tip | **measured** |
-| Optional jobs visibility only | T013 doc + desktop-host comment; jobs must not be catalog SoT | **measured** |
+| Host catalog SoT (`team/routine` / Agent Teams) | `RoutineRecord` + `createRoutine` / `listRoutinesByBot` Remotes; `view.routines` projection | **measured** |
+| NOT `dsh-schedule` as Routines SoT | Zero `@deepseek-ai/dsh-schedule` imports under `agent-team`; Host `routine-cron.ts` owns eval; [schedule-not-routines.md](../../schedule-not-routines.md) | **measured** |
+| No Electron bus invent | `no-electron-routines-bus.spec.ts` **3/3** green; host-protocol / ipc exclusion comments | **measured** |
+| Optional jobs visibility only | [optional-jobs-visibility.md](../../optional-jobs-visibility.md) | **measured** |
 
-## 3. Focused vitest + persistence
+## 3. Focused vitest + persistence (rerun on master tip)
 
 | Command | Result |
 |---------|--------|
-| `pnpm exec vitest run …agent-team… -t 'routine\|Host Routine\|exports Team views\|createRoutine'` | 3 files, **6 passed**, 88 skipped |
+| `pnpm exec vitest run packages/experimental/agent-team -t 'routine\|Host Routine\|exports Team views\|createRoutine'` | 3 files, **6 passed**, 127 skipped |
 | `pnpm exec vitest run apps/desktop/tests/no-electron-routines-bus.spec.ts` | **3 passed** |
 | `pnpm exec tsx scripts/persistence-changes.ts` | `63 roots match 7 history records` |
-| Ack `docs/persistence-changes/2026-09-27-team-routine-catalog.md` | present (`event:team/routine` same-version) |
+| Ack `docs/persistence-changes/2026-09-27-team-routine-catalog.md` | present |
 
-Logs: `/opt/cursor/artifacts/p4-host-foundation-vitest.log`, `p4-electron-routines-bus-vitest.log`, `p4-persistence-ack.log`
+Logs (this dir + `/opt/cursor/artifacts/p4-t014-*`):
+- [vitest-routines.log](./vitest-routines.log)
+- [vitest-electron-bus.log](./vitest-electron-bus.log)
+- [persistence-ack.log](./persistence-ack.log)
 
-## 4. Foundation Pass / Fail (not T014 stamp)
+## 4. T014 gate
 
-**PASS** for Host foundational Slice A (MOH-199…202, 205–206 + Electron T010–T011 already Done).
+**PASS** — Host `RoutineRecord` + catalog + cron evaluator stub + Host projection/mutations + Electron exclusion docs + no-Electron-routines-bus + schedule≠Routines + optional jobs doc all hold on master tip above.
 
-**Not stamped:** T014 / MOH-207 — leave for post-merge stamp per PO instruction.
+**Not gated here:** US1–US4 product SC / desktop GUI evidence (FR-010/011). Those require Scenario recipes after this stamp.
 
-**Not gated here:** US1–US4 product SC / desktop GUI evidence.
+## 5. Linear
 
-## 5. Linear (left as-is)
-
-| Issue | Task | Observed status | Action |
-|-------|------|-----------------|--------|
-| MOH-199 | T006 | Ready for Testing | unchanged |
-| MOH-200 | T007 | In Progress | unchanged |
-| MOH-201 | T008 | Ready for Testing | unchanged |
-| MOH-202 | T009 | Ready for Testing | unchanged |
-| MOH-203 | T010 | Done (#145) | n/a |
-| MOH-204 | T011 | Done (#145) | n/a |
-| MOH-205 | T012 | Ready for Testing | unchanged |
-| MOH-206 | T013 | Ready for Testing | unchanged |
-| MOH-207 | T014 | Backlog | unchanged (stamp after merge) |
+| Issue | Task | Action |
+|-------|------|--------|
+| MOH-207 | T014 | **In Progress** — leave until PO merges stamp branch |
+| MOH-199…206 | T006–T013 | Prior foundation; PO may mark Done on merge of #147 / this stamp |
 
 ## PO next
 
-1. Merge PR #147 when ready.
-2. After merge: Verifier stamps T014 in `verifier/README.md` (MOH-207).
-3. Then authorize US1–US4 fan-out (tasks CRITICAL).
+1. Merge `cursor/p4-t014-foundation-stamp-fe1d` → master.
+2. Mark MOH-207 Done after merge.
+3. Authorize US1–US4 fan-out (tasks CRITICAL unlocked).

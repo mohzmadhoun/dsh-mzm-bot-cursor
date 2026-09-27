@@ -59,7 +59,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ---
 
 
-**Setup checkpoint (Verifier 2026-09-27):** T001–T005 Pass on branch `cursor/p4-setup-verifier-fe1d` — design tree confirmed; inventories + `schedule-not-routines` + `verifier/README.md` Scenario 1–5 owners + FR-010/011 evidence mandate. **T014 deferred** until T006–T013 Host/Electron foundation lands.
+**Setup checkpoint (Verifier 2026-09-27):** T001–T005 Pass on branch `cursor/p4-setup-verifier-fe1d` — design tree confirmed; inventories + `schedule-not-routines` + `verifier/README.md` Scenario 1–5 owners + FR-010/011 evidence mandate.
+
+**Foundational checkpoint (Verifier 2026-09-27):** T006–T013 on master @ `5a53ddac83` (#147 Host + #145 Electron). **T014 Pass** stamped in `verifier/README.md` on branch `cursor/p4-t014-foundation-stamp-fe1d` — US1–US4 fan-out unlocked after stamp merge.
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
@@ -77,7 +79,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T011 [P] Add architecture/regression guard that Electron Main has no parallel routines store/bus/timers in `apps/desktop/tests/no-electron-routines-bus.spec.ts` (and document expected absence in `apps/desktop/src/ipc.ts` / `apps/desktop/src/host-protocol.ts`) per research R7
 - [x] T012 [P] Add regression/docs guard that P4 Routines Pass path is **not** “mount `dsh-schedule` overlay alone” in `specs/004-routines-cron/verifier/schedule-not-routines.md` + a focused Host/Client spot-check recipe note (research R2; [contracts/non-goals.md](./contracts/non-goals.md))
 - [x] T013 Optional: wire `dsh-jobs` / `dsh-jobs-local` availability on Desktop Host for **in-flight fire visibility only** (must not become Routine catalog SoT) — document in `specs/004-routines-cron/verifier/optional-jobs-visibility.md`
-- [ ] T014 Foundational checklist stamp in `specs/004-routines-cron/verifier/README.md` (T006–T013 complete; no US product work before this stamp)
+- [x] T014 Foundational checklist stamp in `specs/004-routines-cron/verifier/README.md` (T006–T013 complete; no US product work before this stamp)
 
 **Checkpoint**: Foundation ready — Host catalog + protocol exclusions + absence guards; user stories may begin.
 
@@ -91,8 +93,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Host createRoutine validates non-empty `intent` and product-supported `scheduleExpr`; rejects with clear user-visible/error reason; persists `status: active` in Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-001
-- [ ] T016 [US1] Host createRoutine is per-`botId` (SC-006); confirm step not required (SC-007); separate displayName not required — identity MAY derive from intent
+- [x] T015 [US1] Host createRoutine validates non-empty `intent` and product-supported `scheduleExpr`; rejects with clear user-visible/error reason; persists `status: active` in Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-001
+- [x] T016 [US1] Host createRoutine is per-`botId` (SC-006); confirm step not required (SC-007); separate displayName not required — identity MAY derive from intent
 - [ ] T017 [P] [US1] Client create-routine UI in bot context under `packages/experimental/client-ui-agent-team/src/client/` calling Host HTTP/WS only (no Main IPC mutations)
 - [ ] T018 [US1] Add Verifier Scenario 1 recipe in `specs/004-routines-cron/verifier/scenario-1-create-list.md` covering SC-001/006/007 create path and **requiring** FR-010/011 desktop evidence under `specs/004-routines-cron/verifier/evidence/scenario-1/` (unit/jsdom alone fails)
 
