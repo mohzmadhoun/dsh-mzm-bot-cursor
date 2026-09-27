@@ -192,7 +192,13 @@ function TurnStatus({ startTime, t }: {
   // has clearly been running for a while.
   const showClock = elapsedMs >= 15_000
   return (
-    <div className={css.turnStatus} role="status" aria-live="polite">
+    <div
+      className={css.turnStatus}
+      role="status"
+      aria-live="polite"
+      // Open-turn activity from Host session running state — not Electron IPC.
+      data-chat-progress="host-stream"
+    >
       {t('chat.deepDiving')}
       {showClock && (
         <span className={css.turnStatusClock} aria-hidden>
