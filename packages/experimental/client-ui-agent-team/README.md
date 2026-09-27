@@ -47,6 +47,10 @@ When the draft has both ids and roster bots already have pairs, the form says wh
 
 **Set avatar** opens a preset shape and/or color picker (Host fixed ids). At least one of shape or color is required to save. Save calls Host Remote `agentTeams/setAvatar`; the marker renders on the roster/overview row (`data-team-avatar`). There is **no** image-file or URL upload control for P2 Pass (clarify lock 3 / T024). Electron Main does not invent name or avatar stores.
 
+### Delete a Bot with confirmation
+
+**Delete bot** on a healthy teammate enters Client `pending-confirm` without calling Host. **Cancel** / dismiss returns to idle with the bot unchanged. **Confirm delete** calls Host Remote `agentTeams/deleteBot`; success reloads the roster so the bot is absent from sidebar and overview entry points. Transcript and mailbox cleanup are **not** Pass gates (clarify lock 5). Electron Main does not invent identity records or host a native confirm dialog for this path (Client confirm preferred; T028 unused).
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -70,7 +74,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, persona/rename/avatar editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |

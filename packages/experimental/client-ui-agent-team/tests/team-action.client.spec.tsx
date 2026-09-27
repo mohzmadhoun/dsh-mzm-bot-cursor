@@ -12,8 +12,8 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamCreateBotActionResult, type TeamRenameBotActionResult, type TeamSetAvatarActionResult,
-  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamCreateBotActionResult, type TeamDeleteBotActionResult, type TeamRenameBotActionResult,
+  type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -136,6 +136,15 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
           id: 'worker-id' as SessionId,
           avatar: { shape: 'circle', color: 'blue' },
           member: { ...view.members[1]!, avatar: { shape: 'circle' as const, color: 'blue' as const } },
+        },
+      },
+    }),
+    deleteBot: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
         },
       },
     }),
@@ -872,7 +881,7 @@ describe('TeamAction', () => {
       expect(screen.queryByRole('button', { name: /重开/u })).toBeNull()
       expect(current).toMatchObject({ revision: 6, status: 'pending' })
     })
-    fireEvent.click(screen.getByRole('button', { name: /删除/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^删除$/u }))
     await waitFor(() => { expect(screen.queryByText('Updated runtime')).toBeNull() })
 
     expect(vi.mocked(updateTask).mock.calls.map(([, input]) => [input.action, input.expectedRevision]))
@@ -1675,5 +1684,116 @@ describe('TeamAction', () => {
     expect(editor!.querySelector('[data-avatar-upload]')).toBeNull()
     expect(screen.getByRole('button', { name: zh['avatarShape.circle'] })).toBeTruthy()
     expect(screen.getByRole('button', { name: zh['avatarColor.blue'] })).toBeTruthy()
+  })
+
+  it('requires explicit confirm before Host deleteBot and removes the bot from overview (T027)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Delete Target',
+    }
+    const deleteBot = vi.fn((): Promise<TeamDeleteBotActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: { id: workerId },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, priorMember] },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!] },
+      })
+    render(<TeamAction {...props(actions({ load, deleteBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Delete Target')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.deleteBot }))
+    expect(screen.getByText(zh.deleteConfirmHint)).toBeTruthy()
+    expect(deleteBot).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: zh.confirmDelete }))
+    await waitFor(() => {
+      expect(deleteBot).toHaveBeenCalledWith(SESSION, { botId: workerId })
+    })
+    await waitFor(() => {
+      expect(screen.queryByText('Delete Target')).toBeNull()
+      expect(screen.queryByText(zh.deleteConfirmHint)).toBeNull()
+    })
+  })
+
+  it('cancels pending confirm without calling Host deleteBot (T027)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Keep Me',
+    }
+    const deleteBot = vi.fn((): Promise<TeamDeleteBotActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { id: 'worker-id' as SessionId } },
+    }))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, deleteBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Keep Me')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.deleteBot }))
+    expect(screen.getByText(zh.deleteConfirmHint)).toBeTruthy()
+    fireEvent.click(document.querySelector('[data-team-cancel-delete]')!)
+    expect(deleteBot).not.toHaveBeenCalled()
+    expect(screen.getByText('Keep Me')).toBeTruthy()
+    expect(screen.queryByText(zh.deleteConfirmHint)).toBeNull()
+    expect(screen.getByRole('button', { name: zh.deleteBot })).toBeTruthy()
+  })
+
+  it('keeps the bot listed and shows failure when deleteBot is unavailable (T027)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Stay Listed',
+    }
+    const deleteBot = vi.fn((): Promise<TeamDeleteBotActionResult> => Promise.resolve(
+      remoteFailure('delete Host offline') as TeamDeleteBotActionResult,
+    ))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, deleteBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Stay Listed')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.deleteBot }))
+    fireEvent.click(screen.getByRole('button', { name: zh.confirmDelete }))
+    expect(await screen.findByText('delete Host offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByText('Stay Listed')).toBeTruthy()
+    expect(screen.getByText(zh.deleteConfirmHint)).toBeTruthy()
+  })
+
+  it('shows Team rejection for deleteBot without removing the overview row (T027)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Rejected Delete',
+    }
+    const deleteBot = vi.fn((): Promise<TeamDeleteBotActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'bot already deleted' },
+      },
+    }))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, deleteBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Rejected Delete')
+    fireEvent.click(screen.getByRole('button', { name: zh.deleteBot }))
+    fireEvent.click(screen.getByRole('button', { name: zh.confirmDelete }))
+    expect(await screen.findByText('bot already deleted (team-rejected)')).toBeTruthy()
+    expect(screen.getByText('Rejected Delete')).toBeTruthy()
+    expect(screen.getByText(zh.deleteConfirmHint)).toBeTruthy()
   })
 })

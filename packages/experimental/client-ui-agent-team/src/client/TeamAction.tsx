@@ -8,6 +8,8 @@ import type {
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
+  DeleteBotInput,
+  DeleteBotResult,
   HostMailboxMessage,
   RenameBotInput,
   RenameBotResult,
@@ -51,6 +53,9 @@ export type TeamRenameBotActionResult = RemoteResult<BotIdentityMutationResult<R
 /** Generated Remote result whose business value preserves Team setAvatar rejections. */
 export type TeamSetAvatarActionResult = RemoteResult<BotIdentityMutationResult<SetAvatarResult>>
 
+/** Generated Remote result whose business value preserves Team deleteBot rejections. */
+export type TeamDeleteBotActionResult = RemoteResult<BotIdentityMutationResult<DeleteBotResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -58,6 +63,7 @@ export interface TeamActionInjected {
   updatePersona: (sessionId: SessionId, input: UpdatePersonaInput) => Promise<TeamUpdatePersonaActionResult>
   renameBot: (sessionId: SessionId, input: RenameBotInput) => Promise<TeamRenameBotActionResult>
   setAvatar: (sessionId: SessionId, input: SetAvatarInput) => Promise<TeamSetAvatarActionResult>
+  deleteBot: (sessionId: SessionId, input: DeleteBotInput) => Promise<TeamDeleteBotActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -295,7 +301,7 @@ function memberLabel(
 
 /** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
-  sessionId, load, createBot, updatePersona, renameBot, setAvatar, createTask, updateTask,
+  sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot, createTask, updateTask,
   openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
@@ -311,6 +317,8 @@ export function TeamAction({
   const [renameDraft, setRenameDraft] = useState<RenameDraft>(EMPTY_RENAME_DRAFT)
   const [editingAvatar, setEditingAvatar] = useState<SessionId | null>(null)
   const [avatarDraft, setAvatarDraft] = useState<AvatarDraft>(EMPTY_AVATAR_DRAFT)
+  /** Delete confirmation phase: null = idle; SessionId = pending-confirm (data-model.md). */
+  const [pendingDelete, setPendingDelete] = useState<SessionId | null>(null)
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -345,6 +353,11 @@ export function TeamAction({
     setBotDraft(EMPTY_BOT_DRAFT)
     setEditingPersona(null)
     setPersonaDraft(EMPTY_PERSONA_DRAFT)
+    setEditingRename(null)
+    setRenameDraft(EMPTY_RENAME_DRAFT)
+    setEditingAvatar(null)
+    setAvatarDraft(EMPTY_AVATAR_DRAFT)
+    setPendingDelete(null)
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
     setEditing(null)
@@ -554,6 +567,42 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleDeleteBot = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamDeleteBotActionResult>,
+  ): Promise<DeleteBotResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`delete:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep bot listed until a successful delete.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not remove; overview still lists the bot.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const deleted = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return deleted
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`delete:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -578,6 +627,7 @@ export function TeamAction({
     })
     setEditingRename(null)
     setEditingAvatar(null)
+    setPendingDelete(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -597,6 +647,7 @@ export function TeamAction({
     setRenameDraft({ displayName: member.displayName ?? member.name })
     setEditingAvatar(null)
     setEditingPersona(null)
+    setPendingDelete(null)
   }
 
   const submitRename = async (member: TeamRosterMember): Promise<void> => {
@@ -620,6 +671,7 @@ export function TeamAction({
     })
     setEditingRename(null)
     setEditingPersona(null)
+    setPendingDelete(null)
   }
 
   const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
@@ -633,6 +685,27 @@ export function TeamAction({
     if (saved === undefined) return
     setEditingAvatar(null)
     setAvatarDraft(EMPTY_AVATAR_DRAFT)
+  }
+
+  /** Enter pending-confirm; Host deleteBot is not called until confirm (FR-007). */
+  const startDelete = (member: TeamRosterMember): void => {
+    setPendingDelete(member.id)
+    setEditingRename(null)
+    setEditingAvatar(null)
+    setEditingPersona(null)
+  }
+
+  /** Cancel / dismiss confirm → idle with profile unchanged (data-model cancelled → idle). */
+  const cancelDelete = (): void => {
+    setPendingDelete(null)
+  }
+
+  const confirmDelete = async (member: TeamRosterMember): Promise<void> => {
+    const deleted = await settleDeleteBot(member.id, () => deleteBot(sessionId, {
+      botId: member.id,
+    }))
+    if (deleted === undefined) return
+    setPendingDelete(null)
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -774,7 +847,9 @@ export function TeamAction({
                     const personaPending = pendingTasks.has(`persona:${member.id}`)
                     const renamePending = pendingTasks.has(`rename:${member.id}`)
                     const avatarPending = pendingTasks.has(`avatar:${member.id}`)
-                    const identityBusy = personaPending || renamePending || avatarPending
+                    const deletePending = pendingTasks.has(`delete:${member.id}`)
+                    const identityBusy = personaPending || renamePending || avatarPending || deletePending
+                    const confirmPending = pendingDelete === member.id
                     return (
                       <div
                         key={member.id}
@@ -871,9 +946,18 @@ export function TeamAction({
                             t={t}
                           />
                         )}
+                        {canEditIdentity && confirmPending && (
+                          <DeleteConfirmForm
+                            pending={deletePending}
+                            onConfirm={() => { void confirmDelete(member) }}
+                            onCancel={cancelDelete}
+                            t={t}
+                          />
+                        )}
                         {canEditIdentity && editingRename !== member.id
                           && editingAvatar !== member.id
-                          && editingPersona !== member.id && (
+                          && editingPersona !== member.id
+                          && !confirmPending && (
                           <div className={css.identityActions}>
                             <button
                               type="button"
@@ -901,6 +985,15 @@ export function TeamAction({
                               onClick={() => { startEditPersona(member) }}
                             >
                               <IconEditOutline16 size={13} /> {t('editPersona')}
+                            </button>
+                            <button
+                              type="button"
+                              className={css.deleteBotButton}
+                              disabled={identityBusy}
+                              data-team-delete={member.id}
+                              onClick={() => { startDelete(member) }}
+                            >
+                              <IconTrashOutline16 size={13} /> {t('deleteBot')}
                             </button>
                           </div>
                         )}
@@ -1247,6 +1340,47 @@ function PersonaForm({
       <div className={css.formActions}>
         <button type="button" disabled={pending} onClick={onSave}>{t('save')}</button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface DeleteConfirmFormProps {
+  pending: boolean
+  onConfirm: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Explicit Client delete confirmation (FR-007 / data-model pending-confirm).
+ * Host `deleteBot` runs only on confirm; cancel returns to idle unchanged.
+ * Transcript/mailbox wipe is not required for Pass (clarify lock 5).
+ */
+function DeleteConfirmForm({
+  pending, onConfirm, onCancel, t,
+}: DeleteConfirmFormProps) {
+  return (
+    <div className={css.form} data-team-delete-confirm role="group" aria-label={t('deleteBot')}>
+      <p className={css.hint}>{t('deleteConfirmHint')}</p>
+      <div className={css.formActions}>
+        <button
+          type="button"
+          className={css.confirmDeleteButton}
+          disabled={pending}
+          data-team-confirm-delete
+          onClick={onConfirm}
+        >
+          {t('confirmDelete')}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          data-team-cancel-delete
+          onClick={onCancel}
+        >
+          {t('cancel')}
+        </button>
       </div>
     </div>
   )

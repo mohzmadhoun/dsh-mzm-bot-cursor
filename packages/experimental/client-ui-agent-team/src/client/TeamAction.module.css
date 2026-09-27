@@ -177,6 +177,25 @@
   cursor: pointer;
 }
 
+.deleteBotButton {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 0;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.confirmDeleteButton {
+  color: var(--dsw-alias-state-error-primary);
+}
+
 .identityActions {
   display: flex;
   flex-wrap: wrap;
@@ -319,6 +338,15 @@
 }
 
 .personaButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.deleteBotButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover-danger);
+}
+
+.deleteBotButton:disabled {
   opacity: 0.45;
   cursor: default;
 }
