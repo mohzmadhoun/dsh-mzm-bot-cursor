@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -65,6 +65,7 @@ async function bench(options: {
     unassignedBotIds: [SESSION],
     handoffs: [],
     skills: [],
+    routines: [],
   }
   ctx.provide('remote.agentTeams', {
     view: (...args: unknown[]) => {
@@ -294,6 +295,31 @@ async function bench(options: {
           },
         })
     },
+    createRoutine: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/createRoutine', args })
+      return Promise.resolve(options.remoteFailure === 'createRoutine'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              routine: {
+                routineId: 'routine-1',
+                botId: CHILD,
+                identity: 'Ping',
+                intent: 'Ping',
+                scheduleExpr: '@every 5m',
+                scheduleLabel: 'Every 5m',
+                status: 'active' as const,
+                lastRunAt: null,
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -429,6 +455,11 @@ describe('ui-team browser plugin', () => {
       displayName: 'My playbook',
       instructionalBody: 'Follow this authored playbook.',
     })).ok).toBe(true)
+    expect((await actions.createRoutine(SESSION, {
+      botId: CHILD,
+      intent: 'Ping',
+      scheduleExpr: '@every 5m',
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -450,6 +481,7 @@ describe('ui-team browser plugin', () => {
       'agentTeams/assignSection',
       'agentTeams/attachSkill',
       'agentTeams/upsertUserSkill',
+      'agentTeams/createRoutine',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -491,6 +523,11 @@ describe('ui-team browser plugin', () => {
     expect(b.calls[10]?.args[1]).toEqual({
       displayName: 'My playbook',
       instructionalBody: 'Follow this authored playbook.',
+    })
+    expect(b.calls[11]?.args[1]).toEqual({
+      botId: CHILD,
+      intent: 'Ping',
+      scheduleExpr: '@every 5m',
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 

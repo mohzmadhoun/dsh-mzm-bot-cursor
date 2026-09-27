@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, discover Host skill catalog summaries, make skills available to attach, attach skills onto a specific bot’s skills surface with run/active indication, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, discover Host skill catalog summaries, make skills available to attach, attach skills onto a specific bot’s skills surface with run/active indication, create Host cron routines on a bot via `agentTeams/createRoutine`, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -67,6 +67,10 @@ Opening the panel loads `TeamView.skills` from Host `agentTeams/view` (managed t
 
 Each teammate card exposes a **Bot skills** surface driven by Host `skillAttachments` on that member (global catalog alone is not enough). **Attach skill** calls Host `agentTeams/attachSkill` with a catalog skill that is available-to-attach; the attachment appears only on that bot. **Run** is a dedicated control that marks the attached skill session-active on that bot’s surface (clarify lock 4 / FR-004) — Pass does not require matching LLM reply text. When Host is unavailable or rejects attach, the panel shows a clear failure and leaves prior attachments unchanged. Electron Main does not own attachment records.
 
+### Create a cron routine on a bot
+
+Each teammate card exposes a **Bot routines** surface projected from Host `TeamView.routines` for that `botId` only (SC-006). **New routine** opens intent + product-supported schedule fields and calls Host Remote `agentTeams/createRoutine` over authenticated HTTP/WS — not Electron Main IPC. Empty intent or schedule show a clear Client reject; Host rejections leave the list unchanged. Confirm is optional (SC-007); identity may derive from intent (no separate display-name field). Success reloads the Team view so the active routine appears on that bot. Electron Main does not own the routine catalog.
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -90,7 +94,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine bot surface, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |

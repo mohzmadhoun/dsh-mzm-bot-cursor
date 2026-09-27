@@ -15,7 +15,7 @@ import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
-  type TeamCreateBotActionResult,
+  type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
@@ -73,6 +73,7 @@ const view: TeamView = {
       description: 'Thin managed skill for Skills UX Pass',
     },
   ],
+  routines: [],
 }
 
 function taskSuccess(value: TeamTask): TeamTaskActionResult {
@@ -227,6 +228,26 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
             displayName: 'My playbook',
             source: 'user' as const,
             description: 'My playbook',
+          },
+        },
+      },
+    }),
+    createRoutine: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          routine: {
+            routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+            botId: 'worker-id' as SessionId,
+            identity: 'Ping status',
+            intent: 'Ping status',
+            scheduleExpr: '@every 5m',
+            scheduleLabel: 'Every 5m',
+            status: 'active' as const,
+            lastRunAt: null,
+            createdAt: 1,
+            updatedAt: 1,
           },
         },
       },
@@ -2602,6 +2623,168 @@ describe('TeamAction', () => {
     expect(document.querySelector(
       `[data-team-bot-skill="${userSkillId}"]`,
     )?.getAttribute('data-skill-active')).toBe('true')
+  })
+
+
+  it('creates a Host routine in bot context without confirm (T017 / SC-007)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const createdRoutine = {
+      routineId: 'routine-created' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Summarize inbox',
+      intent: 'Summarize inbox',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, routines: [createdRoutine] },
+      })
+    const createRoutine = vi.fn((): Promise<TeamCreateRoutineActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { routine: createdRoutine } },
+    }))
+    render(<TeamAction {...props(actions({ load, createRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.botRoutinesEmpty)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.createRoutine }))
+    expect(screen.getByText(zh.createRoutineHint)).toBeTruthy()
+    expect(screen.getByText(zh.routineCreateReject)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(zh.routineIntent), {
+      target: { value: 'Summarize inbox' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.routineSchedule), {
+      target: { value: '@every 5m' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(createRoutine).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        intent: 'Summarize inbox',
+        scheduleExpr: '@every 5m',
+      })
+    })
+    expect(await screen.findByText('Summarize inbox')).toBeTruthy()
+    expect(document.querySelector('[data-team-routine-status="active"]')).toBeTruthy()
+    expect(screen.queryByText(zh.botRoutinesEmpty)).toBeNull()
+  })
+
+  it('shows Host createRoutine rejection without inventing a listed routine (T017)', async () => {
+    const createRoutine = vi.fn((): Promise<TeamCreateRoutineActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'scheduleExpr must be non-empty' },
+      },
+    }))
+    render(<TeamAction {...props(actions({ createRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    await screen.findByText(zh.botRoutinesEmpty)
+    fireEvent.click(screen.getByRole('button', { name: zh.createRoutine }))
+    fireEvent.change(screen.getByLabelText(zh.routineIntent), {
+      target: { value: 'Bad schedule try' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.routineSchedule), {
+      target: { value: '@every 5m' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('scheduleExpr must be non-empty (team-rejected)')).toBeTruthy()
+    expect(screen.getByText(zh.botRoutinesEmpty)).toBeTruthy()
+  })
+
+  it('keeps prior routines and shows failure when createRoutine transport is unavailable (T017)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const existing = {
+      routineId: 'routine-existing' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Keep me',
+      intent: 'Keep me',
+      scheduleExpr: '@hourly',
+      scheduleLabel: 'Every hour',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, routines: [existing] },
+    })
+    const createRoutine = vi.fn((): Promise<TeamCreateRoutineActionResult> => Promise.resolve(
+      remoteFailure('createRoutine offline'),
+    ))
+    render(<TeamAction {...props(actions({ load, createRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Keep me')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.createRoutine }))
+    fireEvent.change(screen.getByLabelText(zh.routineIntent), {
+      target: { value: 'Another' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.routineSchedule), {
+      target: { value: '@daily' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('createRoutine offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByText('Keep me')).toBeTruthy()
+  })
+
+  it('lists only the selected bot’s Host routines after create (T017 / SC-006)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const otherId = 'other-id' as SessionId
+    const onWorker = {
+      routineId: 'routine-a' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Worker only',
+      intent: 'Worker only',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const onOther = {
+      ...onWorker,
+      routineId: 'routine-b' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: otherId,
+      identity: 'Other bot routine',
+      intent: 'Other bot routine',
+    }
+    const loaded: TeamView = {
+      ...view,
+      members: [
+        ...view.members,
+        {
+          id: otherId,
+          name: 'other',
+          role: 'teammate',
+          status: 'inactive',
+          model: 'model-b',
+          modelSelection: { provider: 'fixture', model: 'model-b' },
+          diagnostics: [],
+        },
+      ],
+      unassignedBotIds: [...view.unassignedBotIds, otherId],
+      routines: [onWorker, onOther],
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true, value: loaded }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Worker only')).toBeTruthy()
+    expect(screen.getByText('Other bot routine')).toBeTruthy()
+    const workerList = document.querySelector(`[data-team-bot-routines-list="${workerId}"]`)
+    const otherList = document.querySelector(`[data-team-bot-routines-list="${otherId}"]`)
+    expect(workerList?.textContent).toContain('Worker only')
+    expect(workerList?.textContent).not.toContain('Other bot routine')
+    expect(otherList?.textContent).toContain('Other bot routine')
+    expect(otherList?.textContent).not.toContain('Worker only')
   })
 
 })

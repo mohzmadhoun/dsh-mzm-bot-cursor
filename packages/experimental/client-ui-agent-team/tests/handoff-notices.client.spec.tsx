@@ -40,6 +40,7 @@ const baseView: TeamView = {
   unassignedBotIds: [WORKER],
   handoffs: [],
   skills: [],
+  routines: [],
 }
 
 function props(
