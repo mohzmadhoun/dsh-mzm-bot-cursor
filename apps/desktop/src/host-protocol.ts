@@ -9,6 +9,8 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * payloads are not members and must not be added; that traffic stays on the authenticated Host HTTP/WS
  * data plane (Agent Teams + session/agent streams and session-log finals for Client `ui-chat`;
  * `contracts/chat-progress-final.md`).
+ * Identity / persona / section / avatar / rename / bot-delete payloads are also not members and
+ * must not be added — Host Agent Teams owns that durable store (research R1 / T010).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',
@@ -19,7 +21,8 @@ export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
 
 /**
  * Main→Child control `type` values sent on the Host Node IPC channel.
- * There is no mailbox or bot-message control type on this channel.
+ * There is no mailbox, bot-message, identity, persona, section, or bot-delete control type
+ * on this channel.
  */
 export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
 
