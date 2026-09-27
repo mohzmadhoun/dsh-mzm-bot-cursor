@@ -1,0 +1,66 @@
+Verdict: Pass
+Stamp: 2026-09-27 · tip 4d2eb47840 (#132 T029–T030 Client authoring on master) · desktop start:desktop (DISPLAY=:1)
+Branch: cursor/p3-sc003-scenario3-stamp-fe1d
+Linear: MOH-178 (recipe) · Epic MOH-142
+SC-003: Pass — evidence: evidence/scenario-3/{01-reject-empty,02-author-save,03-discovery-authored}.* + scenario-3-walkthrough.mp4
+FR-012: desktop screenshots/recording present; not unit/jsdom-only
+FR-013: empty name/body rejected with clear reason; not listed as incomplete saved skill
+Blockers: none
+
+Acceptance (Scenario 3 / SC-003)
+--------------------------------
+[x] Step A — Reject empty save: create form blocks empty name and/or empty body with
+    clear user-visible reason; Save disabled; incomplete draft not listed as saved
+[x] Step B — Happy-path author: fixture displayName "MzM authored skill" +
+    instructionalBody "Follow the MzM authored-skill playbook for Pass." persist via
+    Host upsertUserSkill; Host filesystem SKILL.md matches fixture
+[x] Step C — Discovery: Skills library lists authored skill as source=user
+    (alongside managed mzm-thin-pack); Available to attach; not mis-sourced as managed
+[x] FR-012 real Desktop evidence (puppeteer CDP screenshots + ffmpeg x11grab mp4)
+
+Evidence (measured)
+-------------------
+Launch: pnpm run start:desktop on DISPLAY=:1 @ origin/master tip 4d2eb47840 (#132)
+CDP: http://127.0.0.1:9222 · driver /tmp/sc003-scenario3.mjs
+Artifacts (also /opt/cursor/artifacts/ and sc003-scenario3/):
+  01-reject-empty.png — empty name+body; reject alert; Save disabled
+  01b-reject-empty-name.png — empty name + fixture body; reject; Save disabled
+  01c-reject-empty-body.png — fixture name + empty body; reject; Save disabled
+  02-author-save.png — after save: MzM authored skill (User) Available to attach
+  03-discovery-authored.png — same discovery frame as 02 this capture set
+    (identical sha256; post-save library is the discovery observation)
+  scenario-3-walkthrough.mp4 — Desktop recording covering Steps A–C (~11s)
+  step-metrics.json — CDP DOM + Host filesystem persist observations
+  cdp-run.log — driver stdout ending PASS_SC003_DESKTOP
+  p3-sc003-host-upsert-vitest.log — Host upsertUserSkill supporting (8 passed)
+
+DOM / Host excerpts (measured):
+  Step A: rejectText present; saveDisabled=true for empty-both / empty-name / empty-body
+  Step B: authored id=mzm-authored-skill source=user name="MzM authored skill"
+          available=true; SKILL.md body contains fixture playbook line
+  Step C: user skill listed with source=user; thin pack source=managed distinct
+  Host vitest: 8 passed | 62 skipped (upsert / empty-author filter)
+
+Notes
+-----
+- Prior US3 Client gate left an edited name on disk; Step B upsert restored fixture
+  name+body (skillIdFromDisplayName → mzm-authored-skill). Discovery shows User label.
+- 02/03 duplicate frames noted (same as US3 Client evidence set); reject extras 01b/01c
+  cover recipe empty-name and empty-body cases.
+- No Electron Main skills bus (T013 still holds; not re-stamped here).
+- Attach/run of authored skill is Scenario 2 / supporting US3 IT — not SC-003 gate.
+
+Scope lock
+----------
+Does NOT stamp SC-001 / SC-002 / SC-004 / SC-005 / Scenario 1, 2, 4, 5.
+T031 recipe checkbox already [x]; this stamp fills product SC-003 Pass + FR-012 media.
+Leave Linear Done marking on MOH-142 / related US3 issues to PO after merge.
+
+PO embed paths (Standing Order 12)
+----------------------------------
+/opt/cursor/artifacts/01-reject-empty.png
+/opt/cursor/artifacts/01b-reject-empty-name.png
+/opt/cursor/artifacts/01c-reject-empty-body.png
+/opt/cursor/artifacts/02-author-save.png
+/opt/cursor/artifacts/03-discovery-authored.png
+/opt/cursor/artifacts/scenario-3-walkthrough.mp4

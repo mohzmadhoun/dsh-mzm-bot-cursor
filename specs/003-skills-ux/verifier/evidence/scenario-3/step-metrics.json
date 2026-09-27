@@ -1,0 +1,118 @@
+{
+  "stamp": "2026-09-27T17:20:04.970Z",
+  "tip": "4d2eb47840",
+  "tipNote": "origin/master ≥ 4d2eb47840 (#132 T029-T030 Client authoring on master)",
+  "launch": "pnpm run start:desktop",
+  "display": ":1",
+  "cdp": "9222",
+  "fixture": {
+    "displayName": "MzM authored skill",
+    "instructionalBody": "Follow the MzM authored-skill playbook for Pass."
+  },
+  "steps": {
+    "before": {
+      "skills": [
+        {
+          "id": "mzm-authored-skill",
+          "source": "user",
+          "name": "MzM authored skill (edited)",
+          "available": "false"
+        },
+        {
+          "id": "mzm-thin-pack",
+          "source": "managed",
+          "name": "MzM thin pack",
+          "available": "false"
+        }
+      ],
+      "createSkill": true
+    },
+    "reject": {
+      "emptyBoth": {
+        "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+        "saveDisabled": true,
+        "name": "",
+        "body": ""
+      },
+      "emptyName": {
+        "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+        "saveDisabled": true,
+        "name": "",
+        "body": "Follow the MzM authored-skill playbook for Pass."
+      },
+      "emptyBody": {
+        "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+        "saveDisabled": true,
+        "name": "MzM authored skill",
+        "body": ""
+      },
+      "incompleteListed": false,
+      "catalogDuringReject": [
+        {
+          "id": "mzm-authored-skill",
+          "source": "user",
+          "name": "MzM authored skill (edited)",
+          "available": "false"
+        }
+      ]
+    },
+    "author": {
+      "authored": {
+        "id": "mzm-authored-skill",
+        "source": "user",
+        "name": "MzM authored skill",
+        "available": "true"
+      },
+      "catalog": {
+        "skills": [
+          {
+            "id": "mzm-authored-skill",
+            "source": "user",
+            "name": "MzM authored skill",
+            "available": "true"
+          },
+          {
+            "id": "mzm-thin-pack",
+            "source": "managed",
+            "name": "MzM thin pack",
+            "available": "false"
+          }
+        ],
+        "createSkill": true
+      }
+    },
+    "persist": {
+      "skillMd": "/workspace/apps/desktop/.desktop-build/development/home/desktop-user-skills/mzm-authored-skill/SKILL.md",
+      "hasFixtureBody": true,
+      "hasFixtureName": true
+    },
+    "discovery": {
+      "user": {
+        "id": "mzm-authored-skill",
+        "source": "user",
+        "name": "MzM authored skill",
+        "available": "true"
+      },
+      "thin": {
+        "id": "mzm-thin-pack",
+        "source": "managed",
+        "name": "MzM thin pack",
+        "available": "false"
+      },
+      "all": [
+        {
+          "id": "mzm-authored-skill",
+          "source": "user",
+          "name": "MzM authored skill",
+          "available": "true"
+        },
+        {
+          "id": "mzm-thin-pack",
+          "source": "managed",
+          "name": "MzM thin pack",
+          "available": "false"
+        }
+      ]
+    }
+  }
+}
