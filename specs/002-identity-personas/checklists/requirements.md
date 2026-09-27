@@ -33,4 +33,5 @@
 
 - Validation iteration 1 (2026-09-27): All items pass against plan-locked P2 In/Out/Exit from `MzM-Docs/mzm-bot-plan.md` §4.
 - Defaults for job/voice/anti-jobs vocabulary and delete-with-confirm culture are recorded under Assumptions (inventory-backed); no clarification markers required for specify draft.
-- Ready for `/speckit-clarify` or `/speckit-plan` per PO/Lead gate.
+- Clarification session 2026-09-27: five plan-blocking answers integrated (instruction application, ADR path, avatar presets, Unassigned sections, delete vs transcript wipe). Re-validated: all checklist items remain pass; no `[NEEDS CLARIFICATION]` markers.
+- Ready for `/speckit-plan` per PO/Lead gate.
