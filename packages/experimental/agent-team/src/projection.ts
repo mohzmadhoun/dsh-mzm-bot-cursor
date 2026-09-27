@@ -6,6 +6,8 @@ invent a parallel identity store (T015 / FR-002 / FR-003).
 Post-active Host `renameBot` / `setAvatar` journal writes update `displayName`
 and preset avatar markers; `listMembers` / `agentTeams/view` re-read those
 fields for Client roster / sidebar / overview (T022 / FR-004 / FR-005).
+Host `deleteBot` appends an `active` → `deleted` tombstone (clears `sectionId`);
+Client roster / overview omit deleted rows (T026 / FR-008 / clarify lock 5).
 */
 
 import { z } from 'zod'
@@ -107,7 +109,7 @@ const teamMemberSnapshotSchema = z.object({
   sectionId: z.union([sidebarSectionIdSchema, z.null()]).optional(),
   provider: z.string(),
   context: z.enum(['fresh', 'fork']),
-  phase: z.enum(['provisioning', 'active', 'failed']),
+  phase: z.enum(['provisioning', 'active', 'failed', 'deleted']),
   error: z.string().optional(),
 }).strict() as z.ZodType<TeamMemberSnapshot>
 
@@ -304,6 +306,9 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
         } else if (prior.phase === 'active' && member.phase === 'active') {
           // Post-active Host identity mutations (rename / persona / avatar / section).
           // displayName, persona, avatar, sectionId, and description may change; modelSelection may not.
+        } else if (prior.phase === 'active' && member.phase === 'deleted') {
+          // Host delete tombstone (FR-008): clear section membership; other presentation
+          // fields may stay for audit. Transcript / mailbox rows are not rewritten here.
         } else {
           throw new Error(`teammate "${member.name}" has an invalid ${prior.phase} -> ${member.phase} transition`)
         }

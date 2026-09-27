@@ -1,8 +1,8 @@
 /** Serialized Team transactions over the exact live Lead Session log.
 
-Identity mutations (persona, avatar, displayName, section membership) persist by
-appending validated `team/member` payloads on this journal path — field semantics
-live in the projection; Electron Main must not invent a parallel store.
+Identity mutations (persona, avatar, displayName, section membership, delete)
+persist by appending validated `team/member` payloads on this journal path —
+field semantics live in the projection; Electron Main must not invent a parallel store.
 */
 
 import type { Agent } from '@deepseek-ai/dsh-agent'
