@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
-import { teamProjectionDefinition, projectSidebarSections } from '../src/projection.ts'
+import { teamProjectionDefinition, projectSidebarSections, projectSkillCatalog } from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
 import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
@@ -517,5 +517,58 @@ describe('Agent Teams projection events', () => {
       },
     } as unknown as SessionEvent
     expect(isEmptyState(projectTeam(ROOT, [inherited]))).toBe(true)
+  })
+})
+
+describe('projectSkillCatalog (T015)', () => {
+  it('maps thin-pack + bundled to managed and other sources to user', () => {
+    expect(projectSkillCatalog([
+      {
+        name: 'mzm-thin-pack',
+        description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+        source: 'bundled',
+      },
+      {
+        name: 'my-playbook',
+        description: 'User authored playbook',
+        source: 'user-dsh',
+      },
+      {
+        name: 'empty-desc',
+        description: '  ',
+        source: 'custom',
+      },
+    ])).toEqual([
+      {
+        id: 'mzm-thin-pack',
+        displayName: 'MzM thin pack',
+        source: 'managed',
+        description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+      },
+      {
+        id: 'my-playbook',
+        displayName: 'User authored playbook',
+        source: 'user',
+        description: 'User authored playbook',
+      },
+      {
+        id: 'empty-desc',
+        displayName: 'empty-desc',
+        source: 'user',
+      },
+    ])
+  })
+
+  it('forces thin-pack id to managed even when provider source is not bundled', () => {
+    expect(projectSkillCatalog([
+      { name: 'mzm-thin-pack', description: 'alt', source: 'custom' },
+    ])).toEqual([
+      {
+        id: 'mzm-thin-pack',
+        displayName: 'MzM thin pack',
+        source: 'managed',
+        description: 'alt',
+      },
+    ])
   })
 })

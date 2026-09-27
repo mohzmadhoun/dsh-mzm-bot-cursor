@@ -27,6 +27,7 @@ import type {
   HostMailboxMessage,
   SidebarSectionSnapshot,
   SidebarSectionView,
+  SkillCatalogSummary,
   TeamId,
   TeamMemberSnapshot,
   TeamMessageId,
@@ -529,4 +530,37 @@ export function projectMailboxHandoffs(
     if (handoff !== undefined) handoffs.push(handoff)
   }
   return handoffs
+}
+
+/** Provider skill summary fields consumed when projecting the Host product catalog (T015). */
+export interface SkillCatalogSourceEntry {
+  readonly name: string
+  readonly description: string
+  readonly source: string
+}
+
+/**
+ * Project Host `ctx.skills` (or equivalent) summaries into Client-readable catalog rows.
+ * Maps provider sources onto product `managed` | `user`; thin-pack id `mzm-thin-pack` is
+ * always `managed` with human-readable display `MzM thin pack` (FR-001 / discover-load).
+ * Electron Main must not invent catalog rows — call only with Host registry results.
+ * @param entries - winning skill summaries from the Host skills registry.
+ * @returns detached catalog summaries for Agent Teams / Desktop Web discovery.
+ */
+export function projectSkillCatalog(
+  entries: readonly SkillCatalogSourceEntry[],
+): readonly SkillCatalogSummary[] {
+  return entries.map((summary): SkillCatalogSummary => {
+    const managed = summary.source === 'bundled'
+      || summary.name === 'mzm-thin-pack'
+    const description = summary.description.trim()
+    return {
+      id: SkillId(summary.name),
+      displayName: managed && summary.name === 'mzm-thin-pack'
+        ? 'MzM thin pack'
+        : (description.length > 0 ? description : summary.name),
+      source: managed ? 'managed' : 'user',
+      ...(description.length > 0 ? { description } : {}),
+    }
+  })
 }

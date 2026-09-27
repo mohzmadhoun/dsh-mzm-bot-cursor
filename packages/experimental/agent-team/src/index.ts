@@ -21,11 +21,11 @@ import {
   type PersonaBindRef,
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
-import { projectMailboxHandoffs, projectSidebarSections, teamProjectionDefinition } from './projection.ts'
+import { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { SidebarSectionId, SkillId, TeamId, TeamTaskId } from './types.ts'
+import { SidebarSectionId, TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
   CreateBotInput,
@@ -99,7 +99,7 @@ export {
   HOST_MAILBOX_MESSAGE_SOURCE,
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
-export { projectMailboxHandoffs, projectSidebarSections } from './projection.ts'
+export { projectMailboxHandoffs, projectSidebarSections, projectSkillCatalog } from './projection.ts'
 export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -779,8 +779,51 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Project Host skill catalog summaries for Client discovery (T011).
-   * Maps filesystem/provider sources onto product `managed` | `user`.
+   * List Host skill catalog summaries for Desktop Web discovery (US1 / FR-001 / T015).
+   * Requires the Host skills registry (Desktop Host thin-pack mount). Fails loud when absent —
+   * no silent empty success (discover-load; Client T018 owns user-visible copy).
+   * @param caller - exact live Team member used as the authority credential.
+   * @param signal - cancellation for provider list.
+   * @returns managed thin pack + user-authored skills when present.
+   */
+  async listSkills(caller: Agent, signal: AbortSignal): Promise<readonly SkillCatalogSummary[]> {
+    this.roster.membership(caller)
+    const skills = this.ctx.get('skills')
+    if (skills === undefined) {
+      throw new TeamError(
+        'skill catalog is unavailable: Host skills registry is not mounted',
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    signal.throwIfAborted()
+    const summaries = await skills.list({ signal }) as ReadonlyArray<{
+      readonly name: string
+      readonly description: string
+      readonly source: string
+    }>
+    return projectSkillCatalog(summaries)
+  }
+
+  /**
+   * List Host skill catalog through the generated Remote API (US1 / T015).
+   * @param agent - exact live Team member authorizing the read.
+   * @param signal - Remote call cancellation.
+   * @returns catalog summaries or a typed Team rejection when the registry is absent.
+   */
+  @Remote('listSkills')
+  remoteListSkills(
+    agent: Agent,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<{ readonly skills: readonly SkillCatalogSummary[] }>> {
+    return this.botIdentityMutationResult(
+      this.listSkills(agent, signal).then(skills => ({ skills })),
+    )
+  }
+
+  /**
+   * Project Host skill catalog summaries for Client discovery (T011 / T015).
+   * Soft path for {@link remoteView}: empty when the skills service is absent
+   * (non-Desktop compositions). Prefer {@link listSkills} for discovery that must fail loud.
    * @param signal - cancellation for provider list.
    * @returns catalog rows, or `[]` when the skills service is absent.
    */
@@ -792,18 +835,7 @@ export class TeamService extends TypertRemoteService {
       readonly description: string
       readonly source: string
     }>
-    return summaries.map((summary): SkillCatalogSummary => {
-      const managed = summary.source === 'bundled'
-        || summary.name === 'mzm-thin-pack'
-      return {
-        id: SkillId(summary.name),
-        displayName: managed && summary.name === 'mzm-thin-pack'
-          ? 'MzM thin pack'
-          : (summary.description.trim().length > 0 ? summary.description : summary.name),
-        source: managed ? 'managed' : 'user',
-        ...(summary.description.trim().length > 0 ? { description: summary.description } : {}),
-      }
-    })
+    return projectSkillCatalog(summaries)
   }
 
   /**
