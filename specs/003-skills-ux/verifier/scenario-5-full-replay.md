@@ -1,6 +1,6 @@
 # Scenario 5 — Full Phase 3 Verifier replay (SC-005)
 
-**Status:** Recipe delivered (T036) — product SC-005 **not** stamped (await Scenario 1–3 Passes on one tip + foundational Pass; Scenario 3 Client stamp may still be open)
+**Status:** Product SC-005 **Pass** stamped 2026-09-27 — tip `c2a23b3321` (#135 on master) · evidence [evidence/scenario-5/VERDICT.txt](./evidence/scenario-5/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + composite evidence) · DH Runtime / Client (slice owners under Scenarios 1–3) · PO (scope)
 **Linear:** [MOH-183](https://linear.app/momadhoun/issue/MOH-183) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T036 — Verifier Scenario 5 recipe covering FR-012 / SC-005
@@ -18,7 +18,7 @@
 | Recipe present | This file documents the ordered FR-012 path + Pass/Fail + stamp template |
 | SC coverage | SC-005 composite: re-run Scenarios 1–3 on the **real desktop app** with FR-012 evidence |
 | Hard gate | Foundational Pass (T014) recorded Pass before product replay counts |
-| Product SC stamp | Deferred until Scenarios 1–3 product Passes hold on the same SHA and Verifier fills the stamp |
+| Product SC stamp | **Pass** — see `evidence/scenario-5/VERDICT.txt` (2026-09-27) |
 
 ---
 
@@ -240,4 +240,4 @@ LINEAR_STATUS: leave MOH-183 In Progress until PO merges (do not Done; do not me
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T036).** Product SC-005 Pass **not** stamped. Full Scenario 5 Done waits on Scenarios 1–3 product Passes on one tip (including Scenario 3 Client stamp when open), then Verifier re-run of the ordered path using the stamp template above.
+**Product SC-005 Pass stamped** on tip `c2a23b3321` (foundational T014 + Scenarios 1–4 + FR-012 desktop in one session). Evidence under [evidence/scenario-5/](./evidence/scenario-5/). Leave Linear Done on MOH-183 / Epic MOH-142 to PO after merge.

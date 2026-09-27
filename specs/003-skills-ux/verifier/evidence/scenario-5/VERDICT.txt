@@ -1,0 +1,98 @@
+VERDICT: Pass
+SC: SC-005
+SHA: c2a23b33215246222cfb0c0a86a3f91de095576c
+BRANCH: cursor/p3-sc005-full-replay-fe1d
+UTC: 2026-09-27T17:26:21Z
+OPERATOR: DH Verifier
+LINEAR: MOH-183 · Epic MOH-142
+RECIPE: specs/003-skills-ux/verifier/scenario-5-full-replay.md
+FOUNDATIONAL_T014: Pass
+SCENARIO_1: Pass
+SCENARIO_2: Pass
+SCENARIO_3: Pass
+NON_GOALS: Pass
+LIVE_DESKTOP: Pass
+EVIDENCE: evidence/scenario-5/
+CLAIM: measured
+DEFER_REASON: N/A
+BLOCKER: none
+SCOPE_OUT: full-catalog/learn-from-demo/plugin-skills/memory-UX/routines/MCP/Box-Shell/detach-as-Pass-gate/LLM reply adherence
+LINEAR_STATUS: leave MOH-183 / MOH-142 In Progress until PO merges (do not Done; do not merge)
+
+Acceptance (Scenario 5 / SC-005 / FR-012)
+----------------------------------------
+[x] Gate — Foundational Pass (T014) re-confirmed on tip c2a23b3321
+    measured: vitest-foundations.log (5 passed); vitest-attachSkill.log (1 passed);
+    thin-pack SKILL.md + playbook line; instruction-bind.md; on-disk managed dirs=1
+[x] Scenario 1 / SC-001 — discover MzM thin pack; make available-to-attach; leave/return
+    measured: s1-01/02/03 *.png · CDP metrics available=true
+[x] Scenario 2 / SC-002+SC-006 — attach on Sc2 Bot A; Bot B empty; Run → Active
+    measured: s2-01/02/03 *.png · step-metrics.json · SC-007 Host wiring in 05-instruction-assembly.txt
+    + vitest-sc007-wiring.log (1 passed). LLM replies not scored.
+[x] Scenario 3 / SC-003 — reject empty (both/name/body); author fixture; discovery source=user
+    measured: s3-01*.png · s3-02/03 *.png · Host SKILL.md persist
+[x] Scenario 4 / SC-004 — managedCount===1 (mzm-thin-pack only); non-goals spot-check green
+    measured: s4-01-discovery-managed-count.png · non-goals-spotcheck.log
+[x] Real Desktop FR-012 — puppeteer CDP on start:desktop DISPLAY=:1 + ffmpeg x11grab mp4
+    measured: scenario-5-walkthrough.mp4 · cdp-run.log ends PASS_SC005_DESKTOP
+
+Evidence (measured)
+-------------------
+Launch: pnpm run start:desktop on DISPLAY=:1 @ origin/master tip c2a23b3321 (#135 SC-003 merged)
+CDP: http://127.0.0.1:9222 · driver /tmp/sc005-full-replay.mjs
+Artifacts (also /opt/cursor/artifacts/):
+  s1-01-discovery-thin-pack.png
+  s1-02-available-to-attach.png
+  s1-03-leave-return.png
+  s2-01-attach-bot-a.png
+  s2-02-bot-b-not-attached.png
+  s2-03-run-active.png
+  s3-01-reject-empty.png
+  s3-01b-reject-empty-name.png
+  s3-01c-reject-empty-body.png
+  s3-02-author-save.png
+  s3-03-discovery-authored.png
+  s4-01-discovery-managed-count.png
+  scenario-5-walkthrough.mp4
+  step-metrics.json · cdp-run.log · replay-pointer.log
+  vitest-foundations.log · vitest-attachSkill.log · vitest-sc007-wiring.log
+  non-goals-spotcheck.log · 05-instruction-assembly.txt
+
+DOM / metrics excerpts (measured)
+---------------------------------
+SC-001: mzm-thin-pack source=managed name="MzM thin pack" available=true after load
+SC-002: Sc2 Bot A attached label="MzM thin pack"; active=true after Run
+SC-006: Sc2 Bot B hasThin=false empty=true attachmentIds=[]
+SC-003: rejectText present + saveDisabled for empty-both/name/body; authored id=mzm-authored-skill source=user
+SC-004: managedCount=1 managedIds=["mzm-thin-pack"]
+SC-007: Host vitest binds thin-pack body into assembly (wiring only)
+
+Notes
+-----
+- One Desktop session covers discover → attach/run → author (recipe preference).
+- SC-001 leave/return via Escape + reopen Agent Team (available restored). Full Electron
+  process restart not re-run in this composite; Host-durable attach already present on
+  Sc2 Bot A from prior session (measured persist). Per-scenario stamps on master cover restart.
+- No Electron skills bus (T013 foundations still Pass).
+- Out of Scope absences not required for Pass (T033/T038 spot-check).
+
+Scope lock
+----------
+Does NOT mark Linear Done on MOH-183 / MOH-142 — leave to PO after merge.
+Does NOT re-open US1–US4 implementation.
+
+PO embed paths (Standing Order 12)
+----------------------------------
+/opt/cursor/artifacts/s1-01-discovery-thin-pack.png
+/opt/cursor/artifacts/s1-02-available-to-attach.png
+/opt/cursor/artifacts/s1-03-leave-return.png
+/opt/cursor/artifacts/s2-01-attach-bot-a.png
+/opt/cursor/artifacts/s2-02-bot-b-not-attached.png
+/opt/cursor/artifacts/s2-03-run-active.png
+/opt/cursor/artifacts/s3-01-reject-empty.png
+/opt/cursor/artifacts/s3-01b-reject-empty-name.png
+/opt/cursor/artifacts/s3-01c-reject-empty-body.png
+/opt/cursor/artifacts/s3-02-author-save.png
+/opt/cursor/artifacts/s3-03-discovery-authored.png
+/opt/cursor/artifacts/s4-01-discovery-managed-count.png
+/opt/cursor/artifacts/scenario-5-walkthrough.mp4

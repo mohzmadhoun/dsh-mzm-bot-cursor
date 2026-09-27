@@ -1,0 +1,15 @@
+SC-007 instruction assembly wiring (Scenario 5 composite — wiring only; LLM replies not scored)
+=============================================================================================
+UTC: 2026-09-27
+TIP: c2a23b33215246222cfb0c0a86a3f91de095576c (#135 on master)
+CLAIM: measured (Host vitest)
+
+Observation
+-----------
+Host team.spec.ts case "binds attached skill instructional bodies into Bot instruction assembly (FR-014 / SC-007)"
+asserts attached thin-pack body is included in Bot A instruction assembly and Bot B remains clean (SC-006).
+
+Fixture body: Follow the MzM thin-pack playbook for Pass.
+Normative bind doc: specs/003-skills-ux/verifier/instruction-bind.md
+
+Desktop half for SC-007: Scenario 2 run/active UI measured in s2-03-run-active.png (no LLM reply scoring).

@@ -1,0 +1,14 @@
+=== NON-GOALS T033/T038 spot-check ===
+UTC: 2026-09-27T17:25:15Z
+SHA: c2a23b33215246222cfb0c0a86a3f91de095576c
+--- full catalog required? ---
+specs/003-skills-ux/verifier/scenario-4-thin-pack.md:58:| B1 | Full inventory §6 / site-playbook completeness **not** required | Absence does not Fail | Scenario Pass blocked on missing catalog theater | **measured** (docs) |
+--- learn-from-demo product path? ---
+OK: no learn-from-demo product hits
+--- plugin/connector skill Pass path? ---
+specs/003-skills-ux/verifier/scenario-5-full-replay.md:163:7. Fail immediately if any step required full catalog, learn-from-demo, plugin skills, memory UX, routines, MCP, Box/Shell, detach-as-Pass-gate, Electron skills bus, or LLM reply wording.
+specs/003-skills-ux/verifier/scenario-4-thin-pack.md:60:| B3 | Plugin / connector skills **not** required | Absence does not Fail | Scenario Pass blocked on plugin skills | **measured** (docs + spot-check) |
+specs/003-skills-ux/verifier/scenario-4-thin-pack.md:94:[ ] B3 — Plugin skills not required
+--- on-disk managed count ---
+1
+apps/desktop-host/managed-skills/mzm-thin-pack

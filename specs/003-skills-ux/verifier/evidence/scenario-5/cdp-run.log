@@ -1,0 +1,81 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
+=== SCENARIO 1 ===
+shot s1-01-discovery-thin-pack.png
+shot s1-02-available-to-attach.png
+shot s1-03-leave-return.png
+PASS_SC001 {
+  pass: true,
+  discover: {
+    id: 'mzm-thin-pack',
+    source: 'managed',
+    name: 'MzM thin pack',
+    available: 'false'
+  },
+  available: {
+    id: 'mzm-thin-pack',
+    source: 'managed',
+    name: 'MzM thin pack',
+    available: 'true'
+  }
+}
+=== SCENARIO 2 ===
+shot s2-01-attach-bot-a.png
+shot s2-02-bot-b-not-attached.png
+shot s2-03-run-active.png
+PASS_SC002 {
+  pass: true,
+  stepA: { attached: true, label: 'MzM thin pack', active: 'false' },
+  stepB: { hasThin: false, empty: true, attachmentIds: [] },
+  stepC: { active: 'true', hasActiveMark: true },
+  botA: 'bf5d7a12-8d78-45c4-8f3c-8fc24d307b13',
+  botB: '5c08c574-e488-4645-ad6a-bd27ea9021c8'
+}
+=== SCENARIO 3 ===
+shot s3-01-reject-empty.png
+shot s3-01b-reject-empty-name.png
+shot s3-01c-reject-empty-body.png
+shot s3-02-author-save.png
+shot s3-03-discovery-authored.png
+PASS_SC003 {
+  pass: true,
+  reject: {
+    emptyBoth: {
+      rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+      saveDisabled: true,
+      name: '',
+      body: ''
+    },
+    emptyName: {
+      rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+      saveDisabled: true,
+      name: '',
+      body: 'Follow the MzM authored-skill playbook for Pass.'
+    },
+    emptyBody: {
+      rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+      saveDisabled: true,
+      name: 'MzM authored skill',
+      body: ''
+    }
+  },
+  authored: {
+    id: 'mzm-authored-skill',
+    source: 'user',
+    name: 'MzM authored skill',
+    available: 'true'
+  },
+  persist: {
+    skillMd: '/workspace/apps/desktop/.desktop-build/development/home/desktop-user-skills/mzm-authored-skill/SKILL.md',
+    hasBody: true
+  }
+}
+=== SCENARIO 4 ===
+shot s4-01-discovery-managed-count.png
+PASS_SC004 {
+  pass: true,
+  managedCount: 1,
+  managedIds: [ 'mzm-thin-pack' ],
+  A2: true,
+  A3: true
+}
+PASS_SC005_DESKTOP

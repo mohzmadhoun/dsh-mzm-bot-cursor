@@ -1,0 +1,13 @@
+=== FOUNDATIONAL GATE T014 ===
+UTC: 2026-09-27T17:23:51Z
+SHA: c2a23b33215246222cfb0c0a86a3f91de095576c
+BRANCH: cursor/p3-sc005-full-replay-fe1d
+FOUNDATIONAL: Pass (vitest-foundations.log 5 passed; vitest-attachSkill.log 1 passed; thin-pack on disk; instruction-bind.md present)
+
+=== COMPOSITE DESKTOP FR-012 ===
+UTC: 2026-09-27T17:26:21Z
+LAUNCH: pnpm run start:desktop DISPLAY=:1 CDP=9222
+DRIVER: /tmp/sc005-full-replay.mjs → PASS_SC005_DESKTOP (cdp-run.log)
+SC-001: Pass · SC-002/006: Pass · SC-003: Pass · SC-004: Pass · NON-GOALS: Pass
+WALKTHROUGH: scenario-5-walkthrough.mp4
+NOTE: one Desktop session covering discover→attach/run→author; leave/return for SC1; Host-durable attach on Sc2 Bot A from prior session proves persist (full Electron restart not re-run in composite; per-scenario stamps already cover restart)

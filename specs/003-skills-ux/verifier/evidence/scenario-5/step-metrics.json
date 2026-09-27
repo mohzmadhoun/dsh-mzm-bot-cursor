@@ -1,0 +1,88 @@
+{
+  "stamp": "2026-09-27T17:25:16.354Z",
+  "tip": "c2a23b3321",
+  "tipNote": "origin/master @ c2a23b3321 (#135 SC-003 stamp merged)",
+  "launch": "pnpm run start:desktop (already running)",
+  "display": ":1",
+  "cdp": "9222",
+  "scenarios": {
+    "sc001": {
+      "pass": true,
+      "discover": {
+        "id": "mzm-thin-pack",
+        "source": "managed",
+        "name": "MzM thin pack",
+        "available": "false"
+      },
+      "available": {
+        "id": "mzm-thin-pack",
+        "source": "managed",
+        "name": "MzM thin pack",
+        "available": "true"
+      }
+    },
+    "sc002": {
+      "pass": true,
+      "stepA": {
+        "attached": true,
+        "label": "MzM thin pack",
+        "active": "false"
+      },
+      "stepB": {
+        "hasThin": false,
+        "empty": true,
+        "attachmentIds": []
+      },
+      "stepC": {
+        "active": "true",
+        "hasActiveMark": true
+      },
+      "botA": "bf5d7a12-8d78-45c4-8f3c-8fc24d307b13",
+      "botB": "5c08c574-e488-4645-ad6a-bd27ea9021c8"
+    },
+    "sc003": {
+      "pass": true,
+      "reject": {
+        "emptyBoth": {
+          "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+          "saveDisabled": true,
+          "name": "",
+          "body": ""
+        },
+        "emptyName": {
+          "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+          "saveDisabled": true,
+          "name": "",
+          "body": "Follow the MzM authored-skill playbook for Pass."
+        },
+        "emptyBody": {
+          "rejectText": "Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.",
+          "saveDisabled": true,
+          "name": "MzM authored skill",
+          "body": ""
+        }
+      },
+      "authored": {
+        "id": "mzm-authored-skill",
+        "source": "user",
+        "name": "MzM authored skill",
+        "available": "true"
+      },
+      "persist": {
+        "skillMd": "/workspace/apps/desktop/.desktop-build/development/home/desktop-user-skills/mzm-authored-skill/SKILL.md",
+        "hasBody": true
+      }
+    },
+    "sc004": {
+      "pass": true,
+      "managedCount": 1,
+      "managedIds": [
+        "mzm-thin-pack"
+      ],
+      "A2": true,
+      "A3": true
+    }
+  },
+  "botA": "bf5d7a12-8d78-45c4-8f3c-8fc24d307b13",
+  "botB": "5c08c574-e488-4645-ad6a-bd27ea9021c8"
+}
