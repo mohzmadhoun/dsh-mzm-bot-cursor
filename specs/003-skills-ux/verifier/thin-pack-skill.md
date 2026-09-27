@@ -1,6 +1,6 @@
 # Thin-pack skill — pick lock + T032 count measurement (FR-008 / SC-004)
 
-**Status:** Pick locked (T005) · Measurement path documented (T032) · Product Layer C filter landed in `projectSkillCatalog` — Desktop Scenario 4 stamp still Verifier-owned
+**Status:** Pick locked (T005) · Measurement path documented (T032) · Product Layer B filter in `projectSkillCatalog` · Desktop Scenario 4 / SC-004 Layer C **PASS** (`evidence/scenario-4/`)
 **Owners:** DH Verifier (this lock + Scenario 4) · DH Runtime (T006–T007 ship/mount; T032 Pass discovery filter) · DH Client/Web (discovery label) · PO (scope)
 **Linear:** T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152) · T032 [MOH-179](https://linear.app/momadhoun/issue/MOH-179) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T005 pick · T032 assert Pass environments list exactly one `source=managed` skill `mzm-thin-pack`
@@ -121,7 +121,7 @@ pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'exc
 
 **Runtime fix (this PR):** `projectSkillCatalog` omits non-thin-pack `bundled` rows from discovery. Office skills stay in `ctx.skills` for model invocation.
 
-**Verdict for T032 product count:** Layer B/unit path **measured** Pass. Desktop Scenario 4 stamp remains Verifier-owned — rerun Layer C and expect `managedCount === 1`.
+**Verdict for T032 product count:** Layer B/unit path **measured** Pass. Desktop Scenario 4 / Layer C **measured** Pass — `managedCount === 1` (`evidence/scenario-4/`).
 
 **Do not** treat office bundled rows as SC-001 Fail. **Do not** invent a second thin-pack skill to “fix” the count.
 
@@ -130,7 +130,7 @@ pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'exc
 | On-disk thin pack = 1 | **measured** (Layer A) |
 | SC-001 saw `managedCount=4` (office-*) | **measured** (evidence/scenario-1; historical) |
 | Product discovery filter (Layer B) | **measured** — Agent Teams T032 tests |
-| Desktop Scenario 4 exactly-one stamp | **inferred** open — Verifier Layer C |
+| Desktop Scenario 4 exactly-one stamp | **measured** Pass — `evidence/scenario-4/` (managedCount===1) |
 | Full inventory / learn-from-demo / plugins not required | **measured** via [non-goals.md](./non-goals.md) (docs absence) |
 
 GUI screenshot optional for Scenario 4 (docs/absence). FR-012 remains mandatory for Scenarios 1–3 and 5.
