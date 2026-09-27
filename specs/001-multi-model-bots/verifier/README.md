@@ -27,7 +27,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 |----------|------------|------------------------|----------------|------------|
 | **0** Topology handshake (gate) | Scenario 0 | [scenario-0-topology.md](./scenario-0-topology.md) | **Electron** + **Verifier** | SC-007 / FR-013 |
 | **1** In-app auth + clean dump | Scenario 1 | `scenario-1-credentials.md` (T037) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
-| **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018–T019) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
+| **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
 | **3** Host mailbox 1:1 | Scenario 3 | `scenario-3-mailbox.md` (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
@@ -42,7 +42,8 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T015** Bot ModelSelection bind | [t015-model-bind.md](./t015-model-bind.md) | **Runtime** + **Verifier** | FR-002 Host bind via `installModelSelection`; not SC-001/002 Pass |
 | **T016** Bot llm route + credentials | [t016-llm-route.md](./t016-llm-route.md) | **Runtime** + **Verifier** | FR-002 Host `ctx.llm` + credential resolve; Main invents neither bots nor routes |
 | **T017** Client create + assign-model UI | [t017-client-create-ui.md](./t017-client-create-ui.md) | **Electron/Client** + **Verifier** | FR-001 Client half + FR-007; not SC-001/002 Pass |
-| **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Verifier** (after this slice) + Client | FR-003 rule + Client messaging; SC-001/002 session Pass and TTFT stay T019 |
+| **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Verifier** + Client | FR-003 rule + Client messaging (T018 Pass); live SC-001/002 remain Verifier |
+| **T019** Clean-machine TTFT path (SC-001) | [scenario-2-multi-model.md](./scenario-2-multi-model.md#t019--clean-machine-ttft-path-sc-001) | **Spec** (path/fields) · **Verifier** (wall-clock) | Ordered path + recording fields; live timed run may be Deferred until Verifier measures |
 
 ## Fan-out policy
 
