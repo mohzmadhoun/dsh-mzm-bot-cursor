@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — Spec LGTM 2026-09-26 (experiment); auth locked in-app; P1 specify → `specs/001-multi-model-bots` |
-| **Date** | 2026-09-25 |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas open (MOH-88); Lead kickoff authorizes Spec Kit specify |
+| **Date** | 2026-09-25 (living §10 updated 2026-09-27) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
 | **Inputs** | `MzM-Docs/mzm-bot-initial-plan.md` · `docs/designs/mzbot-wedge-to-grok-like.md` · `.specify/memory/constitution.md` · MzM Bot Plan room freeze |
@@ -63,7 +63,7 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **Exit** | Constitution ratified; tooling present; this plan accepted |
 | **Status** | Done except acceptance of this plan |
 
-### P1 — Wedge A (next)
+### P1 — Wedge A (done on master)
 
 | | |
 |--|--|
@@ -71,15 +71,16 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **In** | Chat-only Host (sessions + llm adapters + tools registry **without** local shell backends); **user-initiated basic bot create**; per-bot model via Host isolate/`ctx.llm`; async 1:1 via **Host mailbox/inbox only**; **chat progress updates + final result delivery**; Electron shell UI sufficient for design success criteria; trust floor (below) |
 | **Out** | Box/Shell; MCP; group channels; voice; send-on-behalf; user machines; pixel Grok chrome; CreateAgent-from-peer; event-driven routines; 1Password connector; chat chrome beyond progress+final delivery |
 | **Exit (Verifier-provable)** | ≥2 bots, different models; real session without Alt-Tab for model reasons; recipient acts or handoff visible; TTFT multi-model team session < 30 min on clean machine (documented); Verifier re-runs that path on Electron |
-| **Pre-specify blocker** | Auth path **named and locked** (in-app) — cleared for specify once Spec LGTMs this plan |
+| **Status** | **Done** — epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37/p1-wedge-a-per-bot-models-11-messaging-electron-ui); specs under `specs/001-multi-model-bots`. **Deferred (non-blocking for P2):** SC-005 live desktop full replay (`verifier/evidence/scenario-5/VERDICT.txt` = Deferred; recipe present). |
 
-### P2 — Identity / personas
+### P2 — Identity / personas (current)
 
 | | |
 |--|--|
 | **In** | Job/voice/anti-jobs; rename/avatar; sidebar sections; delete-confirm; **ADR only** for agent vs user memory layers (no memory UX) |
 | **Out** | Memory productization (P5); skills library (P3) |
 | **Exit (Verifier-provable)** | User can create/rename/delete (with confirm) bots and edit job, voice, anti-jobs, avatar, sidebar section; anti-jobs persist on the profile and appear in bot overview; Verifier re-runs that path |
+| **Status** | Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) In Progress. Lead kickoff ([MOH-89](https://linear.app/momadhoun/issue/MOH-89/p2-lead-kickoff-phase-gate)) authorizes Spec Kit **specify** only — **new** `specs/` feature dir; do **not** rewrite `specs/001-multi-model-bots`. |
 
 ### P3 — Skills UX
 
@@ -200,7 +201,9 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 1. ~~**@DH Spec** re-reads v0.3 — LGTM~~ **DONE** 2026-09-26 — Spec LGTM; P1 specify at `specs/001-multi-model-bots`.
 2. ~~Mohammed ship/no-ship on auth~~ **DONE** — in-app primary.
 3. ~~`/speckit-specify` for P1 only~~ **DONE** (branch `cursor/p1-specify-92fa`).
-4. Next: clarify → plan → tasks → Linear (DeepSeek Harness - Cursor / MOH-37); Electron/Runtime only after topology handshake Verifier pass.
+4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** SC-005 live Desktop full replay remains **Deferred** (recipe + stubs on master; does **not** block P2 specify).
+5. **Current — P2 Identity / personas (MOH-88):** Lead kickoff **authorizes** DH Spec Spec Kit **`specify` only** ([MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas)). New feature directory under `specs/` (suggested slug `002-identity-personas`); **do not** overwrite `001-multi-model-bots`. Scope locked to §4 P2 In/Out.
+6. After specify lands: clarify → plan → tasks → analyze → `taskstoissues` on **DeepSeek Harness - Cursor** only; Architect seam map after specify; Electron/Runtime only after Spec+Architect gates for P2.
 
 ---
 
