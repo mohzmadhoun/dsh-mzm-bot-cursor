@@ -1,0 +1,52 @@
+Verdict: Pass
+Stamp: 2026-09-27 · tip 8e372d3800 (≥ f79a658fb8 / #124 Client+Host US2 on master) · desktop start:desktop (DISPLAY=:1)
+Branch: cursor/p3-sc002-scenario2-stamp-fe1d
+Linear: MOH-173 · Epic MOH-142
+SC-002: Pass — evidence: evidence/scenario-2/{01-attach-bot-a,03-run-active,04-post-reload-attach}.png + scenario-2-walkthrough.mp4
+SC-006: Pass — evidence: evidence/scenario-2/02-bot-b-not-attached.png (+ post-reload B still empty)
+SC-007: Pass — wiring only (assembly contains thin-pack body); LLM replies not scored
+FR-012: desktop screenshots/recording present; not unit/jsdom-only
+Blockers: none
+
+Acceptance (Scenario 2 / SC-002 + SC-006 + SC-007)
+---------------------------------------------------
+[x] Step A — Attach on Sc2 Bot A: MzM thin pack / mzm-thin-pack on that bot’s skills surface
+[x] Step B — Isolation: Sc2 Bot B shows no skills attached solely from A’s attach
+[x] Step C — Run/active on A (dedicated Run → Attached ✓ Active); after full Desktop restart,
+    A still attached (run history not required; active resets session-locally)
+[x] Step D — Instruction assembly wiring: Host vitest proves Bot A assemble contains
+    "Follow the MzM thin-pack playbook for Pass."; Bot B does not (SC-006). LLM replies not scored.
+[x] FR-012 real Desktop evidence (puppeteer CDP screenshots + ffmpeg x11grab mp4)
+
+Evidence (measured)
+-------------------
+Launch: pnpm run start:desktop on DISPLAY=:1 @ master tip f79a658fb8
+Bots: Sc2 Bot A = bf5d7a12-8d78-45c4-8f3c-8fc24d307b13 ·
+      Sc2 Bot B = 5c08c574-e488-4645-ad6a-bd27ea9021c8
+Artifacts (also /opt/cursor/artifacts/sc002-scenario2/ and p3-sc002-*):
+  01-attach-bot-a.png — Sc2 Bot A skills surface shows MzM thin pack Attached
+  02-bot-b-not-attached.png — Sc2 Bot B "No skills attached yet"
+  03-run-active.png — Sc2 Bot A Attached ✓ Active after Run
+  04-post-reload-attach.png — After Electron restart; A still Attached; B still empty
+  05-instruction-assembly.txt — SC-007 Host wiring observation + vitest citation
+  scenario-2-walkthrough.mp4 — Desktop recording covering Steps A–C
+  step-metrics.json · bot-ids.json · p3-sc002-host-sc007-vitest.log
+
+DOM / metrics excerpts (measured):
+  Step A: botA.attached=true label="MzM thin pack"
+  Step B: botB.hasThin=false empty=true attachmentIds=[]
+  Step C: botA.active="true" hasActiveMark=true
+  Step C post-reload: botAAttached=true label="MzM thin pack"; botBHasThin=false botBEmpty=true
+  Host SC-007 vitest: 4 passed (attach persist + bind A contains body / B clean)
+
+Notes
+-----
+- Attach Demo Bot from prior US2 Client gate remains in roster; Scenario 2 Pass uses Sc2 Bot A/B.
+- Session-active mark is Client-local across process restart; Host-durable attachment on A is the
+  FR-005 persist half (contract: attachment remains; run history not required).
+- No Electron Main skills bus (T013 still holds).
+
+Scope lock
+----------
+Does NOT stamp SC-001 / SC-003…SC-005 / Scenario 1, 3–5.
+T026 recipe checkbox already [x]; this stamp fills product SC Pass + FR-012 media.

@@ -1,0 +1,18 @@
+SC-007 instruction assembly wiring (Scenario 2 Step D)
+Stamp tip: f79a658fb8 (master merge of #124)
+Greppable body: Follow the MzM thin-pack playbook for Pass.
+
+Thin-pack source (measured):
+6:Follow the MzM thin-pack playbook for Pass.
+
+Host vitest (measured) @ tip:
+  pnpm exec vitest run packages/experimental/agent-team/tests/{team,skill-bind}.spec.ts \
+    -t 'binds attached skill instructional|composeSkillInstructions|registers skill-instructions|persists attachSkill'
+  → 4 passed | 65 skipped
+  - persists attachSkill, projects skillAttachments on view…
+  - binds attached skill instructional bodies into Bot instruction assembly (FR-014 / SC-007)
+    Assert: Bot A assemble contains thin-pack body; Bot B assemble does NOT (SC-006).
+  - composeSkillInstructions / registers skill-instructions…
+
+Desktop (measured): Bot A attached mzm-thin-pack; Bot B empty — see 01/02/04 screenshots.
+LLM assistant reply wording: NOT scored (clarify lock 5).
