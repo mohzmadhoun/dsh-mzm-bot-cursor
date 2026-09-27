@@ -2,7 +2,12 @@
 
 import type { IpcMainInvokeEvent } from 'electron'
 
-/** IPC channel names kept private to the desktop application bundle. */
+/**
+ * IPC channel names kept private to the desktop application bundle.
+ * Channels cover boot, updates, theme, and Windows chrome only.
+ * There is no mailbox, bot-message, or agent-chat channel — Host Agent Teams owns that data plane
+ * over authenticated HTTP/WS after Node IPC `ready` (see `host-protocol.ts`).
+ */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
   bootFailed: 'dsh-desktop:boot-failed',

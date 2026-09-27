@@ -10,7 +10,7 @@
 
 **Linear**: Epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37) · Tasks issue [MOH-44](https://linear.app/momadhoun/issue/MOH-44) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-taskstoissues` (not this file)
 
-**Branch**: `cursor/p1-tasks-92fa` (stacked on `cursor/p1-specify-92fa`)
+**Branch**: `cursor/p1-analyze-92fa` (from `cursor/p1-tasks-92fa`; stacked on specify tip)
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -36,7 +36,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `architecture.md`, `quickstart.md`, `contracts/*`) under `specs/001-multi-model-bots/` and point implementers at [contracts/README.md](./contracts/README.md)
 - [ ] T002 [P] Inventory Shell↔Host spawn/IPC/document surfaces in `apps/desktop/src/host-process.ts`, `apps/desktop/src/host-protocol.ts`, `apps/desktop/src/ipc.ts`, `apps/desktop/src/web-document.ts`, and `apps/desktop-host/src/index.ts` against [contracts/topology-handshake.md](./contracts/topology-handshake.md)
-- [ ] T003 [P] Inventory Host reuse touch points for P1: `packages/core/agent/src/model-selection.ts`, `packages/experimental/agent-team/src/{types,roster,mailbox,index}.ts`, `packages/experimental/agent-team-profile/cordis.patch.yml`, `packages/credentials/credentials-local/`, `packages/client/ui-settings-models/src/client/`, `packages/client/ui-chat/`, `packages/experimental/client-ui-agent-team/`
+- [x] T003 [P] Inventory Host reuse touch points for P1: `packages/core/agent/src/model-selection.ts`, `packages/experimental/agent-team/src/{types,roster,mailbox,index}.ts`, `packages/experimental/agent-team-profile/cordis.patch.yml`, `packages/credentials/credentials-local/`, `packages/client/ui-settings-models/src/client/`, `packages/client/ui-chat/`, `packages/experimental/client-ui-agent-team/`
 - [ ] T004 Create Verifier recipe directory `specs/001-multi-model-bots/verifier/README.md` listing Scenario 0–5 owners (Electron / Verifier / Runtime / Client) mapped to [quickstart.md](./quickstart.md)
 
 ---
@@ -58,9 +58,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Shared Host / composition foundations
 
-- [ ] T009 Mount experimental Agent Teams for P1 Desktop Host composition via `packages/experimental/agent-team-profile/` (+ `packages/experimental/agent-team-web-profile/` if Client panel required) into `$DSH_HOME/profiles/desktop` / Desktop Host packaging paths under `apps/desktop/` / `apps/desktop-host/` — mailbox only; do not productize task board (research R9)
-- [ ] T010 [P] Confirm P1 desktop Host remains chat-oriented without local Shell/Box backends for acceptance in Desktop profile composition under `apps/desktop/` / `apps/desktop-host/` and `packages/bundle/` (FR-010); document non-goal absence check in `specs/001-multi-model-bots/verifier/non-goals.md`
-- [ ] T011 [P] Confirm in-app credentials primary path uses Host `ctx.credentials` + `packages/credentials/credentials-local/` under `$DSH_HOME` with no secret IPC in `apps/desktop/src/preload-*.ts` / `apps/desktop/src/ipc.ts` (FR-008/009; research R4)
+- [x] T009 Mount experimental Agent Teams for P1 Desktop Host composition via `packages/experimental/agent-team-profile/` (+ `packages/experimental/agent-team-web-profile/` if Client panel required) into `$DSH_HOME/profiles/desktop` / Desktop Host packaging paths under `apps/desktop/` / `apps/desktop-host/` — mailbox only; do not productize task board (research R9)
+- [x] T010 [P] Confirm P1 desktop Host remains chat-oriented without local Shell/Box backends for acceptance in Desktop profile composition under `apps/desktop/` / `apps/desktop-host/` and `packages/bundle/` (FR-010); document non-goal absence check in `specs/001-multi-model-bots/verifier/non-goals.md`
+- [x] T011 [P] Confirm in-app credentials primary path uses Host `ctx.credentials` + `packages/credentials/credentials-local/` under `$DSH_HOME` with no secret IPC in `apps/desktop/src/preload-*.ts` / `apps/desktop/src/ipc.ts` (FR-008/009; research R4)
 - [ ] T012 Close Architect runtime gap: extend teammate spawn so each bot receives its own LLM `ModelSelection` / `agentOptions` at create — update `packages/experimental/agent-team/src/types.ts` (`SpawnTeammateRequest`), `packages/experimental/agent-team/src/roster.ts`, and call sites so Electron Main never routes models ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
 - [ ] T013 [P] Ensure per-bot agent scope isolates model assignment and does not share another bot’s tool privilege by default via `packages/core/agent/` scope wiring and Team spawn (FR-011); tools in P1 acceptance MUST NOT send/post externally (FR-012) — document trust floor in `specs/001-multi-model-bots/verifier/trust-floor.md`
 

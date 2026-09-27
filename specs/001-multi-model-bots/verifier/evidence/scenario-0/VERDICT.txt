@@ -1,0 +1,10 @@
+VERDICT: Pass
+SC: SC-007
+SHA: 2632992bb393e608c601a424dfadc67e7cc98283
+UTC: 2026-09-26T22:50:18Z
+COMMAND: xvfb-run -a pnpm exec vitest run apps/desktop/tests/topology-handshake.spec.ts
+LOG: evidence/scenario-0/handshake.log
+TRACE: evidence/scenario-0/ready-auth.zip
+STDOUT: evidence/scenario-0/vitest.stdout.txt
+CRITERIA: 1-6 Pass
+CLAIM: measured (independent Verifier re-run under xvfb)

@@ -101,6 +101,10 @@ describe('desktop external plugin profile', () => {
     expect(manifest.dependencies.plugin).toBe('1.0.0')
     expect(manifest.dsh.profile.bundles).not.toContain('plugin')
     expect(manifest.dsh.profile.bundles).toContain('@deepseek-ai/dsh-web-app')
+    expect(manifest.dsh.profile.bundles).toEqual(expect.arrayContaining([
+      '@deepseek-ai/dsh-experimental-agent-team-profile',
+      '@deepseek-ai/dsh-experimental-agent-team-web-profile',
+    ]))
     await manager.applyRelease()
     expect(readFileSync(patch, 'utf8')).toContain('[]')
   })
@@ -170,7 +174,44 @@ describe('desktop external plugin profile', () => {
     await expect(manager.applyRelease()).resolves.toBeUndefined()
     await expect(manager.applyRelease()).resolves.toBeUndefined()
     expect(plugins(manager)).toEqual([])
-    expect(JSON.parse(readFileSync(join(manager.paths.profile, 'package.json'), 'utf8'))).toMatchObject({ dependencies: {} })
+    expect(JSON.parse(readFileSync(join(manager.paths.profile, 'package.json'), 'utf8'))).toMatchObject({
+      dependencies: {},
+      dsh: {
+        profile: {
+          bundles: [
+            '@deepseek-ai/dsh-base',
+            '@deepseek-ai/dsh-web-app',
+            '@deepseek-ai/dsh-experimental-agent-team-profile',
+            '@deepseek-ai/dsh-experimental-agent-team-web-profile',
+          ],
+        },
+      },
+    })
+  })
+
+  it('upgrades an existing Web-only desktop profile to mount Agent Teams layers', async () => {
+    const { manager } = setup()
+    mkdirSync(manager.paths.profile, { recursive: true })
+    writeFileSync(join(manager.paths.profile, 'package.json'), `${JSON.stringify({
+      name: 'dsh-profile-desktop',
+      private: true,
+      dependencies: {},
+      dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'] } },
+    }, undefined, 2)}\n`)
+    writeFileSync(join(manager.paths.profile, 'cordis.patch.yml'), '[]\n')
+    await manager.applyRelease()
+    expect(JSON.parse(readFileSync(join(manager.paths.profile, 'package.json'), 'utf8'))).toMatchObject({
+      dsh: {
+        profile: {
+          bundles: [
+            '@deepseek-ai/dsh-base',
+            '@deepseek-ai/dsh-web-app',
+            '@deepseek-ai/dsh-experimental-agent-team-profile',
+            '@deepseek-ai/dsh-experimental-agent-team-web-profile',
+          ],
+        },
+      },
+    })
   })
 
   it.skipIf(process.platform !== 'win32')('reuses the profile when the launch path changes only Windows letter casing', async () => {

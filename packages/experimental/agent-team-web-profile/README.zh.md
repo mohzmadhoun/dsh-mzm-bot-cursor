@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-`dsh-experimental-agent-team-web-profile` 是 [Agent Teams](../agent-team/README.zh.md) 公开发布的实验性 Web 层。把它放在 `@deepseek-ai/dsh-web-app` 与 [`@deepseek-ai/dsh-experimental-agent-team-profile`](../agent-team-profile/README.zh.md) 之后，即可在浏览器中显示 Team roster、任务板与 teammate 导航。移除任一实验层都会让稳定的 base 与 Web composition 保持不变。dsh 安装随附本包作为可选组合包，随附 Web profile 不会启用它；在开启 Host 层后可在 Web 侧栏的插件页开启。
+`dsh-experimental-agent-team-web-profile` 是 [Agent Teams](../agent-team/README.zh.md) 公开发布的实验性 Web 层。把它放在 `@deepseek-ai/dsh-web-app` 与 [`@deepseek-ai/dsh-experimental-agent-team-profile`](../agent-team-profile/README.zh.md) 之后，即可在浏览器中显示 Team roster、任务板与 teammate 导航。移除任一实验层都会让稳定的 base 与 Web composition 保持不变。dsh 安装随附本包作为可选组合包，随附 Web profile 模板不会启用它；在开启 Host 层后可在 Web 侧栏的插件页开启。Desktop Host 的 profile 会与 Host Agent Teams 层一起启用本层，以支持 P1 mailbox 可见性；任务板产品化仍延后。
 
 ## 目录
 
