@@ -1,0 +1,59 @@
+T020–T022 Host US2 attach / bind / projection — DH Verifier
+===========================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-27
+Branch: cursor/p3-us2-host-attach-fe1d @ ad83d6381e
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/121 (OPEN, MERGEABLE)
+Linear: MOH-167 (T020), MOH-168 (T021), MOH-169 (T022) — left In Progress (PO closes after merge)
+
+Rebase note
+-----------
+Tip ad83d6381e is 0 behind / 1 ahead of origin/master (ca46eb7a2b).
+master is ancestor of HEAD (merge-base --is-ancestor origin/master HEAD = OK).
+No rebase required.
+
+Acceptance (T020–T022 / Host product — not SC-002 / Scenario 2)
+---------------------------------------------------------------
+[x] T020 Host attachSkill: catalog-validated; appends per-bot skillAttachments
+    only (multi-attach OK; peers unchanged); fails loud when catalog missing
+    or skillId unknown.
+[x] T021 Candidate B bind: agent-teams:skill-instructions section sibling to
+    P2 persona; non-empty bodies present in assemble after attach; empty/missing
+    contribute no prose. Wiring only — LLM replies not scored.
+[x] T022 Per-bot attachments project on listMembers / agentTeams/view for
+    Client overview (no Electron Main store). projection.ts docs cite T022;
+    member schema already carried skillAttachments.
+
+Evidence (measured)
+-------------------
+Commands @ ad83d6381e:
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/skill-bind.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'composeSkillInstructions|bindTeammateSkillInstructions|persists attachSkill|binds attached skill instructional'
+  → 4 passed | 65 skipped (2 files)
+    - composeSkillInstructions() > joins non-empty trimmed bodies…
+    - bindTeammateSkillInstructions() > registers skill-instructions…
+    - Team Remote API > persists attachSkill, projects skillAttachments…
+    - Team Remote API > binds attached skill instructional bodies… (FR-014 / SC-007)
+
+Logs: p3-us2-host-t020-t022-vitest.log · p3-us2-host-t020-t022-vitest-verbose.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (origin/master...HEAD): 8 files, all under
+  packages/experimental/agent-team/{src,tests,README*} + specs/003-skills-ux/tasks.md
+  Zero Client UI / apps/desktop paths in this Host slice.
+
+Claims
+------
+- attachSkill bot-scoped + catalog gate + multi-attach + peer isolation: **measured**
+- Candidate B section name + assemble contains body post-attach; peer prompt clean: **measured**
+- listMembers / remoteView project skillAttachments: **measured**
+- Desktop Scenario 2 / SC-002 / Client T023+: **not run** (out of scope this gate)
+
+Scope lock
+----------
+Does NOT stamp SC-002 / SC-006 / SC-007 product Done or Scenario 2 desktop evidence.
+Does NOT gate Client T023+ or SC-001.
+CI rollup FAILURE/QUEUED noise on PR #121 not used as this Host Pass bar.
+Next: Client attach UI (T023+) + Scenario 2 desktop after PO merges #121.
