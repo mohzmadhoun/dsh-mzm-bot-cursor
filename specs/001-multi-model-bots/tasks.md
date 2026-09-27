@@ -138,7 +138,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T034 [P] [US4] Ensure preload/renderer never receive raw secrets: audit `apps/desktop/src/preload-*.ts` and `apps/desktop/src/ipc.ts` for absence of credential secret APIs ([contracts/in-app-credentials.md](./contracts/in-app-credentials.md))
 - [ ] T035 [US4] On missing credential for needed provider, direct user to in-app entry (not 1Password connector product flow) via `packages/client/ui-settings-models/src/client/` navigation; on invalid/revoked mid-session show clear failure + re-entry offer in that UI with no silent fallback to another bot’s credentials in Host resolve under `packages/credentials/`
 - [x] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
-- [ ] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets
+- [x] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets
 
 **Checkpoint**: US4 independently testable; unlocks clean SC-001/002 evidence with in-app primary auth
 
