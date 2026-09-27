@@ -13,3 +13,7 @@ CRITERIA: modelAssignmentsAreDistinct covers same pair, different model, differe
 DEFERRED: SC-001 wall-clock + live multi-provider session Pass remain T019. This file does not claim SC-002 session Pass.
 ENV: pnpm install --frozen-lockfile exited 1 at root postinstall because lefthook refused to replace core.hooksPath. vitest binary was already linked. First host run exited 1: MODULE_NOT_FOUND for gitignored native/system/packages/linux-x64/bin/glibc/system.node. native/system tree cf2bf0abfb5db04b77ee6540ed4c0e83e413e22d matches the checkout that already had that binary. Copied it and reran. Recorded host stdout is the rerun.
 CLAIM: measured (Verifier re-run at 8ab25122c764d6ba6aa926dd96eddb49ef845f97 in a detached worktree; GitHub Actions on PR #33 were not used)
+
+---
+T019 DOCS (SC-001 path + fields): Pass — see T019-DOCS-VERDICT.txt
+SC-001 LIVE WALL-CLOCK: Deferred — see TTFT.txt (not a T019 docs blocker; docs ≠ SC-001 Pass)

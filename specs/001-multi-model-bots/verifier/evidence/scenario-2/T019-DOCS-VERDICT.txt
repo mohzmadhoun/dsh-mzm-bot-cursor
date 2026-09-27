@@ -1,0 +1,18 @@
+VERDICT: Pass
+SLICE: T019 docs (SC-001 path + recording fields) — NOT SC-001 wall-clock Pass
+SHA: 187415b1751e039e6d8ed319a282f39c8f253b54
+UTC: 2026-09-27T08:35:13Z
+BRANCH: cursor/p1-t019-ttft-docs-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/37
+OPERATOR: Mohammed (DH Verifier)
+RECIPE: specs/001-multi-model-bots/verifier/scenario-2-multi-model.md#t019--clean-machine-ttft-path-sc-001
+
+CHECKLIST (measured on disk at SHA above):
+[x] Clean-machine ordered path present — steps 1–7 with T_START at step 1 and T_END at step 7; preconditions P1–P6 outside clock
+[x] SC-001 wall-clock recording fields present — T_START_UTC / T_END_UTC / TTFT_SECONDS (+ VERDICT/SC/SHA/BRANCH/OPERATOR/MACHINE/LAUNCH_MODE/TTFT_LIMIT_SECONDS/BOT_A/BOT_B/DISTINCT_CHECK/SESSION_NOTE/EVIDENCE/DEFER_REASON) and minimal stamp template
+[x] Pass/Fail/Deferred notes clear — Pass requires measured wall-clock; Deferred allowed; explicit “T019 docs alone are not SC-001 Pass”
+[x] tasks.md T019 checked — `- [x] T019`
+[x] README index row — Host API proofs T019 row + Scenario 2 index mentions T019 TTFT path documented
+
+LIVE_SC001: Deferred — see TTFT.txt (not a T019 docs blocker)
+CLAIM: measured (docs checklist only; no live Desktop timed run in this certification)
