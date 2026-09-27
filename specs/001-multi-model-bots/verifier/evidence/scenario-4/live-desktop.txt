@@ -1,7 +1,8 @@
 LIVE: Skipped
 SC: SC-004
-BRANCH: cursor/p1-t032-scenario4-92fa
-UTC: 2026-09-27T10:55:00Z
+BRANCH: cursor/p1-t032-sc004-stamp-92fa
+SHA: 8fa8148378037657b14cb0039a72855d97cd1392
+UTC: 2026-09-27T11:00:48Z
 OPERATOR: DH Verifier (Composer)
-REASON: T032 scope is recipe + evidence stubs only; live Desktop scripted chat not run. Optional criterion 6 remains Skipped/Deferred until Verifier runs after T030 lands.
+REASON: Optional criterion 6. Keyless composite criteria 1–4 green on this checkout; live Desktop scripted-chat observation not required for SC-004 keyless Pass per scenario-4-progress-final.md.
 RECIPE: specs/001-multi-model-bots/verifier/scenario-4-progress-final.md

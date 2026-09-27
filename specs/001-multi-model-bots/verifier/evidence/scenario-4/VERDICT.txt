@@ -1,19 +1,63 @@
-VERDICT: Deferred
+VERDICT: Pass
 SC: SC-004
-SHA: <fill on composite Pass after T030 lands>
-BRANCH: cursor/p1-t032-scenario4-92fa
-UTC: 2026-09-27T10:55:00Z
+SHA: 8fa8148378037657b14cb0039a72855d97cd1392
+BRANCH: cursor/p1-t032-sc004-stamp-92fa
+BASE: origin/master @ 8fa8148378 (includes T029 + T030 merge PR #60)
+UTC: 2026-09-27T11:00:48Z
 OPERATOR: DH Verifier (Composer; acting as Mohammed)
-LINEAR: MOH-77 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+LINEAR: MOH-77 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37 — leave Done
 RECIPE: specs/001-multi-model-bots/verifier/scenario-4-progress-final.md
-T029: Pass (measured on master — see evidence/t029-chat-progress/; not re-stamped here)
-T030: Deferred
-SHELL_PROGRESS_IPC: Pass (measured via T029 evidence on master)
-SHELL_FINAL_IPC: Deferred
-LIVE: Skipped
+NODE: v24.21.0
+VITEST: 4.1.8
+PRIOR: Deferred (T032 recipe stubs; T030 not on checkout) — superseded by this composite
+
+T029: Pass (measured)
+SHELL_PROGRESS_IPC: Pass (measured)
+T030: Pass (measured)
+SHELL_FINAL_IPC: Pass (measured)
+LIVE: Skipped (optional criterion 6; keyless gate Pass without it)
+
+CRITERIA:
+  1. ≥1 Host-stream progress before settlement — Pass (measured)
+  2. Shell MUST NOT invent chat-progress IPC — Pass (measured)
+  3. Session-log final after completion — Pass (measured)
+  4. Shell MUST NOT invent chat-final IPC — Pass (measured)
+  5. Optional mailbox attribution — Pass (measured; T030 linkedMailbox suites)
+  6. Live Desktop scripted chat — Skipped
+
+COMMANDS (composite; ./node_modules/.bin/vitest — pnpm exec hits lefthook postinstall refusal in this agent env):
+  T029_UI: packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts + chat-view.client.spec.tsx -t 'T029|Host-stream chat progress|Host assistant/live-chunk progress'
+    STDOUT: evidence/scenario-4/vitest-t029-ui-chat.log (Test Files 2 passed; Tests 2 passed | 161 skipped; EXIT:0)
+    VERBOSE: evidence/scenario-4/vitest-t029-ui-chat-verbose.log
+  T029_SHELL: apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts
+    STDOUT: evidence/scenario-4/vitest-t029-shell.log (Test Files 1 passed; Tests 3 passed; EXIT:0)
+    VERBOSE: evidence/scenario-4/vitest-t029-shell-verbose.log
+  T030_UI: conversation-node-definitions + chat-view + team-message-source -t 'T030|session log|linkedMailbox|mailbox attribution|cold-resume mailbox|mid-turn team-message'
+    STDOUT: evidence/scenario-4/vitest-t030-ui-chat.log (Test Files 3 passed; Tests 6 passed | 166 skipped; EXIT:0)
+    VERBOSE: evidence/scenario-4/vitest-t030-ui-chat-verbose.log
+  T030_SHELL: apps/desktop/tests/no-shell-chat-final-ipc.spec.ts
+    STDOUT: evidence/scenario-4/vitest-t030-shell.log (Test Files 1 passed; Tests 3 passed; EXIT:0)
+    VERBOSE: evidence/scenario-4/vitest-t030-shell-verbose.log
+
+PASSED_TESTS (measured):
+  T029: projects ≥1 Host assistant/live-chunk progress before assistant/message settles
+  T029: ChatView renders Host-stream chat progress (≥1 update) before turn settles
+  T029 shell ×3: DESKTOP_IPC lifecycle/chrome; rejects chat-progress names; Main/preload free of dsh-desktop chat-progress
+  T030: settled assistant/message final + cold-resume mailbox attribution
+  T030: mid-turn team-message steer → turn-tail linkedMailboxMessageId
+  T030: ChatView data-chat-final="session-log" + optional data-linked-mailbox-message-id
+  T030: omits linkedMailboxMessageId when not mailbox-caused
+  T030: readLinkedMailboxMessageId team-message / ordinary-user
+  T030 shell ×3: DESKTOP_IPC lifecycle/chrome; rejects chat-final names; Main/preload free of dsh-desktop chat-final
+
+SOURCE_SPOTCHECK (measured):
+  - rg apps/desktop/src: no dsh-desktop:(chat-progress|chat-final|assistant-final|final-result|turn-complete)
+  - ChatView.tsx / AssistantMarkdown.tsx: data-chat-progress="host-stream"; data-chat-final="session-log"; data-linked-mailbox-message-id when attributable
+  - spotcheck: evidence/scenario-4/source-spotcheck.txt
+
 EVIDENCE: evidence/scenario-4/
-CLAIM: inferred (recipe + stubs only; T030 still landing on PR #60)
-DEFER_REASON: T032 delivers recipe + evidence stubs only. T029 Host-stream progress is on master with Verifier Pass. T030 session-log finals are still in Verifier on PR #60 (cursor/p1-t030-chat-final-92fa). Do not stamp SC-004 Pass until T030 is on the checkout under test and the Scenario 4 composite commands exit 0 with measured logs.
-SCOPE_OUT: SC-004 product Done; live Desktop scripted-chat stamp; feature code
-BLOCKER: T030 not on master (PR #60 open) — blocks SC-004 Pass, not T032 recipe presence
-LINEAR_STATUS: leave MOH-77 In Progress (do not Done; do not merge)
+CLAIM: measured (independent composite re-run on master @ 8fa8148378 after T030 merge)
+SCOPE_OUT: live Desktop scripted-chat stamp (optional); Scenario 0/2/3 Pass claims; T031 handoff-row chrome beyond linkedMailbox on final
+BLOCKER: none
+LINEAR_STATUS: leave MOH-77 Done (already); do not reopen
+MERGE: do not merge (PO opens PR)

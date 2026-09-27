@@ -1,12 +1,12 @@
 # Scenario 4 — Progress + final (SC-004)
 
-**Status:** Recipe present (T032). Composite FR-006 proof outline for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** (in-flight half) is on `master` with Verifier Pass evidence. **T030** (complete half + optional mailbox attribution) may still be landing — see PR [#60](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/60) / branch `cursor/p1-t030-chat-final-92fa`. This recipe covers **both** contract halves; do **not** stamp SC-004 Pass until T030 is on the checkout under test and the composite commands below exit 0.
+**Status:** SC-004 keyless **Pass** stamped (composite re-run after T030 on `master`). Composite FR-006 proof for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** + **T030** are both on `master`; measured evidence under [evidence/scenario-4/](./evidence/scenario-4/). Live Desktop (optional criterion 6) remains Skipped.
 **Owners:** DH Verifier (this recipe + evidence) · DH Electron/Client (T029–T030 `ui-chat`) · DH Runtime (session/agent streams + durable session log)
 **Acceptance:** Spec FR-006 · SC-004 · US3 scenario 2 (quickstart Scenario 4)
 **Contract:** [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
 **Quickstart:** [../quickstart.md](../quickstart.md) Scenario 4
 **Data model:** [../data-model.md](../data-model.md) Chat turn (`progressUpdates`, `finalResult`, optional `linkedMailboxMessageId`)
-**Branch (T032 recipe):** `cursor/p1-t032-scenario4-92fa` (base `master` @ T029)
+**Branch (T032 recipe):** `cursor/p1-t032-scenario4-92fa` (landed). **Stamp branch (SC-004 Pass):** `cursor/p1-t032-sc004-stamp-92fa` (base `master` @ T030)
 
 ## What this recipe proves (SC-004)
 
@@ -29,8 +29,8 @@ Does **not** claim Scenario 0 / SC-007, Scenario 2 / SC-001–002, or Scenario 3
 
 ## Preconditions
 
-- [ ] Checkout includes **T029** on base (`master` @ T029 merge or later) — **measured** required for progress half
-- [ ] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required before SC-004 Pass; until then stamp `T030: Deferred` / `VERDICT: Deferred` (recipe presence alone is not SC-004 Pass)
+- [x] Checkout includes **T029** on base (`master` @ T029 merge or later) — **measured** required for progress half
+- [x] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required before SC-004 Pass; until then stamp `T030: Deferred` / `VERDICT: Deferred` (recipe presence alone is not SC-004 Pass)
 - [ ] `pnpm install` complete
 - [ ] Node `^22.19 || >=24`
 - [ ] Scenario 0 / SC-007 Topology handshake **Pass** recorded ([README](./README.md#handshake-pass-gate-sc-007--fr-013)) — required before product SC Done
@@ -53,9 +53,9 @@ Reuse T029 + T030 focused suites. Prefer the local vitest binary when `pnpm exec
   apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts
 ```
 
-### T030 — Session-log final + optional mailbox attribution (requires T030 on checkout)
+### T030 — Session-log final + optional mailbox attribution (on `master` after PR #60)
 
-Until T030 merges, these paths exist on `cursor/p1-t030-chat-final-92fa` / PR #60. Skip and stamp `T030: Deferred` when absent from HEAD.
+Skip and stamp `T030: Deferred` only when these paths are absent from HEAD (historical pre-merge check).
 
 ```sh
 ./node_modules/.bin/vitest run \
@@ -180,6 +180,6 @@ Locked Desktop topology remains: Electron Main + preload lifecycle IPC only; Web
 - Contract: [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
 - Quickstart Scenario 4: [../quickstart.md](../quickstart.md)
 - T029 Host-stream progress: [t029-chat-progress.md](./t029-chat-progress.md) · evidence [evidence/t029-chat-progress/](./evidence/t029-chat-progress/)
-- T030 session-log finals: [t030-chat-final.md](./t030-chat-final.md) (landing PR #60 until on `master`)
+- T030 session-log finals: [t030-chat-final.md](./t030-chat-final.md) · evidence [evidence/t030-chat-final/](./evidence/t030-chat-final/)
 - Scenario 0 topology gate: [scenario-0-topology.md](./scenario-0-topology.md)
 - Scenario 3 mailbox (optional same-session reuse): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
