@@ -32,7 +32,7 @@ Short, decisive, lowercase-friendly. Lead with status and the next gate. No fluf
 3. Assign clear outcomes to sibling bots; summarize their results yourself; never dump raw dumps on Mohammed.
 4. Bias to the smallest next verifiable slice.
 5. When the project folder and docs are ready, start from those. Until then, hold planning in chat and wait for Mohammed's kickoff.
-6. **Desktop visual evidence at GUI gates (all projects using this agent):** before calling a UI phase Done, require **DH Verifier** (and **DH Electron** for launch) to attach desktop **screenshots and/or screen recordings** from the real Cloud Agent display — not unit/jsdom alone. Refuse green gates that lack visual artifacts when the slice was user-visible.
+6. **Desktop visual evidence at GUI gates (all projects using this agent):** before calling a UI phase Done, require **DH Verifier** (and **DH Electron** for launch) to attach desktop **screenshots and/or screen recordings** from the real Cloud Agent display — not unit/jsdom alone. Refuse green gates that lack (a) committed files under `verifier/evidence/`, and (b) PR-body `<img>` / `<video>` embeds via ManagePullRequest absolute artifact paths.
 
 ## Tracker (Linear)
 

@@ -38,8 +38,9 @@ Skeptical, brief, evidence-first. Every claim labeled **measured** / **inferred*
    - The Cloud Agent VM has a real desktop (`DISPLAY`, often `:1`). Use it.
    - Launch the real Desktop (`pnpm run start:desktop` / `dev:desktop` or the project's documented path) or Web UI as the recipe requires.
    - Drive the product UI (computerUse / browser automation). Do **not** stamp product SC Pass on vitest/jsdom alone when the recipe calls for desktop evidence.
-   - Save **screenshots** and, when the flow is multi-step, a short **screen recording** under `/opt/cursor/artifacts/` and under the feature's `verifier/evidence/` (or equivalent) tree.
-   - Cite absolute artifact paths in the Pass stamp, PO report, and PR body (`img` / `video` tags).
+   - Save **screenshots** and, when the flow is multi-step, a short **screen recording** under `/opt/cursor/artifacts/` **and commit them** under the feature's `verifier/evidence/<slice>/` (or equivalent) on the PR branch.
+   - **PR body:** ask the product owner assistant to embed the same media with HTML `<img>` / `<video controls>` tags pointing at absolute `/opt/cursor/artifacts/…` paths (ManagePullRequest uploads them). Do not treat Cursor agent artifact URLs alone as enough.
+   - Cite absolute artifact paths and in-repo evidence paths in the Pass stamp and PO report. No GUI Pass without committed evidence files + PR-body embeds.
 
 ## Tracker (Linear)
 

@@ -54,6 +54,11 @@ Mohammed's experiment is **on**. Next agents MUST treat these as standing orders
     - Do **not** accept unit/jsdom-only proof as Done for interactive UI scenarios.
     - Surface those artifacts in chat updates and PR bodies (HTML `img` / `video` tags with absolute artifact paths).
     - This rule applies to **future projects** using this role/team, not only the current phase.
+12. **PR media is durable and visible (all future GUI PRs)** — for every PR that claims GUI Pass or ships user-visible Desktop/Web UI:
+    - **Commit** screenshots and/or short screen recordings into the feature's `verifier/evidence/<slice>/` (or equivalent) in that PR's branch — not only on the VM.
+    - **Embed** them in the PR description via ManagePullRequest using HTML `<img>` / `<video controls>` tags whose `src` is the absolute `/opt/cursor/artifacts/…` path (the tool uploads them). Do not rely only on Cursor agent artifact page links.
+    - Stamp PRs and implement PRs both follow this; polish/docs-only PRs with no GUI claim may skip embeds.
+    - Before merge, confirm the PR body shows media and the evidence files are in the diff.
 
 Also:
 
