@@ -29,10 +29,13 @@ Does **not** add the T025 Scenario 3 end-to-end recipe or T026 Electron bus regr
 ./node_modules/.bin/vitest run \
   packages/client/ui-chat/tests/team-message-source.client.spec.ts \
   packages/client/ui-chat/tests/chat-view.client.spec.tsx \
-  packages/client/ui-conversation/tests/skeleton.client.spec.tsx \
   packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx \
   packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
-  -t 'T024|T023|handoff|empty handoffs|conversation.session.notices|team-message'
+  -t 'T024|T023|handoff|empty handoffs|team-message'
+
+./node_modules/.bin/vitest run \
+  packages/client/ui-conversation/tests/skeleton.client.spec.tsx \
+  -t 'active phase: fixed header'
 ```
 
 Optional topology negative (no Electron mailbox bus):
