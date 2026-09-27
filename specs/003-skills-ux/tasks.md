@@ -141,7 +141,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T028 [US3] Ensure rejected empty saves do **not** appear as saved discoverable skills in catalog projection — `packages/experimental/agent-team/src/projection.ts` / skill provider watch path
 - [ ] T029 [US3] Add Client skill-authoring create/edit surface under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `locales.ts`) with clear reject messaging for empty name or body
 - [ ] T030 [US3] Wire authored skills into discovery (US1 surface) and attach/run (US2 path) so user skills behave like managed for Pass — `packages/experimental/client-ui-agent-team/src/client/`
-- [ ] T031 [US3] Add Verifier Scenario 3 recipe in `specs/003-skills-ux/verifier/scenario-3-skill-authoring.md` covering SC-003 (reject empty + happy-path author + discovery) and **requiring** FR-012 desktop evidence under `specs/003-skills-ux/verifier/evidence/scenario-3/`
+- [x] T031 [US3] Add Verifier Scenario 3 recipe in `specs/003-skills-ux/verifier/scenario-3-skill-authoring.md` covering SC-003 (reject empty + happy-path author + discovery) and **requiring** FR-012 desktop evidence under `specs/003-skills-ux/verifier/evidence/scenario-3/`
 
 **Checkpoint**: US3 independently testable after foundational Pass (discovery UI from US1 recommended)
 

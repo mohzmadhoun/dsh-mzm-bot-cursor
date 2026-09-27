@@ -72,7 +72,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 |----------|------------|---------------------------|----------------|------------|--------|
 | **1** Discover / load managed skill | [Scenario 1](../quickstart.md) | `scenario-1-discover-load.md` (T019) · contract [discover-load.md](../contracts/discover-load.md) | **Runtime** + **Client** + **Verifier** | SC-001 | **Required** |
 | **2** Attach / run on a bot | [Scenario 2](../quickstart.md) | [scenario-2-attach-run.md](./scenario-2-attach-run.md) (T026) · contract [attach-run.md](../contracts/attach-run.md) | **Runtime** + **Client** + **Verifier** | SC-002, SC-006, SC-007 | **Required** |
-| **3** Author skill (+ reject empty) | [Scenario 3](../quickstart.md) | `scenario-3-skill-authoring.md` (T031) · contract [skill-authoring.md](../contracts/skill-authoring.md) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
+| **3** Author skill (+ reject empty) | [Scenario 3](../quickstart.md) | [scenario-3-skill-authoring.md](./scenario-3-skill-authoring.md) (T031) · contract [skill-authoring.md](../contracts/skill-authoring.md) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
 | **4** Thin pack / non-goals | [Scenario 4](../quickstart.md) | `scenario-4-thin-pack.md` (T034) · contract [thin-managed-pack.md](../contracts/thin-managed-pack.md) · pick [thin-pack-skill.md](./thin-pack-skill.md) | **Runtime** + **Verifier** | SC-004 | Docs/absence ok |
 | **5** Full Phase 3 replay | [Scenario 5](../quickstart.md) | `scenario-5-full-replay.md` (T036) · all contracts above | **Verifier** | SC-005 (+ composite of 1–3) | **Required** |
 
