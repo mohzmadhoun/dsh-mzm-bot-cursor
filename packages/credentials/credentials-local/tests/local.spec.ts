@@ -76,6 +76,20 @@ describe('layering and reads', () => {
     expect(await ctx.credentials.describe(KEY)).toEqual({ configured: true, source: 'file', writable: true })
   })
 
+  it('never silently falls back to a peer reference when resolving a miss (T035)', async () => {
+    const dir = await tempDir()
+    const path = join(dir, '.credentials.yaml')
+    await writeCredentials(path, 'version: 1\nrefs:\n  DSH_CRED_TEST: sk-peer-only-never-substitute\n')
+    const ctx = await boot({ path, watch: false })
+    expect(await ctx.credentials.resolve(KEY)).toEqual({
+      value: 'sk-peer-only-never-substitute',
+      source: 'file',
+    })
+    // OTHER is absent from the document — must not return KEY's secret.
+    expect(await ctx.credentials.resolve(OTHER)).toBeUndefined()
+    expect(await ctx.credentials.describe(OTHER)).toEqual({ configured: false, writable: true })
+  })
+
   it('lets a non-empty process environment win read-only over the file', async () => {
     const dir = await tempDir()
     const path = join(dir, '.credentials.yaml')

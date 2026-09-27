@@ -74,6 +74,18 @@ describe('the credentials seam through the memory provider', () => {
     expect(events).toEqual([])
   })
 
+  it('never silently falls back to another reference when resolving a miss (T035)', async () => {
+    const peer = credentialRef('BOT_PROVIDER_A_KEY')
+    const missing = credentialRef('BOT_PROVIDER_B_KEY')
+    const ctx = await boot({ BOT_PROVIDER_A_KEY: 'sk-peer-only-never-substitute' })
+    expect(await ctx.credentials.resolve(peer)).toEqual({
+      value: 'sk-peer-only-never-substitute',
+      source: 'memory',
+    })
+    expect(await ctx.credentials.resolve(missing)).toBeUndefined()
+    expect(await ctx.credentials.describe(missing)).toEqual({ configured: false, writable: true })
+  })
+
   it('removes the service with its fiber', async () => {
     const ctx = new Context()
     const fiber = await ctx.plugin(MemoryCredentials)

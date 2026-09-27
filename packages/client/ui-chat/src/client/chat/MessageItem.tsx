@@ -55,8 +55,14 @@ function failureMessage(
   t: ChatViewSlotProps['t'],
 ): string {
   if (code === 'AUTH') return t('message.failure.auth')
+  if (code === 'INVALID_CREDENTIAL') return t('message.failure.invalidCredential')
   if (code === 'MISSING_CREDENTIAL') return t('message.failure.missingCredential')
   return message
+}
+
+/** Host codes that offer in-app Models re-entry (not 1Password). */
+function isCredentialReentryCode(code: unknown): code is 'MISSING_CREDENTIAL' | 'AUTH' | 'INVALID_CREDENTIAL' {
+  return code === 'MISSING_CREDENTIAL' || code === 'AUTH' || code === 'INVALID_CREDENTIAL'
 }
 
 function ModelRetryItem({ node, active, t }: {
@@ -131,7 +137,8 @@ function TurnErrorItem({ node, t, openModelsSettings }: {
   t: ChatViewSlotProps['t']
   openModelsSettings?: () => void
 }) {
-  const missingCredential = node.code === 'MISSING_CREDENTIAL'
+  const reentry = isCredentialReentryCode(node.code)
+  const missing = node.code === 'MISSING_CREDENTIAL'
   return (
     <div
       className={css.turnErrorRow}
@@ -142,14 +149,16 @@ function TurnErrorItem({ node, t, openModelsSettings }: {
       <div className={css.turnErrorCopy}>
         <span className={css.turnErrorTitle}>{t('message.turnError')}</span>
         <span className={css.turnErrorMessage}>{failureMessage(node.message, node.code, t)}</span>
-        {missingCredential && openModelsSettings !== undefined && (
+        {reentry && openModelsSettings !== undefined && (
           <button
             type="button"
             className={css.turnErrorAction}
-            data-missing-credential-handoff
+            {...missing
+              ? { 'data-missing-credential-handoff': true }
+              : { 'data-invalid-credential-handoff': true }}
             onClick={openModelsSettings}
           >
-            {t('message.failure.missingCredential.action')}
+            {t('message.failure.credentialReentry.action')}
           </button>
         )}
       </div>

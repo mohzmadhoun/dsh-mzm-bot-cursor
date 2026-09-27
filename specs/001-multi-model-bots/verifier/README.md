@@ -55,6 +55,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of
 | **T029** Chat progress from Host streams | [t029-chat-progress.md](./t029-chat-progress.md) | **Electron/Client** + **Verifier** | FR-006 in-flight half; `data-chat-progress="host-stream"`; no shell progress IPC; not SC-004 Pass (T030/T032) |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
+| **T035** Missing/invalid credential UX | [t035-cred-ux.md](./t035-cred-ux.md) | **Electron/Client** + **Verifier** | FR-008 failure UX: Models re-entry for missing + invalid/revoked; no peer resolve fallback |
 
 ## Fan-out policy
 
