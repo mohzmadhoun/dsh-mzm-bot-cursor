@@ -1,0 +1,16 @@
+VERDICT: Pass
+SC: SC-001 SC-002 SC-008
+SHA: 144a871133652f2f3b8a65fb9bf8bec5acb5de6b
+BRANCH: cursor/p2-verifier-desktop-stamps-92fa
+UTC: 2026-09-27T14:48:31Z
+OPERATOR: DH Verifier (Composer; acting as Mohammed)
+LINEAR: MOH-118 · Epic MOH-88
+RECIPE: specs/002-identity-personas/verifier/scenario-1-persona-profile.md
+DESKTOP: DSH Local Build 0.1.6-alpha.2 · tip 144a87113365 · DISPLAY=:1 · CDP port 9222
+SC-001: Pass (measured) — create Replay/Durable Bot; set job/voice/antiJobs; leave/return panel; Electron restart retains persona fields (post-reload-persona.png: job=ship releases voice=warm anti=docs-only chores)
+SC-002: Pass (measured) — Anti-jobs visible on Agent Team overview without hidden editor (01-persona-saved.png / post-reload)
+SC-008: Pass (measured) — Host wiring only; vitest persona-bind + persists updatePersona (vitest-sc008.log); no LLM reply scoring
+EVIDENCE: evidence/scenario-1/
+CLAIM: measured
+BLOCKER: none
+LINEAR_STATUS: leave to PO (do not Done; do not merge)

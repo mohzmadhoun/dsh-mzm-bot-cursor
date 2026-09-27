@@ -1,6 +1,6 @@
 # Scenario 1 — Persona profile (job / voice / anti-jobs)
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host persist + instruction bind) · DH Client (profile / overview UI)
 **Linear:** [MOH-118](https://linear.app/momadhoun/issue/MOH-118) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T019 — Verifier Scenario 1 recipe covering SC-001, SC-002, SC-008
@@ -128,13 +128,13 @@ pnpm exec vitest run packages/experimental/agent-team/tests/persona-bind.spec.ts
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-Verdict: Pass | Fail | Blocked
-Stamp: YYYY-MM-DD · tip <sha> · desktop build <id or N/A>
+Verdict: Pass
+Stamp: 2026-09-27 · tip 144a87113365 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-118 · Epic MOH-88
-SC-001: Pass|Fail|Blocked — evidence: <path/log/screenshot>
-SC-002: Pass|Fail|Blocked — evidence: <path/log/screenshot>
-SC-008: Pass|Fail|Blocked — evidence: <assemble excerpt or vitest log; no LLM reply quotes>
-Blockers: <Client T016/T017 | Host regression | other>
+SC-001: Pass — evidence: evidence/scenario-1/{01-persona-saved,02-reopen-overview,03-post-reload,04-post-reload-persona}.png + post-reload.txt
+SC-002: Pass — evidence: evidence/scenario-1/01-persona-saved.png (Anti-jobs on overview)
+SC-008: Pass — evidence: evidence/scenario-1/vitest-sc008.log (Host wiring only; no LLM reply quotes)
+Blockers: none
 ```
 
 **Rule:** Do not mark SC-001…SC-008 Done in Linear / Spec without a filled stamp that includes desktop evidence for SC-001/SC-002 once Client UI exists. Host vitest alone may advance SC-008 wiring confidence but does **not** close US1.

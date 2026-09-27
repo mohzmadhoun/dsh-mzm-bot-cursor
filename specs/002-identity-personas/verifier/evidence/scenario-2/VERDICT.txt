@@ -1,0 +1,15 @@
+VERDICT: Pass
+SC: SC-003
+SHA: 144a871133652f2f3b8a65fb9bf8bec5acb5de6b
+BRANCH: cursor/p2-verifier-desktop-stamps-92fa
+UTC: 2026-09-27T14:48:31Z
+OPERATOR: DH Verifier (Composer; acting as Mohammed)
+LINEAR: MOH-124 · Epic MOH-88
+RECIPE: specs/002-identity-personas/verifier/scenario-2-rename-avatar.md
+DESKTOP: DSH Local Build · tip 144a87113365 · DISPLAY=:1
+SC-003: Pass (measured) — Rename Replay Bot → Replay Renamed; preset Circle/Blue avatar; overview shows new name (01-renamed.png / 02-avatar-set.png); Durable Bot identity retained across Electron restart
+Avatar kind: preset shape/color only (no image upload)
+EVIDENCE: evidence/scenario-2/
+CLAIM: measured
+BLOCKER: none
+LINEAR_STATUS: leave to PO

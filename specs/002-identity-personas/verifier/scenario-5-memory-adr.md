@@ -1,6 +1,6 @@
 # Scenario 5 — Memory layers ADR (docs-only)
 
-**Status:** Recipe ready (rerunnable outline; **no** product SC Pass stamped here)
+**Status:** Product SC Pass stamped — see [evidence/scenario-5/VERDICT.txt](./evidence/scenario-5/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Spec / Docs (ADR file — T036)
 **Linear:** [MOH-136](https://linear.app/momadhoun/issue/MOH-136) · Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88)
 **Acceptance slice:** T037 — Verifier Scenario 5 recipe covering SC-006 (file presence + non-goal statement; **no** recall demo)
@@ -86,16 +86,16 @@ test -f MzM-Docs/adr/agent-vs-user-memory-layers.md \
 ## Pass stamp template (fill when evidence lands)
 
 ```text
-Verdict: Pass | Fail | Blocked
-Stamp: YYYY-MM-DD · tip <sha> · ADR path <MzM-Docs/adr/…>
+Verdict: Pass
+Stamp: 2026-09-27 · tip 144a87113365 · ADR path MzM-Docs/adr/agent-vs-user-memory-layers.md
 Linear: MOH-136 · Epic MOH-88 · ADR task MOH-135 (T036)
-SC-006: Pass|Fail|Blocked — evidence: <ADR path + content excerpt refs>
-Filename identifies agent vs user layers: Pass|Fail
-Agent vs user distinction: Pass|Fail
-States no P2 memory UX: Pass|Fail
+SC-006: Pass — evidence: evidence/scenario-5/measured-checks.txt + ADR file
+Filename identifies agent vs user layers: Pass
+Agent vs user distinction: Pass
+States no P2 memory UX: Pass
 Memory product UX required for Pass: No (FR-010) — evidence: non-goals.md + spot-check
 Recall demo: N/A (not a Pass gate)
-Blockers: <T036 ADR not on master | ADR content gap | other>
+Blockers: none
 ```
 
 **Rule:** Do not mark SC-006 Done in Linear / Spec without a filled stamp that includes (1) ADR path under `MzM-Docs/adr/` with identifying filename, (2) agent vs user distinction + no-P2-UX statement, and (3) confirmation that memory product UX is not a Pass requirement. This recipe alone does **not** close US5.
