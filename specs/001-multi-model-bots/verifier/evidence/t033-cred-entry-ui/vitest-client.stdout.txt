@@ -1,0 +1,203 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > renders when the shell root is absent
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > loads a credential-only modal, inerts the product, and focuses the key
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > cannot be dismissed implicitly and restores the previous inert state
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > requires a non-blank key before Save and continue is available
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > keeps the modal open and reports a refused credential write
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > allows configure-later dismissal without opening settings
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > does not block the product when DeepSeek setup is unavailable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > skips an absent adapter and an already-configured environment credential
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/onboarding-dialog.client.spec.tsx > DeepSeekOnboardingDialog > closes when an external credential invalidation refreshes the shared join
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > protocolChoices > reads the protocols out of the namespace schema and nothing else
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > changes image input without rewriting a neighboring model declaration
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > adds, edits, and removes rows without storing emptied optional fields
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > names a duplicate model id in the edit flow too
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > reads K and M suffixes and keeps the text the user typed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > refuses to apply while a capacity is unreadable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > spells a stored capacity back the way it is typed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > edits one row of several and lets a cleared capacity leave the profile
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > shows the adapter defaults as inherited until an edit takes them over
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > keeps expansion on the row it belongs to after an earlier one is removed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > leaves an earlier row expanded and forgets the removed row’s own state
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > model list editing > separates emptying the list from restoring the adapter defaults
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "" as undefined
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "65536" as 65536
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "256K" as 256000
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "1m" as 1000000
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "2.3M" as 2300000
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > reads "1.0005K" as 1000.5
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > refuses "abc" rather than guessing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > refuses "12x" rather than guessing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > refuses "1 000" rather than guessing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > refuses "-5" rather than guessing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > refuses "" rather than guessing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > spells 1000000 as "1M"
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > spells 256000 as "256K"
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > spells 65536 as "65536"
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > spells 0 as "0"
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > spells 1.5 as "1.5"
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > capacity spellings > round-trips every spelling it produces
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > renders catalog input inheritance for a stored declaration of undefined
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > renders catalog input inheritance for a stored declaration of []
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > renders catalog input inheritance for a stored declaration of ["text"]
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > inherits a custom provider default input and persists an explicit model override
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > asks the endpoint the form shows, with a key that is not yet stored
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > carries the protocol the profile already names
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > adopts only the picked candidates, keeping a row the user already tuned
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > keeps the rows editable when the provider cannot be interrogated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > reports an empty listing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > can be asked for a configured route even with no endpoint
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > keeps the create card asking only once it has an endpoint
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > folds a row’s capacities away until they are asked for
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > closes the picker without adopting anything on cancel
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > toggles a candidate off and back on before adopting
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > endpoint interrogation > filters by model id or name, selects visible candidates, and clears every selection
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > provider rows > tags the routes the adapter declared, and only those
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > provider rows > shows no tag when the adapter draws no catalog distinction
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > writes the whole profile and the key under the derived reference
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > scopes each card to fields a provider can actually own
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > renames a declared route and falls back to its id when the name is cleared
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > offers the composition name as what a cleared field falls back to
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > names the provider as the refreshed directory reports it after a rename
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > drops the stored name rather than storing an empty one the adapter refuses
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > edits the protocol a declared route was created with
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > selects nothing for a declared route whose profile names no protocol
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > retries only the key after the profile landed, and reports the provider on cancel
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > reports the created provider when cancelled after its profile landed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > never contradicts a filled-in field with the next gate’s copy
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > refuses a route id whose derived credential reference would be illegal
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > styles a rejected route id as a fault and its guidance as a hint
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > rejects the non-HTTP base URL "not-a-url" before discovery or creation
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > rejects the non-HTTP base URL "localhost:11434" before discovery or creation
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > rejects the non-HTTP base URL "ftp://gateway.acme.example/v1" before discovery or creation
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > allows the HTTP base URL "http://localhost:11434/v1" to be interrogated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > allows the HTTP base URL "http://127.0.0.1:8080/v1" to be interrogated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > allows the HTTP base URL "http://[::1]:8080/v1" to be interrogated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > allows the HTTP base URL "https://gateway.acme.example:8443/v1" to be interrogated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > normalizes surrounding whitespace before interrogating and storing a base URL
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > keeps a network failure distinct from base URL syntax
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > derives a reference the credential seam accepts for every id it admits
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > names the blocked gate under the form, and nothing once it is satisfied
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > refuses to create while a capacity is unreadable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > keeps each half-typed capacity with its own row across a removal
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > refuses two models sharing one id
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > creates a model with no capacities, which the route’s fallbacks size
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > refuses to create until the route, endpoint, and a model are usable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > surfaces a refused write without closing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > translates a create refused by a newer namespace revision
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > reports a stored profile whose key write was refused
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > creates with the chosen protocol and no display name
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > offers no protocol when the namespace declares none
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > closes without writing on cancel, and honors a read-only deployment
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > closes the create card when an existing row is opened for editing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > reaches the card from the section and returns to the button on cancel
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > refuses an unusable key on the field and blocks creation
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > stays silent about the other gates when only the key is refused
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > tells a whitespace-only key what a blank field means on a create card
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > hand-declared providers > creates without a key when the route authenticates some other way
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > submits with a blank key field without writing a credential 55ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > clears a whitespace-only base URL instead of writing the spaces 13ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > blocks submit and names the field when the key holds only whitespace 9ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > blocks submit when the key contains characters no header can carry 10ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > blocks submit when a whole NAME=value line was pasted 10ms
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > hides both add actions when their settings namespaces are absent
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > offers only providers whose settings namespace can open an editor
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > shows a catalog diagnostic while keeping the provider editable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > renders nothing before the slot injects its dependencies
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > shows a configuration diagnostic inside the first-run setup card
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > dispatches the provider-card seat per rendered row, keyed by the owning namespace
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > dispatches the provider-card seat inside the first-run setup card
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > dispatches the provider-card seat on the add-provider draft with its dormant row
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > derives the draft seat's key fact from the page's conventional reference
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > skips the draft seat when a refresh drops the dormant row
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > renders the unkeyed whole-section provider as an open setup card in the first-run posture
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > leaves the unkeyed provider a plain row once another provider is usable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > marks only a confirmed missing reference and leaves native or unavailable state unmarked
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > turns the setup card into a row once the credential reports configured
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > decides setup need from the joined credential state and the first-run posture
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > derives conventional credential references from route ids
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > uses one stable provider identity in action copy
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > names only changed fields instead of rebuilding the section
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > stores a typed key write-only from the setup card without touching settings 121ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > shows CredentialInfo configured state without replaying a stored secret 27ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > reuses the provider editor as a required credential-only onboarding form 9ms
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > applies customized deepseek fields as path ops
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > materializes inherited models and adds an arbitrary DeepSeek id
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > edits the shared DeepSeek card while preserving the YAML protocol selection
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > rejects duplicate DeepSeek model ids before writing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > validates every adapter-owned model catalog invariant
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > reads context windows written as counts, thousands, or millions
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > spells a stored count in the shortest form that round-trips
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > accepts a suffixed context window and stores the plain count
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps unreadable context-window text on screen and refuses the write
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > restores the schema default the moment the override is dropped, not after a reload
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > restores the composition entry the moment the override is dropped, not after a reload
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps every row's unreadable text, not just the last one edited
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > re-keys the typed text around a removed row
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > drops the typed text when reset replaces the rows it annotated
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > edits an output cap per model and carries its text across a removal
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > settles a pasted id and refuses whitespace that would never match
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > renders malformed draft fallbacks without inventing catalog values
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > can empty and reset the model override, then clear optional fields without dropping hidden data
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > clears an inherited override with an unset op, never a whole-section replace
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > pins the deepseek placeholder and clears typed input back to inherited
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > rejects an invalid draft before writing
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > edits a pi-ai profile with the curated fields only
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > adds a dormant provider with a derived reference and stores its key
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps pi-ai provider-native authentication when no key is entered
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > retries only the credential after refreshed settings already committed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > switches the add card target and degrades unknown or broken targets loudly
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > surfaces a rejected settings write and never stores the key after it
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > renders the card without the stored-key hint when the credential probe is refused
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > tells the user to reopen when another writer moved the namespace first
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps the card usable after a refused write
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > surfaces a shadowed credential write on the card
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > locks the key input when the launch environment provides the credential
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps a failed credential describe silent and the input usable
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > requires confirmation before removing a user-added provider
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > blocks duplicate deletion while the confirmed removal is pending
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > renders the load failure with a retry control
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > shows the read-only notice and disables mutations for a read-only provider
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > toggles the row editor closed on a second edit click and on cancel
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > cancels the add card back to the add button
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > collapses the setup card on cancel without disturbing another open card
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > loads on first render of an idle controller
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > removes by unsetting the profile path, never by rebuilding the section
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps the snapshot untouched and reports the message when a removal write is refused
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > keeps a failed identified deletion recoverable in its confirmation dialog
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > retains credentials that are not identified as page-managed
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > ModelsSection > does not remove provider settings when its managed credential removal is refused
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > treats a blank field as no failure — it means keep the stored key
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts a printable-ASCII key
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts a padded key, which the caller trims
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts the printable-ASCII boundary characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts a hyphenated key carrying an equals sign
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts an all-upper-case key ending in base64 padding
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > accepts an all-upper-case key ending in one padding character
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails a field holding only spaces instead of silently dropping it
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails a field holding only a tab instead of silently dropping it
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails an emoji as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails CJK text as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails full-width punctuation as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails an interior space as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails a C0 control character as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails a latin-1 character as illegal characters
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails a pasted environment line as a format failure
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails double quotes as a format failure
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails single quotes as a format failure
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > fails backticks as a format failure
+ ↓ |thread-safe| packages/client/ui-settings-models/tests/components.client.spec.tsx > apiKeyFailure > needs a matching closing quote before it calls a value wrapped
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > trims a padded key before storing it 11ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > blocks the interrogation too, rather than spending a round trip on a refused key 8ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > carries the trimmed key into an interrogation, not the padded draft 85ms
+ ✓ |thread-safe| packages/client/ui-settings-models/tests/provider-form.client.spec.tsx > API key field > reloads the section after creating a hand-declared provider 30ms
+
+ Test Files  2 passed | 1 skipped (3)
+      Tests  12 passed | 180 skipped (192)
+   Start at  10:05:41
+   Duration  2.71s (transform 3.64s, setup 548ms, import 5.37s, tests 391ms, environment 1.21s)

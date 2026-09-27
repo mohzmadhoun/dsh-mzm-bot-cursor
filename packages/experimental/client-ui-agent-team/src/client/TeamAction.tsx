@@ -4,6 +4,8 @@ import type {
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
+  HostMailboxMessage,
+  TeamMailboxDeliveryState,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
   TeamTaskId,
@@ -162,7 +164,34 @@ function memberStatusKey(status: TeamRosterMember['status']): TeamKey {
   }
 }
 
-/** Render the live Team roster, Host bot-create form, and compare-and-set task board. */
+function deliveryStateKey(state: TeamMailboxDeliveryState): TeamKey {
+  switch (state) {
+    case 'queued': return 'deliveryState.queued'
+    case 'delivered': return 'deliveryState.delivered'
+    case 'visible-pending': return 'deliveryState.visible-pending'
+    case 'acted': return 'deliveryState.acted'
+  }
+}
+
+/** First text block from a Host mailbox body for the handoff list preview. */
+function handoffBodyPreview(body: HostMailboxMessage['body']): string {
+  for (const block of body) {
+    if (block.type === 'text' && block.text.trim() !== '') return block.text
+  }
+  return ''
+}
+
+/** Resolve a Bot display label from the current Team roster when known. */
+function memberLabel(
+  members: readonly TeamRosterMember[],
+  id: HostMailboxMessage['fromBotId'],
+): string {
+  const member = members.find(row => row.id === id)
+  if (member === undefined) return id
+  return member.displayName ?? member.name
+}
+
+/** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
   sessionId, load, createBot, createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
@@ -481,6 +510,34 @@ export function TeamAction({
                         {member.diagnostics.map(diagnostic => <small key={diagnostic} className={css.diagnostic}>{diagnostic}</small>)}
                       </span>
                     </button>
+                  ))}
+                </div>
+              </section>
+              <section data-team-handoffs>
+                <div className={css.sectionTitle}>
+                  <h3>{t('handoffs')}</h3>
+                </div>
+                {view.handoffs.length === 0 && <div className={css.notice}>{t('handoffsEmpty')}</div>}
+                <div className={css.handoffs}>
+                  {view.handoffs.map(handoff => (
+                    <article
+                      key={handoff.id}
+                      className={css.handoff}
+                      data-team-handoff
+                      data-handoff-id={handoff.id}
+                      data-delivery-state={handoff.deliveryState}
+                      data-handoff-source={handoff.source.kind}
+                    >
+                      <div className={css.taskTitle}>
+                        <strong>{handoffBodyPreview(handoff.body) || handoff.id}</strong>
+                        <span>{t(deliveryStateKey(handoff.deliveryState))}</span>
+                      </div>
+                      <div className={css.meta}>
+                        <span>{t('handoffFrom')}: {memberLabel(view.members, handoff.fromBotId)}</span>
+                        <span>{t('handoffTo')}: {memberLabel(view.members, handoff.toBotId)}</span>
+                        <span>{handoff.id}</span>
+                      </div>
+                    </article>
                   ))}
                 </div>
               </section>
