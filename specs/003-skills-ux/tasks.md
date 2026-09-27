@@ -8,9 +8,9 @@
 
 **Organization**: Shared Host skills foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority**: US1 → US2 → US3 (all P1) → US4 (P2 thin pack / non-goals).
 
-**Linear**: Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) · Tasks issue [MOH-146](https://linear.app/momadhoun/issue/MOH-146/p3-spec-kit-tasks-skills-ux) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-taskstoissues` (not this file)
+**Linear**: Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) · Analyze/taskstoissues [MOH-147](https://linear.app/momadhoun/issue/MOH-147/p3-spec-kit-analyze-taskstoissues-skills-ux) · Tasks [MOH-146](https://linear.app/momadhoun/issue/MOH-146/p3-spec-kit-tasks-skills-ux) Done · Project **DeepSeek Harness - Cursor** only · T001–T040 → [MOH-148](https://linear.app/momadhoun/issue/MOH-148)…[MOH-187](https://linear.app/momadhoun/issue/MOH-187) (map in [analyze-report.md](./analyze-report.md))
 
-**Branch**: `cursor/p3-tasks-fe1d` (from `origin/master` @ plan merge `fbc1981714` / #108)
+**Branch**: `cursor/p3-analyze-fe1d` (analyze + Linear issues; tasks authored on `cursor/p3-tasks-fe1d` / #109)
 
 **Thin-pack skill pick (tasks lock — simplest):**
 
@@ -174,7 +174,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T039 Update `specs/003-skills-ux/verifier/README.md` Scenario 1–5 owners map + foundational Pass stamp section to match P2 pattern
 - [ ] T040 Confirm no edits to `specs/001-multi-model-bots/**` or `specs/002-identity-personas/**` in this feature’s implement PRs (document check in `specs/003-skills-ux/verifier/README.md`)
 
-**Checkpoint**: Ready for `/speckit-analyze` → `/speckit-taskstoissues` → implement → Verifier product gate
+**Checkpoint**: Analyze **PASS** + Linear T001–T040 filed (MOH-148…MOH-187). Await Verifier/Lead analyze gate → implement → Verifier product gate
 
 ---
 
@@ -277,7 +277,7 @@ Task: "Host user-skill create/update with non-empty validation"
 - FR-012 / standing order 11 is non-negotiable on GUI recipes — vitest/jsdom alone fails those scenarios
 - Do not invent learn-from-demonstration, plugin skills, routines, memory UX, MCP, or Box/Shell tasks
 - Commit after each task or logical group during implement; this Spec change commits `tasks.md` under `specs/003-skills-ux/`
-- **Next after Verifier Pass on tasks:** `/speckit-analyze` then `/speckit-taskstoissues` (separate PR preferred) → implement
+- **Next after Verifier/Lead Pass on analyze:** implement Host foundations T006–T014 (MOH-153…MOH-161) before US fan-out; do not start implement while MOH-147 is still gated
 
 ## Task count summary
 
