@@ -175,7 +175,7 @@ Blockers: <Client T027 | T028 shell | T029 failure UX | Host regression | other>
 | [../contracts/delete-confirm.md](../contracts/delete-confirm.md) | Contract Pass bars |
 | [../data-model.md](../data-model.md) Delete confirmation | UI state machine |
 | [README.md](./README.md) | Scenario owners map + foundational Pass |
-| [non-goals.md](./non-goals.md) | Transcript/mailbox wipe absence (T040 completes row) |
+| [non-goals.md](./non-goals.md) | Transcript/mailbox wipe absence (T040 asserted) |
 | This file | T030 rerunnable Scenario 4 recipe |
 | T026 | Host `deleteBot` (landed [#89](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/89)) |
 | T027 / T028 / T029 | Client confirm · optional shell · failure UX |

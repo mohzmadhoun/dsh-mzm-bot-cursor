@@ -124,7 +124,7 @@ Blockers: <T036 ADR not on master | ADR content gap | other>
 | This file | T037 rerunnable Scenario 5 recipe |
 | T036 / [MOH-135](https://linear.app/momadhoun/issue/MOH-135) | Spec ADR land (blocker for SC-006 Done) |
 | T038 / [MOH-137](https://linear.app/momadhoun/issue/MOH-137) | Non-goals memory UX row |
-| T040 | Remaining non-goal rows (skills, wipe, P1 re-litigation, Grok chrome) |
+| T040 / [MOH-139](https://linear.app/momadhoun/issue/MOH-139) | Remaining non-goal rows asserted (skills, wipe, P1 re-litigation, Grok chrome) |
 
 ## Evidence for PO / DH Lead
 
