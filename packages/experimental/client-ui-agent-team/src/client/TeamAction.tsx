@@ -23,6 +23,8 @@ import type {
   SetAvatarResult,
   SidebarSectionId,
   SidebarSectionView,
+  SkillCatalogSummary,
+  SkillId,
   TeamMailboxDeliveryState,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
@@ -310,6 +312,14 @@ function deliveryStateKey(state: TeamMailboxDeliveryState): TeamKey {
   }
 }
 
+/** Locale key for Host skill catalog source bucket (managed thin pack vs user). */
+function skillSourceKey(source: SkillCatalogSummary['source']): TeamKey {
+  switch (source) {
+    case 'managed': return 'skillSourceManaged'
+    case 'user': return 'skillSourceUser'
+  }
+}
+
 /** First text block from a Host mailbox body for the handoff list preview. */
 function handoffBodyPreview(body: HostMailboxMessage['body']): string {
   for (const block of body) {
@@ -354,6 +364,11 @@ export function TeamAction({
   const [editingSectionId, setEditingSectionId] = useState<SidebarSectionId | null>(null)
   const [sectionRenameDraft, setSectionRenameDraft] = useState<SectionNameDraft>(EMPTY_SECTION_NAME_DRAFT)
   const [assigningBotId, setAssigningBotId] = useState<SessionId | null>(null)
+  /**
+   * Skills selected for attach (clarify lock 2 / FR-002): load = available-to-attach.
+   * Client-local selection only — Host catalog owns persistence across restart.
+   */
+  const [availableToAttach, setAvailableToAttach] = useState<ReadonlySet<SkillId>>(() => new Set())
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -398,6 +413,7 @@ export function TeamAction({
     setEditingSectionId(null)
     setSectionRenameDraft(EMPTY_SECTION_NAME_DRAFT)
     setAssigningBotId(null)
+    setAvailableToAttach(new Set())
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
     setEditing(null)
@@ -414,6 +430,18 @@ export function TeamAction({
     setLoading(false)
     if (result.ok) {
       setView(result.value)
+      // Drop available-to-attach marks for skills no longer in the Host catalog.
+      setAvailableToAttach((current) => {
+        if (current.size === 0) return current
+        const catalogIds = new Set(result.value.skills.map(skill => skill.id))
+        let changed = false
+        const next = new Set<SkillId>()
+        for (const id of current) {
+          if (catalogIds.has(id)) next.add(id)
+          else changed = true
+        }
+        return changed ? next : current
+      })
       clearError()
       return true
     } else {
@@ -421,6 +449,16 @@ export function TeamAction({
       return false
     }
   }, [clearError, load, reportFailure, sessionId])
+
+  /** Clarify lock 2 / FR-002: selecting a discovered skill makes it available to attach (no wizard). */
+  const makeAvailableToAttach = useCallback((skillId: SkillId): void => {
+    setAvailableToAttach((current) => {
+      if (current.has(skillId)) return current
+      const next = new Set(current)
+      next.add(skillId)
+      return next
+    })
+  }, [])
 
   const invalidateRefresh = useCallback((): void => {
     refreshGeneration.current += 1
@@ -1318,6 +1356,72 @@ export function TeamAction({
                     </div>
                   </div>
                 </div>
+              </section>
+              <section data-team-skills>
+                <div className={css.sectionTitle}>
+                  <h3>{t('skills')}</h3>
+                </div>
+                <p className={css.hint}>{t('skillsHint')}</p>
+                {view.skills.length === 0
+                  ? (
+                    <div
+                      className={css.error}
+                      role="alert"
+                      data-team-skills-catalog-unavailable=""
+                    >
+                      {t('skillsCatalogUnavailable')}
+                    </div>
+                  )
+                  : (
+                    <>
+                      <p className={css.hint}>{t('skillSelectHint')}</p>
+                      <div className={css.skillsList} data-team-skills-list>
+                        {view.skills.map((skill) => {
+                          const available = availableToAttach.has(skill.id)
+                          return (
+                            <article
+                              key={skill.id}
+                              className={css.skillCard}
+                              data-team-skill={skill.id}
+                              data-skill-source={skill.source}
+                              data-skill-available={available ? 'true' : 'false'}
+                            >
+                              <div className={css.skillTitle}>
+                                <strong data-team-skill-display-name>{skill.displayName}</strong>
+                                <span data-team-skill-source={skill.source}>
+                                  {t(skillSourceKey(skill.source))}
+                                </span>
+                              </div>
+                              <div className={css.meta}>
+                                <span data-team-skill-id>{skill.id}</span>
+                                {skill.description !== undefined && skill.description.trim() !== ''
+                                  && <span>{skill.description}</span>}
+                              </div>
+                              {available
+                                ? (
+                                  <div
+                                    className={css.skillAvailable}
+                                    data-team-skill-available={skill.id}
+                                  >
+                                    <IconCheckOutline14 /> {t('skillAvailable')}
+                                  </div>
+                                )
+                                : (
+                                  <button
+                                    type="button"
+                                    className={css.personaButton}
+                                    data-team-skill-load={skill.id}
+                                    onClick={() => { makeAvailableToAttach(skill.id) }}
+                                  >
+                                    {t('skillMakeAvailable')}
+                                  </button>
+                                )}
+                            </article>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
               </section>
               <section data-team-handoffs>
                 <div className={css.sectionTitle}>

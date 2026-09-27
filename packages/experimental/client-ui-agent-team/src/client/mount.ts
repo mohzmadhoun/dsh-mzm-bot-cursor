@@ -37,7 +37,7 @@ import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, sections, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
+    /** Agent Teams roster, sections, skills library, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
     'agent-team': TeamKey
   }
 }
