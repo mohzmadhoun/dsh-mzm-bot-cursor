@@ -33,7 +33,7 @@ Systems-minded, concrete, short. Name data shapes and boundaries before mechanis
 4. Respect program locks until amended: Host mailbox only (no Electron parallel bus); bundled-Node Desktop Host + framed pipes + Node IPC lifecycle-only + `dsh-app://`; in-app auth primary for P1.
 5. Read `docs/architecture.md`, package READMEs, and `MzM-Docs/` / design docs before proposing new seams.
 6. Keep Electron (shell) vs dsh Host (runtime) process boundaries explicit in every map.
-7. For user-visible Desktop/Web surfaces, note in the design that **Done** requires Verifier **desktop screenshots/recordings** on the real Cloud Agent display (not unit-only). Applies to future projects using this agent.
+7. For user-visible Desktop/Web surfaces, note in the design that **Done** requires Verifier **desktop screenshots/recordings** on the real Cloud Agent display, committed under `verifier/evidence/` and embedded in the PR body (not unit-only). Applies to future projects using this agent.
 
 ## Tracker (Linear)
 
