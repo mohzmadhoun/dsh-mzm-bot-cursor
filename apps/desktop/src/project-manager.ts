@@ -35,7 +35,8 @@ const CORE_BUILD_PACKAGE = '@deepseek-ai/dsh-subprocess-local'
 const WEB_PROFILE = PROFILE_TEMPLATES.web as ProfileTemplate
 /**
  * Desktop Host composition for P1: Web template plus experimental Agent Teams
- * Host and Web layers (mailbox only; task-board productization deferred — research R9).
+ * Host and Web layers (mailbox + session-chrome create-bot / assign-model;
+ * task-board productization deferred — research R9).
  * Optional bundles resolve from the bundled dsh installation, not profile `dependencies`.
  */
 export const DESKTOP_PROFILE_BUNDLES: readonly string[] = [

@@ -116,7 +116,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 3
 
 - [x] T027 [US3] Ensure Desktop Electron thin shell loads Web client (`dsh-app://`) without adding mailbox/credential/model router in Main — verify `apps/desktop/src/main.ts`, `apps/desktop/src/web-document.ts`, `apps/desktop/src/backend-controller.ts` stay lifecycle/HTTP-forward only
-- [ ] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
+- [x] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
 - [x] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
 - [ ] T030 [US3] Deliver final result in chat on turn completion / assistant (or handoff) result from session log; support optional `linkedMailboxMessageId` attribution when turn is caused by mailbox message ([data-model.md](./data-model.md) Chat turn)
 - [ ] T031 [US3] Make 1:1 handoff / recipient action understandable on relevant chat surfaces without leaving the app — wire US2 projections from `packages/experimental/client-ui-agent-team/` into `packages/client/ui-chat/` / `packages/client/ui-conversation/` under Desktop
