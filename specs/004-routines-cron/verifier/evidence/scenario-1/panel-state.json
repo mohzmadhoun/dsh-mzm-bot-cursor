@@ -1,0 +1,60 @@
+{
+  "tip": "98dec75009",
+  "paneCount": 3,
+  "bots": [
+    {
+      "botId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+      "empty": false,
+      "list": true,
+      "rowCount": 2,
+      "rows": [
+        {
+          "id": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
+          "status": "active",
+          "scheduleExpr": "@every 5m",
+          "lastRun": "never",
+          "text": "Summarize inbox every five minutes Every 5m Active Not run yet"
+        },
+        {
+          "id": "routine-1a8b5d2f-714b-479b-970f-a8e2c2f75a46",
+          "status": "active",
+          "scheduleExpr": "@every 5m",
+          "lastRun": "never",
+          "text": "US2 pane list smoke Every 5m Active Not run yet"
+        }
+      ]
+    },
+    {
+      "botId": "bf5d7a12-8d78-45c4-8f3c-8fc24d307b13",
+      "empty": false,
+      "list": true,
+      "rowCount": 1,
+      "rows": [
+        {
+          "id": "routine-510a2f23-1255-457b-9b61-10159ac641ac",
+          "status": "active",
+          "scheduleExpr": "@hourly",
+          "lastRun": "never",
+          "text": "Hourly status ping Every hour Active Not run yet"
+        }
+      ]
+    },
+    {
+      "botId": "5c08c574-e488-4645-ad6a-bd27ea9021c8",
+      "empty": true,
+      "list": false,
+      "rowCount": 0,
+      "rows": []
+    }
+  ],
+  "leaveReturn": true,
+  "listedBotId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+  "listedCount": 2,
+  "sample": {
+    "id": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
+    "status": "active",
+    "scheduleExpr": "@every 5m",
+    "text": "Summarize inbox every five minutes Every 5m Active Not run yet"
+  },
+  "rowsAfter": 2
+}
