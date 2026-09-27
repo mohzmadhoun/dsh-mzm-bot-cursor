@@ -1,0 +1,17 @@
+{
+  "rows": [
+    {
+      "skillId": "mzm-thin-pack",
+      "active": "true",
+      "bot": "c92d4a8c-a423-4bc4-b015-79167899239d",
+      "label": "MzM thin pack"
+    }
+  ],
+  "surfaces": [
+    {
+      "botId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+      "empty": false
+    }
+  ],
+  "alert": null
+}

@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -245,6 +245,36 @@ async function bench(options: {
           },
         })
     },
+    attachSkill: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/attachSkill', args })
+      return Promise.resolve(options.remoteFailure === 'attachSkill'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              skillAttachments: [{
+                botId: CHILD,
+                skillId: 'mzm-thin-pack',
+              }],
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Research Bot',
+                skillAttachments: [{
+                  botId: CHILD,
+                  skillId: 'mzm-thin-pack',
+                }],
+                diagnostics: [],
+              },
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -372,6 +402,10 @@ describe('ui-team browser plugin', () => {
       botId: CHILD,
       sectionId: 'section-1' as SidebarSectionId,
     })).ok).toBe(true)
+    expect((await actions.attachSkill(SESSION, {
+      botId: CHILD,
+      skillId: 'mzm-thin-pack',
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -391,6 +425,7 @@ describe('ui-team browser plugin', () => {
       'agentTeams/createSection',
       'agentTeams/renameSection',
       'agentTeams/assignSection',
+      'agentTeams/attachSkill',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -424,6 +459,10 @@ describe('ui-team browser plugin', () => {
     expect(b.calls[8]?.args[1]).toEqual({
       botId: CHILD,
       sectionId: 'section-1',
+    })
+    expect(b.calls[9]?.args[1]).toEqual({
+      botId: CHILD,
+      skillId: 'mzm-thin-pack',
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
@@ -545,6 +584,16 @@ describe('ui-team browser plugin', () => {
     await expect(assignSectionActions.assignSection(SESSION, {
       botId: CHILD,
       sectionId: null,
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const attachSkill = await bench({ remoteFailure: 'attachSkill' })
+    const attachSkillActions = (attachSkill.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(attachSkillActions.attachSkill(SESSION, {
+      botId: CHILD,
+      skillId: 'mzm-thin-pack',
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

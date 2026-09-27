@@ -3,6 +3,8 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
   AssignSectionInput,
   AssignSectionResult,
+  AttachSkillInput,
+  AttachSkillResult,
   AvatarColorId,
   AvatarMarker,
   AvatarShapeId,
@@ -23,6 +25,7 @@ import type {
   SetAvatarResult,
   SidebarSectionId,
   SidebarSectionView,
+  SkillAttachment,
   SkillCatalogSummary,
   SkillId,
   TeamMailboxDeliveryState,
@@ -75,6 +78,9 @@ export type TeamRenameSectionActionResult = RemoteResult<BotIdentityMutationResu
 /** Generated Remote result whose business value preserves Team assignSection rejections. */
 export type TeamAssignSectionActionResult = RemoteResult<BotIdentityMutationResult<AssignSectionResult>>
 
+/** Generated Remote result whose business value preserves Team attachSkill rejections. */
+export type TeamAttachSkillActionResult = RemoteResult<BotIdentityMutationResult<AttachSkillResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -86,6 +92,7 @@ export interface TeamActionInjected {
   createSection: (sessionId: SessionId, input: CreateSectionInput) => Promise<TeamCreateSectionActionResult>
   renameSection: (sessionId: SessionId, input: RenameSectionInput) => Promise<TeamRenameSectionActionResult>
   assignSection: (sessionId: SessionId, input: AssignSectionInput) => Promise<TeamAssignSectionActionResult>
+  attachSkill: (sessionId: SessionId, input: AttachSkillInput) => Promise<TeamAttachSkillActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -155,15 +162,29 @@ interface SectionNameDraft {
   name: string
 }
 
+/** Draft skill id for Host attachSkill (must be available-to-attach). */
+interface AttachSkillDraft {
+  skillId: SkillId | ''
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
 const EMPTY_RENAME_DRAFT: RenameDraft = { displayName: '' }
 const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
 const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
+const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
+
+/** Select sentinel for attach picker — never a Host skill id. */
+const ATTACH_SKILL_NONE = ''
+
+/** Stable Client key for session-active run indication on one bot×skill pair (FR-004). */
+function skillSessionActiveKey(botId: SessionId, skillId: SkillId): string {
+  return `${botId}\0${skillId}`
+}
 
 /** Fixed Host avatar shape presets mirrored for the Client picker (FR-005). */
 const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
@@ -341,7 +362,7 @@ function memberLabel(
 /** Render the live Team roster, sidebar sections, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
-  createSection, renameSection, assignSection, createTask, updateTask,
+  createSection, renameSection, assignSection, attachSkill, createTask, updateTask,
   openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
@@ -364,6 +385,14 @@ export function TeamAction({
   const [editingSectionId, setEditingSectionId] = useState<SidebarSectionId | null>(null)
   const [sectionRenameDraft, setSectionRenameDraft] = useState<SectionNameDraft>(EMPTY_SECTION_NAME_DRAFT)
   const [assigningBotId, setAssigningBotId] = useState<SessionId | null>(null)
+  /** Bot whose Host attachSkill picker is open (per-bot skills surface; T023). */
+  const [attachingBotId, setAttachingBotId] = useState<SessionId | null>(null)
+  const [attachSkillDraft, setAttachSkillDraft] = useState<AttachSkillDraft>(EMPTY_ATTACH_SKILL_DRAFT)
+  /**
+   * Session-active run indication for attached bot×skill pairs (clarify lock 4 / FR-004).
+   * Client-local observability — does not require LLM reply text match.
+   */
+  const [sessionActiveSkills, setSessionActiveSkills] = useState<ReadonlySet<string>>(() => new Set())
   /**
    * Skills selected for attach (clarify lock 2 / FR-002): load = available-to-attach.
    * Client-local selection only — Host catalog owns persistence across restart.
@@ -413,6 +442,9 @@ export function TeamAction({
     setEditingSectionId(null)
     setSectionRenameDraft(EMPTY_SECTION_NAME_DRAFT)
     setAssigningBotId(null)
+    setAttachingBotId(null)
+    setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+    setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
     setCreating(false)
     setCreateDraft(EMPTY_DRAFT)
@@ -782,6 +814,42 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleAttachSkill = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamAttachSkillActionResult>,
+  ): Promise<AttachSkillResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`attach-skill:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep prior durable attachments in the loaded view.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not write; overview still shows prior attachments.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const attached = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return attached
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`attach-skill:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -808,6 +876,7 @@ export function TeamAction({
     setEditingAvatar(null)
     setPendingDelete(null)
     setAssigningBotId(null)
+    setAttachingBotId(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -829,6 +898,7 @@ export function TeamAction({
     setEditingPersona(null)
     setPendingDelete(null)
     setAssigningBotId(null)
+    setAttachingBotId(null)
   }
 
   const submitRename = async (member: TeamRosterMember): Promise<void> => {
@@ -854,6 +924,7 @@ export function TeamAction({
     setEditingPersona(null)
     setPendingDelete(null)
     setAssigningBotId(null)
+    setAttachingBotId(null)
   }
 
   const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
@@ -876,6 +947,7 @@ export function TeamAction({
     setEditingAvatar(null)
     setEditingPersona(null)
     setAssigningBotId(null)
+    setAttachingBotId(null)
   }
 
   /** Cancel / dismiss confirm → idle with profile unchanged (data-model cancelled → idle). */
@@ -928,6 +1000,7 @@ export function TeamAction({
     setEditingPersona(null)
     setPendingDelete(null)
     setEditingSectionId(null)
+    setAttachingBotId(null)
   }
 
   const submitAssignSection = async (
@@ -940,6 +1013,41 @@ export function TeamAction({
     }))
     if (saved === undefined) return
     setAssigningBotId(null)
+  }
+
+  const startAttachSkill = (member: TeamRosterMember): void => {
+    setAttachingBotId(member.id)
+    setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+    setEditingRename(null)
+    setEditingAvatar(null)
+    setEditingPersona(null)
+    setPendingDelete(null)
+    setAssigningBotId(null)
+    setEditingSectionId(null)
+  }
+
+  const submitAttachSkill = async (member: TeamRosterMember): Promise<void> => {
+    const skillId = attachSkillDraft.skillId
+    /* v8 ignore next -- AttachSkillForm disables Save while no skill is selected. */
+    if (skillId === '') return
+    const saved = await settleAttachSkill(member.id, () => attachSkill(sessionId, {
+      botId: member.id,
+      skillId,
+    }))
+    if (saved === undefined) return
+    setAttachingBotId(null)
+    setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+  }
+
+  /** Dedicated run control: mark attached skill session-active on this bot (FR-004). */
+  const markSkillSessionActive = (botId: SessionId, skillId: SkillId): void => {
+    setSessionActiveSkills((current) => {
+      const key = skillSessionActiveKey(botId, skillId)
+      if (current.has(key)) return current
+      const next = new Set(current)
+      next.add(key)
+      return next
+    })
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -1012,9 +1120,19 @@ export function TeamAction({
     const avatarPending = pendingTasks.has(`avatar:${member.id}`)
     const deletePending = pendingTasks.has(`delete:${member.id}`)
     const assignPending = pendingTasks.has(`assign-section:${member.id}`)
-    const identityBusy = personaPending || renamePending || avatarPending || deletePending || assignPending
+    const attachPending = pendingTasks.has(`attach-skill:${member.id}`)
+    const identityBusy = personaPending || renamePending || avatarPending
+      || deletePending || assignPending || attachPending
     const confirmPending = pendingDelete === member.id
     const assignOpen = assigningBotId === member.id
+    const attachOpen = attachingBotId === member.id
+    const attachments = member.skillAttachments ?? []
+    const catalogById = view === null
+      ? new Map<SkillId, SkillCatalogSummary>()
+      : new Map(view.skills.map(skill => [skill.id, skill]))
+    const attachCandidates = view === null
+      ? []
+      : view.skills.filter(skill => availableToAttach.has(skill.id))
     return (
       <div
         key={member.id}
@@ -1071,6 +1189,93 @@ export function TeamAction({
                 <li key={item}>{item}</li>
               ))}
             </ul>
+          </div>
+        )}
+        {member.role === 'teammate' && (
+          <div
+            className={css.botSkills}
+            data-team-bot-skills={member.id}
+          >
+            <div className={css.botSkillsHeader}>
+              <span className={css.botSkillsLabel}>{t('botSkills')}</span>
+            </div>
+            <p className={css.hint}>{t('botSkillsHint')}</p>
+            {attachments.length === 0
+              ? <div className={css.notice} data-team-bot-skills-empty={member.id}>{t('botSkillsEmpty')}</div>
+              : (
+                <ul className={css.botSkillsList} data-team-bot-skills-list={member.id}>
+                  {attachments.map((attachment: SkillAttachment) => {
+                    const catalog = catalogById.get(attachment.skillId)
+                    const active = sessionActiveSkills.has(
+                      skillSessionActiveKey(member.id, attachment.skillId),
+                    )
+                    const label = catalog?.displayName ?? attachment.skillId
+                    return (
+                      <li
+                        key={`${attachment.botId}:${attachment.skillId}:${attachment.attachedAt ?? ''}`}
+                        className={css.botSkillRow}
+                        data-team-bot-skill={attachment.skillId}
+                        data-skill-active={active ? 'true' : 'false'}
+                      >
+                        <span data-team-bot-skill-label>{label}</span>
+                        <span className={css.botSkillAttached}>{t('skillAttached')}</span>
+                        {active
+                          ? (
+                            <span
+                              className={css.skillActiveBadge}
+                              data-team-skill-active={attachment.skillId}
+                            >
+                              <IconCheckOutline14 /> {t('skillActive')}
+                            </span>
+                          )
+                          : (
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              data-team-skill-run={attachment.skillId}
+                              onClick={() => { markSkillSessionActive(member.id, attachment.skillId) }}
+                            >
+                              {t('skillRun')}
+                            </button>
+                          )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            {attachments.length > 0 && (
+              <p className={css.hint} data-team-skill-active-hint="">{t('skillActiveHint')}</p>
+            )}
+            {canEditIdentity && attachOpen && (
+              <AttachSkillForm
+                draft={attachSkillDraft}
+                setDraft={setAttachSkillDraft}
+                candidates={attachCandidates}
+                pending={attachPending}
+                onSave={() => { void submitAttachSkill(member) }}
+                onCancel={() => {
+                  setAttachingBotId(null)
+                  setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+                }}
+                t={t}
+              />
+            )}
+            {canEditIdentity && !attachOpen
+              && editingRename !== member.id
+              && editingAvatar !== member.id
+              && editingPersona !== member.id
+              && !confirmPending
+              && !assignOpen && (
+              <button
+                type="button"
+                className={css.personaButton}
+                disabled={identityBusy}
+                data-team-attach-skill={member.id}
+                onClick={() => { startAttachSkill(member) }}
+              >
+                <IconPlusOutline16 size={13} /> {t('attachSkill')}
+              </button>
+            )}
           </div>
         )}
         {canEditIdentity && editingRename === member.id && (
@@ -1134,7 +1339,8 @@ export function TeamAction({
           && editingAvatar !== member.id
           && editingPersona !== member.id
           && !confirmPending
-          && !assignOpen && (
+          && !assignOpen
+          && !attachOpen && (
           <div className={css.identityActions}>
             <button
               type="button"
@@ -1901,6 +2107,62 @@ function DeleteConfirmForm({
         >
           {t('cancel')}
         </button>
+      </div>
+    </div>
+  )
+}
+
+interface AttachSkillFormProps {
+  draft: AttachSkillDraft
+  setDraft: (draft: AttachSkillDraft) => void
+  candidates: readonly SkillCatalogSummary[]
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host attachSkill picker on a bot’s skills surface (FR-003 / T023).
+ * Candidates are Client available-to-attach skills from the Host catalog.
+ */
+function AttachSkillForm({
+  draft, setDraft, candidates, pending, onSave, onCancel, t,
+}: AttachSkillFormProps) {
+  const ready = draft.skillId !== '' && candidates.some(skill => skill.id === draft.skillId)
+  return (
+    <div className={css.form} data-team-attach-skill-editor>
+      <p className={css.hint}>{t('attachSkillHint')}</p>
+      {candidates.length === 0
+        ? (
+          <div className={css.notice} data-team-attach-skill-none="">
+            {t('attachSkillNoneAvailable')}
+          </div>
+        )
+        : (
+          <select
+            aria-label={t('attachSkill')}
+            data-team-attach-skill-select=""
+            value={draft.skillId === '' ? ATTACH_SKILL_NONE : draft.skillId}
+            disabled={pending}
+            onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+              const value = event.target.value
+              setDraft({
+                skillId: value === ATTACH_SKILL_NONE ? '' : value as SkillId,
+              })
+            }}
+          >
+            <option value={ATTACH_SKILL_NONE}>{t('attachSkillPlaceholder')}</option>
+            {candidates.map(skill => (
+              <option key={skill.id} value={skill.id}>
+                {skill.displayName} ({t(skillSourceKey(skill.source))})
+              </option>
+            ))}
+          </select>
+        )}
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>
   )
