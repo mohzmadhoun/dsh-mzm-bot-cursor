@@ -9,19 +9,19 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 
 ## Required filenames (minimum)
 
-| Artifact | Content | Owner recipe |
-|----------|---------|--------------|
-| `01-create-listed-active.png` (or `.webp`) | Bot A routines pane after create — intent identity + active | T018 |
-| `02-reject-empty-or-invalid.png` (or recording segment) | Clear rejection for empty intent and/or bad schedule | T018 |
-| `03-bot-b-isolation.png` (or recording segment) | Bot B pane without A’s routine | T018 |
-| `04-pane-listed-fields.png` (or `.webp`) | Identity + schedule + status (+ last-run if shown) on bot routines pane | T021 |
-| `05-pane-after-leave-return.png` (or `.webp`) | Same Host list after leave/return or reload | T021 |
-| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering create / reject / isolation (+ durability) | T018/T021 |
-| Optional `scenario-1-pane-list-walkthrough.mp4` / `.webm` | Durability-only recording (Steps A–B of pane-list recipe) | T021 |
-| `VERDICT.txt` | Filled stamp when product SC Pass is claimed | Verifier |
+| Artifact | Content | Owner recipe | Status |
+|----------|---------|--------------|--------|
+| `01-create-listed-active.png` (or `.webp`) | Bot A routines pane after create — intent identity + active | T018 | Pending |
+| `02-reject-empty-or-invalid.png` (or recording segment) | Clear rejection for empty intent and/or bad schedule | T018 | Pending |
+| `03-bot-b-isolation.png` (or recording segment) | Bot B pane without A’s routine | T018 | Pending |
+| `04-pane-listed-fields.png` (or `.webp`) | Identity + schedule + status (+ last-run if shown) on bot routines pane | T021 | **Present** (US2 Pass) |
+| `05-pane-after-leave-return.png` (or `.webp`) | Same Host list after leave/return or reload | T021 | **Present** (US2 Pass) |
+| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering create / reject / isolation (+ durability) | T018/T021 | — |
+| Optional `scenario-1-pane-list-walkthrough.mp4` / `.webm` | Durability-only recording (Steps A–B of pane-list recipe) | T021 | **Present** |
+| `VERDICT.txt` | Filled stamp when product SC / US2 path Pass is claimed | Verifier | **US2 pane-list Pass** (see file) |
 
 **Numbering:** Pane-list US2 media stays in **this** directory (`04-`/`05-`). Do **not** put T021 Pass media under `../scenario-2/` — that folder is reserved for quickstart Scenario 2 (pause/resume / T024).
 
-**Supporting (not Scenario path):** Client T020 product-slice media may exist under [`../us2-client-t020/`](../us2-client-t020/); copy or re-capture into `04-`/`05-` before Scenario Pass.
+**Provenance (T021):** `04-`/`05-` (+ walkthrough) copied byte-identical from [`../us2-client-t020/`](../us2-client-t020/) Desktop Verifier frames (leave/return CDP-asserted). See [VERDICT.txt](./VERDICT.txt).
 
-**Status:** Placeholder only — product Pass not stamped; T018 + T021 recipe docs land before media.
+**SO11 mirrors:** `/opt/cursor/artifacts/p4-t021-04-pane-listed-fields.png`, `p4-t021-05-pane-after-leave-return.png`, `p4-t021-scenario-1-pane-list-walkthrough.mp4`.

@@ -1,6 +1,6 @@
 # Scenario — Pane list + durability (US2 / T021)
 
-**Status:** Recipe drafted — product SC Pass **not** stamped (FR-010/011 Scenario media under `evidence/scenario-1/` pending dedicated Desktop run; T020 Client slice evidence is supporting only)
+**Status:** Product US2 pane-list Pass stamped 2026-09-27 — see [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt) (FR-002 + durability only; full SC-001 Scenario 1 Done still needs T018 `01–03`)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host list projection) · DH Client (bot routines pane)
 **Linear:** [MOH-214](https://linear.app/momadhoun/issue/MOH-214) · Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188)
 **Acceptance slice:** T021 — Verifier pane-list + leave/return (or reload) durability with mandatory FR-010/011 (standing orders **11** + **12**) desktop evidence
@@ -29,9 +29,8 @@ Do **not** file pane-list Pass media under `evidence/scenario-2/` — that direc
 | SC / FR coverage | FR-002 pane list · US2 leave/return or reload durability · SC-001 list half (with T018 create path for full Scenario 1) |
 | FR-010 (SO 11) | Desktop screenshot(s) and/or short screen recording of the **real Desktop app** under `verifier/evidence/scenario-1/` — unit/jsdom alone **fails** |
 | FR-011 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
-| Product SC stamp | **Deferred** — fill `evidence/scenario-1/VERDICT.txt` (or sibling pane-list section) only after Desktop FR-010/011 media for Steps A–C lands under `scenario-1/` |
+| Product SC stamp | **Pass (US2 pane-list path)** @ tip `d72ff352f4` — [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt); full SC-001 still deferred pending T018 `01–03` |
 
-**Supporting (not sufficient alone):** Client T020 stamp under [evidence/us2-client-t020/](./evidence/us2-client-t020/) proves pane chrome + leave/return on a product tip — **does not** close Scenario 1 / SC-001 Done or satisfy this recipe’s `evidence/scenario-1/` FR-010/011 bar.
 
 ---
 
@@ -160,7 +159,7 @@ Also copy/publish walkthrough copies under `/opt/cursor/artifacts/` when running
 
 ---
 
-## Pass stamp template (fill when evidence lands — do not claim now)
+## Pass stamp (filled — see VERDICT.txt; template for reruns)
 
 ```text
 Verdict: Pass (US2 pane-list path)
@@ -209,4 +208,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T021 docs).** Product Scenario / SC Pass **not** stamped. Host T019 + Client T020 are on master ([#153](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/153), [#154](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/154)); T020 Desktop leave/return is supporting under `us2-client-t020/`. Full US2 Scenario-path Done waits on FR-010/011 media filed as `04-`/`05-` under `verifier/evidence/scenario-1/` plus SO12 PR embeds. Leave [MOH-214](https://linear.app/momadhoun/issue/MOH-214) **In Progress**.
+**US2 pane-list Scenario path Pass stamped** (2026-09-27) at master tip `d72ff352f4` (#156 recipe) with FR-010/011 media under [evidence/scenario-1/](./evidence/scenario-1/) (`04-`/`05-` + walkthrough). Provenance: byte-identical copy of T020 Desktop Verifier leave/return frames. Full SC-001 Scenario 1 Done still waits on T018 `01–03`. Leave [MOH-214](https://linear.app/momadhoun/issue/MOH-214) **In Progress** until the stamp PR merges; PO closes after SO12 PR embeds land.
