@@ -1,0 +1,65 @@
+T025 Host cron ticker wake active routines + lastRunAt — DH Verifier
+======================================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-27
+Product tip gated: cursor/p4-us4-host-cron-fire-fe1d @ c3b49cfbbc
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/161 (OPEN, base master)
+Linear: MOH-218 (T025) — left In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T025 / Host product — not SC-003 / Scenario desktop Done)
+--------------------------------------------------------------------
+[x] Host ticker / evaluateDueRoutines wakes due **active** routines and starts/continues
+    bot turn with intent (live followup or cold subagent queue).
+[x] lastRunAt updates after fire commit/enqueue (and not when wake enqueue fails).
+[x] Paused routines MUST NOT wake (T022 / FR-003 invariant held).
+[x] Host catalog SoT — Host process setInterval ticker; journal team/routine;
+    no Electron Main routines bus; no dsh-schedule as fire SoT.
+[x] Unit tests cover US4 T025; tasks.md T025 [x]; T026–T028 unchecked.
+[x] Host-only: unit/session proof enough for T025 Pass — Desktop SC-003 / last-run pane
+    is T027+T028 (not gated here).
+
+Evidence (measured)
+-------------------
+Commands @ c3b49cfbbc:
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/routine-cron.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'US4 T025'
+  → 4 passed | 78 skipped (2 files)
+    - routine-cron > US4 T025: isRoutineDue gates on active + next fire ≤ now
+    - Team Remote API > US4 T025: evaluateDueRoutines wakes active routine and updates
+      lastRunAt; paused does not fire
+    - Team Remote API > US4 T025: live bot followup wake updates lastRunAt
+    - Team Remote API > US4 T025: deleted bot skips fire without lastRunAt; disposed
+      evaluator is empty
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-routines-bus.spec.ts
+  → 3 passed (spot-check)
+
+Logs: p4-us4-host-t025-vitest.log · p4-us4-host-t025-vitest-verbose.log
+      p4-us4-host-t025-electron-bus.log · p4-us4-host-t025-option3.log
+      p4-us4-host-t025-diff-scope.log
+(also under /opt/cursor/artifacts/us4-t025/)
+
+Diff scope (origin/master...c3b49cfbbc): 9 files under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/004-routines-cron/tasks.md
+  Zero Client UI / apps/desktop product paths in this Host slice.
+
+Claims
+------
+- evaluateDueRoutines wakes active + commits lastRunAt: **measured**
+- Intent enqueued on bot session / live followup: **measured**
+- Paused does not fire; failed wake does not advance lastRunAt: **measured**
+- Host ticker in agent-team (not Electron Main / not dsh-schedule): **measured**
+- tasks.md T025 [x], T026–T028 [ ]: **measured**
+- Desktop SC-003 / last-run pane (T027/T028): **not run** (out of scope)
+
+Scope lock
+----------
+Does NOT stamp SC-003 product Done or Scenario desktop FR-010/011.
+Does NOT gate Client last-run UI (T027) or Verifier Scenario recipe (T028).
+Does NOT mark Linear MOH-218 Done.
+Next: optional T026 jobs visibility · Client T027 · Verifier T028 / SC-003 desktop.
+Leave MOH-218 In Progress until PO merges.

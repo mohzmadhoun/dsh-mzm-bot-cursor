@@ -1,0 +1,16 @@
+=== PR #161 ===
+{"baseRefName":"master","headRefOid":"c3b49cfbbc738847a6f0ef8500775db3fe476eb3","number":161,"state":"OPEN","title":"Phase 4 - T025 - Host cron ticker wake active routines + lastRunAt","url":"https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/161"}
+=== tip vs origin ===
+c3b49cfbbc738847a6f0ef8500775db3fe476eb3
+c3b49cfbbc738847a6f0ef8500775db3fe476eb3
+=== diff scope vs master ===
+ packages/experimental/agent-team/README.i18n.yaml  |   4 +-
+ packages/experimental/agent-team/README.md         |   5 +-
+ packages/experimental/agent-team/README.zh.md      |   5 +-
+ packages/experimental/agent-team/src/index.ts      | 159 +++++++++++++++++++++
+ .../experimental/agent-team/src/routine-cron.ts    |  31 ++++
+ packages/experimental/agent-team/src/types.ts      |   6 +
+ .../agent-team/tests/routine-cron.spec.ts          |  32 +++++
+ .../experimental/agent-team/tests/team.spec.ts     | 153 ++++++++++++++++++++
+ specs/004-routines-cron/tasks.md                   |   2 +-
+ 9 files changed, 390 insertions(+), 7 deletions(-)
