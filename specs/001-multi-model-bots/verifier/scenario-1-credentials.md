@@ -5,7 +5,7 @@
 **Contract:** [../contracts/in-app-credentials.md](../contracts/in-app-credentials.md)
 **Quickstart:** [../quickstart.md](../quickstart.md) Scenario 1
 **Related:** [credentials-ipc.md](./credentials-ipc.md) (T011 / T034) · [t016-llm-route.md](./t016-llm-route.md) · [t020-cred-handoff.md](./t020-cred-handoff.md) · [trust-floor.md](./trust-floor.md)
-**Package authority (resolve order + product role):** [`packages/credentials/credentials-local/README.md`](../../../packages/credentials/credentials-local/README.md) — section “Where keys come from” (T036 may still be landing; this recipe restates FR-009 so Verifier does not wait on that merge)
+**Package authority (resolve order + product role):** [`packages/credentials/credentials-local/README.md`](../../../packages/credentials/credentials-local/README.md) — section “Where keys come from” (T036 landed; this recipe restates FR-009 for Verifier)
 **Branch:** `cursor/p1-t037-scenario1-92fa`
 **Evidence:** [evidence/scenario-1/](./evidence/scenario-1/)
 
@@ -134,4 +134,4 @@ Electron Main invents neither credentials nor LLM routes. Secrets stay on Host `
 
 ## Merge-forward note (T036)
 
-T036 owns packaging the same FR-009 table into `credentials-local` README and may land a stub of this file first. If that branch merges after T037, **merge-forward** this recipe onto the stub (keep T037 Pass evidence and assert tables; keep T036 README product-role wording).
+T036 landed the FR-009 table in `credentials-local` README. This file keeps the full T037 Pass recipe and assert tables; do not regress to the T036 stub.

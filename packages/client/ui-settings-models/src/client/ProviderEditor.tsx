@@ -366,6 +366,7 @@ export function ProviderEditor(props: ProviderEditorProps): ReactNode {
             className={styles['input']}
             type="password"
             autoComplete="off"
+            data-models-credential-entry=""
             value={keyDraft}
             placeholder={keyPlaceholder}
             aria-label={t('keyInput')}

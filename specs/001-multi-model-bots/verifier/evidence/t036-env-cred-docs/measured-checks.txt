@@ -1,0 +1,62 @@
+# T036 measured checks — 2026-09-27T10:13:59Z
+git rev-parse HEAD
+8de7278c58ce5d30c8468ccff34ef0f8dd199a1e
+
+git show --stat --oneline HEAD
+8de7278c58 Phase 1 - T036 - document env/keyfile as secondary credentials
+ .../credentials/credentials-local/README.i18n.yaml |  4 +--
+ packages/credentials/credentials-local/README.md   | 20 ++++++++-----
+ .../credentials/credentials-local/README.zh.md     | 20 ++++++++-----
+ specs/001-multi-model-bots/tasks.md                |  2 +-
+ specs/001-multi-model-bots/verifier/README.md      |  2 +-
+ .../verifier/scenario-1-credentials.md             | 35 ++++++++++++++++++++++
+ 6 files changed, 63 insertions(+), 20 deletions(-)
+
+git hash-object packages/credentials/credentials-local/README.md
+0371b3b255b0d4efffde25e1f7768075d40145c1
+git hash-object packages/credentials/credentials-local/README.zh.md
+e93ce0650d529fab797d116ab344f6e83bebb776
+
+cat packages/credentials/credentials-local/README.i18n.yaml
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/credentials/credentials-local/README.md
+README.md: 0371b3b255b0d4efffde25e1f7768075d40145c1
+README.zh.md: e93ce0650d529fab797d116ab344f6e83bebb776
+
+--- FR-009 wording (rg) ---
+12:`dsh-credentials-local` keeps API keys and other secrets in a private file under your harness home. You can save credentials through the configuration UI or edit the file directly; changes reload automatically and saved values survive restarts. In-app save to the stored file is the product primary auth path; launch-environment and `.env` layers remain for development and CI only. Credential lookup follows a fixed precedence: the launch environment wins, followed by the stored file, the project's `.env`, and the harness-home `.env`; a newly saved value immediately overrides older `.env` values. Only your OS user can read the file, but agent tool processes run as that same user, so this store cannot isolate secrets from the agent.
+73:| Place | Product role | Writable? | Wins over |
+75:| The environment you launched in (`DEEPSEEK_API_KEY=… dsh`) | Secondary (dev/CI only) | no | everything |
+76:| The stored file | **Primary** (in-app Models / settings) | yes (`set`/`unset`) | both `.env` files |
+77:| Your project's `.env` (`<invocation cwd>/.env`) | Secondary (dev/CI only) | not here | your home `.env` |
+78:| Your home `.env` (`$DSH_HOME/.env`) | Secondary (dev/CI only) | not here | nothing |
+82:**Secondary path (development and CI only).** Launch-environment variables and the two `.env` layers may supply keys for local development, CI secrets, and container `-e` overrides. They MUST NOT be documented or taught as the product primary auth path. When a launch-environment value is set for a reference, it wins for that process (read-only); that override is a per-run intent, not the product story.
+
+--- scenario stub FR-009 ---
+4:**Status:** T036 documents FR-009 secondary path. Full SC-006 dump recipe is **T037** (not Pass yet).
+5:**Acceptance slice:** FR-009 product posture (this file + package docs). SC-006 / FR-008 dump Pass remains T037.
+9:**Related (do not edit for T036):** [credentials-ipc.md](./credentials-ipc.md) (T011 / T034)
+13:| Path | Role | Counts for SC-006 Pass? |
+15:| In-app Models / settings → Host `ctx.credentials` → managed `$DSH_HOME/.credentials.yaml` | **Product primary** | Yes (required evidence path) |
+16:| Launch environment (`DEEPSEEK_API_KEY=…`), project `.env`, harness-home `.env` | **Secondary** — development and CI only | No — CI shortcut only; must not be taught as product primary |
+18:**Fail FR-009** if Desktop/Host docs or this recipe teach env/key-file as the product primary auth path, or if SC-006 Pass evidence relies only on env injection without an in-app entry demonstration.
+20:## Stub notes for T037 (full recipe)
+22:T037 owns the rerunnable Scenario 1 recipe. Until then, Verifier may **Defer** SC-006 with reason rather than Pass on env-only auth.
+29:4. Export / dump session transcript; review for raw secrets (SC-006).
+31:## Pass criteria (T036 docs slice only)
+35:- This slice alone does **not** claim Scenario 1 / SC-006 dump Pass.
+
+--- tasks.md T036/T037 ---
+140:- [x] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
+141:- [ ] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets
+191:- US4 (T033–T037) can parallel US2 once T011 done
+
+--- name-only diff vs master ---
+packages/credentials/credentials-local/README.i18n.yaml
+packages/credentials/credentials-local/README.md
+packages/credentials/credentials-local/README.zh.md
+specs/001-multi-model-bots/tasks.md
+specs/001-multi-model-bots/verifier/README.md
+specs/001-multi-model-bots/verifier/scenario-1-credentials.md
