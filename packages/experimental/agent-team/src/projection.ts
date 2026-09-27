@@ -541,26 +541,31 @@ export interface SkillCatalogSourceEntry {
 
 /**
  * Project Host `ctx.skills` (or equivalent) summaries into Client-readable catalog rows.
- * Maps provider sources onto product `managed` | `user`; thin-pack id `mzm-thin-pack` is
- * always `managed` with human-readable display `MzM thin pack` (FR-001 / discover-load).
- * Electron Main must not invent catalog rows — call only with Host registry results.
+ * Pass discovery lists exactly one `managed` skill: id `mzm-thin-pack` with display
+ * `MzM thin pack` (FR-001 / FR-008 / SC-004). Other provider `bundled` skills (office-*,
+ * badges) stay installed in `ctx.skills` for model use but are omitted from this surface.
+ * Remaining non-bundled rows map to product `user`. Electron Main must not invent catalog
+ * rows — call only with Host registry results.
  * @param entries - winning skill summaries from the Host skills registry.
  * @returns detached catalog summaries for Agent Teams / Desktop Web discovery.
  */
 export function projectSkillCatalog(
   entries: readonly SkillCatalogSourceEntry[],
 ): readonly SkillCatalogSummary[] {
-  return entries.map((summary): SkillCatalogSummary => {
-    const managed = summary.source === 'bundled'
-      || summary.name === 'mzm-thin-pack'
+  const catalog: SkillCatalogSummary[] = []
+  for (const summary of entries) {
+    // Omit non-thin-pack bundled skills from Pass discovery (SC-004 / T032).
+    if (summary.source === 'bundled' && summary.name !== 'mzm-thin-pack') continue
+    const managed = summary.name === 'mzm-thin-pack'
     const description = summary.description.trim()
-    return {
+    catalog.push({
       id: SkillId(summary.name),
-      displayName: managed && summary.name === 'mzm-thin-pack'
+      displayName: managed
         ? 'MzM thin pack'
         : (description.length > 0 ? description : summary.name),
       source: managed ? 'managed' : 'user',
       ...(description.length > 0 ? { description } : {}),
-    }
-  })
+    })
+  }
+  return catalog
 }
