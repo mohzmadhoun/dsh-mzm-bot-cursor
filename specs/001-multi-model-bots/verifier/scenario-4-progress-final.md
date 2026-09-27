@@ -1,12 +1,12 @@
 # Scenario 4 — Progress + final (SC-004)
 
-**Status:** Recipe present (T032). Composite FR-006 proof outline for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** (in-flight half) and **T030** (complete half + optional mailbox attribution) are on `master`. This recipe covers **both** contract halves; do **not** stamp SC-004 Pass until the composite commands below exit 0 on the checkout under test and evidence is recorded under `evidence/scenario-4/`.
+**Status:** SC-004 keyless **Pass** stamped (composite re-run after T030 on `master`). Composite FR-006 proof for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** + **T030** are both on `master`; measured evidence under [evidence/scenario-4/](./evidence/scenario-4/). Live Desktop (optional criterion 6) remains Skipped.
 **Owners:** DH Verifier (this recipe + evidence) · DH Electron/Client (T029–T030 `ui-chat`) · DH Runtime (session/agent streams + durable session log)
 **Acceptance:** Spec FR-006 · SC-004 · US3 scenario 2 (quickstart Scenario 4)
 **Contract:** [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
 **Quickstart:** [../quickstart.md](../quickstart.md) Scenario 4
 **Data model:** [../data-model.md](../data-model.md) Chat turn (`progressUpdates`, `finalResult`, optional `linkedMailboxMessageId`)
-**Branch (T032 recipe):** `cursor/p1-t032-scenario4-92fa` (base `master` @ T029)
+**Branch (T032 recipe):** `cursor/p1-t032-scenario4-92fa` (landed). **Stamp branch (SC-004 Pass):** `cursor/p1-t032-sc004-stamp-92fa` (base `master` @ T030)
 
 ## What this recipe proves (SC-004)
 
@@ -29,8 +29,8 @@ Does **not** claim Scenario 0 / SC-007, Scenario 2 / SC-001–002, or Scenario 3
 
 ## Preconditions
 
-- [ ] Checkout includes **T029** on base (`master` @ T029 merge or later) — **measured** required for progress half
-- [ ] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required before SC-004 Pass; recipe alone is not SC-004 Pass
+- [x] Checkout includes **T029** on base (`master` @ T029 merge or later) — **measured** required for progress half
+- [x] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required for SC-004 Pass (recipe presence alone is not SC-004 Pass)
 - [ ] `pnpm install` complete
 - [ ] Node `^22.19 || >=24`
 - [ ] Scenario 0 / SC-007 Topology handshake **Pass** recorded ([README](./README.md#handshake-pass-gate-sc-007--fr-013)) — required before product SC Done

@@ -1,0 +1,13 @@
+UTC: 2026-09-27T11:00:48Z
+SHA: 8fa8148378037657b14cb0039a72855d97cd1392
+CLAIM: measured
+
+COMMAND:
+  rg -n 'dsh-desktop:(chat-progress|chat-final|assistant-final|final-result|turn-complete)' apps/desktop/src
+RESULT: no matches (expected — Shell MUST NOT synthesize progress/final IPC)
+
+MARKERS (packages/client/ui-chat/src):
+  ChatView.tsx:200 — data-chat-progress="host-stream"
+  AssistantMarkdown.tsx:151 — data-chat-progress={streaming ? 'host-stream' : undefined}
+  AssistantMarkdown.tsx:154 — data-chat-final={finalDelivery && !streaming ? 'session-log' : undefined}
+  AssistantMarkdown.tsx:155 — data-linked-mailbox-message-id= (when attributable)
