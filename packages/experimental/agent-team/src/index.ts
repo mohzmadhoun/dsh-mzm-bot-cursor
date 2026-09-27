@@ -583,9 +583,10 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Routine create (P4 FR-001 / T007).
+   * Lead-authorized Host Routine create (P4 US1 FR-001 / T015–T016).
    * Persists a `RoutineRecord` on the Team journal (`team/routine`); status defaults to `active`.
-   * Rejects empty intent or unsupported scheduleExpr without writing.
+   * Rejects empty intent or unsupported scheduleExpr without writing (loud TeamError).
+   * Per-`botId` isolation (SC-006); no confirm step and no separate displayName — identity from intent (SC-007).
    * Electron Main must not invent routine records — Host owns the durable write (research R1).
    * Not `@deepseek-ai/dsh-schedule` session reminders (research R2).
    * @param caller - exact live Lead Agent.
@@ -1124,11 +1125,12 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Create one Host Routine through the generated Remote API (P4 T009).
+   * Create one Host Routine through the generated Remote API (P4 US1 T015–T016 / T009).
+   * Empty intent or unsupported scheduleExpr return `{ ok: false, error.message }` for Client display.
    * @param agent - exact live Lead Agent authorizing create.
-   * @param request - bot id, intent, and scheduleExpr.
+   * @param request - bot id, intent, and scheduleExpr (no confirm / displayName fields).
    * @param signal - Remote call cancellation.
-   * @returns the Routine projection or a typed Team rejection.
+   * @returns the Routine projection or a typed Team rejection with a clear reason.
    */
   @Remote('createRoutine')
   remoteCreateRoutine(

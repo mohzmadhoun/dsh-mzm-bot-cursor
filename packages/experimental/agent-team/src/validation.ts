@@ -89,7 +89,7 @@ export function requiredSkillInstructionalBody(value: string): string {
 }
 
 /**
- * Normalize Host routine wake intent (P4 FR-001).
+ * Normalize Host routine wake intent (P4 US1 FR-001 / T015).
  * Empty / whitespace-only intents reject create without writing.
  * @param value - raw intent from Host create.
  * @returns trimmed non-empty intent text.
@@ -99,7 +99,7 @@ export function requiredRoutineIntent(value: string): string {
 }
 
 /**
- * Normalize and validate Host routine scheduleExpr (P4 FR-001 / T008).
+ * Normalize and validate Host routine scheduleExpr (P4 US1 FR-001 / T015; evaluator T008).
  * Rejects empty / unsupported expressions with a stable TeamError.
  * @param value - raw schedule expression.
  * @returns trimmed product-supported scheduleExpr string.
