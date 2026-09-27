@@ -1,0 +1,40 @@
+VERDICT: Pass
+SC: FR-004 Host mailbox send path A→B (T021 / US2)
+SHA: 427909a480873c9f59ac1d1ecab388758863784c
+UTC: 2026-09-27T09:15:42Z
+IMPL_SHA: 427909a480 (Phase 1 - T021 - Host mailbox send path A to B)
+BRANCH: cursor/p1-t021-mailbox-send-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/41
+RECIPE: specs/001-multi-model-bots/verifier/t021-mailbox-send.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/mailbox-send.spec.ts packages/experimental/agent-team/tests/delivery-state.spec.ts
+STDOUT: evidence/t021-mailbox-send/vitest-focused.log (Test Files 2 passed; Tests 9 passed; EXIT:0)
+PASSED_TESTS (measured):
+  mailbox-send.spec.ts (3):
+    1. delivers A→B through Lead-log mailbox into B inbox as visible-pending (FR-004/005)
+    2. reconstructs acted when B cold-resumes and runs a turn on A's message
+    3. keeps deliveryState queued when Host cannot complete delivery yet
+  delivery-state.spec.ts (6):
+    1. returns undefined when the Lead never queued the message
+    2. returns queued before the Lead delivered edge
+    3. returns delivered when Lead ack exists but the target log has no receipt yet
+    4. returns visible-pending for a durable user/message receipt without a later turn
+    5. returns visible-pending when the receipt is only in the pending inbox splice
+    6. returns acted when a request/header follows the durable team-message receipt
+OPTIONAL_TEAM_MAILBOX: Pass (measured)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'Team mailbox and waiting'
+STDOUT2: evidence/t021-mailbox-send/vitest-team-mailbox.log (23 passed | 33 skipped; EXIT:0)
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND3: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT3: evidence/t021-mailbox-send/vitest-topology-negative.log (1 passed | 4 skipped; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; mock LLM — no provider API secrets
+CRITERIA_CHECKED:
+  1. Product bots via Host createBot exchange peer mail through sendMessage (A→B), not Electron IPC — Pass (measured; mailbox-send createBot + sendMessage)
+  2. Lead Session log records team/message/queued then team/message/delivered — Pass (measured; leadMailboxEdges)
+  3. Target Session holds TeamMessageSource kind team-message with sender/team attribution — Pass (measured)
+  4. deliveryState reconstructs queued | delivered | visible-pending | acted from Lead + target logs — Pass (measured; observeMailboxDeliveryState suite + integration)
+  5. Session-log reconstructable without Main-synthesized mailbox payloads — Pass (measured; storedEvents / snapshotEvents only)
+  6. Optional topology negative: no Main mailbox channel — Pass (measured; rejects fake mailbox)
+CLAIM: measured (independent Verifier re-run @ 427909a480)
+SCOPE_OUT: T022 durable product field aliases; T023–T025 SC-003 Desktop UI / Scenario 3; T026 Electron bus guard (checklist-only; topology negative already green)
+BLOCKER: none
