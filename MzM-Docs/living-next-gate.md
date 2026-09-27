@@ -15,38 +15,60 @@
 
 **P2 (Identity / personas)** — **Done.** Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) Done (PO). Specs under `specs/002-identity-personas/`. Phase 2 product Verifier **Pass** merged as [#104](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/104) @ `5ec5bb004e` (desktop visual stamps per standing order 11).
 
-**P3 (Skills UX)** — Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) open (PO-owned; Lead did **not** create). Spec Kit loop not started until specify Pass.
+**P3 (Skills UX)** — Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) **In Progress**. Specs under `specs/003-skills-ux/`.
+
+- Spec Kit **design Done** (specify → clarify → plan → tasks → analyze + taskstoissues) on `master`:
+  - Specify Done ([MOH-143](https://linear.app/momadhoun/issue/MOH-143/p3-spec-kit-specify-skills-ux) / [#106](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/106)).
+  - Clarify Done ([MOH-144](https://linear.app/momadhoun/issue/MOH-144/p3-spec-kit-clarify-skills-ux) / [#107](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/107)).
+  - Plan Done ([MOH-145](https://linear.app/momadhoun/issue/MOH-145/p3-spec-kit-plan-skills-ux) / [#108](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/108)).
+  - Tasks Done ([MOH-146](https://linear.app/momadhoun/issue/MOH-146/p3-spec-kit-tasks-skills-ux) / [#109](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/109)).
+  - Analyze + taskstoissues Done ([MOH-147](https://linear.app/momadhoun/issue/MOH-147/p3-spec-kit-analyze-taskstoissues-skills-ux) / [#111](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/111) @ `bf71115cea`; analyze **PASS**). Issues [MOH-148](https://linear.app/momadhoun/issue/MOH-148)…[MOH-187](https://linear.app/momadhoun/issue/MOH-187) under epic MOH-142.
 
 ## Next gate
 
-**Current — P3 Skills UX Spec Kit specify.** Owner: **DH Spec**. Linear: [MOH-143](https://linear.app/momadhoun/issue/MOH-143/p3-spec-kit-specify-skills-ux). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P3.
+**Implement — Setup + Foundational (T001–T014) kicked** (no US1–US4 fan-out until foundations checkpoint).
 
-- **Authorize specify only** — no clarify/plan/tasks/implement until Verifier Pass on specify.
-- **Do not invent FR detail** — Spec owns FRs/acceptance when specify runs; Lead/this doc carry plan In/Out/Exit only.
-- **Do not rewrite** `specs/001-multi-model-bots` or `specs/002-identity-personas`; new `specs/003-…` tree.
-- **Standing order 11** — GUI acceptance criteria from specify onward must require desktop screenshots/recordings (real Cloud Agent display), not unit/jsdom alone.
-- Program In/Out/Exit (plan only; not FRs): load/discover + authoring; thin managed pack — **out** full managed catalog parity + learn-from-demonstration; exit = attach/run a skill on a bot with Verifier covering load + one authoring path.
+### Setup (T001–T005) — parallel
 
-## Phase 3 kickoff (specify authorized)
+| Task | Issue | Owner |
+|------|-------|-------|
+| T001 Confirm design tree | [MOH-148](https://linear.app/momadhoun/issue/MOH-148) | **DH Spec** |
+| T002 Inventory Host skill catalog | [MOH-149](https://linear.app/momadhoun/issue/MOH-149) | **DH Runtime** |
+| T003 Inventory attachment + instruction-bind | [MOH-150](https://linear.app/momadhoun/issue/MOH-150) | **DH Runtime** |
+| T004 Verifier recipe README | [MOH-151](https://linear.app/momadhoun/issue/MOH-151) | **DH Verifier** |
+| T005 Record thin-pack pick (`mzm-thin-pack`) | [MOH-152](https://linear.app/momadhoun/issue/MOH-152) | **DH Spec** / **DH Architect** |
 
-Mirror P2 [MOH-89](https://linear.app/momadhoun/issue/MOH-89/p2-lead-kickoff-phase-gate). Spec Kit **specify** only; no feature code; no FR invention.
+### Foundational (T006–T014) — **blocks** US fan-out
 
-1. **PO** — Confirmed P2 Verifier Pass + MOH-88 Done; opened epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) and specify [MOH-143](https://linear.app/momadhoun/issue/MOH-143/p3-spec-kit-specify-skills-ux). Lead does **not** create/duplicate epics.
-2. **DH Lead** — This living gate; authorize Spec specify; report Status / Next gate / Owners to PO. No feature code.
-3. **DH Spec** — `/speckit-specify` for P3 Skills UX only against plan §4 P3 In/Out/Exit; new `specs/003-…` tree; FRs from specify, not from this gate. GUI paths must call out desktop visual evidence (standing order 11).
-4. **DH Verifier** — Gate specify delivery (Pass/Fail) before clarify.
-5. **Held until after specify Pass** — clarify → plan → tasks → analyze → taskstoissues → implement (same Spec Kit order as P2); Architect / Runtime / Electron engage on seams when plan/tasks demand.
+| Task | Issue | Owner |
+|------|-------|-------|
+| T006 Ship `mzm-thin-pack` SKILL.md | [MOH-153](https://linear.app/momadhoun/issue/MOH-153) | **DH Runtime** |
+| T007 Mount managed + user skills roots | [MOH-154](https://linear.app/momadhoun/issue/MOH-154) | **DH Runtime** |
+| T008 Extend Bot identity `skillAttachments` | [MOH-155](https://linear.app/momadhoun/issue/MOH-155) | **DH Runtime** |
+| T009 Persist `skillAttachments` Host-durably | [MOH-156](https://linear.app/momadhoun/issue/MOH-156) | **DH Runtime** |
+| T010 Host attach/author mutation stubs | [MOH-157](https://linear.app/momadhoun/issue/MOH-157) | **DH Runtime** |
+| T011 Project catalog + attachments to Client | [MOH-158](https://linear.app/momadhoun/issue/MOH-158) | **DH Runtime** |
+| T012 Document instruction-bind approach | [MOH-159](https://linear.app/momadhoun/issue/MOH-159) | **DH Architect** / **DH Runtime** |
+| T013 No-Electron-skills-bus regression guard | [MOH-160](https://linear.app/momadhoun/issue/MOH-160) | **DH Electron** |
+| T014 Foundational Pass checklist in verifier README | [MOH-161](https://linear.app/momadhoun/issue/MOH-161) | **DH Verifier** |
+
+- Spec / Verifier / Runtime may touch `specs/003-skills-ux/` for their Setup/Foundational slices; do **not** rewrite `specs/001` or `specs/002`.
+- **Standing order 11** — every GUI Verifier recipe requires desktop screenshots/recordings (real Cloud Agent display), not unit/jsdom alone.
+- **After T014 foundational checkpoint:** US fan-out (US1 → US2 → US3 → US4 per `tasks.md`) + Architect seams as story slices demand.
+- Epic MOH-142 stays open until Phase 3 product Verifier Pass + PO Done.
 
 ## Owners / held
 
 | Role | Action |
 |------|--------|
-| **DH Spec** | **Go** — P3 specify ([MOH-143](https://linear.app/momadhoun/issue/MOH-143/p3-spec-kit-specify-skills-ux)); no FR invention beyond plan In/Out/Exit |
-| **DH Verifier** | Gate specify PR Pass/Fail before clarify |
-| **DH Lead** | This living gate + kickoff; no epic create; no feature code |
-| **DH Architect / Runtime / Electron** | Held until plan/tasks demand; no P2 reopen |
+| **DH Spec** | Setup T001 + T005 in flight |
+| **DH Runtime** | Setup T002–T003 + Foundational T006–T011 (and T012 with Architect) in flight |
+| **DH Architect** | T005 thin-pack lock + T012 instruction-bind; seams as foundations demand |
+| **DH Electron** | Foundational T013 (no Electron skills bus); shell only when story slices need it |
+| **DH Verifier** | Setup T004 + Foundational T014; gate product SC path after US work |
+| **DH Lead** | This living gate only; no feature code; no epic Done |
 | **PO Assistant** | Orchestration; Linear statuses; ship/no-ship on later P3 gates |
 
 ## Blockers
 
-None for specify kickoff. P2 Verifier Pass + epic open satisfied. Next hard gate after specify draft: Verifier Pass on specify before clarify.
+None for Setup + Foundational T001–T014 kickoff. Design PRs #106–#109 + #111 merged; analyze PASS. Hard gate before US1–US4: foundational checkpoint (T006–T014 / T014 stamp).
