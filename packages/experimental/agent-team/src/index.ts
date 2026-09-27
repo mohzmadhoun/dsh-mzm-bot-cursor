@@ -4,6 +4,8 @@ import { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { randomUUID } from 'node:crypto'
 import type { Agent } from '@deepseek-ai/dsh-agent'
+import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { queueHostSubagentPrompt } from '@deepseek-ai/dsh-subagent/internal'
 import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
 import { writeSkillBundle } from '@deepseek-ai/dsh-skill-filesystem'
@@ -63,6 +65,7 @@ import type {
   PauseRoutineInput,
   PauseRoutineRequest,
   PauseRoutineResult,
+  RoutineProjection,
   RenameBotInput,
   RenameBotRequest,
   RenameBotResult,
@@ -128,12 +131,19 @@ export {
   projectSidebarSections,
   projectSkillCatalog,
 } from './projection.ts'
+import {
+  isRoutineEligibleForWake,
+  isRoutineDue,
+  routinesDueForWake,
+} from './routine-cron.ts'
 export {
   parseScheduleExpr,
   nextFireAt,
   describeScheduleExpr,
   isRoutineEligibleForWake,
   routinesEligibleForWake,
+  isRoutineDue,
+  routinesDueForWake,
   MIN_EVERY_INTERVAL_MS,
 } from './routine-cron.ts'
 export {
@@ -155,6 +165,8 @@ const DEFAULT_MAX_TASKS = 256
 const DEFAULT_MAX_PENDING_MESSAGES = 64
 const DEFAULT_MAX_MESSAGE_BYTES = 65_536
 const DEFAULT_DISPOSAL_TIMEOUT_MS = 5_000
+/** Default Host Routine cron poll period (15s — Verifier ≤6 min window needs no sub-5m schedule). */
+const DEFAULT_ROUTINE_CRON_TICK_MS = 15_000
 
 /** Validate one positive safe-integer deployment limit. */
 function positiveLimit(name: string, value: number): number {
@@ -174,6 +186,7 @@ export class TeamService extends TypertRemoteService {
     maxPendingMessagesPerMember: z.number().step(1).min(1).default(DEFAULT_MAX_PENDING_MESSAGES),
     maxMessageBytes: z.number().step(1).min(1).default(DEFAULT_MAX_MESSAGE_BYTES),
     disposalTimeoutMs: z.number().step(1).min(1).default(DEFAULT_DISPOSAL_TIMEOUT_MS),
+    routineCronTickMs: z.number().step(1).min(1).default(DEFAULT_ROUTINE_CRON_TICK_MS),
     userSkillsRoot: z.string().min(1),
   })
 
@@ -194,6 +207,8 @@ export class TeamService extends TypertRemoteService {
   private readonly skillBinds = new Map<SessionId, SkillBindRef>()
   /** Disposers for Host-authored runtime skill registrations (re-register on update). */
   private readonly userSkillRegistrations = new Map<string, () => void>()
+  /** In-flight Host Routine fires keyed by routineId (dedupe concurrent ticker ticks). */
+  private readonly inFlightFires = new Map<RoutineId, Promise<void>>()
 
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'agentTeams')
@@ -209,6 +224,10 @@ export class TeamService extends TypertRemoteService {
       disposalTimeoutMs: positiveLimit(
         'disposalTimeoutMs',
         config.disposalTimeoutMs ?? DEFAULT_DISPOSAL_TIMEOUT_MS,
+      ),
+      routineCronTickMs: positiveLimit(
+        'routineCronTickMs',
+        config.routineCronTickMs ?? DEFAULT_ROUTINE_CRON_TICK_MS,
       ),
       userSkillsRoot: userSkillsRoot === undefined || userSkillsRoot.length === 0
         ? undefined
@@ -250,6 +269,16 @@ export class TeamService extends TypertRemoteService {
         }
       }
     }, 'agentTeams.runtimeLifecycle()')
+    // Host process cron ticker (Architect Option 3) — not Electron Main, not dsh-schedule.
+    ctx.effect(() => {
+      const timer = setInterval(() => {
+        void this.evaluateDueRoutines().catch((error: unknown) => {
+          if (this.lifecycle.disposed) return
+          this.ctx.logger.warn(`Agent Teams routine cron tick failed: ${errorMessage(error)}`)
+        })
+      }, this.config.routineCronTickMs)
+      return () => { clearInterval(timer) }
+    }, 'agentTeams.routineCronTicker()')
     for (const agent of ctx.agents.list()) this.scheduleRecovery(agent)
   }
 
@@ -732,6 +761,134 @@ export class TeamService extends TypertRemoteService {
       return row
     })
     return { routine: projectRoutine(routine) }
+  }
+
+  /**
+   * Host cron evaluator (P4 US4 T025 / FR-005): wake due **active** routines and commit `lastRunAt`.
+   * Paused catalog rows never fire (FR-003). Uses Agent inbox wake via subagent queue (followup),
+   * not `dsh-schedule` reminder dispatch and not Electron Main timers (research R3).
+   * Safe to call from the Host ticker or tests with an explicit wall-clock sample.
+   * @param nowMs - wall-clock sample; defaults to `Date.now()`.
+   * @returns projections for routines whose fire committed (lastRunAt updated).
+   */
+  async evaluateDueRoutines(nowMs: number = Date.now()): Promise<readonly RoutineProjection[]> {
+    if (this.lifecycle.disposed) return []
+    if (!Number.isFinite(nowMs)) {
+      throw new TeamError('evaluateDueRoutines nowMs must be a finite number', 'TEAM_INVALID_ARGUMENT')
+    }
+    const committed: RoutineProjection[] = []
+    for (const agent of this.ctx.agents.list()) {
+      /* v8 ignore next -- disposal races the Host ticker mid-scan. */
+      if (this.lifecycle.disposed) break
+      const membership = this.roster.tryMembership(agent)
+      if (membership === undefined || membership.role !== 'lead') continue
+      const root = membership.root
+      let due: readonly RoutineRecord[]
+      try {
+        due = routinesDueForWake(this.journal.state(root).routines, nowMs)
+      } catch (error: unknown) {
+        /* v8 ignore next 4 -- journal rows are create-validated; corrupt expr is defensive only. */
+        this.ctx.logger.warn(
+          `Agent Teams routine due-scan for lead "${root.id}" failed: ${errorMessage(error)}`,
+        )
+        continue
+      }
+      for (const routine of due) {
+        /* v8 ignore next -- disposal races the Host ticker mid-fire loop. */
+        if (this.lifecycle.disposed) break
+        if (this.inFlightFires.has(routine.routineId)) continue
+        const fired = await this.commitRoutineFire(root, routine, nowMs)
+        if (fired !== undefined) committed.push(fired)
+      }
+    }
+    return committed
+  }
+
+  /**
+   * Wake one due routine's bot with intent, then persist `lastRunAt` after enqueue succeeds.
+   * @param root - exact live Team Lead owning the catalog.
+   * @param routine - due active catalog row (re-checked under journal lock before write).
+   * @param firedAt - fire commit timestamp written to `lastRunAt`.
+   * @returns projection after fire commit, or undefined when wake/commit skipped.
+   */
+  private async commitRoutineFire(
+    root: Agent,
+    routine: RoutineRecord,
+    firedAt: number,
+  ): Promise<RoutineProjection | undefined> {
+    /* v8 ignore next -- concurrent ticker ticks share one in-flight slot per routineId. */
+    if (this.inFlightFires.has(routine.routineId)) return undefined
+    const signal = this.lifecycle.signal
+    let releaseInFlight!: () => void
+    const tracked = new Promise<void>((resolve) => { releaseInFlight = resolve })
+    this.inFlightFires.set(routine.routineId, tracked)
+    try {
+      /* v8 ignore next -- disposal races an admitted fire. */
+      if (this.lifecycle.disposed) return undefined
+      // Re-check eligibility under current catalog (pause may have landed since due-scan).
+      const latest = this.journal.state(root).routines.find(row => row.routineId === routine.routineId)
+      /* v8 ignore next -- pause/delete races the due-scan. */
+      if (latest === undefined || !isRoutineEligibleForWake(latest)) return undefined
+      /* v8 ignore next -- lastRunAt commit from a peer tick advances the anchor. */
+      if (!isRoutineDue(latest, firedAt)) return undefined
+      const bot = this.journal.state(root).members.find(member => member.id === latest.botId)
+      if (bot === undefined || bot.phase !== 'active') {
+        this.ctx.logger.warn(
+          `Agent Teams routine "${latest.routineId}" skipped: active bot "${latest.botId}" not found`,
+        )
+        return undefined
+      }
+      try {
+        const live = this.ctx.agents.get(latest.botId)
+        const content = [{ type: 'text' as const, text: latest.intent }]
+        const source = { kind: 'user' as const }
+        if (live !== undefined) {
+          live.followup(createUserMessage({ content, source }))
+        } else {
+          await queueHostSubagentPrompt(
+            this.ctx.subagents,
+            root,
+            latest.botId,
+            content,
+            source,
+            signal,
+          )
+        }
+      } catch (error: unknown) {
+        /* v8 ignore next -- disposal aborts wake enqueue. */
+        if (this.lifecycle.disposed) return undefined
+        this.ctx.logger.warn(
+          `Agent Teams routine "${latest.routineId}" wake failed: ${errorMessage(error)}`,
+        )
+        return undefined
+      }
+      // Fire commit: durable lastRunAt only after wake enqueue succeeds (FR-005).
+      const updated = await this.journal.transact(root.id, async () => {
+        signal.throwIfAborted()
+        const current = this.journal.state(root).routines.find(row => row.routineId === latest.routineId)
+        /* v8 ignore next -- pause races the fire commit write. */
+        if (current === undefined || !isRoutineEligibleForWake(current)) return undefined
+        const row: RoutineRecord = {
+          ...current,
+          lastRunAt: firedAt,
+          updatedAt: firedAt,
+        }
+        await this.journal.appendAndFlush(root, 'team/routine', {
+          version: 2,
+          teamId: TeamId(root.id),
+          routine: row,
+        })
+        return row
+      })
+      /* v8 ignore next -- pause race returns undefined from the journal transaction. */
+      return updated === undefined ? undefined : projectRoutine(updated)
+    } finally {
+      releaseInFlight()
+      /* v8 ignore next -- overlapping ticks may replace the tracked promise. */
+      if (this.inFlightFires.get(routine.routineId) === tracked) {
+        this.inFlightFires.delete(routine.routineId)
+      }
+    }
   }
 
   /**
@@ -1541,6 +1698,8 @@ export class TeamService extends TypertRemoteService {
     const failures: unknown[] = []
     await this.lifecycle.settle(this.roster.pendingCreations(), failures)
     await this.lifecycle.settle(this.mailbox.pendingDispatches(), failures)
+    await this.lifecycle.settle([...this.inFlightFires.values()], failures)
+    this.inFlightFires.clear()
     for (const [root, childIds] of this.roster.liveChildrenByRoot()) {
       try {
         await this.roster.stopTeammates(root, childIds)

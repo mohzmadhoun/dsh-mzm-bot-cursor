@@ -391,6 +391,12 @@ export interface Config {
   /** Maximum milliseconds allowed for Team-owned runtime disposal. */
   readonly disposalTimeoutMs?: number
   /**
+   * Host Routine cron ticker period in milliseconds (P4 US4 T025 / FR-005).
+   * While Agent Teams is loaded, the Host process polls the Routine catalog on this
+   * interval and wakes due **active** rows. Changeable from cordis.yml — not Electron Main.
+   */
+  readonly routineCronTickMs?: number
+  /**
    * Absolute Host-durable user skills root for `upsertUserSkill` (FR-006 / FR-013).
    * Desktop mounts the same path via `dsh-skill-filesystem` customSkillDirs
    * (`desktop-user-skills` under `$DSH_HOME`). Required for durable authoring;

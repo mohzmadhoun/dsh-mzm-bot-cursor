@@ -53,6 +53,7 @@ kind: "package-reference"
 | `maxPendingMessagesPerMember` | `64` | 单个成员最多可排队的消息数 |
 | `maxMessageBytes` | `65,536` | 单条发送消息的最大尺寸 |
 | `disposalTimeoutMs` | `5,000` | 关闭清理允许的时间 |
+| `routineCronTickMs` | `15,000` | Agent Teams 已加载时 Host Routine cron 轮询周期 |
 | `userSkillsRoot` | — | `upsertUserSkill` 目录包所用的绝对 Host 持久根 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-experimental-agent-team)是每个受支持字段及其 JSDoc 的穷尽式真源。
@@ -71,7 +72,7 @@ Host `upsertUserSkill` 创建或更新用户编写的技能：`displayName` 与 
 
 Host `attachSkill(botId, skillId)` 仅把有序 `{ botId, skillId }` 追加到该 Bot 的持久 `skillAttachments`（允许多附；绝不自动附到其他 Bot）。技能必须存在于 Host `ctx.skills`，否则失败响亮且不写入。`listMembers` / `agentTeams/view` 将这些附件投影给 Client 的 bot skills/overview — 绝不用 Electron Main 存储。附上之后（以及 create / 冷恢复时），Agent Teams 把非空的附属技能说明正文绑定到该 Bot 作用域内的 `agent-teams:skill-instructions` system-prompt 段（Candidate B，与 P2 persona 前缀并列；空/缺失正文不贡献文案；Verifier 只观察装配接线，不评判 LLM 回复措辞）。
 
-Host Routine 目录（P4 Architect Option 3）把 `RoutineRecord` 持久化在 Lead 日志路径 `team/routine`——按 `botId` 隔离，含非空 `intent`、产品支持的 `scheduleExpr`（`@every 5m`／`@hourly`／`@daily`／五段 cron）、`status: active|paused` 与 `lastRunAt`。Host `createRoutine`（US1 T015–T016）对空 intent 或不支持的 schedule 以明确 Remote `team-rejected` 原因拒绝且不写入；成功仅为该 `botId` 持久化 `status: active`（SC-006）。无确认步骤、无单独 displayName——面板 `identity` 由 intent 派生（SC-007）。Host `listRoutinesByBot`（US2 T019／FR-002）按单个 `botId` 经已认证 HTTP/WS 从该 Host 目录投影 `RoutineProjection`（intent／identity、scheduleExpr／scheduleLabel、status、lastRunAt）；`agentTeams/view.routines` 对 Team 视图暴露同一投影集合。Host `pauseRoutine`／`resumeRoutine`（US3 T022／FR-003/004）持久化 `status: paused|active`；`isRoutineEligibleForWake`／`routinesEligibleForWake` 确保 paused 行绝不会收到 Host cron 唤醒。这不是 `@deepseek-ai/dsh-schedule` 会话提醒，也不是 Electron Main 存储。Host `routine-cron` 校验表达式并计算下次触发；可选 `ctx.jobs` 稍后仅可用于飞行中触发可见性。
+Host Routine 目录（P4 Architect Option 3）把 `RoutineRecord` 持久化在 Lead 日志路径 `team/routine`——按 `botId` 隔离，含非空 `intent`、产品支持的 `scheduleExpr`（`@every 5m`／`@hourly`／`@daily`／五段 cron）、`status: active|paused` 与 `lastRunAt`。Host `createRoutine`（US1 T015–T016）对空 intent 或不支持的 schedule 以明确 Remote `team-rejected` 原因拒绝且不写入；成功仅为该 `botId` 持久化 `status: active`（SC-006）。无确认步骤、无单独 displayName——面板 `identity` 由 intent 派生（SC-007）。Host `listRoutinesByBot`（US2 T019／FR-002）按单个 `botId` 经已认证 HTTP/WS 从该 Host 目录投影 `RoutineProjection`（intent／identity、scheduleExpr／scheduleLabel、status、lastRunAt）；`agentTeams/view.routines` 对 Team 视图暴露同一投影集合。Host `pauseRoutine`／`resumeRoutine`（US3 T022／FR-003/004）持久化 `status: paused|active`；`isRoutineEligibleForWake`／`routinesEligibleForWake` 确保 paused 行绝不会收到 Host cron 唤醒。Host cron 定时器（US4 T025／FR-005；Config `routineCronTickMs`）在 Host 进程中评估到期的 **active** 行，以例行 intent 唤醒 bot 回合（Agent followup／subagent 队列），并在触发提交后更新 `lastRunAt`；paused 行永不唤醒。这不是 `@deepseek-ai/dsh-schedule` 会话提醒，也不是 Electron Main 存储。Host `routine-cron` 校验表达式并计算下次触发／是否到期；可选 `ctx.jobs` 稍后仅可用于飞行中触发可见性。
 
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
@@ -168,7 +169,7 @@ Team 事件追加到精确的 live Lead 会话，并在操作报告成功或唤�
 
 ### Dispose
 
-dispose 会关闭准入、中止并等待已获准的创建与 mailbox dispatch 事务，再让 continuation owner 释放 roster 中确切的 live direct child 及其后代；Lead 的非 Team continuable child 不受影响。cleanup 失败会让 dispose 明确失败，并以 `disposalTimeoutMs` 为上限。
+dispose 会关闭准入、中止并等待已获准的创建、mailbox dispatch 与进行中的 Routine cron fire 事务，再让 continuation owner 释放 roster 中确切的 live direct child 及其后代；Lead 的非 Team continuable child 不受影响。cleanup 失败会让 dispose 明确失败，并以 `disposalTimeoutMs` 为上限。
 
 </details>
 
