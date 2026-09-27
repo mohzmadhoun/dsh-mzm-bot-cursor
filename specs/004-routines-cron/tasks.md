@@ -50,13 +50,16 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Orient implementers to P4 Architect Option 3 seams; create Verifier recipe home; no product behavior yet
 
-- [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/*`, `checklists/requirements.md`) under `specs/004-routines-cron/` and point implementers at [contracts/README.md](./contracts/README.md) + Architect Option 3 in [research.md](./research.md)
-- [ ] T002 [P] Inventory Host Routine-catalog touch points in `packages/experimental/agent-team/src/` and Desktop Host profile under `apps/desktop-host/` against [data-model.md](./data-model.md) `RoutineRecord` — record findings in `specs/004-routines-cron/verifier/host-routines-inventory.md`
-- [ ] T003 [P] Inventory cron-wake / bot-turn candidates (Agent session inbox / turn start) and optional `ctx.jobs` visibility in `packages/jobs/jobs/`, `packages/jobs/jobs-local/` for [contracts/cron-fire.md](./contracts/cron-fire.md) — `specs/004-routines-cron/verifier/cron-wake-inventory.md`
-- [ ] T004 [P] Document that `@deepseek-ai/dsh-schedule` / `packages/client/ui-schedule/` are **session reminders only** (not Routines SoT) in `specs/004-routines-cron/verifier/schedule-not-routines.md` (research R2)
-- [ ] T005 Create Verifier recipe directory `specs/004-routines-cron/verifier/README.md` listing Scenario 1–5 owners (Runtime / Client / Electron / Verifier) mapped to [quickstart.md](./quickstart.md) and mandating FR-010/011 desktop screenshots/recordings **committed** under `verifier/evidence/` + PR embeds (SO 11+12)
+- [x] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/*`, `checklists/requirements.md`) under `specs/004-routines-cron/` and point implementers at [contracts/README.md](./contracts/README.md) + Architect Option 3 in [research.md](./research.md)
+- [x] T002 [P] Inventory Host Routine-catalog touch points in `packages/experimental/agent-team/src/` and Desktop Host profile under `apps/desktop-host/` against [data-model.md](./data-model.md) `RoutineRecord` — record findings in `specs/004-routines-cron/verifier/host-routines-inventory.md`
+- [x] T003 [P] Inventory cron-wake / bot-turn candidates (Agent session inbox / turn start) and optional `ctx.jobs` visibility in `packages/jobs/jobs/`, `packages/jobs/jobs-local/` for [contracts/cron-fire.md](./contracts/cron-fire.md) — `specs/004-routines-cron/verifier/cron-wake-inventory.md`
+- [x] T004 [P] Document that `@deepseek-ai/dsh-schedule` / `packages/client/ui-schedule/` are **session reminders only** (not Routines SoT) in `specs/004-routines-cron/verifier/schedule-not-routines.md` (research R2)
+- [x] T005 Create Verifier recipe directory `specs/004-routines-cron/verifier/README.md` listing Scenario 1–5 owners (Runtime / Client / Electron / Verifier) mapped to [quickstart.md](./quickstart.md) and mandating FR-010/011 desktop screenshots/recordings **committed** under `verifier/evidence/` + PR embeds (SO 11+12)
 
 ---
+
+
+**Setup checkpoint (Verifier 2026-09-27):** T001–T005 Pass on branch `cursor/p4-setup-verifier-fe1d` — design tree confirmed; inventories + `schedule-not-routines` + `verifier/README.md` Scenario 1–5 owners + FR-010/011 evidence mandate. **T014 deferred** until T006–T013 Host/Electron foundation lands.
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
