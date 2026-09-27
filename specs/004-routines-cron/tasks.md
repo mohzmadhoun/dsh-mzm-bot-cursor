@@ -112,7 +112,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T019 [US2] Host listRoutinesByBot projects `RoutineProjection` (intent/identity, schedule, status, lastRunAt) over HTTP/WS from Host catalog only
 - [x] T020 [P] [US2] Client bot info-pane routines list UI in `packages/experimental/client-ui-agent-team/src/client/` (must not treat `packages/client/ui-schedule/` header catalog as Pass surface)
-- [ ] T021 [US2] Extend Verifier Scenario 1 (or `specs/004-routines-cron/verifier/scenario-2-pane-list.md` if split) to prove pane list + durability + FR-010/011 evidence under `verifier/evidence/scenario-1/` or `verifier/evidence/scenario-2/`
+- [x] T021 [US2] Extend Verifier Scenario 1 (or `specs/004-routines-cron/verifier/scenario-2-pane-list.md` if split) to prove pane list + durability + FR-010/011 evidence under `verifier/evidence/scenario-1/` or `verifier/evidence/scenario-2/`
 
 **Checkpoint**: US2 pane list independently testable on Desktop.
 

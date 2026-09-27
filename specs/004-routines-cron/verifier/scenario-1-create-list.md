@@ -18,7 +18,7 @@
 | FR-011 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
 | Product SC stamp | **Deferred** — fill `evidence/scenario-1/VERDICT.txt` only after Desktop FR-010/011 media lands |
 
-**T021 note:** Leave/return or reload **pane-list durability** may be extended by T021 in this file or a split `scenario-2-pane-list.md`. Initial list appearance after create (SC-001) is required here.
+**T021 pane-list durability:** Split recipe [scenario-2-pane-list.md](./scenario-2-pane-list.md) owns leave/return or reload durability + FR-002 field checks (evidence still under `verifier/evidence/scenario-1/` as `04-`/`05-`). Initial list appearance after create (SC-001) remains required here (Step A).
 
 ---
 
@@ -29,8 +29,8 @@
 | Foundational Pass (T014) | Any product SC | **measured:** stamped in [README.md](./README.md#foundational-pass-checklist--recorded) · tip `a141d11045` (#148) |
 | Host create + validate (T015) | SC-001 Host half | **measured:** `createRoutine` rejects empty intent / bad `scheduleExpr`; persists `status: active` ([#147](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/147)) |
 | Host per-bot + confirm optional (T016) | SC-006 · SC-007 | **measured:** create keyed by `botId`; no confirm / displayName required ([#147](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/147)) |
-| Client create-routine UI (T017) | SC-001 desktop path | **inferred:** open until Client lands |
-| Host list projection + Client pane (T019/T020) | Full pane list chrome | **inferred:** open until US2 lands — create Pass still requires the routine **visible** on that bot’s routines pane (SC-001 / FR-002) |
+| Client create-routine UI (T017) | SC-001 desktop path | **measured:** [#150](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/150) |
+| Host list projection + Client pane (T019/T020) | Full pane list chrome | **measured:** T019 [#153](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/153) · T020 [#154](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/154) — create Pass still requires the routine **visible** on that bot’s routines pane (SC-001 / FR-002); durability Steps → [scenario-2-pane-list.md](./scenario-2-pane-list.md) |
 
 **Desktop prerequisites** (full Scenario 1 create Pass): buildable Desktop (`apps/desktop`, `apps/desktop-host`) with P1 create-bot; ≥2 bots for SC-006; ability to open the **bot routines pane** (not session Schedule header alone); Host Routine catalog on Desktop Host; `DISPLAY` when Cloud Agent.
 
@@ -177,7 +177,9 @@ specs/004-routines-cron/verifier/evidence/scenario-1/
 | `01-create-listed-active.png` (or `.webp`) | Bot A routines pane after create — intent identity + active |
 | `02-reject-empty-or-invalid.png` (or recording segment) | Clear rejection for empty intent and/or bad schedule |
 | `03-bot-b-isolation.png` (or recording segment) | Bot B pane without A’s routine |
-| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering Steps A–C |
+| `04-pane-listed-fields.png` (T021) | Identity + schedule + status on bot routines pane — see [scenario-2-pane-list.md](./scenario-2-pane-list.md) |
+| `05-pane-after-leave-return.png` (T021) | Same list after leave/return or reload |
+| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering Steps A–C (+ T021 durability) |
 | `VERDICT.txt` | Filled stamp (template below) when product SC is claimed |
 
 Also copy/publish walkthrough copies under `/opt/cursor/artifacts/` when running as Cloud Agent Verifier (SO 11). Placeholder README: [evidence/scenario-1/README.md](./evidence/scenario-1/README.md).
@@ -193,20 +195,21 @@ Linear: MOH-211 · Epic MOH-188
 SC-001: Pass — evidence: evidence/scenario-1/{01-create-listed-active,02-reject-empty-or-invalid}.*
 SC-006: Pass — evidence: evidence/scenario-1/03-bot-b-isolation.*
 SC-007: Pass — confirm/edit absence did not fail create path
+FR-002 / US2 durability: Pass — evidence: evidence/scenario-1/{04-pane-listed-fields,05-pane-after-leave-return}.* (recipe: scenario-2-pane-list.md)
 FR-010: desktop screenshots/recording present; not unit/jsdom-only (SO 11)
 FR-011: media committed under verifier/evidence/scenario-1/ + PR embeds via /opt/cursor/artifacts/… (SO 12)
 Blockers: none
 ```
 
-**Rule:** Do not mark SC-001 / SC-006 / SC-007 Done in Linear / Spec without a filled stamp that includes FR-010/011 desktop evidence once Client create + pane UI exists. Host vitest alone may advance catalog confidence but does **not** close US1 / Scenario 1.
+**Rule:** Do not mark SC-001 / SC-006 / SC-007 Done in Linear / Spec without a filled stamp that includes FR-010/011 desktop evidence once Client create + pane UI exists (including T021 `04-`/`05-` when claiming full Scenario 1). Host vitest alone may advance catalog confidence but does **not** close US1 / Scenario 1.
 
 ---
 
 ## Explicit non-goals
 
 - Client create-routine UI implementation (T017) — out of this Verifier recipe PR
-- Full pane-list durability leave/return (T021 extension) as a separate Pass gate
-- Pause / resume (Scenario 2 / US3)
+- Pane-list durability recipe body (owned by [scenario-2-pane-list.md](./scenario-2-pane-list.md) / T021)
+- Pause / resume (quickstart Scenario 2 / US3)
 - Cron fire + last-run (Scenario 3 / US4)
 - Event listeners, memory UX, Box/Shell, MCP
 - Electron Main routines bus (forbidden; T011)
@@ -225,10 +228,11 @@ Blockers: none
 | [schedule-not-routines.md](./schedule-not-routines.md) | SoT honesty lock |
 | [README.md](./README.md) | Scenario owners map + foundational Pass + FR-010/011 mandate |
 | This file | T018 rerunnable Scenario 1 create-list recipe |
+| [scenario-2-pane-list.md](./scenario-2-pane-list.md) | T021 pane-list + durability (evidence `04-`/`05-` here) |
 | T015–T017 | Host create/validate/per-bot + Client create UI |
-| T019–T021 | Host list projection + Client pane + durability extension |
+| T019–T020 | Host list projection + Client pane |
 | T030 | Evidence directory filename expectations (when packaging) |
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T018 docs).** Product SC Pass **not** stamped. Host create / reject / per-bot path is on master via foundational [#147](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/147) (T015/T016). Full Scenario 1 Done waits on Client create UI (T017) + pane list (T019/T020 as needed) plus Verifier desktop FR-010/011 evidence using Steps A–D above. Leave [MOH-211](https://linear.app/momadhoun/issue/MOH-211) **In Progress** until evidence + stamp land.
+**Recipe delivered (T018 docs).** Product SC Pass **not** stamped. Host create / reject / per-bot and Client create/pane are on master (T015–T017, T019–T020). Full Scenario 1 Done waits on Verifier desktop FR-010/011 evidence for Steps A–D here **plus** T021 durability media (`04-`/`05-`) per [scenario-2-pane-list.md](./scenario-2-pane-list.md). Leave [MOH-211](https://linear.app/momadhoun/issue/MOH-211) **In Progress** until evidence + stamp land.

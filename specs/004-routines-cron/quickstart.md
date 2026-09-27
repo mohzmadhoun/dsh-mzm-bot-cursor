@@ -39,15 +39,17 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 ## Scenario 1 — Create + pane list
 
 **Contract:** [contracts/create-list.md](./contracts/create-list.md)
+**Recipes:** [verifier/scenario-1-create-list.md](./verifier/scenario-1-create-list.md) (T018 create/reject/isolation) · [verifier/scenario-2-pane-list.md](./verifier/scenario-2-pane-list.md) (T021 list fields + leave/return; evidence still under `scenario-1/`)
 
 1. Launch Desktop; select bot A.
 2. Open **bot routines pane** (not session Schedule header alone); create routine with non-empty intent + product-supported schedule (confirm optional).
 3. Confirm routine listed on bot A with active status (intent-derived identity OK).
 4. Attempt empty intent or invalid schedule → rejected with clear reason.
 5. Open bot B → routine from A not listed.
-6. Capture desktop visual evidence → `verifier/evidence/scenario-1/` (commit + PR embed).
+6. Leave/return (or reload) → same Host list remains (T021); confirm identity + schedule + status fields.
+7. Capture desktop visual evidence → `verifier/evidence/scenario-1/` (commit + PR embed; include `04-`/`05-` for durability).
 
-**Expected:** SC-001, SC-006, SC-007.
+**Expected:** SC-001, SC-006, SC-007 · FR-002.
 
 ---
 

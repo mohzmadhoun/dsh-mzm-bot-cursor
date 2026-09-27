@@ -1,17 +1,27 @@
 # Evidence — scenario-1 (create + pane list)
 
-FR-010/011 / standing orders **11** + **12** artifacts for [Scenario 1 create-list recipe](../../scenario-1-create-list.md).
+FR-010/011 / standing orders **11** + **12** artifacts for:
+
+- [Scenario 1 create-list recipe](../../scenario-1-create-list.md) (T018)
+- [Pane-list durability recipe](../../scenario-2-pane-list.md) (T021 US2 split)
 
 Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR bodies.
 
 ## Required filenames (minimum)
 
-| Artifact | Content |
-|----------|---------|
-| `01-create-listed-active.png` (or `.webp`) | Bot A routines pane after create — intent identity + active |
-| `02-reject-empty-or-invalid.png` (or recording segment) | Clear rejection for empty intent and/or bad schedule |
-| `03-bot-b-isolation.png` (or recording segment) | Bot B pane without A’s routine |
-| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering create / reject / isolation |
-| `VERDICT.txt` | Filled stamp when product SC Pass is claimed |
+| Artifact | Content | Owner recipe |
+|----------|---------|--------------|
+| `01-create-listed-active.png` (or `.webp`) | Bot A routines pane after create — intent identity + active | T018 |
+| `02-reject-empty-or-invalid.png` (or recording segment) | Clear rejection for empty intent and/or bad schedule | T018 |
+| `03-bot-b-isolation.png` (or recording segment) | Bot B pane without A’s routine | T018 |
+| `04-pane-listed-fields.png` (or `.webp`) | Identity + schedule + status (+ last-run if shown) on bot routines pane | T021 |
+| `05-pane-after-leave-return.png` (or `.webp`) | Same Host list after leave/return or reload | T021 |
+| Optional `scenario-1-walkthrough.mp4` / `.webm` | Short recording covering create / reject / isolation (+ durability) | T018/T021 |
+| Optional `scenario-1-pane-list-walkthrough.mp4` / `.webm` | Durability-only recording (Steps A–B of pane-list recipe) | T021 |
+| `VERDICT.txt` | Filled stamp when product SC Pass is claimed | Verifier |
 
-**Status:** Placeholder only — product Pass not stamped; recipe docs land in T018 before media.
+**Numbering:** Pane-list US2 media stays in **this** directory (`04-`/`05-`). Do **not** put T021 Pass media under `../scenario-2/` — that folder is reserved for quickstart Scenario 2 (pause/resume / T024).
+
+**Supporting (not Scenario path):** Client T020 product-slice media may exist under [`../us2-client-t020/`](../us2-client-t020/); copy or re-capture into `04-`/`05-` before Scenario Pass.
+
+**Status:** Placeholder only — product Pass not stamped; T018 + T021 recipe docs land before media.
