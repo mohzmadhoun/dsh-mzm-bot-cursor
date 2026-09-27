@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
+  HostMailboxMessage,
+  TeamMessageId,
   TeamTaskId, TeamTaskView as TeamTask, TeamView,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
@@ -53,6 +55,7 @@ const view: TeamView = {
     },
   ],
   tasks: [task],
+  handoffs: [],
 }
 
 function taskSuccess(value: TeamTask): TeamTaskActionResult {
@@ -1149,5 +1152,37 @@ describe('TeamAction', () => {
     dependency.resolve(taskSuccess({ ...task, revision: 3, subject: 'Late dependency' }))
     await Promise.resolve()
     expect(screen.queryByText('Late dependency')).toBeNull()
+  })
+
+  it('renders Host mailbox handoffs from agentTeams/view with deliveryState (T023)', async () => {
+    const handoff: HostMailboxMessage = {
+      id: 'team-message-visible' as TeamMessageId,
+      fromBotId: SESSION,
+      toBotId: 'worker-id' as SessionId,
+      body: [{ type: 'text', text: 'handoff body for Client' }],
+      createdAt: 1_700_000_000_000,
+      deliveryState: 'visible-pending',
+      source: { kind: 'host-mailbox' },
+    }
+    const withHandoff: TeamView = { ...view, handoffs: [handoff] }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true, value: withHandoff }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.handoffs)).toBeTruthy()
+    const row = await screen.findByText('handoff body for Client')
+    const article = row.closest('[data-team-handoff]')
+    expect(article).not.toBeNull()
+    expect(article?.getAttribute('data-delivery-state')).toBe('visible-pending')
+    expect(article?.getAttribute('data-handoff-source')).toBe('host-mailbox')
+    expect(screen.getByText(zh['deliveryState.visible-pending'])).toBeTruthy()
+    expect(screen.getByText(new RegExp(`${zh.handoffFrom}:\\s*lead`, 'u'))).toBeTruthy()
+    expect(screen.getByText(new RegExp(`${zh.handoffTo}:\\s*worker`, 'u'))).toBeTruthy()
+  })
+
+  it('shows the empty handoffs notice when the Host projection has none', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.handoffsEmpty)).toBeTruthy()
   })
 })

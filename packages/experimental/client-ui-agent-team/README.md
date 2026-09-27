@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, create a Host-owned Bot with a model/provider assignment, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -37,6 +37,10 @@ Opening the panel calls `agentTeams/view`. Roster rows show product `displayName
 
 When the draft has both ids and roster bots already have pairs, the form says whether that draft is a new distinct assignment. The panel counts only teammate rows that expose both an LLM provider and a model; the Lead row and a backend id without that pair are omitted. An incomplete draft does not show that comparison.
 
+### Observe Host mailbox handoffs
+
+Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). Desktop chat-surface polish for the same handoffs is a later task.
+
 ### Manage the task board
 
 The task board shows task identity, owner, blockers, readiness, advisory write scopes, and overlap warnings. A user can create, edit, assign or unassign, complete, reopen, and delete tasks through `agentTeams/createTask` and `agentTeams/updateTask`. Every update sends the displayed revision, and create or update rejections remain explicit business results.
@@ -56,7 +60,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host bot-create, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, and task-board interaction state |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
 
@@ -87,7 +91,7 @@ No direct effect; the Team tools and ordinary conversation submission own any la
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; it has no live event subscription or mailbox timeline.
+- **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; handoffs come from the latest `agentTeams/view` snapshot and have no live event subscription.
 - **Ordinary child continuation** — a human message sent after navigation uses the stable addressed-subagent prompt path, not the Team peer mailbox.
 - **No rename/delete/interrupt controls** — the panel creates bots through Host `createBot` but cannot rename, delete, or interrupt teammates; write scopes remain advisory metadata.
 
