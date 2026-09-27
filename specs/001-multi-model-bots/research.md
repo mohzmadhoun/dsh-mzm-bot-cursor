@@ -22,7 +22,7 @@ All Technical Context unknowns from plan.md are resolved below. Format: Decision
 | Hybrid framed control + HTTP app | Two transports; no product gain over shipped IPC events |
 | Electron-only mailbox / model router | Violates Host-mailbox and seam-honesty locks |
 
-**Open B (tracked, not blocking plan):** Program plan freeze still says “framed pipes.” Architect pick = amend freeze string to shipped HTTP/WS when PO/Lead convenient. Plan **honors lock intent** (lifecycle IPC + `dsh-app://` + no parallel bus) and **scripts the shipped data plane**. Verifier must not require a reintroduced framed-pipe stack.
+**Open B (amended 2026-09-27, T040 — not blocking implement):** Program plan freeze string updated in [`MzM-Docs/mzm-bot-plan.md`](../../MzM-Docs/mzm-bot-plan.md) (P1 entry gate + §12 Room freeze): “framed pipes” → **shipped authenticated Host HTTP/WS data plane**. Wording-only (Architect pick 2). Plan **honors lock intent** (lifecycle IPC + `dsh-app://` + no parallel bus) and **scripts the shipped data plane**. Verifier must not require a reintroduced framed-pipe stack.
 
 ---
 
@@ -130,7 +130,7 @@ All Technical Context unknowns from plan.md are resolved below. Format: Decision
 
 | Item | Status |
 |------|--------|
-| Shell↔Host topology HOW for plan | Resolved R1 (+ open B on freeze wording) |
+| Shell↔Host topology HOW for plan | Resolved R1 (open B freeze wording amended T040 → [`mzm-bot-plan.md`](../../MzM-Docs/mzm-bot-plan.md) §12) |
 | Mailbox implementation seam | Resolved R2 |
 | Model assignment seam | Resolved R3 |
 | Auth primary storage | Resolved R4 |
