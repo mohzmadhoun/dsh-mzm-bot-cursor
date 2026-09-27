@@ -881,7 +881,7 @@ describe('TeamAction', () => {
       expect(screen.queryByRole('button', { name: /重开/u })).toBeNull()
       expect(current).toMatchObject({ revision: 6, status: 'pending' })
     })
-    fireEvent.click(screen.getByRole('button', { name: /删除/u }))
+    fireEvent.click(screen.getByRole('button', { name: /^删除$/u }))
     await waitFor(() => { expect(screen.queryByText('Updated runtime')).toBeNull() })
 
     expect(vi.mocked(updateTask).mock.calls.map(([, input]) => [input.action, input.expectedRevision]))
