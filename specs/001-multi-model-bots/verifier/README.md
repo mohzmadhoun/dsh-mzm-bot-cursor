@@ -32,7 +32,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
-Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor.md` (T013).
+Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expands), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), `trust-floor.md` (T013).
 
 ## Fan-out policy
 

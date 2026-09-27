@@ -1,0 +1,17 @@
+# T010/T011 VERDICT
+
+branch: cursor/p1-t010-t011-confirms-92fa
+base_commit: 0ed5b7c0a8ef1123fbbd0d06e323d3af237e7bd1
+date_utc: 2026-09-26T23:02:00Z
+
+T010 (MOH-55 / FR-010): PASS
+- Desktop composition = dsh-base + dsh-web-app + agent-team Host/Web layers
+- Box/computer-use: ABSENT (rg no matches)
+- Shell tool rows in dsh-base: PRESENT but NOT required for P1 SC Pass
+
+T011 (MOH-56 / FR-008/009 / R4): PASS
+- credentials-local mounted as Host ctx.credentials in dsh-base
+- preload-*.ts / ipc.ts: no secret credential IPC (DESKTOP_IPC lifecycle/chrome only)
+
+Evidence: measured-checks.txt
+Docs: ../non-goals.md , ../credentials-ipc.md
