@@ -26,7 +26,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | Scenario | Quickstart | Recipe (when present) | Primary owners | Acceptance |
 |----------|------------|------------------------|----------------|------------|
 | **0** Topology handshake (gate) | Scenario 0 | [scenario-0-topology.md](./scenario-0-topology.md) | **Electron** + **Verifier** | SC-007 / FR-013 |
-| **1** In-app auth + clean dump | Scenario 1 | [scenario-1-credentials.md](./scenario-1-credentials.md) (T036 FR-009 stub; T037 full SC-006 recipe) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
+| **1** In-app auth + clean dump | Scenario 1 | [scenario-1-credentials.md](./scenario-1-credentials.md) (T037 SC-006 Pass; FR-009 table; live Desktop dump optional) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
 | **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
 | **3** Host mailbox 1:1 | Scenario 3 | [scenario-3-mailbox.md](./scenario-3-mailbox.md) (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |

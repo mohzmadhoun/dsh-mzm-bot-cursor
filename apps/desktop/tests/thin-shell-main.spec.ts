@@ -55,7 +55,7 @@ describe('Desktop thin shell Main (T027)', () => {
     const backend = readSource('apps/desktop/src/backend-controller.ts')
 
     expect(SCHEME).toBe('dsh-app')
-    expect(main).toContain("applicationUrl = `${SCHEME}://app/`")
+    expect(main).toContain('applicationUrl = `${SCHEME}://app/`')
     expect(main).toMatch(/protocol\.handle\(\s*SCHEME/)
     expect(main).toMatch(/\bserveWebDocument\b/)
     expect(main).toMatch(/\bforwardWebRequest\b/)
