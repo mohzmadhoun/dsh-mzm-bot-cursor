@@ -71,6 +71,10 @@ kind: "package-reference"
 
 每个 teammate 卡片展示由 Host `TeamView.routines` 按该 `botId` 投影的 **Bot 定时任务**面（SC-006）。**新建定时任务**打开意图与产品支持的日程字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/createRoutine`——不是 Electron Main IPC。空意图或日程显示明确 Client 拒绝；Host 拒绝时列表不变。确认步骤可选（SC-007）；身份可由意图派生（无需单独显示名称）。成功后刷新 Team 视图，使进行中的定时任务出现在该 Bot 上。Electron Main 不持有定时任务目录。
 
+### 在 Bot 面列出 Host 定时任务
+
+同一 **Bot 定时任务**面即 US2 信息面列表：每条 Host `RoutineProjection` 显示意图派生身份、日程标签、进行中／已暂停状态，以及上次运行（或尚未运行）。行仅来自 Host `TeamView.routines`（与 `listRoutinesByBot` 同一 Host 目录投影）；会话 Schedule／`ui-schedule` 抬头目录不是 Pass 面。关闭再打开面板会重新加载 Host 状态，已列定时任务无需重建。Electron Main 不编造定时任务行。
+
 ### 观察 Host mailbox handoff
 
 打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。
@@ -94,7 +98,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host createRoutine 与定时任务面列表、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |

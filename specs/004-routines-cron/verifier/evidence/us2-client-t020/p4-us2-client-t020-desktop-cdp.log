@@ -1,0 +1,30 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
+{
+  "pane": true,
+  "empty": true,
+  "list": true,
+  "rows": [
+    {
+      "id": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
+      "status": "active",
+      "scheduleExpr": "@every 5m",
+      "lastRun": "never",
+      "text": "Summarize inbox every five minutes Every 5m Active Not run yet"
+    },
+    {
+      "id": "routine-1a8b5d2f-714b-479b-970f-a8e2c2f75a46",
+      "status": "active",
+      "scheduleExpr": "@every 5m",
+      "lastRun": "never",
+      "text": "US2 pane list smoke Every 5m Active Not run yet"
+    },
+    {
+      "id": "routine-510a2f23-1255-457b-9b61-10159ac641ac",
+      "status": "active",
+      "scheduleExpr": "@hourly",
+      "lastRun": "never",
+      "text": "Hourly status ping Every hour Active Not run yet"
+    }
+  ],
+  "afterCreate": true
+}
