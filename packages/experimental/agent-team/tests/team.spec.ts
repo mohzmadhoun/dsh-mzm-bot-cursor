@@ -280,6 +280,10 @@ describe('Team identity and provisioning', () => {
         role: 'teammate',
       },
     })
+    expect(durable(lead).members.find(row => row.id === created.id)?.modelSelection).toEqual({
+      provider: 'mock',
+      model: 'research-model',
+    })
     const live = await waitRunning(ctx, created.id)
     expect(live.options).toMatchObject({ provider: 'mock', model: 'research-model' })
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
@@ -352,6 +356,79 @@ describe('Team identity and provisioning', () => {
         modelSelection: { provider: 'mock', model: 'remote-model' },
       },
     })
+  })
+
+  it('binds Bot ModelSelection via installModelSelection for subsequent chats only', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('bound first turn'),
+      textResponse('bound follow-up turn'),
+      textResponse('peer first turn'),
+    ])
+
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Bound Bot',
+      modelSelection: { provider: 'mock', model: 'bound-model' },
+      signal: SIGNAL,
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.modelSelection).toEqual({
+      provider: 'mock',
+      model: 'bound-model',
+    })
+    expect(created.member.model).toBe('bound-model')
+    await waitNoAgent(ctx, created.id)
+
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
+      model: 'bound-model',
+      status: 'inactive',
+    })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.model)
+      .not.toBe(lead.options.model)
+
+    const followUp = await ctx.agentTeams.sendMessage(lead, {
+      target: created.name,
+      content: content('second chat for the same bot'),
+      signal: SIGNAL,
+    })
+    expect(followUp.status).toBe('accepted')
+    await waitNoAgent(ctx, created.id)
+    await vi.waitFor(() => { expect(durable(lead).pendingMessages).toEqual([]) })
+
+    const headers = (await storedEvents(ctx, created.id))
+      .filter(event => event.type === 'request/header')
+    expect(headers.length).toBeGreaterThanOrEqual(2)
+    expect(headers.map(event => event.type === 'request/header'
+      ? event.data.header.config
+      : undefined)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ provider: 'mock', model: 'bound-model' }),
+    ]))
+    for (const event of headers) {
+      expect(event.type === 'request/header' && event.data.header.config).toMatchObject({
+        provider: 'mock',
+        model: 'bound-model',
+      })
+    }
+    expect(lead.options.model).toBe('mock')
+
+    const peer = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Peer Bot',
+      modelSelection: { provider: 'mock', model: 'peer-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, peer.id)
+    const peerHeaders = (await storedEvents(ctx, peer.id))
+      .filter(event => event.type === 'request/header')
+    expect(peerHeaders.length).toBeGreaterThanOrEqual(1)
+    for (const event of peerHeaders) {
+      expect(event.type === 'request/header' && event.data.header.config).toMatchObject({
+        provider: 'mock',
+        model: 'peer-model',
+      })
+    }
+    const boundHeaders = (await storedEvents(ctx, created.id))
+      .filter(event => event.type === 'request/header')
+    for (const event of boundHeaders) {
+      expect(event.type === 'request/header' && event.data.header.config.model).toBe('bound-model')
+    }
   })
 
   it('flushes the accepted child prompt before committing the active roster edge', async () => {
