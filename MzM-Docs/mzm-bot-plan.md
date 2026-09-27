@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | DRAFT v0.3 — Spec four-edit patch 2026-09-25; auth locked in-app; **pending DH Spec LGTM** |
+| **Status** | ACCEPTED v0.3 — Spec LGTM 2026-09-26 (experiment); auth locked in-app; P1 specify → `specs/001-multi-model-bots` |
 | **Date** | 2026-09-25 |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
@@ -197,10 +197,10 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 
 ## 10. Immediate next gates
 
-1. **@DH Spec** re-reads v0.3 — **LGTM or residual edits** (specify blocked until LGTM).
+1. ~~**@DH Spec** re-reads v0.3 — LGTM~~ **DONE** 2026-09-26 — Spec LGTM; P1 specify at `specs/001-multi-model-bots`.
 2. ~~Mohammed ship/no-ship on auth~~ **DONE** — in-app primary.
-3. On Spec LGTM: `/speckit-specify` for **P1 only** (entry gate + wedge scope).
-4. Then clarify → plan → tasks → Linear; Electron/Runtime only after topology handshake Verifier pass.
+3. ~~`/speckit-specify` for P1 only~~ **DONE** (branch `cursor/p1-specify-92fa`).
+4. Next: clarify → plan → tasks → Linear (DeepSeek Harness - Cursor / MOH-37); Electron/Runtime only after topology handshake Verifier pass.
 
 ---
 

@@ -1,0 +1,150 @@
+# Implementation Plan: Phase 1 Wedge A — Multi-Model Bots
+
+**Branch**: `cursor/p1-specify-92fa` | **Date**: 2026-09-26 | **Spec**: [spec.md](./spec.md)
+
+**Input**: Feature specification from `/specs/001-multi-model-bots/spec.md` (Status: Clarified)
+
+**Linear**: Epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37) · Plan issue [MOH-42](https://linear.app/momadhoun/issue/MOH-42) · Architect [MOH-40](https://linear.app/momadhoun/issue/MOH-40) Done · Project **DeepSeek Harness - Cursor** only
+
+**Note**: Filled by `/speckit-plan`. Phase 0–1 design only — no feature implementation in this change. Next: `/speckit-tasks`.
+
+## Summary
+
+Ship wedge A on durable DeepSeek Harness + Electron seams: user creates ≥2 bots with **distinct configured model/provider assignments**, exchanges **async 1:1 via Host mailbox only** (Agent Teams), sees **chat progress + final**, with **in-app credentials** and a usable Desktop UI. **Entry gate:** Verifier-scripted Shell↔Host topology handshake (bundled-Node Desktop Host child, Node IPC lifecycle-only, `dsh-app://`, authenticated Host HTTP/WS) owned by DH Electron + DH Verifier; Architect criteria in [architecture.md](./architecture.md). Prefer reuse; no Box/MCP/personas/skills/routines/memory productization in P1.
+
+## Technical Context
+
+**Language/Version**: TypeScript (ESM), Node `^22.19 || >=24`, Electron Desktop packaging
+
+**Primary Dependencies**: DeepSeek Harness Cordis plugins (`@deepseek-ai/dsh-*`), `apps/desktop` + `apps/desktop-host`, `ctx.agents` / `ctx.llm` / `ctx.credentials` / experimental Agent Teams, Web client under Desktop wrapper
+
+**Storage**: Host session persistence; `dsh-credentials-local` under `$DSH_HOME` for in-app secrets; Lead Session log for Team mailbox durability
+
+**Testing**: Vitest unit/behavior; Desktop topology handshake scripts (Electron + Verifier); keyless snapshots / expected paths where session-visible; Verifier acceptance against SC-*; Linear issues only after `taskstoissues`
+
+**Target Platform**: Electron Desktop (Windows-first for Mohammed; mac/Linux as Verifier environment allows)
+
+**Project Type**: desktop-app (Electron shell + Desktop Host runtime + Web client)
+
+**Performance Goals**: Time-to-first multi-model team session < 30 minutes on clean machine (SC-001); no other throughput SLO for P1
+
+**Constraints**:
+- Host mailbox only — no Electron parallel messaging bus
+- Topology: bundled-Node Desktop Host + IPC lifecycle-only + `dsh-app://` (+ shipped HTTP/WS data plane; see research R1 / open B on “framed pipes” freeze wording)
+- In-app auth primary; secrets off renderer and out of dumps
+- Chat-only Host for acceptance (no local Shell/Box backends)
+- Verifier ≥2 models = any two distinct configured assignments
+- Constitution v1.0.0 wedge-first; no north-star C scope creep
+
+**Scale/Scope**: Single primary user (Mohammed); ≥2 bots; 1:1 messaging only; operable UI not Grok chrome parity
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+
+| Principle | Status | Evidence |
+|-----------|--------|----------|
+| I. Wedge-First A→C | PASS | Plan maps only P1 wedge capabilities to durable seams; non-goals explicit |
+| II. Spec-Driven Delivery | PASS | Artifacts under `specs/001-multi-model-bots/`; Linear after tasks; design docs directional |
+| III. Product Over Theater | PASS | Prioritizes multi-model + 1:1 + usable UI + in-app auth; defers polish/parity |
+| IV. Verify Against Spec | PASS | SC-001…007 + contracts; Verifier gates Done; handshake before product Done |
+| V. Simplicity & Seam Honesty | PASS | Reuse agent/llm/credentials/Teams mailbox/Desktop wrapper; Architect rejects duplicate buses |
+| Stack & Seam Constraints | PASS | DSH + Electron + Spec Kit + Linear (Cursor project); seams named in architecture.md |
+
+**Post-design re-check:** PASS — research/data-model/contracts/quickstart introduce no C-scope features and no unjustified new abstractions. Complexity Tracking empty.
+
+## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/001-multi-model-bots/
+├── spec.md              # Clarified feature spec
+├── plan.md              # This file
+├── research.md          # Phase 0
+├── data-model.md        # Phase 1
+├── quickstart.md        # Phase 1 validation guide
+├── architecture.md      # Architect seam map (MOH-40) — folded into plan branch
+├── contracts/           # Phase 1 interface contracts
+│   ├── README.md
+│   ├── topology-handshake.md
+│   ├── bot-create-model.md
+│   ├── host-mailbox-1to1.md
+│   ├── chat-progress-final.md
+│   └── in-app-credentials.md
+├── checklists/          # From specify/clarify
+└── tasks.md             # Phase 2 — NOT created by /speckit-plan (next: /speckit-tasks)
+```
+
+### Source Code (repository root) — touch targets for later implement
+
+```text
+apps/desktop/                 # Electron Main, preload, dsh-app://, Host spawn/supervise
+apps/desktop-host/            # Desktop Host child (bundled Node), ready IPC, Web listen
+packages/core/agent/          # Agent create, model selection install, scopes
+packages/llm/                 # Provider adapters (ctx.llm)
+packages/credentials/         # credentials + credentials-local
+packages/experimental/        # Agent Teams mailbox / client-ui-agent-team (P1 messaging reuse)
+# Web/client UI packages under Desktop composition — bot create, Models, chat cards
+```
+
+**Structure Decision:** Existing Desktop dual-process layout (Electron shell + Desktop Host) plus Host plugin packages. No new top-level app. Implementation tasks will name exact packages; this plan does not add feature code.
+
+## Phase 0 — Research
+
+See [research.md](./research.md). All Technical Context unknowns resolved. Architect ownership map folded from [architecture.md](./architecture.md) (not pending).
+
+## Phase 1 — Design
+
+| Artifact | Path |
+|----------|------|
+| Data model | [data-model.md](./data-model.md) |
+| Contracts | [contracts/](./contracts/) |
+| Quickstart | [quickstart.md](./quickstart.md) |
+
+### Capability → ownership → contract (plan matrix)
+
+| Capability | Host (Runtime) | Electron (Shell) | Contract |
+|------------|----------------|------------------|----------|
+| Per-bot model + bot create | agents / ModelSelection / Team spawn LLM route | UI forms only | [bot-create-model.md](./contracts/bot-create-model.md) |
+| Host mailbox 1:1 | Agent Teams mailbox | Observe via Host projections | [host-mailbox-1to1.md](./contracts/host-mailbox-1to1.md) |
+| Chat progress + final | Session/agent streams | Render Web chat | [chat-progress-final.md](./contracts/chat-progress-final.md) |
+| In-app credentials | credentials-local | No secret IPC | [in-app-credentials.md](./contracts/in-app-credentials.md) |
+| Topology handshake | desktop-host ready + listen | Spawn, dsh-app://, HTTP forward | [topology-handshake.md](./contracts/topology-handshake.md) |
+
+### Locks honored
+
+| Lock | Plan treatment |
+|------|----------------|
+| Host mailbox only | R2 + mailbox contract; Electron bus forbidden |
+| Bundled-Node Desktop Host + framed pipes + IPC lifecycle-only + `dsh-app://` | Handshake contract scripts spawn + IPC lifecycle + `dsh-app://`; data plane = shipped HTTP/WS (Architect pick 2); freeze “framed pipes” wording = open B for PO/Lead |
+| In-app auth | R4 + credentials contract |
+| Verifier = any two distinct configured models | R3/R8 + bot-create contract |
+| Handshake scripts = Electron + Verifier | Topology contract ownership |
+
+### Implementation workstreams (for `/speckit-tasks` — not executed here)
+
+1. **Topology gate scripts** (Electron + Verifier) — Scenario 0 before feature fan-out.
+2. **Runtime:** per-bot `ModelSelection` on Team/bot create; Agent Teams mount; chat-only tools; credential resolve.
+3. **Client/Web:** create bot, assign model, chat progress/final, handoff visibility, Models credential entry.
+4. **Electron:** preserve thin shell; no mailbox/credential/model router in Main.
+5. **Verifier:** product SC paths after handshake Pass; dump secret absence.
+
+## Complexity Tracking
+
+> No Constitution Check violations requiring justification.
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| — | — | — |
+
+## Open gaps (for Lead / follow-ons)
+
+1. **PO/Lead:** Amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane (Architect + Spec aligned; Verifier scripts shipped topology).
+2. **Runtime (tasks):** Exact Host API for user-initiated bot create (Lead spawn vs dedicated RPC) — HOW within Team+agent; Spec WHAT already set.
+3. **Lead/Mohammed:** Explicit ack that experimental Agent Teams may mount for P1 with promotion deferred.
+4. **Not gaps:** Architect seam map (present); Verifier catalog (clarify Done); auth primary (locked in-app).
+
+## Ready for next command
+
+**`/speckit-tasks`** — generate `tasks.md` from this plan + contracts + architecture ownership. Then analyze → taskstoissues (Linear **DeepSeek Harness - Cursor** / MOH-37) → implement. Do not implement feature code from this plan change.
