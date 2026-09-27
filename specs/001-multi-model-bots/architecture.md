@@ -123,7 +123,9 @@ Evidence: scripted log + one screenshot or trace of `ready` + successful authent
 
 ## Handoff to DH Spec
 
-Encode in Spec Kit `plan` / acceptance:
+Work units live in [tasks.md](./tasks.md) (Phase 1 wedge A). Analyze → `taskstoissues` is **complete** ([analyze-report.md](./analyze-report.md) PASS · Linear [MOH-45](https://linear.app/momadhoun/issue/MOH-45) / epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37)); **implement** is next. This handoff does **not** rewrite FRs.
+
+Encode in Spec Kit `plan` / acceptance (unchanged WHAT; tracked as tasks, not new requirements):
 
 - Topology gate = Verifier criteria above (plan entry, not product FR expansion).
 - Bot create + per-bot model = Host Agent/`ModelSelection`; Team spawn must accept per-bot LLM route.
