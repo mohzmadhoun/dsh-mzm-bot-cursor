@@ -59,6 +59,10 @@ When the draft has both ids and roster bots already have pairs, the form says wh
 
 Opening the panel loads `TeamView.skills` from Host `agentTeams/view` (managed thin pack + user skills). The **Skills library** lists each skill with its human-readable `displayName` and source. **Make available to attach** selects a discovered skill for the attach flow with no multi-step load wizard (clarify lock 2 / FR-002). Availability is Client selection state; Host catalog remount owns restart survival for managed skills. When the Host catalog returns no skills (registry unavailable / empty), the library shows a clear failure — never a silent empty success. Electron Main does not invent skill catalog rows.
 
+### Author a user skill
+
+**New user skill** opens the Client authoring form. Save calls Host `agentTeams/upsertUserSkill` with non-empty `displayName` and `instructionalBody` (FR-013). Empty name or body show a clear reject and do not call Host; Host rejections leave the catalog unchanged. Success reloads discovery so the skill appears as `source=user`, marks it available-to-attach, and enables the same attach/run path as managed skills (T030). **Edit skill** on a user row re-saves through the same Remote with `skillId`. Electron Main does not own user skill files.
+
 ### Attach and run skills on a bot
 
 Each teammate card exposes a **Bot skills** surface driven by Host `skillAttachments` on that member (global catalog alone is not enough). **Attach skill** calls Host `agentTeams/attachSkill` with a catalog skill that is available-to-attach; the attachment appears only on that bot. **Run** is a dedicated control that marks the attached skill session-active on that bot’s surface (clarify lock 4 / FR-004) — Pass does not require matching LLM reply text. When Host is unavailable or rejects attach, the panel shows a clear failure and leaves prior attachments unchanged. Electron Main does not own attachment records.
@@ -86,7 +90,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/load/attach/run, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
@@ -120,8 +124,8 @@ No direct effect; the Team tools and ordinary conversation submission own any la
 
 - **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; handoffs come from the latest `agentTeams/view` snapshot and have no live event subscription.
 - **Ordinary child continuation** — a human message sent after navigation uses the stable addressed-subagent prompt path, not the Team peer mailbox.
-- **No interrupt controls** — the panel creates bots, edits identity, organizes sections, and deletes with confirm through Host Remotes but cannot interrupt teammates; write scopes remain advisory metadata.
-- **Skills authoring UI** — US2 attach/run is Client-owned here; user-skill create/edit (US3) remains deferred. Host still returns `skills: []` when `ctx.skills` is absent — Client treats that empty catalog as unavailable (no silent empty success); an explicit Host error code remains Runtime-owned if needed.
+- **No interrupt controls** — the panel creates bots, edits identity, organizes sections, authors user skills, and deletes with confirm through Host Remotes but cannot interrupt teammates; write scopes remain advisory metadata.
+- **Skill body on edit** — Host catalog summaries omit instructional body; edit prefill uses the session’s last successful upsert body when known, otherwise the user re-enters a non-empty body before Save.
 
 <a id="dev-note"></a>
 ### Dev Note

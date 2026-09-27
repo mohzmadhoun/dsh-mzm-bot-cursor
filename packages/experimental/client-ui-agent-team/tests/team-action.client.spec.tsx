@@ -18,7 +18,8 @@ import {
   type TeamCreateBotActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
-  type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamSetAvatarActionResult, type TeamTaskActionResult,
+  type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -212,6 +213,20 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
               botId: 'worker-id' as SessionId,
               skillId: 'mzm-thin-pack' as SkillId,
             }],
+          },
+        },
+      },
+    }),
+    upsertUserSkill: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          skill: {
+            id: 'my-playbook' as SkillId,
+            displayName: 'My playbook',
+            source: 'user' as const,
+            description: 'My playbook',
           },
         },
       },
@@ -2347,4 +2362,246 @@ describe('TeamAction', () => {
     )).not.toBeNull()
     expect(screen.getByText(zh.attachSkillHint)).toBeTruthy()
   })
+
+  it('rejects empty skill author drafts with clear Client messaging (T029)', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText(zh.skills)
+    fireEvent.click(screen.getByRole('button', { name: zh.createSkill }))
+    const editor = document.querySelector('[data-team-skill-author-editor="create"]')
+    expect(editor).not.toBeNull()
+    expect(document.querySelector('[data-team-skill-author-reject]')?.textContent)
+      .toBe(zh.skillAuthorEmptyReject)
+    expect(screen.getByText(zh.skillAuthorHint)).toBeTruthy()
+    const save = screen.getAllByRole('button', { name: zh.save }).find(
+      button => editor!.contains(button),
+    )
+    expect(save).toBeTruthy()
+    expect((save as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
+      target: { value: '   ' },
+    })
+    fireEvent.change(document.querySelector('[data-team-skill-author-body]')!, {
+      target: { value: 'body only' },
+    })
+    expect(document.querySelector('[data-team-skill-author-reject]')?.textContent)
+      .toBe(zh.skillAuthorEmptyReject)
+    expect((save as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
+      target: { value: 'Named' },
+    })
+    fireEvent.change(document.querySelector('[data-team-skill-author-body]')!, {
+      target: { value: '  ' },
+    })
+    expect(document.querySelector('[data-team-skill-author-reject]')).not.toBeNull()
+    expect((save as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('creates a user skill via Host upsertUserSkill and lists it in discovery (T029/T030)', async () => {
+    const authored = {
+      id: 'my-playbook' as SkillId,
+      displayName: 'My playbook',
+      source: 'user' as const,
+      description: 'My playbook',
+    }
+    let catalog = [...view.skills]
+    const upsertUserSkill = vi.fn((): Promise<TeamUpsertUserSkillActionResult> => {
+      catalog = [...catalog, authored]
+      return Promise.resolve({
+        ok: true,
+        value: { ok: true, value: { skill: authored } },
+      })
+    })
+    const load = vi.fn().mockImplementation(() => Promise.resolve({
+      ok: true as const,
+      value: { ...view, skills: catalog },
+    }))
+    render(<TeamAction {...props(actions({ load, upsertUserSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('MzM thin pack')
+    fireEvent.click(screen.getByRole('button', { name: zh.createSkill }))
+    fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
+      target: { value: 'My playbook' },
+    })
+    fireEvent.change(document.querySelector('[data-team-skill-author-body]')!, {
+      target: { value: 'Follow this authored playbook.' },
+    })
+    expect(document.querySelector('[data-team-skill-author-reject]')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(upsertUserSkill).toHaveBeenCalledWith(SESSION, {
+        displayName: 'My playbook',
+        instructionalBody: 'Follow this authored playbook.',
+      })
+    })
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill="my-playbook"]')).not.toBeNull()
+    })
+    const userSkill = document.querySelector('[data-team-skill="my-playbook"]')
+    expect(userSkill?.getAttribute('data-skill-source')).toBe('user')
+    expect(userSkill?.querySelector('[data-team-skill-display-name]')?.textContent)
+      .toBe('My playbook')
+    expect(userSkill?.getAttribute('data-skill-available')).toBe('true')
+    expect(document.querySelector('[data-team-skill-available="my-playbook"]')).not.toBeNull()
+    expect(document.querySelector('[data-team-skill-author-editor]')).toBeNull()
+  })
+
+  it('edits a user skill through Host upsertUserSkill with skillId (T029)', async () => {
+    const prior = {
+      id: 'my-playbook' as SkillId,
+      displayName: 'My playbook',
+      source: 'user' as const,
+      description: 'My playbook',
+    }
+    const updated = {
+      ...prior,
+      displayName: 'Updated playbook',
+      description: 'Updated playbook',
+    }
+    let catalog = [...view.skills, prior]
+    const upsertUserSkill = vi.fn((): Promise<TeamUpsertUserSkillActionResult> => {
+      catalog = catalog.map(skill => skill.id === updated.id ? updated : skill)
+      return Promise.resolve({
+        ok: true,
+        value: { ok: true, value: { skill: updated } },
+      })
+    })
+    const load = vi.fn().mockImplementation(() => Promise.resolve({
+      ok: true as const,
+      value: { ...view, skills: catalog },
+    }))
+    render(<TeamAction {...props(actions({ load, upsertUserSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-skill="my-playbook"]')).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector('[data-team-skill-edit="my-playbook"]')!)
+    expect(document.querySelector('[data-team-skill-author-editor="edit"]')).not.toBeNull()
+    fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
+      target: { value: 'Updated playbook' },
+    })
+    fireEvent.change(document.querySelector('[data-team-skill-author-body]')!, {
+      target: { value: 'Updated instructional body.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(upsertUserSkill).toHaveBeenCalledWith(SESSION, {
+        skillId: 'my-playbook',
+        displayName: 'Updated playbook',
+        instructionalBody: 'Updated instructional body.',
+      })
+    })
+    await waitFor(() => {
+      expect(document.querySelector(
+        '[data-team-skill="my-playbook"] [data-team-skill-display-name]',
+      )?.textContent).toBe('Updated playbook')
+    })
+  })
+
+  it('shows Host upsertUserSkill rejection without inventing a catalog row (T029)', async () => {
+    const upsertUserSkill = vi.fn((): Promise<TeamUpsertUserSkillActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: {
+          code: 'team-rejected',
+          message: 'displayName must be non-empty',
+        },
+      },
+    }))
+    const load = vi.fn().mockResolvedValue({ ok: true as const, value: view })
+    render(<TeamAction {...props(actions({ load, upsertUserSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('MzM thin pack')
+    fireEvent.click(screen.getByRole('button', { name: zh.createSkill }))
+    fireEvent.change(document.querySelector('[data-team-skill-author-name]')!, {
+      target: { value: 'Ghost' },
+    })
+    fireEvent.change(document.querySelector('[data-team-skill-author-body]')!, {
+      target: { value: 'body' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('displayName must be non-empty (team-rejected)')).toBeTruthy()
+    expect(document.querySelector('[data-team-skill="ghost"]')).toBeNull()
+    expect(document.querySelector('[data-team-skills-list] [data-skill-source="user"]')).toBeNull()
+  })
+
+  it('attaches and runs an authored user skill like managed (T030)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const userSkillId = 'my-playbook' as SkillId
+    const priorWorker = { ...view.members[1]!, displayName: 'Attach Target' }
+    const catalog = [
+      ...view.skills,
+      {
+        id: userSkillId,
+        displayName: 'My playbook',
+        source: 'user' as const,
+        description: 'User-authored instructional body',
+      },
+    ]
+    const attachment = { botId: workerId, skillId: userSkillId }
+    const savedWorker = { ...priorWorker, skillAttachments: [attachment] }
+    const attachSkill = vi.fn((): Promise<TeamAttachSkillActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          skillAttachments: [attachment],
+          member: savedWorker,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          skills: catalog,
+          members: [view.members[0]!, priorWorker],
+          unassignedBotIds: [SESSION, workerId],
+        },
+      })
+      .mockResolvedValue({
+        ok: true as const,
+        value: {
+          ...view,
+          skills: catalog,
+          members: [view.members[0]!, savedWorker],
+          unassignedBotIds: [SESSION, workerId],
+        },
+      })
+    render(<TeamAction {...props(actions({ load, attachSkill }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('My playbook')
+    fireEvent.click(document.querySelector(`[data-team-skill-load="${userSkillId}"]`)!)
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-skill="${userSkillId}"]`)
+        ?.getAttribute('data-skill-available')).toBe('true')
+    })
+    fireEvent.click(document.querySelector(`[data-team-attach-skill="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-attach-skill-select]')!, {
+      target: { value: userSkillId },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(attachSkill).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        skillId: userSkillId,
+      })
+    })
+    await waitFor(() => {
+      expect(document.querySelector(
+        `[data-team-bot-skills="${workerId}"] [data-team-bot-skill="${userSkillId}"]`,
+      )).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector(`[data-team-skill-run="${userSkillId}"]`)!)
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-skill-active="${userSkillId}"]`)).not.toBeNull()
+    })
+    expect(document.querySelector(
+      `[data-team-bot-skill="${userSkillId}"]`,
+    )?.getAttribute('data-skill-active')).toBe('true')
+  })
+
 })

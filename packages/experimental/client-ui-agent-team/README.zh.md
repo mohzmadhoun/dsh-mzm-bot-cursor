@@ -59,6 +59,10 @@ kind: "package-reference"
 
 打开 panel 时从 Host `agentTeams/view` 加载 `TeamView.skills`（管理精简包 + 用户技能）。**技能库**列出每项技能的可读 `displayName` 与来源。**设为可挂载**将已发现技能选入挂载流程，无需多步加载向导（clarify lock 2／FR-002）。可挂载是 Client 选择状态；管理技能跨重启的存活由 Host 目录重新挂载负责。当 Host 目录返回空列表（注册表不可用／空）时，技能库显示明确失败——绝不当作空列表成功。Electron Main 不得发明技能目录行。
 
+### 编写用户技能
+
+**新建用户技能**打开 Client 编写表单。保存调用 Host `agentTeams/upsertUserSkill`，要求非空 `displayName` 与 `instructionalBody`（FR-013）。空名称或正文显示明确拒绝且不调用 Host；Host 拒绝时目录不变。成功后刷新发现列表，以 `source=user` 出现，并标为可挂载，从而与管理技能走同一挂载／运行路径（T030）。用户行上的**编辑技能**经同一 Remote 带 `skillId` 再保存。Electron Main 不持有用户技能文件。
+
 ### 在 Bot 上挂载并运行技能
 
 每个 teammate 卡片展示由该成员 Host `skillAttachments` 驱动的 **Bot 技能**面（仅看全局目录不足）。**挂载技能**对已可挂载的目录项调用 Host `agentTeams/attachSkill`；挂载只出现在该 Bot 上。**运行**是专用控件，将该已挂载技能标为该 Bot 面上的会话生效（clarify lock 4／FR-004）——Pass 不要求匹配 LLM 回复措辞。Host 不可用或拒绝挂载时，面板显示明确失败并保留先前挂载不变。Electron Main 不持有挂载记录。
@@ -86,7 +90,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／加载／挂载／运行、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |
@@ -120,8 +124,8 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 
 - **Snapshot refresh**——panel 会在打开、显式 refresh 与 mutation 后刷新；handoff 来自最新的 `agentTeams/view` 快照，没有实时事件订阅。
 - **普通 child continuation**——导航后发送的人类消息使用稳定 addressed-subagent 提示词路径，而不是 Team peer mailbox。
-- **没有 interrupt 控件**——panel 通过 Host Remote 创建 bot、编辑身份、组织分组并以确认删除，但不能 interrupt teammate；write scope 仍只是提示性 metadata。
-- **技能编写 UI**——US2 挂载／运行由本 Client 拥有；用户技能创建／编辑（US3）仍延期。Host 在 `ctx.skills` 缺席时仍返回 `skills: []`——Client 将该空目录视为不可用（绝不当作空列表成功）；若需显式 Host 错误码，仍由 Runtime 拥有。
+- **没有 interrupt 控件**——panel 通过 Host Remote 创建 bot、编辑身份、组织分组、编写用户技能并以确认删除，但不能 interrupt teammate；write scope 仍只是提示性 metadata。
+- **编辑时的技能正文**——Host 目录摘要不含说明正文；编辑预填使用本会话最近一次成功 upsert 的正文（若已知），否则用户须在保存前重新输入非空正文。
 
 <a id="dev-note"></a>
 ### 开发备注

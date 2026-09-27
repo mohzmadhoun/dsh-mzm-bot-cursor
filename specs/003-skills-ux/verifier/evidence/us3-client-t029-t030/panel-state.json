@@ -1,0 +1,17 @@
+{
+  "createSkill": true,
+  "skills": [
+    {
+      "id": "mzm-authored-skill",
+      "source": "user",
+      "name": "MzM authored skill (edited)",
+      "available": "true"
+    },
+    {
+      "id": "mzm-thin-pack",
+      "source": "managed",
+      "name": "MzM thin pack",
+      "available": "false"
+    }
+  ]
+}
