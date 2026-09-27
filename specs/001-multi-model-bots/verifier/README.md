@@ -26,13 +26,13 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | Scenario | Quickstart | Recipe (when present) | Primary owners | Acceptance |
 |----------|------------|------------------------|----------------|------------|
 | **0** Topology handshake (gate) | Scenario 0 | [scenario-0-topology.md](./scenario-0-topology.md) | **Electron** + **Verifier** | SC-007 / FR-013 |
-| **1** In-app auth + clean dump | Scenario 1 | `scenario-1-credentials.md` (T037) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
+| **1** In-app auth + clean dump | Scenario 1 | [scenario-1-credentials.md](./scenario-1-credentials.md) (T036 FR-009 stub; T037 full SC-006 recipe) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
 | **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
-| **3** Host mailbox 1:1 | Scenario 3 | `scenario-3-mailbox.md` (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
+| **3** Host mailbox 1:1 | Scenario 3 | [scenario-3-mailbox.md](./scenario-3-mailbox.md) (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
 | **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
-Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expands), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
+Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of Scope absence checks Pass), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
 
 ## Host API proofs (pre-Scenario)
 
@@ -50,6 +50,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T023** Host handoff projections | [t023-handoff-projections.md](./t023-handoff-projections.md) | **Runtime** + **Verifier** | FR-005 `TeamView.handoffs` via session/RPC; Client panel consumes; not SC-003 chat-surface Pass |
 | **T024** Chat handoff / pending UI | [t024-chat-handoff.md](./t024-chat-handoff.md) | **Electron/Client** + **Verifier** | FR-005 chat + Conversation notices + Agent Team strip; Host projections only; not SC-003 Scenario 3 Pass |
 | **T026** No Electron bot↔bot bus | [t026-no-ipc-bus.md](./t026-no-ipc-bus.md) | **Electron** + **Verifier** | FR-004 negative — Main invents no mailbox IPC; Host mailbox only; complements T007 |
+| **T027** Thin Electron shell (no Main routers) | [t027-thin-shell.md](./t027-thin-shell.md) | **Electron** + **Verifier** | FR-007 Main lifecycle/`dsh-app://` HTTP forward only; not SC-004 Pass; leaves T026/T034 files alone |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
 | **T035** Missing/invalid credential UX | [t035-cred-ux.md](./t035-cred-ux.md) | **Electron/Client** + **Verifier** | FR-008 failure UX: Models re-entry for missing + invalid/revoked; no peer resolve fallback |

@@ -1,0 +1,29 @@
+VERDICT: Pass
+SLICE: T036 docs (FR-009 primary=in-app / secondary=env+keyfile dev-CI only) — NOT Scenario 1 / SC-006 dump Pass
+SHA: 8de7278c58ce5d30c8468ccff34ef0f8dd199a1e
+UTC: 2026-09-27T10:13:59Z
+BRANCH: cursor/p1-t036-env-cred-docs-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/51
+LINEAR: MOH-81 (leave In Progress; PO gates Done)
+OPERATOR: Mohammed (DH Verifier)
+PROJECT: DeepSeek Harness - Cursor (P-MOH-2)
+RECIPE: specs/001-multi-model-bots/verifier/scenario-1-credentials.md
+
+CHECKLIST (measured on disk at SHA above):
+[x] credentials-local README Summary states in-app managed file = product primary; launch env / .env = development and CI only
+[x] README "Where keys come from" Product role column: stored file Primary (in-app Models/settings); env + both .env Secondary (dev/CI only)
+[x] Explicit Product primary path + Secondary path (dev/CI only) MUST NOT teach env as product primary
+[x] README.zh.md mirrors EN product-role table and primary/secondary prose
+[x] README.i18n.yaml blob hashes match git hash-object of both README sides
+[x] scenario-1-credentials.md stub: FR-009 table primary vs secondary; SC-006 env-only = Fail; T037 owns full recipe
+[x] verifier/README.md Scenario 1 row links stub (T036 FR-009; T037 full SC-006)
+[x] tasks.md T036 checked [x]; T037 remains unchecked
+[x] credentials-ipc.md NOT in diff (T033/T034 collision avoidance)
+[x] Diff is docs-only (6 files under credentials-local + specs verifier/tasks)
+
+OUT_OF_SCOPE_THIS_SLICE:
+- SC-006 dump/transcript measurement (T037)
+- Live Desktop in-app credential entry UI (T033)
+- Secret IPC audit re-run (T034)
+
+CLAIM: measured (docs checklist + blob hashes + git show --stat); no live app run required for docs-only FR-009

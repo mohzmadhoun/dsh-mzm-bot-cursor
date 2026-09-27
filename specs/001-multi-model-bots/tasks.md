@@ -100,7 +100,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T022 [P] [US2] Persist durable Host mailbox message fields (`id`, `fromBotId`, `toBotId`, `body`, `createdAt`, `deliveryState`, `source` Host-only) per [data-model.md](./data-model.md) — `source` MUST NOT be Electron IPC
 - [x] T023 [US2] Expose handoff observability to Client via Host session/RPC projections (not Main-synthesized IPC) in `packages/experimental/agent-team/src/projection.ts` and `packages/experimental/client-ui-agent-team/`
 - [x] T024 [US2] Render user-visible handoff / pending / recipient follow-up in Desktop Web chat surfaces under `packages/client/ui-chat/` / `packages/client/ui-conversation/` and Agent Team UI so copy-paste is not required
-- [ ] T025 [US2] Add Verifier Scenario 3 recipe in `specs/001-multi-model-bots/verifier/scenario-3-mailbox.md` asserting Host mailbox path and failing if delivery required Electron IPC bus ([contracts/host-mailbox-1to1.md](./contracts/host-mailbox-1to1.md))
+- [x] T025 [US2] Add Verifier Scenario 3 recipe in `specs/001-multi-model-bots/verifier/scenario-3-mailbox.md` asserting Host mailbox path and failing if delivery required Electron IPC bus ([contracts/host-mailbox-1to1.md](./contracts/host-mailbox-1to1.md))
 - [x] T026 [P] [US2] Add architecture/regression guard (test or static check) documenting forbidden Electron bot↔bot messaging bus in `apps/desktop/tests/topology-handshake.spec.ts` or `apps/desktop/tests/no-electron-mailbox-bus.spec.ts`
 
 **Checkpoint**: US2 independently testable (needs ≥2 bots from US1)
@@ -115,7 +115,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Ensure Desktop Electron thin shell loads Web client (`dsh-app://`) without adding mailbox/credential/model router in Main — verify `apps/desktop/src/main.ts`, `apps/desktop/src/web-document.ts`, `apps/desktop/src/backend-controller.ts` stay lifecycle/HTTP-forward only
+- [x] T027 [US3] Ensure Desktop Electron thin shell loads Web client (`dsh-app://`) without adding mailbox/credential/model router in Main — verify `apps/desktop/src/main.ts`, `apps/desktop/src/web-document.ts`, `apps/desktop/src/backend-controller.ts` stay lifecycle/HTTP-forward only
 - [ ] T028 [P] [US3] Wire create-bot + assign-model controls into operable Desktop session chrome (Web under Electron) so happy path needs no config-file editing — Client packages under `packages/client/` composed by Desktop Host profile
 - [ ] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
 - [ ] T030 [US3] Deliver final result in chat on turn completion / assistant (or handoff) result from session log; support optional `linkedMailboxMessageId` attribution when turn is caused by mailbox message ([data-model.md](./data-model.md) Chat turn)
@@ -137,7 +137,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T033 [US4] Implement/confirm Models / settings write-only credential entry UI in `packages/client/ui-settings-models/src/client/` storing secrets via Host `CredentialRef` in `packages/credentials/credentials-local/` — UI may show non-secret `CredentialInfo` only
 - [x] T034 [P] [US4] Ensure preload/renderer never receive raw secrets: audit `apps/desktop/src/preload-*.ts` and `apps/desktop/src/ipc.ts` for absence of credential secret APIs ([contracts/in-app-credentials.md](./contracts/in-app-credentials.md))
 - [x] T035 [US4] On missing credential for needed provider, direct user to in-app entry (not 1Password connector product flow) via `packages/client/ui-settings-models/src/client/` navigation; on invalid/revoked mid-session show clear failure + re-entry offer in that UI with no silent fallback to another bot’s credentials in Host resolve under `packages/credentials/`
-- [ ] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
+- [x] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
 - [ ] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets
 
 **Checkpoint**: US4 independently testable; unlocks clean SC-001/002 evidence with in-app primary auth
@@ -149,9 +149,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 **Purpose**: Full Verifier replay, non-goals, open-gap docs, no scope creep
 
 - [ ] T038 [P] Add Verifier Scenario 5 full Phase 1 replay recipe in `specs/001-multi-model-bots/verifier/scenario-5-full-replay.md` (SC-005) requiring Scenario 0 Pass first
-- [ ] T039 [P] Document explicit non-goals absence checks (Box/Shell, MCP/1Password vault, personas/skills/routines/memory product UX, pixel Grok chrome) in `specs/001-multi-model-bots/verifier/non-goals.md`
+- [x] T039 [P] Document explicit non-goals absence checks (Box/Shell, MCP/1Password vault, personas/skills/routines/memory product UX, pixel Grok chrome) in `specs/001-multi-model-bots/verifier/non-goals.md`
 - [ ] T040 Track open B for PO/Lead: amend program plan freeze string “framed pipes” → shipped HTTP/WS data plane in `MzM-Docs/mzm-bot-plan.md` (note only; do not block implement) — cross-link from `specs/001-multi-model-bots/research.md` R1
-- [ ] T041 [P] Link `specs/001-multi-model-bots/architecture.md` Handoff section to `tasks.md` and note analyze → taskstoissues next (no FR rewrite)
+- [x] T041 [P] Link `specs/001-multi-model-bots/architecture.md` Handoff section to `tasks.md` and note analyze → taskstoissues complete / implement next (no FR rewrite)
 - [ ] T042 Run `specs/001-multi-model-bots/quickstart.md` Scenario 0–5 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
 
 ---

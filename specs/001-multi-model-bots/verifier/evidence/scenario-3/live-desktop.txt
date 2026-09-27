@@ -1,0 +1,7 @@
+LIVE: Deferred
+SC: SC-003
+SHA: 7515f367455bfe48a5dd7e77cc5335651264fbc7
+UTC: 2026-09-27T10:11:05Z
+OPERATOR: DH Verifier (Composer second Pass)
+REASON: Keyless Pass gate (criteria 1–5) re-proven; interactive dual-bot Desktop operator path not executed on this host.
+RECIPE: specs/001-multi-model-bots/verifier/scenario-3-mailbox.md (criterion 6 optional)
