@@ -1,0 +1,63 @@
+T016–T018 Client US1 product UI slice — DH Verifier
+====================================================
+Verdict: PASS (Client product UI slice only)
+Stamp: 2026-09-27
+Branch: cursor/p3-us1-client-discover-fe1d @ 38abf4b7a3
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/120 (OPEN, MERGEABLE)
+Linear: MOH-163 (T016), MOH-164 (T017), MOH-165 (T018)
+
+Rebase note
+-----------
+Earlier tip d92395cf was 4 behind master (#118 T015 Host catalog, #119 T015
+Verifier stamp) with mergeable=CONFLICTING. Rebased tip 38abf4b7 is
+0 behind / 1 ahead of origin/master; PR #120 mergeable=MERGEABLE
+(mergeStateStatus=UNSTABLE — CI rollup noise, not used as this gate bar).
+
+Acceptance (T016–T018 / Client product UI — not SC-001)
+-------------------------------------------------------
+[x] T016 Skills library lists managed + user Host catalog summaries with
+    human-readable display names (locales + data-team-skill*).
+[x] T017 Load = select / make-available-to-attach; no multi-step wizard
+    (clarify lock 2 / FR-002). In-session refresh retains selection when
+    skill remains in catalog.
+[x] T018 Empty Host catalog projection shows role=alert
+    data-team-skills-catalog-unavailable (no silent empty success).
+    Host listSkills fail-loud path already on master tip via #118 (T015).
+[x] No Electron Main skills bus (T013 regression still green).
+
+Evidence (measured)
+-------------------
+Commands (rebased tip 38abf4b7):
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'discovery library|available-to-attach|Host skill catalog is empty'
+  → 4 passed | 54 skipped
+    - lists Host managed and user skills in the discovery library (T016)
+    - selects a discovered skill as available-to-attach without a load wizard (T017)
+    - shows a clear failure when the Host skill catalog is empty (T018)
+    - keeps available-to-attach across refresh when the skill remains in the catalog (T017)
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-skills-bus.spec.ts
+  → 3 passed
+
+Logs: p3-us1-client-t016-t018-vitest.log · p3-us1-no-electron-skills-bus.log
+(also under /opt/cursor/artifacts/)
+
+Claims
+------
+- Client discovery/load/failure UI behavior: **measured** (vitest above).
+- No Main skills IPC bus: **measured** (no-electron-skills-bus.spec.ts).
+- available-to-attach is Client-local React state (not Host-persisted load
+  mark): **measured** (TeamAction.tsx); OK for T017 UI slice; SC-001
+  restart durability remains open.
+- T018 empty-view path vs Host listSkills throw: Client gates on
+  view.skills.length===0 from soft view path; Host loud Remote is separate
+  (**measured** code + T015 Pass). Product “no silent empty” holds for
+  Desktop thin-pack expectation.
+
+Scope lock
+----------
+Does NOT stamp SC-001 / Scenario 1 / FR-012 desktop Done.
+Desktop Electron was observed running (DISPLAY=:1) but Scenario 1 Steps A–C
+with FR-012 screenshots/recording were not executed this gate.
+Next for US1 Done: Verifier Scenario 1 desktop evidence after PO merges #120.
