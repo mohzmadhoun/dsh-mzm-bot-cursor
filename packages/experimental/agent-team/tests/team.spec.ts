@@ -60,6 +60,7 @@ async function storedEvents(ctx: Context, id: SessionId): Promise<readonly Sessi
 async function setup(
   script: ConstructorParameters<typeof MockAdapter>[0],
   config: ConstructorParameters<typeof TeamService>[1] = {},
+  reasoning?: ConstructorParameters<typeof MockAdapter>[1],
 ) {
   const ctx = new Context()
   await mountAgentLoopTestDependencies(ctx)
@@ -72,7 +73,7 @@ async function setup(
   await ctx.plugin(SubagentSpawn, { providerName: 'spawn' })
   await ctx.plugin(SubagentFork, { providerName: 'fork' })
   const teamFiber = await ctx.plugin(TeamService, config)
-  const adapter = new MockAdapter(script)
+  const adapter = new MockAdapter(script, reasoning)
   ctx.llm.registerAdapter(['mock'], adapter)
   const lead = await ctx.agentLoop.create(SessionId('lead'), { provider: 'mock', model: 'mock' })
   return { ctx, lead, adapter, storageRoot, teamFiber }
@@ -304,19 +305,16 @@ describe('Team identity and provisioning', () => {
       textResponse('coding first'),
       textResponse('research later'),
       textResponse('coding later'),
-    ])
-    ctx.on('agent/created', ({ agent }) => {
-      if (ctx.agentTeams.tryMembership(agent)?.role !== 'teammate') return
-      expect(bindBotModelSelection(agent)).toBe(false)
+    ], {}, {
+      efforts: [
+        { id: ReasoningEffortId('high'), name: 'High' },
+        { id: ReasoningEffortId('low'), name: 'Low' },
+      ],
     })
     let replaceActivationRoute = false
+    const activations: Agent[] = []
     ctx.on('agent/created', ({ agent }) => {
-      if (!replaceActivationRoute || agent === lead) return
-      Object.assign(agent.options, {
-        provider: 'mock',
-        model: 'other-bot-model',
-        reasoningEffort: ReasoningEffortId('low'),
-      })
+      if (ctx.agentTeams.tryMembership(agent)?.role === 'teammate') activations.push(agent)
     })
 
     const research = await ctx.agentTeams.createBot(lead, {
@@ -336,7 +334,17 @@ describe('Team identity and provisioning', () => {
     })
     await waitNoAgent(ctx, coding.id)
     expect(bindBotModelSelection(lead)).toBe(false)
+    expect(activations.length).toBeGreaterThan(0)
+    expect(bindBotModelSelection(activations[0]!)).toBe(false)
 
+    ctx.on('agent/created', ({ agent }) => {
+      if (!replaceActivationRoute || agent === lead) return
+      Object.assign(agent.options, {
+        provider: 'mock',
+        model: 'other-bot-model',
+        reasoningEffort: ReasoningEffortId('low'),
+      })
+    })
     replaceActivationRoute = true
     Object.assign(lead.options, { provider: 'mock', model: 'lead-switched' })
     const researchLater = await ctx.agentTeams.sendMessage(lead, {
@@ -354,16 +362,23 @@ describe('Team identity and provisioning', () => {
     expect(codingLater.status).toBe('accepted')
     await waitNoAgent(ctx, coding.id)
 
-    expect(adapter.requests.map(request => ({
-      provider: request.provider,
-      model: request.model,
-      ...request.reasoningEffort === undefined ? {} : { reasoningEffort: request.reasoningEffort },
-    }))).toEqual([
+    const routeOf = (sessionId: SessionId) => adapter.requests
+      .filter(request => request.sessionId === sessionId)
+      .map(request => ({
+        provider: request.provider,
+        model: request.model,
+        ...request.reasoningEffort === undefined ? {} : { reasoningEffort: request.reasoningEffort },
+      }))
+    expect(routeOf(research.id)).toEqual([
       { provider: 'mock', model: 'research-model', reasoningEffort: ReasoningEffortId('high') },
+      { provider: 'mock', model: 'research-model', reasoningEffort: ReasoningEffortId('high') },
+    ])
+    expect(routeOf(coding.id)).toEqual([
       { provider: 'mock', model: 'coding-model' },
-      { provider: 'mock', model: 'research-model', reasoningEffort: ReasoningEffortId('high') },
       { provider: 'mock', model: 'coding-model' },
     ])
+    expect(adapter.requests.some(request =>
+      request.model === 'other-bot-model' || request.model === 'lead-switched')).toBe(false)
   })
 
   it('reads a recorded bot assignment only from a continuable route', () => {
