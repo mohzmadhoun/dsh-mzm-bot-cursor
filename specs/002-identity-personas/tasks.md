@@ -160,8 +160,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 5
 
 - [x] T036 [US5] Create `MzM-Docs/adr/` directory if absent and land ADR file whose filename identifies agent vs user memory layers (recommended: `MzM-Docs/adr/agent-vs-user-memory-layers.md`) distinguishing **agent memory** (per bot) from **user memory** (shared across bots) and stating P2 ships **no** memory product UX ([contracts/memory-layers-adr.md](./contracts/memory-layers-adr.md); FR-009; clarify lock 2)
-- [ ] T037 [P] [US5] Add Verifier Scenario 5 docs recipe in `specs/002-identity-personas/verifier/scenario-5-memory-adr.md` for SC-006 (file presence + non-goal statement; **no** recall demo)
-- [ ] T038 [P] [US5] Assert absence of memory productization UX (no profile/log/note authoring or recall product flow) in `specs/002-identity-personas/verifier/non-goals.md` for FR-010 / SC-006 Pass
+- [x] T037 [P] [US5] Add Verifier Scenario 5 docs recipe in `specs/002-identity-personas/verifier/scenario-5-memory-adr.md` for SC-006 (file presence + non-goal statement; **no** recall demo)
+- [x] T038 [P] [US5] Assert absence of memory productization UX (no profile/log/note authoring or recall product flow) in `specs/002-identity-personas/verifier/non-goals.md` for FR-010 / SC-006 Pass
 
 **Checkpoint**: US5 independently testable as docs-only; does not block interactive MVP (US1)
 
