@@ -1139,9 +1139,10 @@ describe('Team Remote API', () => {
   it('exports Team views and task mutations from the owning service', async () => {
     const { ctx, lead } = await setup([])
     expect(ctx.agentTeams.typertRemote).toMatchObject({ serviceKey: 'agentTeams', namespace: 'agentTeams' })
-    expect(ctx.agentTeams.remoteView(lead)).toEqual({
+    await expect(ctx.agentTeams.remoteView(lead, SIGNAL)).resolves.toEqual({
       members: [expect.objectContaining({ name: 'lead', role: 'lead', status: 'idle' })],
       tasks: [],
+      handoffs: [],
     })
 
     const createdResult = await ctx.agentTeams.remoteCreateTask(lead, {
@@ -1161,7 +1162,10 @@ describe('Team Remote API', () => {
       ok: true,
       value: { id: created.id, revision: 2, ownerName: 'lead' },
     })
-    expect(ctx.agentTeams.remoteView(lead).tasks).toHaveLength(1)
+    await expect(ctx.agentTeams.remoteView(lead, SIGNAL)).resolves.toMatchObject({
+      tasks: [expect.objectContaining({ id: created.id })],
+      handoffs: [],
+    })
   })
 
   it('preserves Team task rejections and propagates unexpected failures', async () => {

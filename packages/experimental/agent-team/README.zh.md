@@ -137,7 +137,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 
 `sendMessage()` 校验 peer 成员关系，追加 `team/message/queued` 并在尝试投递前 flush。目标消息以 `Team message <id> from <name>:` 开头，并在 `TeamMessageSource` 中保留同一 id 与发送者。只有目标会话在 pending inbox 或已记录历史中持久持有消息身份后，才会以 `team/message/delivered` 确认投递。即时准入按目标与持久队列顺序串行化；恢复按同一顺序重新投递 queued-minus-delivered 记录。重试前会同时折叠 live 与持久目标 inbox／历史状态，因此 inbox 已接受但模型尚未 claim 时发生崩溃不会复制消息。该保证是进程内重试加 target 会话去重，而不是跨进程 exactly-once 投递。
 
-产品侧 `deliveryState`（`queued` → `delivered` → `acted` | `visible-pending`）由上述 Lead-log 边与目标 Session 日志通过 `observeMailboxDeliveryState` 重建——绝不来自 Electron IPC。`visible-pending` 表示接收方持有持久 handoff 但尚未产生后续 turn；`acted` 表示 durable team-message receipt 之后出现了 `request/header`。产品侧 Host mailbox 字段（`id`、`fromBotId`、`toBotId`、`body`、`createdAt`、`deliveryState`、`source: { kind: 'host-mailbox' }`）同样由 `readHostMailboxMessage` 重建：别名来自 Lead `team/message/queued` 快照（`senderId`→`fromBotId`、`targetId`→`toBotId`、`content`→`body`）以及 queued 事件的 `time`→`createdAt`；`source` 仅属 Host，绝不可为 Electron IPC。
+产品侧 `deliveryState`（`queued` → `delivered` → `acted` | `visible-pending`）由上述 Lead-log 边与目标 Session 日志通过 `observeMailboxDeliveryState` 重建——绝不来自 Electron IPC。`visible-pending` 表示接收方持有持久 handoff 但尚未产生后续 turn；`acted` 表示 durable team-message receipt 之后出现了 `request/header`。产品侧 Host mailbox 字段（`id`、`fromBotId`、`toBotId`、`body`、`createdAt`、`deliveryState`、`source: { kind: 'host-mailbox' }`）同样由 `readHostMailboxMessage` 重建：别名来自 Lead `team/message/queued` 快照（`senderId`→`fromBotId`、`targetId`→`toBotId`、`content`→`body`）以及 queued 事件的 `time`→`createdAt`；`source` 仅属 Host，绝不可为 Electron IPC。Client 可观测性使用同一重建路径：`projectMailboxHandoffs` 由 Lead 事件与各目标 Session 日志构建 `HostMailboxMessage[]`，并由 `agentTeams/view` 通过 `TeamView.handoffs` 返回（绝非 Main 合成的 IPC）。
 
 投递给 Lead 时直接调用 `Agent.steer()`。投递给 teammate 时使用 continuation owner 的 host-only Steer 路径；该路径会保留 Team 发送者 source，同时授权 Lead-to-child edge 并冷恢复 inactive target。sibling 消息绝不会通过公开的相邻 Agent 消息操作伪装成 Lead。
 
@@ -177,7 +177,7 @@ dispose 会关闭准入、中止并等待已获准的创建与 mailbox dispatch 
 
 ### 浏览器 Remote
 
-`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
+`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`agentTeams/view` 返回 roster 行、未删除任务以及 `handoffs`（Host mailbox 产品行）。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view、handoff 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
 
 ## 模型体验
 
