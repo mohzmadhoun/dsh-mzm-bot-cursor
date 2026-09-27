@@ -35,6 +35,8 @@ Opening the panel calls `agentTeams/view`. Roster rows show product `displayName
 
 **New bot** opens a form for non-empty `displayName` plus provider and model ids, then calls Host Remote `agentTeams/createBot`. Electron Main invents neither bot records nor LLM routes. Create rejections remain explicit business results; success reloads the roster. The form shows locale-owned Verifier guidance: multi-model Pass needs ≥2 distinct configured `(provider, model)` assignments (not a fixed marketing catalog). Same assignment is still allowed; a soft warning appears when the draft duplicates a roster pair. The roster notice tracks whether those distinct pairs are present.
 
+When the draft has both ids and roster bots already have pairs, the form says whether that draft is a new distinct assignment. The panel counts only teammate rows that expose both an LLM provider and a model; the Lead row and a backend id without that pair are omitted. An incomplete draft does not show that comparison.
+
 ### Manage the task board
 
 The task board shows task identity, owner, blockers, readiness, advisory write scopes, and overlap warnings. A user can create, edit, assign or unassign, complete, reopen, and delete tasks through `agentTeams/createTask` and `agentTeams/updateTask`. Every update sends the displayed revision, and create or update rejections remain explicit business results.

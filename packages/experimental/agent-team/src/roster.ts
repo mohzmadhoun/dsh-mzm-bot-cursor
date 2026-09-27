@@ -155,9 +155,12 @@ export class TeamRoster {
     }]
     for (const member of state.members) {
       const live = this.ctx.agents.get(member.id)
-      const route = live?.options.model !== undefined
-        ? live.options
-        : root.options.model !== undefined ? root.options : undefined
+      const liveRoute = llmRouteFields(live?.options)
+      // An unloaded child may still show the Lead model string. modelSelection
+      // stays on that child's live route so the Lead pair is not counted as the bot's.
+      const route = liveRoute.model !== undefined
+        ? liveRoute
+        : root.options.model === undefined ? {} : { model: root.options.model }
       result.push({
         id: member.id,
         name: member.name,
@@ -171,7 +174,7 @@ export class TeamRoster {
         ...member.displayName === undefined ? {} : { displayName: member.displayName },
         provider: member.provider,
         context: member.context,
-        ...llmRouteFields(route),
+        ...route,
         diagnostics: member.error === undefined ? [] : [member.error],
       })
     }

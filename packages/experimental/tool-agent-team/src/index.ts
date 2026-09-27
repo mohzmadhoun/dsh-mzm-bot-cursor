@@ -53,9 +53,18 @@ const MEMBER_VIEW_SCHEMA = {
     role: { type: 'string', required: true, enum: ['lead', 'teammate'] },
     status: { type: 'string', required: true, enum: ['running', 'idle', 'inactive', 'provisioning', 'failed'] },
     description: { type: 'string' },
+    displayName: { type: 'string' },
     provider: { type: 'string' },
     context: { type: 'string', enum: ['fresh', 'fork'] },
     model: { type: 'string' },
+    modelSelection: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        provider: { type: 'string', required: true },
+        model: { type: 'string', required: true },
+      },
+    },
     diagnostics: { type: 'array', required: true, items: { type: 'string' } },
   },
 } as const

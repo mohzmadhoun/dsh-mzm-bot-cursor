@@ -40,7 +40,7 @@ Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor
 |-------|--------|----------------|-------|
 | **T014** Host bot-create | [t014-host-bot-create.md](./t014-host-bot-create.md) | **Runtime** + **Verifier** | FR-001 Host half; not SC-001/002 Pass |
 | **T017** Client create + assign-model UI | [t017-client-create-ui.md](./t017-client-create-ui.md) | **Electron/Client** + **Verifier** | FR-001 Client half + FR-007; not SC-001/002 Pass |
-| **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Electron/Client** + **Verifier** | FR-003 / SC-002 rule + Client messaging; TTFT live Pass = T019 |
+| **T018** Distinct `(provider, model)` rule | [scenario-2-multi-model.md](./scenario-2-multi-model.md) | **Verifier** (after this slice) + Client | FR-003 rule + Client messaging; SC-001/002 session Pass and TTFT stay T019 |
 
 ## Fan-out policy
 

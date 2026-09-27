@@ -1,82 +1,83 @@
 # Scenario 2 — Multi-model team session (distinct `(provider, model)`)
 
-**Status:** Recipe for T018 distinct-assignment rule + Client messaging. **SC-001 wall-clock (TTFT) and full live multi-provider session Pass remain T019** (deferred proof).
-**Owners:** DH Verifier (Pass/Fail) · DH Electron / Client (create messaging) · DH Runtime (Host createBot + roster projection)
-**Acceptance slice:** Spec FR-003, SC-002 rule definition; FR-001…002 / FR-007 create path reused from T014/T017
-**Contract:** [../contracts/bot-create-model.md](../contracts/bot-create-model.md)
+**Status:** Recipe for the T018 distinct-assignment rule and Client messaging. Owner: DH Verifier, after this slice. SC-001 wall-clock (TTFT) and a full live multi-provider session Pass stay **T019**.
+**Acceptance slice:** FR-003 and the SC-002 rule. Create path reused from T014/T017. This recipe does not record SC-001/SC-002 session Pass.
+**Contract:** [../contracts/bot-create-model.md](../contracts/bot-create-model.md) section “Verifier rule for different”
 **Quickstart:** [../quickstart.md](../quickstart.md) Scenario 2
-**Branch (implement):** `cursor/p1-t018-distinct-models-92fa` (base `cursor/p1-t017-create-ui-92fa`)
+**Branch (implement):** `cursor/p1-t018-distinct-models-92fa` (base `cursor/p1-t017-create-ui-92fa` at `537bd02588`)
 
 ## Verifier rule — “different models”
 
-**Pass definition for “≥2 different models/providers”:**
+Quoted from the contract:
 
-Any two **distinct configured `(provider, model)` assignments** available in the verification environment.
+> Any two distinct configured `(provider, model)` assignments available in the verification environment. No fixed marketing catalog.
 
-| Counts as distinct? | Example |
-|---------------------|---------|
-| Yes | `(deepseek-official, deepseek-v4-flash)` vs `(deepseek-official, deepseek-v4-pro)` |
-| Yes | `(provider-a, shared-id)` vs `(provider-b, shared-id)` — provider differs |
-| No | Same `(provider, model)` pair on two bots |
+Accepted edges for this slice:
 
-**Not a fixed marketing catalog.** The environment’s configured provider/model directory is the only catalog. Same-assignment create remains **allowed** for product use; Verifier cannot Pass SC-001/SC-002 until ≥2 distinct pairs exist across bots under test.
+- A second bot with the **same** `(provider, model)` pair may be created. That pair does not satisfy the ≥2-distinct exit.
+- If only one provider/model is configured, bots may still be created. Verifier cannot Pass the ≥2-distinct-models exit until a second distinct configured assignment exists.
+- `reasoningEffort` does not make two assignments distinct. Distinct means the `(provider, model)` tuple differs after the same trim as `requiredModelSelection` (`modelAssignmentsAreDistinct`).
+- Count only bots that expose both an LLM provider and a model on `modelSelection`. The Lead row often has no product bot assignment. A missing pair is not an assignment. The subagent backend id on `provider` without an LLM model is not an assignment.
+- The catalog is the verification environment’s configured assignments. Do not require a brand list.
 
 ## What this recipe proves (T018)
 
-1. Client **New bot** form shows locale-owned guidance that Verifier Pass needs ≥2 distinct `(provider, model)` assignments from the environment (no marketing list).
-2. Roster shows multi-model readiness (pending vs ready) from projected LLM `modelSelection` pairs.
-3. Draft that duplicates an existing roster `(provider, model)` shows a soft warning; Save stays enabled (same assignment allowed).
-4. Host roster rows expose LLM `modelSelection` when the live Agent route has provider + model (distinct from spawn-backend `provider`).
+1. The open team panel states the rule: different models means any two distinct configured `(provider, model)` assignments, not a fixed catalog.
+2. When teammate rows expose fewer than 2 distinct pairs, the panel says a multi-model distinct-models check cannot pass yet. When they expose ≥2, it says the roster meets that rule. This is messaging, not a chat blocker.
+3. Near New bot, a complete draft says whether it is a new distinct assignment relative to bots that already have both ids. The same assignment still submits. An incomplete draft (empty or longer than 200 characters after trim) does not show that comparison.
+4. Host roster rows set `modelSelection` from the live Agent route only. An unloaded teammate does not inherit the Lead pair.
 
-Does **not** prove SC-001 wall-clock < 30 min (T019). Does **not** require a live multi-provider API session for T018 Pass when this recipe’s Client/Host unit path is green; T019 owns that live evidence.
+Does **not** prove SC-001 wall-clock under 30 minutes. Does **not** add TTFT recording fields. Those belong to T019.
 
-## Preconditions
+## How to observe the Client messages
 
-- [ ] Scenario 0 topology handshake **Pass** recorded ([scenario-0-topology.md](./scenario-0-topology.md))
-- [ ] Checkout includes T017 create UI + T018 distinct-models tip
-- [ ] `pnpm install` complete; Node `^22.19 || >=24`
-- [ ] Environment can advertise ≥2 configured `(provider, model)` ids for a later live Pass (not required for T018 unit proof)
+Open the team panel on a loaded roster.
 
-## Commands (rerunnable) — T018 unit / Client proof
+- `data-team-distinct-models` shows `multiModelPending` or `multiModelReady`.
+- **New bot** shows `distinctModelsHint` (`data-team-distinct-models-hint`).
+- A draft that matches a teammate `modelSelection` shows `duplicateAssignment` (`data-team-duplicate-assignment`). Save stays enabled.
+- A complete draft that differs shows `draftDistinctAssignment` (`data-team-draft-distinct`).
 
-```sh
-pnpm exec vitest run \
-  packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
-  -t 'creates a Host-owned bot|warns when the draft|cancels bot create'
-```
+Copy is locale-owned (`packages/experimental/client-ui-agent-team/src/client/locales.ts`). Client tests assert the Chinese dictionary strings.
+
+## Commands (rerunnable)
 
 ```sh
 pnpm exec vitest run \
   packages/experimental/agent-team/tests/team.spec.ts \
-  -t 'applies per-teammate LLM agentOptions|creates a Host-owned bot from displayName'
+  packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+  -t 'distinct|createBot|creates a Host-owned bot|model assignment'
 ```
 
-Optional Client create regression (T017):
+In this workspace, `pnpm exec` may refuse to run because install rewrites `core.hooksPath`. The same filter via the local binary:
 
 ```sh
-pnpm exec vitest run \
-  packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts \
-  -t 'createBot|RPC-backed bot'
+./node_modules/.bin/vitest run \
+  packages/experimental/agent-team/tests/team.spec.ts \
+  packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+  -t 'distinct|createBot|creates a Host-owned bot|model assignment'
 ```
 
-## Deferred to T019 (do not block T018)
+## Deferred to T019
+
+Do not add wall-clock or TTFT fields in this slice.
 
 | Item | Owner |
 |------|--------|
 | Wall-clock first-launch → completed multi-model session < 30 min (SC-001) | Verifier + Electron |
 | Live work session using ≥2 bots with distinct configured assignments (SC-002 full) | Verifier + Runtime + Client |
-| Evidence under `evidence/scenario-2/` with TTFT stamp | Verifier |
+| Evidence under `evidence/scenario-2/` with a TTFT stamp | Verifier |
 
 ## Pass criteria (T018 slice)
 
-- Focused Client tests for distinct-models hint, duplicate soft warning, and multi-model ready/pending copy are green.
-- Host createBot / agentOptions tests show `member.modelSelection` for LLM routes.
-- Recipe documents the Verifier distinct-pair rule with **no** fixed marketing provider list.
+- `modelAssignmentsAreDistinct` tests cover the same pair, a different model, a different provider, ignored `reasoningEffort`, trim, and empty rejection.
+- Client tests show same-assignment `createBot`, the distinct-draft message, one teammate pair as not-yet, and two distinct teammate pairs as meets-rule.
+- This recipe does not claim SC-001 or SC-002 session Pass.
 
 ## Evidence home
 
-Record stdout + SHA under [evidence/scenario-2/](./evidence/scenario-2/) when Verifier runs T018 slice Pass/Fail. Full SC-001/002 evidence lands with T019.
+Record stdout and the commit SHA under [evidence/scenario-2/](./evidence/scenario-2/) when Verifier runs this slice. Full SC-001/002 evidence lands with T019.
 
 ## Topology unchanged
 
-Electron Main invents neither bots nor LLM routes. Create stays Host Remote `agentTeams/createBot`; Web under `dsh-app://` uses authenticated Host HTTP/WS.
+Electron Main invents neither bots nor LLM routes. Create stays Host Remote `agentTeams/createBot`. Web under `dsh-app://` uses authenticated Host HTTP/WS.

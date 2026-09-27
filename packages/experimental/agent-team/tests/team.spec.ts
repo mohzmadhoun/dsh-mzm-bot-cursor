@@ -13,8 +13,10 @@ import SubagentService from '@deepseek-ai/dsh-subagent'
 import { deliverSubagentPrompt, type HostPromptDeliverer } from '@deepseek-ai/dsh-subagent/internal'
 import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
 import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
+import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
+import { modelAssignmentsAreDistinct } from '../src/validation.ts'
 import { TeamRuntimeLifecycle } from '../src/lifecycle.ts'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/index.ts'
@@ -138,6 +140,49 @@ async function waitRunning(ctx: Context, id: SessionId): Promise<Agent> {
     return agent!
   }, { timeout: 5_000 })
 }
+
+describe('modelAssignmentsAreDistinct', () => {
+  it('treats trimmed (provider, model) tuples as distinct and ignores reasoningEffort', () => {
+    expect(modelAssignmentsAreDistinct(
+      { provider: ' prov-a ', model: ' model-a ' },
+      { provider: 'prov-a', model: 'model-a', reasoningEffort: ReasoningEffortId('high') },
+    )).toBe(false)
+    expect(modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'model-a', reasoningEffort: ReasoningEffortId('low') },
+      { provider: 'prov-a', model: 'model-b', reasoningEffort: ReasoningEffortId('high') },
+    )).toBe(true)
+    expect(modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'shared-id' },
+      { provider: 'prov-b', model: 'shared-id' },
+    )).toBe(true)
+  })
+
+  it('rejects an empty provider or model through required text', () => {
+    expect(() => modelAssignmentsAreDistinct(
+      { provider: '  ', model: 'model-a' },
+      { provider: 'prov-a', model: 'model-a' },
+    )).toThrow(expect.objectContaining({ code: 'TEAM_INVALID_ARGUMENT' }))
+    expect(() => modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'model-a' },
+      { provider: 'prov-a', model: '' },
+    )).toThrow(expect.objectContaining({ code: 'TEAM_INVALID_ARGUMENT' }))
+  })
+
+  it('does not project the Lead pair as an inactive teammate modelSelection', async () => {
+    const { ctx, lead } = await setup([textResponse('done')])
+    const spawned = await spawn(ctx, lead, 'quiet-bot', {
+      agentOptions: { provider: 'mock', model: 'quiet-model' },
+    })
+    await waitNoAgent(ctx, spawned.member.id)
+    const row = ctx.agentTeams.listMembers(lead).find(member => member.name === 'quiet-bot')
+    expect(row).toMatchObject({ provider: 'spawn', model: 'mock' })
+    expect(row).not.toHaveProperty('modelSelection')
+    expect(ctx.agentTeams.listMembers(lead)[0]).toMatchObject({
+      role: 'lead',
+      modelSelection: { provider: 'mock', model: 'mock' },
+    })
+  })
+})
 
 describe('Team identity and provisioning', () => {
   it('rejects missing and failed authoritative Team projections', async () => {

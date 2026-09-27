@@ -61,6 +61,22 @@ export function requiredModelSelection(selection: ModelSelection): ModelSelectio
 }
 
 /**
+ * Report whether two assignments are distinct Verifier `(provider, model)` pairs.
+ * Comparison uses the same trim as {@link requiredModelSelection}.
+ * `reasoningEffort` does not make two assignments distinct.
+ * @param left - candidate assignment.
+ * @param right - candidate assignment.
+ * @returns true when the normalized provider or model id differs.
+ * @throws {TeamError} when either provider or model is empty or longer than 200 characters.
+ */
+export function modelAssignmentsAreDistinct(left: ModelSelection, right: ModelSelection): boolean {
+  const normalizedLeft = requiredModelSelection(left)
+  const normalizedRight = requiredModelSelection(right)
+  return normalizedLeft.provider !== normalizedRight.provider
+    || normalizedLeft.model !== normalizedRight.model
+}
+
+/**
  * Normalize one workspace-relative path prefix without treating it as a lock.
  * @param value - user-authored path prefix.
  * @returns normalized slash-separated prefix.

@@ -62,6 +62,8 @@ Ask the Lead to create a teammate: give it a unique lowercase name such as `revi
 
 Product bot create uses Host `createBot(displayName, modelSelection)`: the Lead-authorized API requires a non-empty `displayName` and exactly one model/provider assignment, derives the durable kebab roster name, and retains `displayName` on the Host member snapshot. Call it through `ctx.agentTeams.createBot` or the generated `agentTeams/createBot` Remote; Electron Main must not invent bot records.
 
+`modelAssignmentsAreDistinct` compares two assignments after the same trim as `requiredModelSelection`. Optional reasoning effort does not make them distinct. A row missing either id is not an assignment, and the subagent backend id remains `provider`.
+
 The roster shows every member with its role (`lead` or `teammate`) and current status: `running`, `idle`, `inactive` (a member that exists but is not loaded), `provisioning`, or `failed`. A member that is not loaded receives its messages when it wakes.
 
 Only the Lead can create teammates or interrupt them.

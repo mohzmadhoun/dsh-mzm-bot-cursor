@@ -89,22 +89,47 @@ function failureText(error: { readonly code: string; readonly message: string })
   return `${error.message} (${error.code})`
 }
 
+/**
+ * Trim and length limits match Host `requiredModelSelection`.
+ * This browser bundle cannot import that Host module.
+ */
+const MODEL_ASSIGNMENT_MAX_LENGTH = 200
+
 /** Stable key for one Verifier `(provider, model)` assignment. */
 function assignmentKey(provider: string, model: string): string {
   return `${provider}\0${model}`
 }
 
 /**
- * Collect distinct LLM `(provider, model)` keys from a Team roster.
+ * Normalize one draft or roster pair the same way Host create trims ids.
+ * @param provider - raw provider id.
+ * @param model - raw model id.
+ * @returns a comparison key, or undefined when either id is empty or longer than 200 characters.
+ */
+function comparableAssignment(provider: string, model: string): string | undefined {
+  const trimmedProvider = provider.trim()
+  const trimmedModel = model.trim()
+  if (trimmedProvider.length === 0 || trimmedModel.length === 0) return undefined
+  if (trimmedProvider.length > MODEL_ASSIGNMENT_MAX_LENGTH || trimmedModel.length > MODEL_ASSIGNMENT_MAX_LENGTH) {
+    return undefined
+  }
+  return assignmentKey(trimmedProvider, trimmedModel)
+}
+
+/**
+ * Collect distinct LLM `(provider, model)` keys from teammate rows that expose both ids.
+ * The Lead row is omitted. A backend `provider` without `modelSelection` is not an assignment.
  * @param members - current TeamMemberView rows.
- * @returns set of assignment keys present on the roster.
+ * @returns set of assignment keys present on product bots.
  */
 function rosterAssignmentKeys(members: readonly TeamRosterMember[]): Set<string> {
   const keys = new Set<string>()
   for (const member of members) {
+    if (member.role !== 'teammate') continue
     const selection = member.modelSelection
     if (selection === undefined) continue
-    keys.add(assignmentKey(selection.provider, selection.model))
+    const key = comparableAssignment(selection.provider, selection.model)
+    if (key !== undefined) keys.add(key)
   }
   return keys
 }
@@ -528,8 +553,10 @@ function BotCreateForm({
   const provider = draft.provider.trim()
   const model = draft.model.trim()
   const ready = draft.displayName.trim() !== '' && provider !== '' && model !== ''
-  const duplicatesExisting = provider !== '' && model !== ''
-    && existingAssignments.has(assignmentKey(provider, model))
+  const draftKey = comparableAssignment(draft.provider, draft.model)
+  const comparable = draftKey !== undefined && existingAssignments.size > 0
+  const duplicatesExisting = comparable && existingAssignments.has(draftKey)
+  const distinctDraft = comparable && !existingAssignments.has(draftKey)
   return (
     <div className={css.form} data-team-create-bot>
       <p className={css.hint} data-team-distinct-models-hint>{t('distinctModelsHint')}</p>
@@ -555,6 +582,11 @@ function BotCreateForm({
         <div className={css.warning} role="status" data-team-duplicate-assignment>
           {t('duplicateAssignment')}
         </div>
+      )}
+      {distinctDraft && (
+        <p className={css.hint} role="status" data-team-draft-distinct>
+          {t('draftDistinctAssignment')}
+        </p>
       )}
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
