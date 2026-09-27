@@ -787,7 +787,11 @@ export class TeamService extends TypertRemoteService {
   private async listSkillCatalog(signal: AbortSignal): Promise<readonly SkillCatalogSummary[]> {
     const skills = this.ctx.get('skills')
     if (skills === undefined) return []
-    const summaries = await skills.list({ signal })
+    const summaries = await skills.list({ signal }) as ReadonlyArray<{
+      readonly name: string
+      readonly description: string
+      readonly source: string
+    }>
     return summaries.map((summary): SkillCatalogSummary => {
       const managed = summary.source === 'bundled'
         || summary.name === 'mzm-thin-pack'
