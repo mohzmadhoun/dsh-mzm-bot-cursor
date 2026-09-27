@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、编辑 Bot persona（职责／语气／反职责）、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
+本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、编辑 Bot persona（职责／语气／反职责）、用具名侧栏分组与未分组／默认组织 Bot、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
 
 ## 目录
 
@@ -51,6 +51,10 @@ kind: "package-reference"
 
 健康 teammate 上的**删除 Bot**进入 Client `pending-confirm`，此时不调用 Host。**取消**／关闭确认返回 idle，Bot 保持不变。**确认删除**调用 Host Remote `agentTeams/deleteBot`；成功后重新加载 roster，Bot 从侧栏与 overview 入口消失。会话记录与 mailbox 清理**不是** Pass 条件（clarify lock 5）。Electron Main 不得发明身份记录，也不为本路径托管原生确认对话框（优先 Client 确认；T028 未使用）。
 
+### 用侧栏分组组织 Bot
+
+**新建分组**通过 `agentTeams/createSection` 创建 Host 具名侧栏分组（名称必填非空）。具名分组来自 `TeamView.sections` 及其 Host 派生 membership。`sectionId` 为 null／缺省的 Bot 出现在来自 `TeamView.unassignedBotIds` 的**未分组**下——Host 永不持久化未分组目录行（clarify lock 4）。**重命名分组**调用 `agentTeams/renameSection`。健康 teammate 上的**移至分组**调用 `agentTeams/assignSection`，传入具名分组 id 或 `null` 表示未分组／默认。Electron Main 不得发明分组记录或归属。
+
 ### 观察 Host mailbox handoff
 
 打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。
@@ -74,7 +78,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |
@@ -108,7 +112,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 
 - **Snapshot refresh**——panel 会在打开、显式 refresh 与 mutation 后刷新；handoff 来自最新的 `agentTeams/view` 快照，没有实时事件订阅。
 - **普通 child continuation**——导航后发送的人类消息使用稳定 addressed-subagent 提示词路径，而不是 Team peer mailbox。
-- **没有 rename/delete/interrupt 控件**——panel 通过 Host Remote 创建 bot 并编辑 persona，但不能 rename、delete 或 interrupt teammate；write scope 仍只是提示性 metadata。
+- **没有 interrupt 控件**——panel 通过 Host Remote 创建 bot、编辑身份、组织分组并以确认删除，但不能 interrupt teammate；write scope 仍只是提示性 metadata。
 
 <a id="dev-note"></a>
 ### 开发备注

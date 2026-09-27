@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
   HostMailboxMessage,
+  SidebarSectionId,
   TeamMessageId,
   TeamTaskId, TeamTaskView as TeamTask, TeamView,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -12,7 +13,9 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamCreateBotActionResult, type TeamDeleteBotActionResult, type TeamRenameBotActionResult,
+  type TeamAssignSectionActionResult, type TeamCreateBotActionResult,
+  type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
+  type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
@@ -57,7 +60,7 @@ const view: TeamView = {
   ],
   tasks: [task],
   sections: [],
-  unassignedBotIds: ['worker-id' as SessionId],
+  unassignedBotIds: [SESSION, 'worker-id' as SessionId],
   handoffs: [],
 }
 
@@ -150,6 +153,39 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
         },
       },
     }),
+    createSection: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'section-1' as SidebarSectionId,
+          name: 'Research',
+          section: { id: 'section-1' as SidebarSectionId, name: 'Research', botIds: [] },
+        },
+      },
+    }),
+    renameSection: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'section-1' as SidebarSectionId,
+          name: 'Lab',
+          section: { id: 'section-1' as SidebarSectionId, name: 'Lab', botIds: [] },
+        },
+      },
+    }),
+    assignSection: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          sectionId: 'section-1' as SidebarSectionId,
+          member: { ...view.members[1]!, sectionId: 'section-1' as SidebarSectionId },
+        },
+      },
+    }),
     createTask: () => Promise.resolve(taskSuccess({ ...task, id: TASK_2, subject: 'New task' })),
     updateTask: () => Promise.resolve({
       ok: true,
@@ -168,6 +204,8 @@ describe('TeamAction', () => {
       ...view,
       members: [{ id: nextSession, name: 'lead', role: 'lead', status: 'idle', diagnostics: [] }],
       tasks: [{ ...task, id: 'task-next' as TeamTaskId, subject: 'Next session task' }],
+      unassignedBotIds: [nextSession],
+      sections: [],
     }
     const load = vi.fn((sessionId: SessionId) => sessionId === SESSION
       ? firstLoad.promise
@@ -227,7 +265,11 @@ describe('TeamAction', () => {
       .mockResolvedValueOnce({ ok: true, value: view })
       .mockResolvedValueOnce({
         ok: true,
-        value: { ...view, members: [...view.members, createdMember] },
+        value: {
+          ...view,
+          members: [...view.members, createdMember],
+          unassignedBotIds: [...view.unassignedBotIds, createdMember.id],
+        },
       })
     render(<TeamAction {...props(actions({ load, createBot }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
@@ -965,6 +1007,12 @@ describe('TeamAction', () => {
           status: 'provisioning',
           diagnostics: [],
         },
+      ],
+      unassignedBotIds: [
+        SESSION,
+        'worker-id' as SessionId,
+        'failed-id' as SessionId,
+        'provisioning-id' as SessionId,
       ],
       tasks: [
         { ...unownedTask, id: 'ready-task' as TeamTaskId, status: 'pending', ready: true },
@@ -1797,5 +1845,193 @@ describe('TeamAction', () => {
     expect(await screen.findByText('bot already deleted (team-rejected)')).toBeTruthy()
     expect(screen.getByText('Rejected Delete')).toBeTruthy()
     expect(screen.getByText(zh.deleteConfirmHint)).toBeTruthy()
+  })
+
+  it('creates a named section through Host createSection and lists it beside Unassigned (T034)', async () => {
+    const sectionId = 'section-research' as SidebarSectionId
+    const createSection = vi.fn((): Promise<TeamCreateSectionActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: sectionId,
+          name: 'Research',
+          section: { id: sectionId, name: 'Research', botIds: [] },
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: view })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          sections: [{ id: sectionId, name: 'Research', botIds: [] }],
+        },
+      })
+    render(<TeamAction {...props(actions({ load, createSection }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.unassigned)).toBeTruthy()
+    expect(document.querySelector('[data-team-member="worker-id"]')).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: zh.createSection }))
+    fireEvent.change(screen.getByLabelText(zh.sectionName), { target: { value: 'Research' } })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(createSection).toHaveBeenCalledWith(SESSION, { name: 'Research' })
+    })
+    await waitFor(() => {
+      expect(document.querySelector('[data-section-name="Research"]')).not.toBeNull()
+      expect(document.querySelector('[data-team-section-unassigned]')).not.toBeNull()
+      expect(document.querySelector('[data-section-name="Unassigned"]')).toBeNull()
+    })
+  })
+
+  it('assigns a bot into a named section and moves it back to Unassigned (T034)', async () => {
+    const sectionId = 'section-lab' as SidebarSectionId
+    const workerId = 'worker-id' as SessionId
+    const worker = view.members[1]!
+    const namedView: TeamView = {
+      ...view,
+      members: [
+        view.members[0]!,
+        { ...worker, sectionId },
+      ],
+      sections: [{ id: sectionId, name: 'Lab', botIds: [workerId] }],
+      unassignedBotIds: [SESSION],
+    }
+    const unassignedView: TeamView = {
+      ...view,
+      sections: [{ id: sectionId, name: 'Lab', botIds: [] }],
+      unassignedBotIds: [SESSION, workerId],
+    }
+    const assignSection = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ok: true as const,
+          value: {
+            id: workerId,
+            sectionId,
+            member: { ...worker, sectionId },
+          },
+        },
+      } satisfies TeamAssignSectionActionResult)
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ok: true as const,
+          value: {
+            id: workerId,
+            sectionId: null,
+            member: { ...worker, sectionId: null },
+          },
+        },
+      } satisfies TeamAssignSectionActionResult)
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          sections: [{ id: sectionId, name: 'Lab', botIds: [] }],
+        },
+      })
+      .mockResolvedValueOnce({ ok: true as const, value: namedView })
+      .mockResolvedValueOnce({ ok: true as const, value: unassignedView })
+    render(<TeamAction {...props(actions({ load, assignSection }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Lab')
+    fireEvent.click(document.querySelector(`[data-team-assign-section="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-assign-section-select]')!, {
+      target: { value: sectionId },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(assignSection).toHaveBeenCalledWith(SESSION, { botId: workerId, sectionId })
+    })
+    await waitFor(() => {
+      const section = document.querySelector(`[data-team-section="${sectionId}"]`)
+      expect(section?.querySelector(`[data-team-member="${workerId}"]`)).not.toBeNull()
+    })
+    fireEvent.click(document.querySelector(`[data-team-assign-section="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-assign-section-select]')!, {
+      target: { value: '' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(assignSection).toHaveBeenCalledWith(SESSION, { botId: workerId, sectionId: null })
+    })
+    await waitFor(() => {
+      const unassigned = document.querySelector('[data-team-section-unassigned]')
+      expect(unassigned?.querySelector(`[data-team-member="${workerId}"]`)).not.toBeNull()
+    })
+  })
+
+  it('renames a named section through Host renameSection (T034)', async () => {
+    const sectionId = 'section-lab' as SidebarSectionId
+    const renameSection = vi.fn((): Promise<TeamRenameSectionActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: sectionId,
+          name: 'Studio',
+          section: { id: sectionId, name: 'Studio', botIds: [] },
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          sections: [{ id: sectionId, name: 'Lab', botIds: [] }],
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: {
+          ...view,
+          sections: [{ id: sectionId, name: 'Studio', botIds: [] }],
+        },
+      })
+    render(<TeamAction {...props(actions({ load, renameSection }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Lab')).toBeTruthy()
+    fireEvent.click(document.querySelector(`[data-team-rename-section="${sectionId}"]`)!)
+    fireEvent.change(screen.getByLabelText(zh.sectionName), { target: { value: 'Studio' } })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(renameSection).toHaveBeenCalledWith(SESSION, { sectionId, name: 'Studio' })
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Studio')).toBeTruthy()
+      expect(screen.queryByText('Lab')).toBeNull()
+    })
+  })
+
+  it('keeps prior section membership and shows failure when assignSection is unavailable (T034)', async () => {
+    const sectionId = 'section-lab' as SidebarSectionId
+    const workerId = 'worker-id' as SessionId
+    const assignSection = vi.fn((): Promise<TeamAssignSectionActionResult> => Promise.resolve(
+      { ok: false, error: new RemoteError('gateway/internal', 'Host offline', {}) },
+    ))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: {
+        ...view,
+        sections: [{ id: sectionId, name: 'Lab', botIds: [] }],
+      },
+    })
+    render(<TeamAction {...props(actions({ load, assignSection }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Lab')
+    fireEvent.click(document.querySelector(`[data-team-assign-section="${workerId}"]`)!)
+    fireEvent.change(document.querySelector('[data-team-assign-section-select]')!, {
+      target: { value: sectionId },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('Host offline (gateway/internal)')).toBeTruthy()
+    const unassigned = document.querySelector('[data-team-section-unassigned]')
+    expect(unassigned?.querySelector(`[data-team-member="${workerId}"]`)).not.toBeNull()
   })
 })

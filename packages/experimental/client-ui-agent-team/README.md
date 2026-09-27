@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -51,6 +51,10 @@ When the draft has both ids and roster bots already have pairs, the form says wh
 
 **Delete bot** on a healthy teammate enters Client `pending-confirm` without calling Host. **Cancel** / dismiss returns to idle with the bot unchanged. **Confirm delete** calls Host Remote `agentTeams/deleteBot`; success reloads the roster so the bot is absent from sidebar and overview entry points. Transcript and mailbox cleanup are **not** Pass gates (clarify lock 5). Electron Main does not invent identity records or host a native confirm dialog for this path (Client confirm preferred; T028 unused).
 
+### Organize bots in sidebar sections
+
+**New section** creates a Host named sidebar section via `agentTeams/createSection` (non-empty name required). Named sections render from `TeamView.sections` with Host-derived membership. Bots with null/absent `sectionId` appear under **Unassigned** from `TeamView.unassignedBotIds` — Host never persists an Unassigned catalog row (clarify lock 4). **Rename section** calls `agentTeams/renameSection`. **Move to section** on a healthy teammate calls `agentTeams/assignSection` with a named section id or `null` for Unassigned/default. Electron Main does not invent section records or membership.
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -74,7 +78,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
@@ -108,7 +112,7 @@ No direct effect; the Team tools and ordinary conversation submission own any la
 
 - **Snapshot refresh** — the panel refreshes on open, explicit refresh, and mutations; handoffs come from the latest `agentTeams/view` snapshot and have no live event subscription.
 - **Ordinary child continuation** — a human message sent after navigation uses the stable addressed-subagent prompt path, not the Team peer mailbox.
-- **No rename/delete/interrupt controls** — the panel creates bots and edits persona through Host Remotes but cannot rename, delete, or interrupt teammates; write scopes remain advisory metadata.
+- **No interrupt controls** — the panel creates bots, edits identity, organizes sections, and deletes with confirm through Host Remotes but cannot interrupt teammates; write scopes remain advisory metadata.
 
 <a id="dev-note"></a>
 ### Dev Note

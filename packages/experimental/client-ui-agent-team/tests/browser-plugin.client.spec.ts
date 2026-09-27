@@ -3,7 +3,10 @@ import { describe, expect, it, vi } from 'vitest'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import type { TeamMemberView as TeamRosterMember, TeamTaskId } from '@deepseek-ai/dsh-experimental-agent-team/client'
+import type {
+  SidebarSectionId,
+  TeamMemberView as TeamRosterMember, TeamTaskId,
+} from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type {} from '@deepseek-ai/dsh-experimental-agent-team/remote'
 import { RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
@@ -23,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -58,6 +61,9 @@ async function bench(options: {
     members: [{
       id: SESSION, name: 'lead', role: 'lead' as const, status: 'idle' as const, diagnostics: [],
     }], tasks: [task],
+    sections: [],
+    unassignedBotIds: [SESSION],
+    handoffs: [],
   }
   ctx.provide('remote.agentTeams', {
     view: (...args: unknown[]) => {
@@ -171,6 +177,70 @@ async function bench(options: {
           value: {
             ok: true as const,
             value: { id: CHILD },
+          },
+        })
+    },
+    createSection: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/createSection', args })
+      return Promise.resolve(options.remoteFailure === 'createSection'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: 'section-1' as SidebarSectionId,
+              name: 'Research',
+              section: {
+                id: 'section-1' as SidebarSectionId,
+                name: 'Research',
+                botIds: [],
+              },
+            },
+          },
+        })
+    },
+    renameSection: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/renameSection', args })
+      return Promise.resolve(options.remoteFailure === 'renameSection'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: 'section-1' as SidebarSectionId,
+              name: 'Lab',
+              section: {
+                id: 'section-1' as SidebarSectionId,
+                name: 'Lab',
+                botIds: [],
+              },
+            },
+          },
+        })
+    },
+    assignSection: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/assignSection', args })
+      return Promise.resolve(options.remoteFailure === 'assignSection'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              sectionId: 'section-1' as SidebarSectionId,
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Research Bot',
+                sectionId: 'section-1' as SidebarSectionId,
+                diagnostics: [],
+              },
+            },
           },
         })
     },
@@ -290,6 +360,17 @@ describe('ui-team browser plugin', () => {
     expect((await actions.deleteBot(SESSION, {
       botId: CHILD,
     })).ok).toBe(true)
+    expect((await actions.createSection(SESSION, {
+      name: 'Research',
+    })).ok).toBe(true)
+    expect((await actions.renameSection(SESSION, {
+      sectionId: 'section-1' as SidebarSectionId,
+      name: 'Lab',
+    })).ok).toBe(true)
+    expect((await actions.assignSection(SESSION, {
+      botId: CHILD,
+      sectionId: 'section-1' as SidebarSectionId,
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -306,6 +387,9 @@ describe('ui-team browser plugin', () => {
       'agentTeams/renameBot',
       'agentTeams/setAvatar',
       'agentTeams/deleteBot',
+      'agentTeams/createSection',
+      'agentTeams/renameSection',
+      'agentTeams/assignSection',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -330,6 +414,15 @@ describe('ui-team browser plugin', () => {
     })
     expect(b.calls[5]?.args[1]).toEqual({
       botId: CHILD,
+    })
+    expect(b.calls[6]?.args[1]).toEqual({ name: 'Research' })
+    expect(b.calls[7]?.args[1]).toEqual({
+      sectionId: 'section-1',
+      name: 'Lab',
+    })
+    expect(b.calls[8]?.args[1]).toEqual({
+      botId: CHILD,
+      sectionId: 'section-1',
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
@@ -422,6 +515,35 @@ describe('ui-team browser plugin', () => {
     const deleteActions = (deleteBot.entry()!.inject as unknown as () => TeamActionInjected)()
     await expect(deleteActions.deleteBot(SESSION, {
       botId: CHILD,
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const createSection = await bench({ remoteFailure: 'createSection' })
+    const createSectionActions = (createSection.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(createSectionActions.createSection(SESSION, {
+      name: 'Research',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const renameSection = await bench({ remoteFailure: 'renameSection' })
+    const renameSectionActions = (renameSection.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(renameSectionActions.renameSection(SESSION, {
+      sectionId: 'section-1' as SidebarSectionId,
+      name: 'Lab',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const assignSection = await bench({ remoteFailure: 'assignSection' })
+    const assignSectionActions = (assignSection.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(assignSectionActions.assignSection(SESSION, {
+      botId: CHILD,
+      sectionId: null,
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },
