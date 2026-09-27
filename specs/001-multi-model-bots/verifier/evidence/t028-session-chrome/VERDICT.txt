@@ -1,15 +1,30 @@
-T028 Desktop session chrome create/assign — Electron measured Pass
+T028 Desktop session chrome create/assign — DH Verifier PASS
 
-Composition path:
-- DESKTOP_PROFILE_BUNDLES = web template + Agent Teams Host/Web layers
-- ui-conversation + ui-model-selection (packages/client) from dsh-web-app
-- ui-agent-team create-bot form on conversation.session.header.actions
-- assign-model: conversation.input.model + create form provider/model
-- Default cordis.patch.yml empty — no config-file edit for happy path
-- Electron Main free of createBot / ModelSelection / those slots
+Branch: cursor/p1-t028-session-chrome-92fa @ 1be72eaeda803389ea1cfa8528f30fb6881a048e
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/54
+Linear: MOH-73 left In Progress (PO owns Done)
 
-Command: pnpm exec vitest run apps/desktop/tests/session-chrome-create-assign.spec.ts apps/desktop/tests/agent-teams-mount.spec.ts
-Result: 3/3 passed
+Acceptance (recipe t028-session-chrome.md / FR-007 chrome slice):
+1. DESKTOP_PROFILE_BUNDLES = web template + Agent Teams Host/Web
+   measured: [dsh-base, dsh-web-app, experimental-agent-team-profile, experimental-agent-team-web-profile]
+2. composeEntries includes ui-conversation, ui-model-selection, ui-agent-team
+   measured: session-chrome-create-assign.spec.ts 2/2 green (vitest-rerun.stdout.txt)
+3. create-bot on conversation.session.header.actions → remote.agentTeams.createBot
+   measured: packages/experimental/client-ui-agent-team/src/client/mount.ts + TeamAction.tsx
+4. assign-model on conversation.input.model (+ create form provider/model)
+   measured: packages/client/ui-model-selection/src/client/index.ts + TeamAction modelSelection
+5. Default cordis.patch.yml empty — no create/assign patch required
+   measured: createPluginProfile assertion in recipe test
+6. Electron Main free of createBot / ModelSelection / those slots
+   measured: rg empty on apps/desktop/src/main.ts (+ ipc/preload)
 
-Not Done: product SC / Linear Done await Verifier + PO; ui-settings-models (T033/T035) untouched.
-d8e91511499b35ed5ebff08f262504ecce5807b7c977485410ee18f0de36dc84  specs/001-multi-model-bots/verifier/evidence/t028-session-chrome/vitest.stdout.txt
+Commands (this Verifier rerun):
+  DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run \
+    apps/desktop/tests/session-chrome-create-assign.spec.ts
+  → 2/2 passed (vitest-rerun.stdout.txt)
+  optional agent-teams-mount.spec.ts → 1/1 passed
+  optional team-action.client create/cancel → 2 passed / 31 skipped
+
+Out of scope (recipe): SC-001/002 live multi-model; T033/T035 credential UX; no Electron GUI launch required for this slice.
+
+Linear Done: leave to PO after this Pass.
