@@ -62,7 +62,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T010 [P] Confirm P1 desktop Host remains chat-oriented without local Shell/Box backends for acceptance in Desktop profile composition under `apps/desktop/` / `apps/desktop-host/` and `packages/bundle/` (FR-010); document non-goal absence check in `specs/001-multi-model-bots/verifier/non-goals.md`
 - [ ] T011 [P] Confirm in-app credentials primary path uses Host `ctx.credentials` + `packages/credentials/credentials-local/` under `$DSH_HOME` with no secret IPC in `apps/desktop/src/preload-*.ts` / `apps/desktop/src/ipc.ts` (FR-008/009; research R4)
 - [x] T012 Close Architect runtime gap: extend teammate spawn so each bot receives its own LLM `ModelSelection` / `agentOptions` at create — update `packages/experimental/agent-team/src/types.ts` (`SpawnTeammateRequest`), `packages/experimental/agent-team/src/roster.ts`, and call sites so Electron Main never routes models ([contracts/bot-create-model.md](./contracts/bot-create-model.md))
-- [ ] T013 [P] Ensure per-bot agent scope isolates model assignment and does not share another bot’s tool privilege by default via `packages/core/agent/` scope wiring and Team spawn (FR-011); tools in P1 acceptance MUST NOT send/post externally (FR-012) — document trust floor in `specs/001-multi-model-bots/verifier/trust-floor.md`
+- [x] T013 [P] Ensure per-bot agent scope isolates model assignment and does not share another bot’s tool privilege by default via `packages/core/agent/` scope wiring and Team spawn (FR-011); tools in P1 acceptance MUST NOT send/post externally (FR-012) — document trust floor in `specs/001-multi-model-bots/verifier/trust-floor.md`
 
 **Checkpoint**: Foundation ready — user story implementation can begin (after handshake Pass)
 

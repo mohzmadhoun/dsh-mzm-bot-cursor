@@ -1,0 +1,25 @@
+VERDICT: Pass
+SC: FR-011 · FR-012 (T013 trust floor)
+SHA: 22e25788642bf9df739acffdbde0550027c208d1
+BRANCH: cursor/p1-t013-trust-floor-92fa
+UTC: 2026-09-27T09:09:32Z
+RECIPE: specs/001-multi-model-bots/verifier/trust-floor.md
+LINEAR: MOH-58
+
+COMMAND1: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'binds Bot ModelSelection via installModelSelection'
+STDOUT1: evidence/t013-trust-floor/vitest-model-bind.stdout.txt (1 passed | 55 skipped; EXIT:0)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/tool-agent-team/tests/tool-team.spec.ts -t 'installs the complete scoped schema'
+STDOUT2: evidence/t013-trust-floor/vitest-scoped-schema.stdout.txt (1 passed | 21 skipped; EXIT:0)
+
+FR011_SYMBOLS: Pass (measured — symbols present at recipe table paths on SHA)
+FR011_MODEL_BIND: Pass (measured — recipe vitest)
+FR011_SCOPED_TOOLS: Pass (measured — recipe vitest)
+FR012_ACCEPTANCE: Pass (measured — no Scenario 1–5 recipe requires Shell/Box/web_*/webhook/MCP connector send/post; Team send_message is in-process Host mailbox)
+DOCS_TASKS_T013: Pass (measured — tasks.md T013 [x])
+DOCS_README_LINK: Pass (measured — verifier/README.md links trust-floor.md)
+CROSS_T010: Pass (inferred — evidence/t010-t011 VERDICT Pass for FR-010 non-dependence)
+CROSS_T015: Pass (inferred — evidence/t015-model-bind VERDICT Pass for bind isolation)
+
+CLAIM: measured (independent re-run on assigned SHA; docs + wiring confirmed)
+RUNTIME_BLOCKER: none
+SCOPE_OUT: live SC-001…SC-006 product scenario Pass (later Verifier recipes)

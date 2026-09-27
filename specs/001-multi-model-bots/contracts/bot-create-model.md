@@ -14,8 +14,8 @@
 ## Host obligations
 
 - Persist Bot identity + one `ModelSelection` per Bot for P1.
-- Isolate scopes so Bot A does not share Bot B’s tool privilege by default.
-- Team/teammate spawn (or equivalent Host create) MUST accept per-bot LLM route (`agentOptions` / `installModelSelection`) — Architect runtime gap.
+- Isolate scopes so Bot A does not share Bot B’s tool privilege by default — measured wiring in [../verifier/trust-floor.md](../verifier/trust-floor.md) (FR-011).
+- Team/teammate spawn (or equivalent Host create) MUST accept per-bot LLM route (`agentOptions` / `installModelSelection`).
 - Electron Main MUST NOT invent bot records or route models.
 
 ## Verifier rule for “different”

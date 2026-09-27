@@ -27,7 +27,7 @@ Session dump / transcript export for a scripted authenticated session MUST conta
 
 ## Trust floor tie-ins
 
-- Tools in P1 acceptance surface MUST NOT send/post externally (FR-012).
+- Tools in P1 acceptance surface MUST NOT send/post externally (FR-012) — Verifier recipe [../verifier/trust-floor.md](../verifier/trust-floor.md).
 - No MCP / 1Password connector vault in P1 (deferred P6).
 
 ## Non-goals
