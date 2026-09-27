@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type {
+  AvatarColorId,
+  AvatarMarker,
+  AvatarShapeId,
   BotIdentityMutationResult,
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
   HostMailboxMessage,
+  RenameBotInput,
+  RenameBotResult,
+  SetAvatarInput,
+  SetAvatarResult,
   TeamMailboxDeliveryState,
   TeamMemberView as TeamRosterMember,
   TeamTaskAction,
@@ -38,11 +45,19 @@ export type TeamCreateBotActionResult = RemoteResult<CreateBotMutationResult>
 /** Generated Remote result whose business value preserves Team updatePersona rejections. */
 export type TeamUpdatePersonaActionResult = RemoteResult<BotIdentityMutationResult<UpdatePersonaResult>>
 
+/** Generated Remote result whose business value preserves Team renameBot rejections. */
+export type TeamRenameBotActionResult = RemoteResult<BotIdentityMutationResult<RenameBotResult>>
+
+/** Generated Remote result whose business value preserves Team setAvatar rejections. */
+export type TeamSetAvatarActionResult = RemoteResult<BotIdentityMutationResult<SetAvatarResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
   createBot: (sessionId: SessionId, input: CreateBotInput) => Promise<TeamCreateBotActionResult>
   updatePersona: (sessionId: SessionId, input: UpdatePersonaInput) => Promise<TeamUpdatePersonaActionResult>
+  renameBot: (sessionId: SessionId, input: RenameBotInput) => Promise<TeamRenameBotActionResult>
+  setAvatar: (sessionId: SessionId, input: SetAvatarInput) => Promise<TeamSetAvatarActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -92,9 +107,61 @@ interface PersonaDraft {
   antiJobs: string
 }
 
+/** Draft fields for the Host rename editor (non-empty displayName). */
+interface RenameDraft {
+  displayName: string
+}
+
+/**
+ * Draft fields for the Host preset avatar picker (shape and/or color).
+ * Empty string means unset for that axis; at least one must be set to save.
+ * Image-file / URL upload is omitted for P2 Pass (clarify lock 3 / T024).
+ */
+interface AvatarDraft {
+  shape: AvatarShapeId | ''
+  color: AvatarColorId | ''
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
+const EMPTY_RENAME_DRAFT: RenameDraft = { displayName: '' }
+const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
+
+/** Fixed Host avatar shape presets mirrored for the Client picker (FR-005). */
+const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
+
+/** Fixed Host avatar color presets mirrored for the Client picker (FR-005). */
+const AVATAR_COLOR_IDS = ['blue', 'green', 'orange', 'purple', 'red', 'gray'] as const satisfies readonly AvatarColorId[]
+
+function avatarShapeKey(shape: AvatarShapeId): TeamKey {
+  switch (shape) {
+    case 'circle': return 'avatarShape.circle'
+    case 'square': return 'avatarShape.square'
+    case 'triangle': return 'avatarShape.triangle'
+    case 'hexagon': return 'avatarShape.hexagon'
+  }
+}
+
+function avatarColorKey(color: AvatarColorId): TeamKey {
+  switch (color) {
+    case 'blue': return 'avatarColor.blue'
+    case 'green': return 'avatarColor.green'
+    case 'orange': return 'avatarColor.orange'
+    case 'purple': return 'avatarColor.purple'
+    case 'red': return 'avatarColor.red'
+    case 'gray': return 'avatarColor.gray'
+  }
+}
+
+/** Build a Host avatar marker from the picker draft, or undefined when neither axis is set. */
+function avatarFromDraft(draft: AvatarDraft): AvatarMarker | undefined {
+  if (draft.shape === '' && draft.color === '') return undefined
+  return {
+    ...draft.shape === '' ? {} : { shape: draft.shape },
+    ...draft.color === '' ? {} : { color: draft.color },
+  }
+}
 
 function items(value: string): string[] {
   return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]
@@ -228,7 +295,8 @@ function memberLabel(
 
 /** Render the live Team roster, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
-  sessionId, load, createBot, updatePersona, createTask, updateTask, openTeammate, openModelsSettings, t,
+  sessionId, load, createBot, updatePersona, renameBot, setAvatar, createTask, updateTask,
+  openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -239,6 +307,10 @@ export function TeamAction({
   const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
   const [editingPersona, setEditingPersona] = useState<SessionId | null>(null)
   const [personaDraft, setPersonaDraft] = useState<PersonaDraft>(EMPTY_PERSONA_DRAFT)
+  const [editingRename, setEditingRename] = useState<SessionId | null>(null)
+  const [renameDraft, setRenameDraft] = useState<RenameDraft>(EMPTY_RENAME_DRAFT)
+  const [editingAvatar, setEditingAvatar] = useState<SessionId | null>(null)
+  const [avatarDraft, setAvatarDraft] = useState<AvatarDraft>(EMPTY_AVATAR_DRAFT)
   const [creating, setCreating] = useState(false)
   const [createDraft, setCreateDraft] = useState<Draft>(EMPTY_DRAFT)
   const [editing, setEditing] = useState<string | null>(null)
@@ -414,6 +486,74 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleRenameBot = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamRenameBotActionResult>,
+  ): Promise<RenameBotResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`rename:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`rename:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
+  const settleSetAvatar = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamSetAvatarActionResult>,
+  ): Promise<SetAvatarResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`avatar:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`avatar:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -436,6 +576,8 @@ export function TeamAction({
       voice: member.persona?.voice ?? '',
       antiJobs: member.persona?.antiJobs.join('\n') ?? '',
     })
+    setEditingRename(null)
+    setEditingAvatar(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -448,6 +590,49 @@ export function TeamAction({
     if (saved === undefined) return
     setEditingPersona(null)
     setPersonaDraft(EMPTY_PERSONA_DRAFT)
+  }
+
+  const startRename = (member: TeamRosterMember): void => {
+    setEditingRename(member.id)
+    setRenameDraft({ displayName: member.displayName ?? member.name })
+    setEditingAvatar(null)
+    setEditingPersona(null)
+  }
+
+  const submitRename = async (member: TeamRosterMember): Promise<void> => {
+    const displayName = renameDraft.displayName.trim()
+    /* v8 ignore next -- RenameForm disables Save while the normalized name is empty. */
+    if (displayName === '') return
+    const saved = await settleRenameBot(member.id, () => renameBot(sessionId, {
+      botId: member.id,
+      displayName,
+    }))
+    if (saved === undefined) return
+    setEditingRename(null)
+    setRenameDraft(EMPTY_RENAME_DRAFT)
+  }
+
+  const startEditAvatar = (member: TeamRosterMember): void => {
+    setEditingAvatar(member.id)
+    setAvatarDraft({
+      shape: member.avatar?.shape ?? '',
+      color: member.avatar?.color ?? '',
+    })
+    setEditingRename(null)
+    setEditingPersona(null)
+  }
+
+  const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
+    const avatar = avatarFromDraft(avatarDraft)
+    /* v8 ignore next -- AvatarForm disables Save while neither preset axis is set. */
+    if (avatar === undefined) return
+    const saved = await settleSetAvatar(member.id, () => setAvatar(sessionId, {
+      botId: member.id,
+      avatar,
+    }))
+    if (saved === undefined) return
+    setEditingAvatar(null)
+    setAvatarDraft(EMPTY_AVATAR_DRAFT)
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -583,10 +768,13 @@ export function TeamAction({
                 <div className={css.roster}>
                   {view.members.map((member) => {
                     const antiJobs = member.persona?.antiJobs ?? []
-                    const canEditPersona = member.role === 'teammate'
+                    const canEditIdentity = member.role === 'teammate'
                       && member.status !== 'failed'
                       && member.status !== 'provisioning'
                     const personaPending = pendingTasks.has(`persona:${member.id}`)
+                    const renamePending = pendingTasks.has(`rename:${member.id}`)
+                    const avatarPending = pendingTasks.has(`avatar:${member.id}`)
+                    const identityBusy = personaPending || renamePending || avatarPending
                     return (
                       <div
                         key={member.id}
@@ -605,9 +793,25 @@ export function TeamAction({
                             })
                           }}
                         >
+                          {member.avatar !== undefined && (
+                            <span
+                              className={css.avatarMarker}
+                              data-team-avatar=""
+                              data-avatar-shape={member.avatar.shape ?? ''}
+                              data-avatar-color={member.avatar.color ?? ''}
+                              title={[
+                                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
+                                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
+                              ].filter(Boolean).join(' · ')}
+                              aria-label={[
+                                member.avatar.shape === undefined ? null : t(avatarShapeKey(member.avatar.shape)),
+                                member.avatar.color === undefined ? null : t(avatarColorKey(member.avatar.color)),
+                              ].filter(Boolean).join(' · ')}
+                            />
+                          )}
                           <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />
                           <span className={css.memberText}>
-                            <span>{member.displayName ?? member.name}</span>
+                            <span data-team-display-name>{member.displayName ?? member.name}</span>
                             <small>
                               {member.displayName !== undefined ? `${member.name} · ` : ''}
                               {t(memberStatusKey(member.status))}
@@ -628,7 +832,33 @@ export function TeamAction({
                             </ul>
                           </div>
                         )}
-                        {canEditPersona && editingPersona === member.id && (
+                        {canEditIdentity && editingRename === member.id && (
+                          <RenameForm
+                            draft={renameDraft}
+                            setDraft={setRenameDraft}
+                            pending={renamePending}
+                            onSave={() => { void submitRename(member) }}
+                            onCancel={() => {
+                              setEditingRename(null)
+                              setRenameDraft(EMPTY_RENAME_DRAFT)
+                            }}
+                            t={t}
+                          />
+                        )}
+                        {canEditIdentity && editingAvatar === member.id && (
+                          <AvatarForm
+                            draft={avatarDraft}
+                            setDraft={setAvatarDraft}
+                            pending={avatarPending}
+                            onSave={() => { void submitAvatar(member) }}
+                            onCancel={() => {
+                              setEditingAvatar(null)
+                              setAvatarDraft(EMPTY_AVATAR_DRAFT)
+                            }}
+                            t={t}
+                          />
+                        )}
+                        {canEditIdentity && editingPersona === member.id && (
                           <PersonaForm
                             draft={personaDraft}
                             setDraft={setPersonaDraft}
@@ -641,16 +871,38 @@ export function TeamAction({
                             t={t}
                           />
                         )}
-                        {canEditPersona && editingPersona !== member.id && (
-                          <button
-                            type="button"
-                            className={css.personaButton}
-                            disabled={personaPending}
-                            data-team-edit-persona={member.id}
-                            onClick={() => { startEditPersona(member) }}
-                          >
-                            <IconEditOutline16 size={13} /> {t('editPersona')}
-                          </button>
+                        {canEditIdentity && editingRename !== member.id
+                          && editingAvatar !== member.id
+                          && editingPersona !== member.id && (
+                          <div className={css.identityActions}>
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              disabled={identityBusy}
+                              data-team-rename={member.id}
+                              onClick={() => { startRename(member) }}
+                            >
+                              <IconEditOutline16 size={13} /> {t('rename')}
+                            </button>
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              disabled={identityBusy}
+                              data-team-edit-avatar={member.id}
+                              onClick={() => { startEditAvatar(member) }}
+                            >
+                              <IconEditOutline16 size={13} /> {t('editAvatar')}
+                            </button>
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              disabled={identityBusy}
+                              data-team-edit-persona={member.id}
+                              onClick={() => { startEditPersona(member) }}
+                            >
+                              <IconEditOutline16 size={13} /> {t('editPersona')}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )
@@ -837,6 +1089,118 @@ function BotCreateForm({
           {t('draftDistinctAssignment')}
         </p>
       )}
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface RenameFormProps {
+  draft: RenameDraft
+  setDraft: (draft: RenameDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/** Host rename editor: non-empty displayName (FR-004). */
+function RenameForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: RenameFormProps) {
+  const ready = draft.displayName.trim() !== ''
+  return (
+    <div className={css.form} data-team-rename-editor>
+      <p className={css.hint}>{t('renameHint')}</p>
+      <input
+        value={draft.displayName}
+        aria-label={t('displayName')}
+        placeholder={t('renamePlaceholder')}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          setDraft({ displayName: event.target.value })
+        }}
+      />
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+interface AvatarFormProps {
+  draft: AvatarDraft
+  setDraft: (draft: AvatarDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host preset avatar picker: shape and/or color markers (FR-005 / clarify lock 3).
+ * No image-file / URL upload control — omitted for P2 Pass (T024).
+ */
+function AvatarForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: AvatarFormProps) {
+  const ready = draft.shape !== '' || draft.color !== ''
+  return (
+    <div className={css.form} data-team-avatar-editor>
+      <p className={css.hint}>{t('avatarHint')}</p>
+      <fieldset className={css.presetFieldset}>
+        <legend>{t('avatarShape')}</legend>
+        <div className={css.presetRow} role="group" aria-label={t('avatarShape')}>
+          <button
+            type="button"
+            className={draft.shape === '' ? css.presetSelected : css.presetChip}
+            aria-pressed={draft.shape === ''}
+            onClick={() => { setDraft({ ...draft, shape: '' }) }}
+          >
+            {t('avatarUnset')}
+          </button>
+          {AVATAR_SHAPE_IDS.map(shape => (
+            <button
+              key={shape}
+              type="button"
+              className={draft.shape === shape ? css.presetSelected : css.presetChip}
+              aria-pressed={draft.shape === shape}
+              data-avatar-shape-option={shape}
+              onClick={() => { setDraft({ ...draft, shape }) }}
+            >
+              {t(avatarShapeKey(shape))}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className={css.presetFieldset}>
+        <legend>{t('avatarColor')}</legend>
+        <div className={css.presetRow} role="group" aria-label={t('avatarColor')}>
+          <button
+            type="button"
+            className={draft.color === '' ? css.presetSelected : css.presetChip}
+            aria-pressed={draft.color === ''}
+            onClick={() => { setDraft({ ...draft, color: '' }) }}
+          >
+            {t('avatarUnset')}
+          </button>
+          {AVATAR_COLOR_IDS.map(color => (
+            <button
+              key={color}
+              type="button"
+              className={draft.color === color ? css.presetSelected : css.presetChip}
+              aria-pressed={draft.color === color}
+              data-avatar-color-option={color}
+              data-avatar-swatch={color}
+              onClick={() => { setDraft({ ...draft, color }) }}
+            >
+              {t(avatarColorKey(color))}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>

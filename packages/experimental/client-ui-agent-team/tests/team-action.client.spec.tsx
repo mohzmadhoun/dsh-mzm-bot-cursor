@@ -12,7 +12,8 @@ import { makeTranslate, RemoteError } from '@deepseek-ai/dsh-client-test-runtime
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
-  type TeamCreateBotActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamCreateBotActionResult, type TeamRenameBotActionResult, type TeamSetAvatarActionResult,
+  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -113,6 +114,28 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
           id: 'worker-id' as SessionId,
           persona: { job: '', voice: '', antiJobs: [] },
           member: view.members[1]!,
+        },
+      },
+    }),
+    renameBot: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          displayName: 'Renamed Bot',
+          member: { ...view.members[1]!, displayName: 'Renamed Bot' },
+        },
+      },
+    }),
+    setAvatar: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          avatar: { shape: 'circle', color: 'blue' },
+          member: { ...view.members[1]!, avatar: { shape: 'circle' as const, color: 'blue' as const } },
         },
       },
     }),
@@ -1464,5 +1487,193 @@ describe('TeamAction', () => {
     await Promise.resolve()
     await Promise.resolve()
     expect(screen.queryByText('reload-anti')).toBeNull()
+  })
+
+  it('renames a bot through Host renameBot and shows the new displayName on the overview (T023)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Rename Source',
+    }
+    const savedMember = { ...priorMember, displayName: 'Rename Target' }
+    const renameBot = vi.fn((): Promise<TeamRenameBotActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          displayName: 'Rename Target',
+          member: savedMember,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, priorMember] },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, savedMember] },
+      })
+    render(<TeamAction {...props(actions({ load, renameBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Rename Source')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.rename }))
+    expect(screen.getByText(zh.renameHint)).toBeTruthy()
+    const renameInput = screen.getByPlaceholderText(zh.renamePlaceholder) as HTMLInputElement
+    expect(renameInput.value).toBe('Rename Source')
+    fireEvent.change(renameInput, { target: { value: '   ' } })
+    expect((screen.getByRole('button', { name: '保存' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.change(renameInput, { target: { value: 'Rename Target' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(renameBot).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        displayName: 'Rename Target',
+      })
+    })
+    expect(await screen.findByText('Rename Target')).toBeTruthy()
+    expect(screen.queryByText('Rename Source')).toBeNull()
+    expect(screen.queryByPlaceholderText(zh.renamePlaceholder)).toBeNull()
+  })
+
+  it('keeps prior displayName and shows failure when renameBot is unavailable (T023)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Rename Source',
+    }
+    const renameBot = vi.fn((): Promise<TeamRenameBotActionResult> => Promise.resolve(
+      remoteFailure('rename Host offline') as TeamRenameBotActionResult,
+    ))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, renameBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText('Rename Source')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.rename }))
+    fireEvent.change(screen.getByPlaceholderText(zh.renamePlaceholder), {
+      target: { value: 'Rename Target' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('rename Host offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByText('Rename Source')).toBeTruthy()
+    expect(screen.getByPlaceholderText(zh.renamePlaceholder)).toBeTruthy()
+  })
+
+  it('shows Team rejection for renameBot without mutating overview displayName (T023)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      displayName: 'Rename Source',
+    }
+    const renameBot = vi.fn((): Promise<TeamRenameBotActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'displayName must be non-empty' },
+      },
+    }))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, renameBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Rename Source')
+    fireEvent.click(screen.getByRole('button', { name: zh.rename }))
+    fireEvent.change(screen.getByPlaceholderText(zh.renamePlaceholder), {
+      target: { value: 'Rename Target' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('displayName must be non-empty (team-rejected)')).toBeTruthy()
+    expect(screen.getByText('Rename Source')).toBeTruthy()
+    expect(screen.getByPlaceholderText(zh.renamePlaceholder)).toBeTruthy()
+  })
+
+  it('sets a preset avatar through Host setAvatar and shows the marker on the overview (T023)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const priorMember = { ...view.members[1]! }
+    const savedAvatar = { shape: 'circle' as const, color: 'blue' as const }
+    const savedMember = { ...priorMember, avatar: savedAvatar }
+    const setAvatar = vi.fn((): Promise<TeamSetAvatarActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: workerId,
+          avatar: savedAvatar,
+          member: savedMember,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, priorMember] },
+      })
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, members: [view.members[0]!, savedMember] },
+      })
+    render(<TeamAction {...props(actions({ load, setAvatar }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByRole('button', { name: zh.editAvatar })
+    fireEvent.click(screen.getByRole('button', { name: zh.editAvatar }))
+    expect(screen.getByText(zh.avatarHint)).toBeTruthy()
+    expect(document.querySelector('[data-team-avatar-editor] input[type="file"]')).toBeNull()
+    expect((screen.getByRole('button', { name: '保存' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: zh['avatarShape.circle'] }))
+    fireEvent.click(screen.getByRole('button', { name: zh['avatarColor.blue'] }))
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(setAvatar).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        avatar: { shape: 'circle', color: 'blue' },
+      })
+    })
+    const marker = await screen.findByLabelText(`${zh['avatarShape.circle']} · ${zh['avatarColor.blue']}`)
+    expect(marker.getAttribute('data-team-avatar')).toBe('')
+    expect(marker.getAttribute('data-avatar-shape')).toBe('circle')
+    expect(marker.getAttribute('data-avatar-color')).toBe('blue')
+    expect(screen.queryByText(zh.avatarHint)).toBeNull()
+  })
+
+  it('keeps prior avatar and shows failure when setAvatar is unavailable (T023)', async () => {
+    const priorMember = {
+      ...view.members[1]!,
+      avatar: { shape: 'square' as const, color: 'green' as const },
+    }
+    const setAvatar = vi.fn((): Promise<TeamSetAvatarActionResult> => Promise.resolve(
+      remoteFailure('avatar Host offline') as TeamSetAvatarActionResult,
+    ))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, members: [view.members[0]!, priorMember] },
+    })
+    render(<TeamAction {...props(actions({ load, setAvatar }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByLabelText(`${zh['avatarShape.square']} · ${zh['avatarColor.green']}`)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.editAvatar }))
+    fireEvent.click(screen.getByRole('button', { name: zh['avatarShape.circle'] }))
+    fireEvent.click(screen.getByRole('button', { name: zh['avatarColor.blue'] }))
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('avatar Host offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByLabelText(`${zh['avatarShape.square']} · ${zh['avatarColor.green']}`)).toBeTruthy()
+    expect(screen.getByText(zh.avatarHint)).toBeTruthy()
+  })
+
+  it('omits custom image upload controls so preset avatar Pass is not blocked (T024)', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByRole('button', { name: zh.editAvatar })
+    fireEvent.click(screen.getByRole('button', { name: zh.editAvatar }))
+    const editor = screen.getByText(zh.avatarHint).closest('[data-team-avatar-editor]')
+    expect(editor).not.toBeNull()
+    expect(editor!.querySelector('input[type="file"]')).toBeNull()
+    expect(editor!.querySelector('[data-avatar-upload]')).toBeNull()
+    expect(screen.getByRole('button', { name: zh['avatarShape.circle'] })).toBeTruthy()
+    expect(screen.getByRole('button', { name: zh['avatarColor.blue'] })).toBeTruthy()
   })
 })
