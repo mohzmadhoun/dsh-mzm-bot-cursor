@@ -1,0 +1,46 @@
+T029 Verifier non-goals / SC-004 — DH Verifier
+==============================================
+Verdict: PASS (SC-004 / quickstart Scenario 4)
+Stamp: 2026-09-27
+Product tip: origin/master @ 7294304388 (includes T028 #164)
+Evidence tip: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
+Linear: MOH-222 (T029) — left In Progress (PO closes after merge)
+Recipe: specs/004-routines-cron/verifier/non-goals.md
+Evidence home: specs/004-routines-cron/verifier/evidence/non-goals/
+  (alias evidence/scenario-4/ — pointer only)
+
+Acceptance (SC-004)
+-------------------
+[x] Event listeners not required for Pass (P6).
+[x] Memory UX not required for Pass (P5).
+[x] Box / Shell / computer-use not required for Pass (P7).
+[x] MCP / vault UX not required for Pass (P6).
+[x] No Electron Main routines bus (T033 re-green: 3 passed).
+[x] dsh-schedule ≠ Routines SoT (schedule-not-routines + T034 spot-check).
+[x] dsh-jobs ≠ catalog/cron SoT (optional-jobs-visibility; T026 left unchecked).
+[x] Absence of Out of Scope does not Fail Pass.
+
+Evidence (measured)
+-------------------
+  measured-checks.txt
+  p4-t033-electron-bus.log          (vitest 3 passed + host-protocol exclusions)
+  p4-t034-schedule-overlay-spotcheck.log
+  VERDICT.txt (this file)
+
+SO11 mirrors
+------------
+  /opt/cursor/artifacts/p4-t029-measured-checks.txt
+  /opt/cursor/artifacts/p4-t033-electron-bus.log
+  /opt/cursor/artifacts/p4-t034-schedule-overlay-spotcheck.log
+
+Claims
+------
+- SC-004 absences: **measured**
+- Electron bus still green after US1–US4: **measured** (T033)
+- Schedule-overlay product copy clean: **measured** (T034)
+- GUI screenshot: **not required** (docs/absence)
+
+Scope lock
+----------
+Does NOT stamp SC-005 Done. Does NOT close MOH-222.
+Does NOT merge. Leave Linear Done to PO.

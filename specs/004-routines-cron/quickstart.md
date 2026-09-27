@@ -56,6 +56,7 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 ## Scenario 2 — Pause / resume
 
 **Contract:** [contracts/pause-resume.md](./contracts/pause-resume.md)
+**Recipe:** [verifier/scenario-3-pause-resume.md](./verifier/scenario-3-pause-resume.md) (T024; evidence under `verifier/evidence/scenario-2/`)
 
 1. With an active routine on bot A, pause it; pane shows paused.
 2. Optionally wait one schedule interval while paused → no fire indicator update.
@@ -85,11 +86,12 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 ## Scenario 4 — Non-goals / seam absence
 
 **Contract:** [contracts/non-goals.md](./contracts/non-goals.md)
+**Recipe:** [verifier/non-goals.md](./verifier/non-goals.md) (T029) · [verifier/schedule-not-routines.md](./verifier/schedule-not-routines.md) · evidence under `verifier/evidence/non-goals/` (alias `verifier/evidence/scenario-4/`)
 
 1. Confirm Pass path does not require event listeners, memory UX, Box/Shell, or MCP.
 2. Confirm Electron Main is not the durable routines SoT (no routines bus on lifecycle IPC).
 3. Confirm Routines path is **not** “mount `dsh-schedule` overlay alone”; `dsh-jobs` is not the catalog SoT.
-4. Document absence checks (recipe in tasks; clone P3 no-Electron-skills-bus pattern).
+4. Document absence checks ([verifier/non-goals.md](./verifier/non-goals.md); clone P3 no-Electron-skills-bus pattern).
 
 **Expected:** SC-004.
 
@@ -97,9 +99,11 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 
 ## Scenario 5 — Full Phase 4 replay
 
+**Recipe:** [verifier/scenario-5-full-replay.md](./verifier/scenario-5-full-replay.md) (T031; evidence under `verifier/evidence/scenario-5/`)
+
 1. Replay Scenarios 1–3 (and 4 absence) on real Desktop.
-2. File FR-010/011 evidence for all GUI steps.
-3. Stamp SC-005 when Verifier Pass criteria met.
+2. File FR-010/011 evidence for all GUI steps (or cite committed scenario media).
+3. Stamp SC-005 when Verifier Pass criteria met (foundational Pass + Scenarios 1–4).
 
 **Expected:** SC-005.
 
@@ -109,11 +113,22 @@ Verifier recipes home: `verifier/` (created in tasks — not required for plan P
 
 ```text
 specs/004-routines-cron/verifier/evidence/
-├── scenario-1/
-├── scenario-2/
-├── scenario-3/
-├── non-goals/
-└── scenario-5/
+├── scenario-1/   # QS Scenario 1 create + pane (T018/T021)
+├── scenario-2/   # QS Scenario 2 pause/resume (T024)
+├── scenario-3/   # QS Scenario 3 cron fire (T028; recipe file scenario-4-cron-fire.md)
+├── scenario-4/   # alias → non-goals (QS Scenario 4 / SC-004)
+├── non-goals/    # canonical SC-004 absence evidence
+└── scenario-5/   # QS Scenario 5 full replay (T031)
 ```
+
+### Scenario → recipe map (T032)
+
+| Quickstart | Recipe file(s) | Evidence dir |
+|------------|----------------|--------------|
+| Scenario 1 Create + pane list | `verifier/scenario-1-create-list.md` · `verifier/scenario-2-pane-list.md` | `evidence/scenario-1/` |
+| Scenario 2 Pause / resume | `verifier/scenario-3-pause-resume.md` | `evidence/scenario-2/` |
+| Scenario 3 Cron fire + last-run | `verifier/scenario-4-cron-fire.md` | `evidence/scenario-3/` |
+| Scenario 4 Non-goals | `verifier/non-goals.md` · `schedule-not-routines.md` | `evidence/non-goals/` (alias `scenario-4/`) |
+| Scenario 5 Full replay | `verifier/scenario-5-full-replay.md` | `evidence/scenario-5/` |
 
 Mirror walkthrough copies under `/opt/cursor/artifacts/` when Cloud Agent Verifier runs (standing order 11). Commit under `verifier/evidence/` and embed in PR body (standing order 12).

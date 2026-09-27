@@ -155,12 +155,12 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Absence checks, evidence layout, full SC-005 replay; no new product scope
 
-- [ ] T029 [P] Create Verifier non-goals recipe `specs/004-routines-cron/verifier/non-goals.md` covering SC-004 / [contracts/non-goals.md](./contracts/non-goals.md): no event listeners, memory UX, Box/Shell, MCP; **no Electron routines bus**; **`dsh-schedule` ≠ Routines SoT**; jobs ≠ catalog SoT
-- [ ] T030 [P] Create evidence directory placeholders + README expectations under `specs/004-routines-cron/verifier/evidence/{scenario-1,scenario-2,scenario-3,scenario-4,non-goals,scenario-5}/` documenting required screenshot/recording filenames for FR-010/011 / SO 11+12
-- [ ] T031 Add Verifier Scenario 5 full replay recipe `specs/004-routines-cron/verifier/scenario-5-full-replay.md` covering SC-005 (Scenarios 1–4 + foundational stamp) with mandatory desktop visual evidence
-- [ ] T032 [P] Re-validate quickstart Scenario → recipe map in `specs/004-routines-cron/quickstart.md` and `specs/004-routines-cron/verifier/README.md` (owners + evidence paths)
-- [ ] T033 [P] Confirm `apps/desktop/tests/no-electron-routines-bus.spec.ts` + `host-protocol.ts` exclusions still green after story work
-- [ ] T034 Polish: ensure no product code path documents Routines as “enable Schedule overlay” in Desktop Host / Client copy or Verifier README
+- [x] T029 [P] Create Verifier non-goals recipe `specs/004-routines-cron/verifier/non-goals.md` covering SC-004 / [contracts/non-goals.md](./contracts/non-goals.md): no event listeners, memory UX, Box/Shell, MCP; **no Electron routines bus**; **`dsh-schedule` ≠ Routines SoT**; jobs ≠ catalog SoT
+- [x] T030 [P] Create evidence directory placeholders + README expectations under `specs/004-routines-cron/verifier/evidence/{scenario-1,scenario-2,scenario-3,scenario-4,non-goals,scenario-5}/` documenting required screenshot/recording filenames for FR-010/011 / SO 11+12
+- [x] T031 Add Verifier Scenario 5 full replay recipe `specs/004-routines-cron/verifier/scenario-5-full-replay.md` covering SC-005 (Scenarios 1–4 + foundational stamp) with mandatory desktop visual evidence
+- [x] T032 [P] Re-validate quickstart Scenario → recipe map in `specs/004-routines-cron/quickstart.md` and `specs/004-routines-cron/verifier/README.md` (owners + evidence paths)
+- [x] T033 [P] Confirm `apps/desktop/tests/no-electron-routines-bus.spec.ts` + `host-protocol.ts` exclusions still green after story work
+- [x] T034 Polish: ensure no product code path documents Routines as “enable Schedule overlay” in Desktop Host / Client copy or Verifier README
 
 ---
 

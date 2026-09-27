@@ -78,30 +78,41 @@ rg -n "export interface RoutineRecord" packages/experimental/agent-team/src/type
 
 **Rule:** Every **GUI** acceptance scenario (US1–US3 / SC-001…SC-003 / SC-005 full replay) requires **desktop screenshot(s) and/or a short screen recording** of the real Desktop app, **committed** under `specs/004-routines-cron/verifier/evidence/` **and** embedded in the GUI PR body (absolute `/opt/cursor/artifacts/…` paths for ManagePullRequest uploads). Unit/jsdom alone **fails** those scenarios. Scenario 4 (non-goals / seam absence) is docs/absence — GUI screenshot optional.
 
-Evidence layout:
+Evidence layout (T030):
 
 ```text
 specs/004-routines-cron/verifier/evidence/
-├── scenario-1/   # screenshots / recording + VERDICT.txt · README.md
-├── scenario-2/
-├── scenario-3/
-├── non-goals/    # SC-004 measured absence checks
-└── scenario-5/   # full replay
+├── scenario-1/   # QS1 create + pane — screenshots / recording + VERDICT.txt · README.md
+├── scenario-2/   # QS2 pause/resume
+├── scenario-3/   # QS3 cron fire (recipe file scenario-4-cron-fire.md)
+├── scenario-4/   # alias → non-goals (QS4 / SC-004) — do not put cron-fire here
+├── non-goals/    # canonical SC-004 measured absence checks
+└── scenario-5/   # QS5 full replay
 ```
 
-## Scenario 1–5 owners map
+## Scenario 1–5 owners map (T032 re-validated)
 
 Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts/evidence for that scenario (not who implements the product feature). Owner labels are **Runtime** / **Client** / **Electron** / **Verifier** per T005.
 
-| Scenario | Quickstart | Recipe path (later tasks) | Primary owners | Acceptance | FR-010/011 |
-|----------|------------|---------------------------|----------------|------------|------------|
-| **1** Create + pane list | [Scenario 1](../quickstart.md#scenario-1--create--pane-list) | [scenario-1-create-list.md](./scenario-1-create-list.md) (T018) · [scenario-2-pane-list.md](./scenario-2-pane-list.md) (T021 US2 durability split; evidence `04-`/`05-` under `evidence/scenario-1/`) · [create-list.md](../contracts/create-list.md) | **Runtime** + **Client** + **Verifier** | SC-001, SC-006, SC-007 · FR-002 | **Required** |
-| **2** Pause / resume | [Scenario 2](../quickstart.md#scenario-2--pause--resume) | [scenario-3-pause-resume.md](./scenario-3-pause-resume.md) (T024) · [pause-resume.md](../contracts/pause-resume.md) · evidence under `evidence/scenario-2/` | **Runtime** + **Client** + **Verifier** | SC-002 | **Required** |
-| **3** Cron fire + last-run | [Scenario 3](../quickstart.md#scenario-3--cron-fire--last-run) | [scenario-4-cron-fire.md](./scenario-4-cron-fire.md) (T028 US4 recipe; evidence under `evidence/scenario-3/`) · [cron-fire.md](../contracts/cron-fire.md) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
-| **4** Non-goals / seam absence | [Scenario 4](../quickstart.md#scenario-4--non-goals--seam-absence) | [schedule-not-routines.md](./schedule-not-routines.md) + no-Electron-routines-bus (T011) · [non-goals.md](../contracts/non-goals.md) | **Runtime** + **Electron** + **Verifier** | SC-004 | Docs/absence ok |
-| **5** Full Phase 4 replay | [Scenario 5](../quickstart.md#scenario-5--full-phase-4-replay) | `scenario-5-full-replay.md` (tasks) · all contracts | **Verifier** | SC-005 (+ composite of 1–3) | **Required** |
+| Scenario | Quickstart | Recipe path | Evidence | Primary owners | Acceptance | FR-010/011 |
+|----------|------------|-------------|----------|----------------|------------|------------|
+| **1** Create + pane list | [Scenario 1](../quickstart.md#scenario-1--create--pane-list) | [scenario-1-create-list.md](./scenario-1-create-list.md) (T018) · [scenario-2-pane-list.md](./scenario-2-pane-list.md) (T021; `04-`/`05-` under `evidence/scenario-1/`) · [create-list.md](../contracts/create-list.md) | [evidence/scenario-1/](./evidence/scenario-1/) | **Runtime** + **Client** + **Verifier** | SC-001, SC-006, SC-007 · FR-002 | **Required** |
+| **2** Pause / resume | [Scenario 2](../quickstart.md#scenario-2--pause--resume) | [scenario-3-pause-resume.md](./scenario-3-pause-resume.md) (T024) · [pause-resume.md](../contracts/pause-resume.md) | [evidence/scenario-2/](./evidence/scenario-2/) | **Runtime** + **Client** + **Verifier** | SC-002 | **Required** |
+| **3** Cron fire + last-run | [Scenario 3](../quickstart.md#scenario-3--cron-fire--last-run) | [scenario-4-cron-fire.md](./scenario-4-cron-fire.md) (T028) · [cron-fire.md](../contracts/cron-fire.md) | [evidence/scenario-3/](./evidence/scenario-3/) | **Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
+| **4** Non-goals / seam absence | [Scenario 4](../quickstart.md#scenario-4--non-goals--seam-absence) | [non-goals.md](./non-goals.md) (T029) · [schedule-not-routines.md](./schedule-not-routines.md) · [contracts/non-goals.md](../contracts/non-goals.md) · T011 bus guard | [evidence/non-goals/](./evidence/non-goals/) (alias [evidence/scenario-4/](./evidence/scenario-4/)) | **Runtime** + **Electron** + **Verifier** | SC-004 | Docs/absence ok |
+| **5** Full Phase 4 replay | [Scenario 5](../quickstart.md#scenario-5--full-phase-4-replay) | [scenario-5-full-replay.md](./scenario-5-full-replay.md) (T031) · all contracts | [evidence/scenario-5/](./evidence/scenario-5/) | **Verifier** | SC-005 (+ composite of 1–4 + T014) | **Required** |
 
-Scenario recipe files (aside from Setup inventories) land with US tasks. Foundational Pass (T014) must hold before Scenario evidence counts toward phase Done.
+**Naming note:** Recipe file `scenario-N-*.md` numbers follow tasks/US delivery order; **evidence folders follow quickstart Scenario numbers**. Cron-fire recipe is `scenario-4-cron-fire.md` but evidence is `evidence/scenario-3/`.
+
+Foundational Pass (T014) must hold before Scenario evidence counts toward phase Done.
+
+### T032 map re-validation stamp
+
+**Verdict:** **Pass** (docs map consistency)
+**Stamp:** 2026-09-27 · polish branch `cursor/p4-polish-t029-t034-fe1d` on master tip including T028 [#164](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/164)
+**Checks:** quickstart Scenario 1–5 sections link recipes + evidence dirs; this table matches; T030 placeholders present under all six evidence paths (incl. `scenario-4/` alias).
+
+**Seam honesty (T034):** Routines Pass is Host Routine catalog + Host cron wake — **not** “enable Schedule overlay.” See [schedule-not-routines.md](./schedule-not-routines.md) · [non-goals.md](./non-goals.md).
 
 ## Owner roles (T005)
 
