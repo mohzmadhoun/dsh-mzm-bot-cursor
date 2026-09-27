@@ -1,0 +1,36 @@
+{
+  "tip": "06b8795e56",
+  "paneCount": 3,
+  "steps": {
+    "beforePause": {
+      "status": "active",
+      "statusLabel": "Active",
+      "text": "Summarize inbox every five minutes Every 5m Active Not run yet Pause",
+      "pauseControl": true
+    },
+    "afterPause": {
+      "status": "paused",
+      "statusLabel": "Paused",
+      "text": "Summarize inbox every five minutes Every 5m Paused Not run yet Resume",
+      "resumeControl": true
+    },
+    "afterResume": {
+      "status": "active",
+      "statusLabel": "Active",
+      "text": "Summarize inbox every five minutes Every 5m Active Not run yet Pause",
+      "pauseControl": true
+    },
+    "afterReturn": {
+      "status": "active"
+    },
+    "afterReturnPaused": {
+      "status": "paused"
+    }
+  },
+  "targetBotId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+  "targetRoutineId": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
+  "pass": true,
+  "evidenceTip": "verifier-stamp",
+  "pr": 158,
+  "linear": "MOH-216"
+}
