@@ -1,0 +1,14 @@
+VERDICT: Pass
+LAUNCH_SHA: b6f17280bccdf92c19ca9f4f751621fad24b10df
+REBASED_ON: fb81cbd4d9ac781dc5df7091fe9eff4d08c581dd (origin/master incl #108/#109)
+UTC: 2026-09-27T15:08:06Z
+HOST_SEES_DEEPSEEK_API_KEY: yes (presence only; value not logged)
+MISSING_CREDENTIAL: absent (Pass)
+PROVIDER_KEY_MISSING_COPY: absent (Pass)
+PHASE: hero -> active
+MODEL_REPLY: LIVE_KEY_SMOKE_OK (measured)
+USER_PROMPT: visible
+AGENT_TEAM: opened; createBotChrome=true
+ARTIFACTS: /opt/cursor/artifacts/p2-live-key-smoke/ + p2_live_key_smoke_desktop.mp4
+EVIDENCE: specs/002-identity-personas/verifier/evidence/live-key-smoke/
+CLAIM: measured
