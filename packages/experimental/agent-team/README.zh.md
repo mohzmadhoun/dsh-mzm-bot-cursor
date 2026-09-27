@@ -62,6 +62,8 @@ kind: "package-reference"
 
 产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 与该 `modelSelection` 保留在 Host member 快照上。创建时（以及冷恢复时），Agent Teams 通过 `installModelSelection` 绑定 live Bot，使后续对话只使用该 bot 自己的赋值——绝不回落到 Lead 路由。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用；Electron Main 不得发明 bot 记录。
 
+该 Bot 的后续对话调用已为该赋值的 provider 注册的 `ctx.llm` 适配器。该适配器通过 `ctx.credentials.resolve` 解析该 provider 的 Host `CredentialRef`。已命名的引用缺失时，请求以 `MISSING_CREDENTIAL` 失败，且不会改用另一个 Bot 的凭证。
+
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
 
 只有 Lead 可以创建 teammate 或中断它们。

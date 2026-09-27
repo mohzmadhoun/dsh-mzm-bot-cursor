@@ -1,0 +1,11 @@
+VERDICT: Runtime measured (Verifier owns Pass/Fail)
+SC: FR-002 Host llm credential route (T016)
+UTC: 2026-09-27T08:16:49Z
+COMMAND: pnpm exec vitest run packages/experimental/agent-team/tests/llm-credentials.spec.ts
+STDOUT: evidence/t016-llm-credentials/vitest.stdout.txt (1 passed; EXIT:0)
+COMMAND2: pnpm exec vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'keeps Electron Main from inventing bots'
+STDOUT2: evidence/t016-llm-credentials/electron-assertion.stdout.txt (1 passed | 4 skipped; EXIT:0)
+CRITERIA: two provider routes isolate Host credential tokens; missing named ref is MISSING_CREDENTIAL with no other Bot resolve and no provider HTTP call; surviving Bot still uses its own token; Electron Main/IPC/preload has no bot create, model route, or secret credential API
+CLAIM: measured by DH Runtime on this branch before the evidence commit; DH Verifier reruns and records Pass/Fail
+SCOPE_OUT: SC-001/SC-002 Desktop multi-model; T017 Client UI; T020 missing-credential UX; DEEPSEEK_API_KEY not used
+BLOCKER: none

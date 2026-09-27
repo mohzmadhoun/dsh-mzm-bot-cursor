@@ -181,4 +181,41 @@ describe('topology handshake (SC-007)', () => {
     expect(DESKTOP_HOST_CONTROL_TYPES).not.toContain('mailbox')
     expect(DESKTOP_HOST_CONTROL_TYPES).not.toContain('bot-message')
   })
+
+  it('keeps Electron Main from inventing bots, routing models, or exposing secret credential IPC (T016)', () => {
+    const shellSources = [
+      'apps/desktop/src/main.ts',
+      'apps/desktop/src/ipc.ts',
+      'apps/desktop/src/host-protocol.ts',
+      'apps/desktop/src/preload-app.ts',
+      'apps/desktop/src/preload-mandatory.ts',
+      'apps/desktop/src/preload-menu.ts',
+      'apps/desktop/src/preload-platform.ts',
+      'apps/desktop/src/preload-theme.ts',
+      'apps/desktop/src/preload-update-dialog.ts',
+      'apps/desktop/src/preload-windows.ts',
+    ]
+    const forbidden = /\bcreateBot\b|\bmodelSelection\b|\bagentTeams\b|\bregisterAdapter\b|credentials\.resolve|\bctx\.llm\b/
+    for (const relative of shellSources) {
+      expect(existsSync(join(process.cwd(), relative)), relative).toBe(true)
+      expect(readFileSync(join(process.cwd(), relative), 'utf8'), relative).not.toMatch(forbidden)
+    }
+    for (const channel of Object.values(DESKTOP_IPC)) {
+      expect(channel).not.toMatch(/credential|api[-_]?key|create[-_]?bot|model[-_]?route|llm/i)
+    }
+    const exposed: string[] = []
+    for (const relative of shellSources.filter(path => path.includes('/preload-'))) {
+      const source = readFileSync(join(process.cwd(), relative), 'utf8')
+      for (const match of source.matchAll(/exposeInMainWorld\(\s*'([^']+)'/g)) {
+        exposed.push(match[1] ?? '')
+      }
+    }
+    expect(exposed.sort()).toEqual([
+      '__DSH_DIRECTORY_PICKER__',
+      'dshDesktop',
+      'dshDesktopBoot',
+      'dshMandatoryUpdate',
+      'dshUpdateDialog',
+    ])
+  })
 })
