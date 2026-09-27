@@ -117,9 +117,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Implement Host `attachSkill` (or equivalent) accepting existing Bot id + available `skillId`, appending to that bot’s `skillAttachments` (multi-attach allowed; Pass ≥1) in `packages/experimental/agent-team/src/{index,roster}.ts` — must not auto-attach other bots ([contracts/attach-run.md](./contracts/attach-run.md); clarify lock 3)
-- [ ] T021 [US2] Bind attached skill instructional bodies into that bot’s instruction assembly for subsequent turns via `packages/preset/persona/src/` and/or `packages/core/system-prompt/src/` from Agent Teams scope wiring under `packages/experimental/agent-team/src/` (FR-014; clarify lock 5)
-- [ ] T022 [P] [US2] Project per-bot attachments to Client so bot skills/overview can render attached skills without Main-owned storage — `packages/experimental/agent-team/src/projection.ts`
+- [x] T020 [US2] Implement Host `attachSkill` (or equivalent) accepting existing Bot id + available `skillId`, appending to that bot’s `skillAttachments` (multi-attach allowed; Pass ≥1) in `packages/experimental/agent-team/src/{index,roster}.ts` — must not auto-attach other bots ([contracts/attach-run.md](./contracts/attach-run.md); clarify lock 3)
+- [x] T021 [US2] Bind attached skill instructional bodies into that bot’s instruction assembly for subsequent turns via `packages/preset/persona/src/` and/or `packages/core/system-prompt/src/` from Agent Teams scope wiring under `packages/experimental/agent-team/src/` (FR-014; clarify lock 5)
+- [x] T022 [P] [US2] Project per-bot attachments to Client so bot skills/overview can render attached skills without Main-owned storage — `packages/experimental/agent-team/src/projection.ts`
 - [ ] T023 [US2] Add Client per-bot skills/overview attach UI under `packages/experimental/client-ui-agent-team/src/client/` showing attachments on **that bot’s** surface (global catalog alone insufficient for Pass)
 - [ ] T024 [US2] Add Client run/active indication: dedicated run control **and/or** session-active UI when attached skill applies — `packages/experimental/client-ui-agent-team/src/client/` (clarify lock 4; FR-004); do **not** require LLM reply text match
 - [ ] T025 [US2] On attach while Host unavailable, show clear failure and leave prior attachments unchanged — Client error surface + Host reject path in `packages/experimental/agent-team/src/` / `packages/experimental/client-ui-agent-team/src/client/`

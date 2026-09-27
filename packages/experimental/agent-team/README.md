@@ -66,6 +66,8 @@ Optional Host Bot identity fields on the durable member snapshot — `persona` (
 
 Host skill discovery projects `ctx.skills` through `projectSkillCatalog` onto `agentTeams/view.skills` and the loud `agentTeams/listSkills` Remote (`listSkills`): thin-pack id `mzm-thin-pack` is always `managed` with display `MzM thin pack`, other register rows map to `user`, and a missing skills registry fails loud on `listSkills` (soft empty on `view` for non-Desktop compositions). Electron Main must not invent catalog rows.
 
+Host `attachSkill(botId, skillId)` appends an ordered `{ botId, skillId }` onto that Bot’s durable `skillAttachments` only (multi-attach allowed; never auto-attaches peers). The skill must exist in Host `ctx.skills` or the mutation fails loud without writing. `listMembers` / `agentTeams/view` project those attachments for Client bot skills/overview — never Electron Main storage. After attach (and on create/cold resume), Agent Teams binds non-empty attached instructional bodies into that Bot’s scoped `agent-teams:skill-instructions` system-prompt section (Candidate B sibling to P2 persona prefix; empty/missing bodies contribute no prose; Verifier observes assembly wiring, not LLM reply wording).
+
 `modelAssignmentsAreDistinct` compares two assignments after the same trim as `requiredModelSelection`. Optional reasoning effort does not make them distinct. A row missing either id is not an assignment, and the subagent backend id remains `provider`.
 
 The roster shows every member with its role (`lead` or `teammate`) and current status: `running`, `idle`, `inactive` (a member that exists but is not loaded), `provisioning`, or `failed`. A member that is not loaded receives its messages when it wakes.
@@ -128,7 +130,9 @@ The [Agent Teams Agent Note](../../../.agents/notes/implemented/feature/2026-08-
 | [`src/host-mailbox-message.ts`](src/host-mailbox-message.ts) | Product Host mailbox fields (`fromBotId` / `toBotId` / `body` / `createdAt` / Host-only `source`) from durable logs |
 | [`src/task-board.ts`](src/task-board.ts) | Task CAS commands, DAG validation, and derived views |
 | [`src/journal.ts`](src/journal.ts) | Serialized Lead-log transactions and commit notification |
-| [`src/projection.ts`](src/projection.ts) | Strict replay projection that decodes and validates Team events; `projectSkillCatalog` maps Host skill summaries for Desktop discovery |
+| [`src/projection.ts`](src/projection.ts) | Strict replay projection that decodes and validates Team events; `projectSkillCatalog` maps Host skill summaries for Desktop discovery; `skillAttachments` on member snapshots project for Client bot overview |
+| [`src/persona-bind.ts`](src/persona-bind.ts) | Scoped `deployment:persona-prefix` bind from durable Host persona |
+| [`src/skill-bind.ts`](src/skill-bind.ts) | Scoped `agent-teams:skill-instructions` bind from durable Host `skillAttachments` + catalog bodies |
 | [`src/activity.ts`](src/activity.ts) | One-shot change waiters and disposal release |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | Shared admission cutoff and bounded settlement |
 | [`src/invariant.ts`](src/invariant.ts) | Invariant companion that replays candidate events before append |

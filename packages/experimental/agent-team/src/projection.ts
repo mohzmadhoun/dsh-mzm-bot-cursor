@@ -3,11 +3,11 @@
 Persona (`job` / `voice` / `antiJobs`), avatar, displayName, sectionId, and
 `skillAttachments` on `team/member` snapshots are Host→Client readable here —
 Electron Main must not invent a parallel identity or skills store (T008–T011 /
-FR-002 / FR-003 / FR-005).
+T022 / FR-002 / FR-003 / FR-005).
 Post-active Host `renameBot` / `setAvatar` / `attachSkill` journal writes update
 `displayName`, preset avatar markers, and skill attachments; `listMembers` /
 `agentTeams/view` re-read those fields for Client roster / sidebar / overview /
-bot skills (T011 / FR-003 / FR-004 / FR-005).
+bot skills (T011 / T022 / FR-003 / FR-004 / FR-005).
 Host `deleteBot` appends an `active` → `deleted` tombstone (clears `sectionId`);
 Client roster / overview omit deleted rows (T026 / FR-008 / clarify lock 5).
 Named sidebar sections persist as `team/section` catalog rows; membership is

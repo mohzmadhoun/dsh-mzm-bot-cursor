@@ -66,6 +66,8 @@ kind: "package-reference"
 
 Host 技能发现经 `projectSkillCatalog` 把 `ctx.skills` 投影到 `agentTeams/view.skills` 与会失败响亮的 `agentTeams/listSkills` Remote（`listSkills`）：thin-pack id `mzm-thin-pack` 始终为 `managed` 且显示名为 `MzM thin pack`，其余注册行映射为 `user`；缺失 skills registry 时 `listSkills` 失败响亮（非 Desktop 组合上 `view` 软返回空）。Electron Main 不得发明目录行。
 
+Host `attachSkill(botId, skillId)` 仅把有序 `{ botId, skillId }` 追加到该 Bot 的持久 `skillAttachments`（允许多附；绝不自动附到其他 Bot）。技能必须存在于 Host `ctx.skills`，否则失败响亮且不写入。`listMembers` / `agentTeams/view` 将这些附件投影给 Client 的 bot skills/overview — 绝不用 Electron Main 存储。附上之后（以及 create / 冷恢复时），Agent Teams 把非空的附属技能说明正文绑定到该 Bot 作用域内的 `agent-teams:skill-instructions` system-prompt 段（Candidate B，与 P2 persona 前缀并列；空/缺失正文不贡献文案；Verifier 只观察装配接线，不评判 LLM 回复措辞）。
+
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
@@ -128,7 +130,9 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | [`src/host-mailbox-message.ts`](src/host-mailbox-message.ts) | 从持久日志重建产品侧 Host mailbox 字段（`fromBotId` / `toBotId` / `body` / `createdAt` / 仅 Host 的 `source`） |
 | [`src/task-board.ts`](src/task-board.ts) | 任务 CAS 命令、DAG 校验与派生视图 |
 | [`src/journal.ts`](src/journal.ts) | 串行化的 Lead 日志事务与提交通知 |
-| [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影；`projectSkillCatalog` 映射 Host 技能摘要供 Desktop 发现 |
+| [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影；`projectSkillCatalog` 映射 Host 技能摘要供 Desktop 发现；成员快照上的 `skillAttachments` 投影给 Client bot overview |
+| [`src/persona-bind.ts`](src/persona-bind.ts) | 从持久 Host persona 绑定作用域内 `deployment:persona-prefix` |
+| [`src/skill-bind.ts`](src/skill-bind.ts) | 从持久 Host `skillAttachments` + catalog 正文绑定作用域内 `agent-teams:skill-instructions` |
 | [`src/activity.ts`](src/activity.ts) | 一次性变更等待者与 dispose（资源释放）时的等待解除 |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | 共享准入截止与有界结算 |
 | [`src/invariant.ts`](src/invariant.ts) | 在 append 前回放候选事件的不变式伴生插件 |

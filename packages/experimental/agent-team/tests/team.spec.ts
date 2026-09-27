@@ -1796,6 +1796,57 @@ describe('Team Remote API', () => {
     })
     await waitNoAgent(ctx, created.id)
 
+    const peer = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Peer Bot',
+      modelSelection: { provider: 'mock', model: 'peer-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, peer.id)
+
+    await expect(ctx.agentTeams.attachSkill(lead, {
+      botId: created.id,
+      skillId: 'mzm-thin-pack',
+      signal: SIGNAL,
+    })).rejects.toThrow(/skill catalog is unavailable/)
+
+    const catalog = new Map<string, { name: string; description: string; source: string; content: string }>([
+      ['mzm-thin-pack', {
+        name: 'mzm-thin-pack',
+        description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+        source: 'bundled',
+        content: 'Follow the MzM thin-pack playbook for Pass.',
+      }],
+      ['second-skill', {
+        name: 'second-skill',
+        description: 'Second skill',
+        source: 'user-dsh',
+        content: 'Second attached instructional body.',
+      }],
+    ])
+    ctx.provide('skills', {
+      async list() {
+        return [...catalog.values()].map(({ name, description, source }) => ({ name, description, source }))
+      },
+      async get(name: string) {
+        return catalog.get(name)
+      },
+      register(skill: { name: string; description: string; content: string; source: string }) {
+        catalog.set(skill.name, {
+          name: skill.name,
+          description: skill.description,
+          source: skill.source,
+          content: skill.content,
+        })
+        return () => { catalog.delete(skill.name) }
+      },
+    })
+
+    await expect(ctx.agentTeams.attachSkill(lead, {
+      botId: created.id,
+      skillId: 'missing-skill',
+      signal: SIGNAL,
+    })).rejects.toThrow(/not available in the Host catalog/)
+
     const attached = await ctx.agentTeams.attachSkill(lead, {
       botId: created.id,
       skillId: 'mzm-thin-pack',
@@ -1808,11 +1859,19 @@ describe('Team Remote API', () => {
       .toEqual(attached.skillAttachments)
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.skillAttachments)
       .toEqual(attached.skillAttachments)
+    // Per-bot isolation: peer must not gain A's attachment solely because A attached (SC-006).
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === peer.id)?.skillAttachments)
+      .toBeUndefined()
 
     const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
     expect(view.members.find(row => row.id === created.id)?.skillAttachments)
       .toEqual(attached.skillAttachments)
-    expect(view.skills).toEqual([])
+    expect(view.members.find(row => row.id === peer.id)?.skillAttachments)
+      .toBeUndefined()
+    expect(view.skills).toEqual([
+      expect.objectContaining({ id: 'mzm-thin-pack', source: 'managed' }),
+      expect.objectContaining({ id: 'second-skill', source: 'user' }),
+    ])
 
     const remoteOk = await ctx.agentTeams.remoteAttachSkill(lead, {
       botId: created.id,
@@ -1827,6 +1886,8 @@ describe('Team Remote API', () => {
         ],
       },
     })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === peer.id)?.skillAttachments)
+      .toBeUndefined()
 
     await expect(ctx.agentTeams.upsertUserSkill(lead, {
       displayName: '  ',
@@ -1849,6 +1910,82 @@ describe('Team Remote API', () => {
       displayName: 'My Playbook',
       source: 'user',
     })
+  })
+
+  it('binds attached skill instructional bodies into Bot instruction assembly (FR-014 / SC-007)', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('skill bind create a'),
+      textResponse('skill bind create b'),
+      textResponse('skill bind turn a'),
+      textResponse('skill bind turn b'),
+    ])
+    const botA = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Bind A',
+      modelSelection: { provider: 'mock', model: 'bind-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, botA.id)
+    const botB = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Bind B',
+      modelSelection: { provider: 'mock', model: 'bind-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, botB.id)
+
+    const thinPackBody = 'Follow the MzM thin-pack playbook for Pass.'
+    ctx.provide('skills', {
+      async list() {
+        return [{
+          name: 'mzm-thin-pack',
+          description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+          source: 'bundled',
+        }]
+      },
+      async get(name: string) {
+        if (name !== 'mzm-thin-pack') return undefined
+        return {
+          name: 'mzm-thin-pack',
+          description: 'MzM thin pack — single managed skill for Phase 3 Skills UX Pass.',
+          source: 'bundled',
+          content: thinPackBody,
+        }
+      },
+      register() {
+        return () => {}
+      },
+    })
+
+    await ctx.agentTeams.attachSkill(lead, {
+      botId: botA.id,
+      skillId: 'mzm-thin-pack',
+      signal: SIGNAL,
+    })
+
+    const followUp = await ctx.agentTeams.sendMessage(lead, {
+      target: botA.name,
+      content: content('second turn with skill bind'),
+      signal: SIGNAL,
+    })
+    expect(followUp.status).toBe('accepted')
+    const liveA = await waitRunning(ctx, botA.id)
+    // Cold resume resolves catalog bodies onto the skill bind asynchronously.
+    await vi.waitFor(async () => {
+      const promptA = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(liveA)))
+      expect(promptA).toContain(thinPackBody)
+    }, { timeout: 5_000 })
+
+    // Bot B must not gain A's skill body solely from A's attach (SC-006).
+    const wakeB = await ctx.agentTeams.sendMessage(lead, {
+      target: botB.name,
+      content: content('wake peer without attachment'),
+      signal: SIGNAL,
+    })
+    expect(wakeB.status).toBe('accepted')
+    const liveB = await waitRunning(ctx, botB.id)
+    const promptB = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(liveB)))
+    expect(promptB).not.toContain(thinPackBody)
+    await waitNoAgent(ctx, botA.id)
+    await waitNoAgent(ctx, botB.id)
   })
 
   it('projects Host skill catalog with mzm-thin-pack managed + user skills (T015)', async () => {
