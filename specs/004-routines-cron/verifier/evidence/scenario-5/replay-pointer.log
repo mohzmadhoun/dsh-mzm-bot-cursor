@@ -1,7 +1,8 @@
 T031 Scenario 5 replay-pointer (measured from existing evidence; no new product code)
 UTC: 2026-09-27T20:05:10Z
-SHA: 72943043888584e6e48cc5e9907a279d0082e2a2
+SHA: 1c0b6698b5750f12485e1167f30be1accd8ff059
 BASE: origin/master @ 7294304388 (T028 #164)
+POLISH: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
 
 FOUNDATIONAL_GATE: Pass (README T014 @ 5a53ddac83; bus guard re-green T033)
 SC-001 create 01-03: Deferred/Blocked — media Pending (T018 unchecked)

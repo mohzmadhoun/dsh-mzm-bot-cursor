@@ -3,7 +3,7 @@ T029 Verifier non-goals / SC-004 — DH Verifier
 Verdict: PASS (SC-004 / quickstart Scenario 4)
 Stamp: 2026-09-27
 Product tip: origin/master @ 7294304388 (includes T028 #164)
-Evidence tip: cursor/p4-polish-t029-t034-fe1d (this polish)
+Evidence tip: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
 Linear: MOH-222 (T029) — left In Progress (PO closes after merge)
 Recipe: specs/004-routines-cron/verifier/non-goals.md
 Evidence home: specs/004-routines-cron/verifier/evidence/non-goals/

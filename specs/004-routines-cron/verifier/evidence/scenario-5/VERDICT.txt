@@ -3,7 +3,7 @@ T031 Verifier Scenario 5 full replay (SC-005) — DH Verifier
 Verdict: BLOCKED (composite SC-005) — partial rows measured below
 Stamp: 2026-09-27
 Product tip: origin/master @ 7294304388 (T028 #164)
-Evidence tip: cursor/p4-polish-t029-t034-fe1d (this polish)
+Evidence tip: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
 Linear: MOH-224 (T031) — left In Progress (PO closes after merge / full SC-001)
 Recipe: specs/004-routines-cron/verifier/scenario-5-full-replay.md
 Evidence home: specs/004-routines-cron/verifier/evidence/scenario-5/
