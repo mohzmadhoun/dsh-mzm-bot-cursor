@@ -1,0 +1,26 @@
+SC-004 composite measured checks — 2026-09-27T11:00:48Z
+SHA: 8fa8148378037657b14cb0039a72855d97cd1392
+BRANCH: cursor/p1-t032-sc004-stamp-92fa
+NODE: v24.21.0
+VITEST: 4.1.8
+
+[1] T029 ui-chat progress — EXIT 0
+    Test Files 2 passed; Tests 2 passed | 161 skipped
+    log: vitest-t029-ui-chat.log
+
+[2] T029 shell no chat-progress IPC — EXIT 0
+    Test Files 1 passed; Tests 3 passed
+    log: vitest-t029-shell.log
+
+[3] T030 ui-chat session-log final + linkedMailbox — EXIT 0
+    Test Files 3 passed; Tests 6 passed | 166 skipped
+    log: vitest-t030-ui-chat.log
+
+[4] T030 shell no chat-final IPC — EXIT 0
+    Test Files 1 passed; Tests 3 passed
+    log: vitest-t030-shell.log
+
+[5] Source spotcheck — no shell progress/final channel literals in apps/desktop/src
+    file: source-spotcheck.txt
+
+COMPOSITE: Pass (criteria 1–4 green; criterion 5 green; criterion 6 Skipped)
