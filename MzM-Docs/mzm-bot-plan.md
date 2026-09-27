@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas (MOH-88) In Progress — tasks merged; analyze + taskstoissues current |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas (MOH-88) In Progress — Spec Kit design closed; implement Setup T001–T004 current |
 | **Date** | 2026-09-25 (living §10 updated 2026-09-27) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
@@ -80,7 +80,7 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **In** | Job/voice/anti-jobs; rename/avatar; sidebar sections; delete-confirm; **ADR only** for agent vs user memory layers (no memory UX) |
 | **Out** | Memory productization (P5); skills library (P3) |
 | **Exit (Verifier-provable)** | User can create/rename/delete (with confirm) bots and edit job, voice, anti-jobs, avatar, sidebar section; anti-jobs persist on the profile and appear in bot overview; Verifier re-runs that path |
-| **Status** | Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) In Progress. Lead kickoff ([MOH-89](https://linear.app/momadhoun/issue/MOH-89/p2-lead-kickoff-phase-gate)) authorizes Spec Kit **specify** only — **new** `specs/` feature dir; do **not** rewrite `specs/001-multi-model-bots`. |
+| **Status** | Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) In Progress. Spec Kit design closed (specify→analyze); implement Setup T001–T004 in flight, then foundations T005–T012 before US fan-out. Do **not** rewrite `specs/001-multi-model-bots`. |
 
 ### P3 — Skills UX
 
@@ -206,8 +206,8 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 6. ~~P2 Spec Kit **clarify**~~ **DONE** — [MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass.
 7. ~~P2 Spec Kit **plan**~~ **DONE** — [MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) / PR #70; Verifier [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Pass.
 8. ~~P2 Spec Kit **tasks**~~ **DONE** — [MOH-96](https://linear.app/momadhoun/issue/MOH-96/p2-spec-kit-tasks-identity-personas) / PR #72 @ `837152b248`; Verifier [MOH-97](https://linear.app/momadhoun/issue/MOH-97/p2-verifier-gate-tasks-002-identity-personas) Pass.
-9. **Current — P2 analyze + taskstoissues:** DH Spec ([MOH-98](https://linear.app/momadhoun/issue/MOH-98/p2-spec-kit-analyze-taskstoissues), branch `cursor/p2-analyze-92fa`). Verifier gate [MOH-99](https://linear.app/momadhoun/issue/MOH-99/p2-verifier-gate-analyze-taskstoissues) Todo until Spec output. Tracker: **DeepSeek Harness - Cursor** only.
-10. After analyze + Verifier Pass: **implement fan-out** — Architect seam map, then Electron/Runtime slices only after Spec+Architect gates for P2.
+9. ~~P2 Spec Kit **analyze + taskstoissues**~~ **DONE** — [MOH-98](https://linear.app/momadhoun/issue/MOH-98/p2-spec-kit-analyze-taskstoissues) / PR #73 @ `97e62765a3`; Verifier [MOH-99](https://linear.app/momadhoun/issue/MOH-99/p2-verifier-gate-analyze-taskstoissues) Pass; issues [MOH-100](https://linear.app/momadhoun/issue/MOH-100)…[MOH-141](https://linear.app/momadhoun/issue/MOH-141).
+10. **Current — P2 implement Setup (T001–T004) in parallel:** Spec T001 ([MOH-100](https://linear.app/momadhoun/issue/MOH-100)); Runtime T002+T003 ([MOH-101](https://linear.app/momadhoun/issue/MOH-101), [MOH-102](https://linear.app/momadhoun/issue/MOH-102)); Verifier T004 ([MOH-103](https://linear.app/momadhoun/issue/MOH-103)). Then **foundations T005–T012** (blocking) before any US1–US5 fan-out. Tracker: **DeepSeek Harness - Cursor** only.
 
 ---
 
