@@ -1,0 +1,18 @@
+VERDICT: Pass (implementer evidence; Verifier re-confirm pending)
+SC: FR-008 preload/renderer no raw secrets (T034)
+SHA: 605f512e487c042bc0c564018123df0688b5e37a
+UTC: 2026-09-27T09:59:04Z
+RECIPE: specs/001-multi-model-bots/verifier/t034-no-secret-ipc.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run apps/desktop/tests/no-secret-ipc.spec.ts
+STDOUT: evidence/t034-no-secret-ipc/vitest-no-secret-ipc.stdout.txt (3 passed; EXIT:0)
+COMMAND2: rg -n -i 'credential|secret|api[_-]?key|password' apps/desktop/src/preload-*.ts apps/desktop/src/ipc.ts
+STDOUT2: evidence/t034-no-secret-ipc/credentials-ipc-rg.txt (JSDoc-only forbid mentions; EXIT:0)
+NOTE: Vitest 4.1.8; Node v24.21.0; no provider API secrets required
+CRITERIA_CHECKED:
+  1. DESKTOP_IPC lifecycle/chrome allowlist only — Pass (measured)
+  2. preload-*.ts + ipc.ts match no credential-secret API patterns — Pass (measured)
+  3. contextBridge globals stay on product/chrome allowlist — Pass (measured)
+CLAIM: measured (implementer); keep MOH-79 In Progress until Verifier marks Pass
+SCOPE_OUT: T033 Models write-only UI; T035 missing-cred navigation; T037 Scenario 1 SC-006 dump
+BLOCKER: none — ask PO to open PR; do not merge; do not declare Done
