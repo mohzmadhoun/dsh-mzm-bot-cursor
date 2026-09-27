@@ -1,0 +1,34 @@
+{
+  "tip": "728fd23a31",
+  "tipNote": "origin/master ≥ 43fb328e56 (T032 filter #130); Desktop start:desktop DISPLAY=:1 with rebuilt agent-team lib including projectSkillCatalog office omit",
+  "display": ":1",
+  "launch": "pnpm run start:desktop",
+  "A1": {
+    "pass": true,
+    "managedSkillsChildCount": 1,
+    "soleChild": "mzm-thin-pack",
+    "greppableBody": true,
+    "vitest": "apps/desktop-host/tests/managed-skills.spec.ts — 2 passed"
+  },
+  "A2": {
+    "pass": true,
+    "visible": true,
+    "display": "MzM thin pack",
+    "id": "mzm-thin-pack",
+    "source": "managed",
+    "available": "false"
+  },
+  "A3": {
+    "pass": true,
+    "managedCount": 1,
+    "managedIds": ["mzm-thin-pack"],
+    "allIds": ["mzm-thin-pack"],
+    "officeAbsentFromManaged": true,
+    "expected": { "managedCount": 1, "managedIds": ["mzm-thin-pack"] }
+  },
+  "B": {
+    "B1_fullCatalogNotRequired": true,
+    "B2_learnFromDemoNotRequired": true,
+    "B3_pluginSkillsNotRequired": true
+  }
+}

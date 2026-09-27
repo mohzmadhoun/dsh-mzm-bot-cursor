@@ -1,0 +1,54 @@
+PAGE Live key smoke test — DSH Local Build dsh-app://app/
+ENSURE opened@0
+PROBE {"attempt":0,"visible":true,"display":"MzM thin pack","id":"mzm-thin-pack","source":"managed","available":"false","managedCount":1,"managedIds":["mzm-thin-pack"],"allIds":["mzm-thin-pack"],"allSources":[{"id":"mzm-thin-pack","source":"managed"}],"unavailable":null,"headings":["Members","Sidebar sections","Skills library","Mailbox handoffs","Shared tasks"],"thinText":"MzM thin pack\nManaged\nmzm-thin-pack\nMzM thin pack — single managed skill for Phase 3 Skills UX Pass.\nMake available to attach"}
+RESULT {
+  "tip": "43fb328e56",
+  "display": ":1",
+  "launch": "pnpm run start:desktop",
+  "A2": {
+    "pass": true,
+    "attempt": 0,
+    "visible": true,
+    "display": "MzM thin pack",
+    "id": "mzm-thin-pack",
+    "source": "managed",
+    "available": "false",
+    "managedCount": 1,
+    "managedIds": [
+      "mzm-thin-pack"
+    ],
+    "allIds": [
+      "mzm-thin-pack"
+    ],
+    "allSources": [
+      {
+        "id": "mzm-thin-pack",
+        "source": "managed"
+      }
+    ],
+    "unavailable": null,
+    "headings": [
+      "Members",
+      "Sidebar sections",
+      "Skills library",
+      "Mailbox handoffs",
+      "Shared tasks"
+    ],
+    "thinText": "MzM thin pack\nManaged\nmzm-thin-pack\nMzM thin pack — single managed skill for Phase 3 Skills UX Pass.\nMake available to attach"
+  },
+  "A3": {
+    "pass": true,
+    "managedCount": 1,
+    "managedIds": [
+      "mzm-thin-pack"
+    ],
+    "expected": {
+      "managedCount": 1,
+      "managedIds": [
+        "mzm-thin-pack"
+      ]
+    }
+  },
+  "officeAbsentFromManaged": true
+}
+SC004_COUNT_PASS

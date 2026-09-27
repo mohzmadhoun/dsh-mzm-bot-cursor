@@ -1,0 +1,51 @@
+Scenario 4 / SC-004 — Thin pack managed count — DH Verifier
+==========================================================
+Verdict: PASS
+Stamp: 2026-09-27 · tip 728fd23a31 (≥ 43fb328e56 / #130 T032 filter) · desktop start:desktop (DISPLAY=:1)
+Branch: cursor/p3-sc004-thin-pack-stamp-fe1d
+Linear: MOH-179 (T032) · MOH-181 (T034) · Epic MOH-142
+SC-004: Pass — exactly one source=managed skill (mzm-thin-pack / MzM thin pack); non-goals absences green
+FR-012: desktop screenshot preferred (present); GUI optional per recipe
+Blockers: none for SC-004. Client US3 authoring not in scope.
+
+Acceptance (Scenario 4 / SC-004)
+--------------------------------
+[x] A1 — On-disk thin pack count = 1 (managed-skills sole child mzm-thin-pack + vitest)
+[x] A2 — mzm-thin-pack visible as managed (display MzM thin pack)
+[x] A3 — Exactly one source=managed in Pass Desktop (managedCount===1; office-* omitted)
+[x] B1 — Full catalog not required (docs / spot-check)
+[x] B2 — Learn-from-demo not required (spot-check no product hits)
+[x] B3 — Plugin skills not required (spot-check no product hits)
+
+Evidence (measured)
+-------------------
+Launch: pnpm run start:desktop on DISPLAY=:1 @ tip ≥ 43fb328e56 with agent-team lib
+rebuilt so projectSkillCatalog omits non-thin-pack bundled (office-*) from discovery.
+(Host loads package exports default → lib/index.js; source-only filter is insufficient.)
+
+Artifacts (also /opt/cursor/artifacts/):
+  01-discovery-managed-count.png — CDP Page.captureScreenshot Skills library
+  01-discovery-managed-count-desktop.png — ffmpeg x11grab :1
+  sc004-thin-pack-discovery.mp4 — short walkthrough recording
+  step-metrics.json — CDP DOM assertions (managedCount, ids)
+  measured-checks.txt — non-goals B1–B3 spot-checks
+  layer-a-non-goals.log · managed-skills-vitest.log · measure.log
+
+DOM / metrics excerpts (measured):
+  A2: visible mzm-thin-pack displayName="MzM thin pack" source=managed
+  A3: managedCount=1 managedIds=["mzm-thin-pack"] allIds=["mzm-thin-pack"]
+      officeAbsentFromManaged=true
+  Prior SC-001 historical managedCount=4 closed by T032 Layer B filter + this Layer C stamp.
+
+Claims
+------
+- On-disk thin pack count === 1: **measured** (A1)
+- Desktop discovery sole managed = mzm-thin-pack: **measured** (A2/A3 CDP + screenshot)
+- Non-goals absences do not Fail Pass: **measured** (B1–B3)
+- Client US3 authoring / SC-003: **not run** (explicitly out of scope)
+
+Scope lock
+----------
+Does NOT stamp SC-001…SC-003 / SC-005–SC-007.
+Does NOT gate Client US3 authoring WIP.
+T034 recipe product stamp filled by this evidence; Desktop SC-004 Done bar met.
