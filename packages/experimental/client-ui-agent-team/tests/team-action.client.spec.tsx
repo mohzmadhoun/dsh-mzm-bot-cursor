@@ -79,6 +79,19 @@ function props(actions: TeamActionInjected, sessionId: SessionId = SESSION): Tea
 function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjected {
   return {
     load: () => Promise.resolve({ ok: true, value: view }),
+    createBot: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'worker-id' as SessionId,
+          displayName: 'Research Bot',
+          name: 'research-bot',
+          modelSelection: { provider: 'fixture', model: 'model-a' },
+          member: view.members[1]!,
+        },
+      },
+    }),
     createTask: () => Promise.resolve(taskSuccess({ ...task, id: TASK_2, subject: 'New task' })),
     updateTask: () => Promise.resolve({
       ok: true,
@@ -126,6 +139,190 @@ describe('TeamAction', () => {
     expect(screen.getByText('write scopes overlap with task-2')).toBeTruthy()
     fireEvent.click(worker)
     await waitFor(() => { expect(openTeammate).toHaveBeenCalledWith(SESSION, view.members[1]) })
+  })
+
+  it('creates a Host-owned bot from displayName plus provider/model assignment', async () => {
+    const createdMember = {
+      id: 'research-id' as SessionId,
+      name: 'research-bot',
+      role: 'teammate' as const,
+      status: 'inactive' as const,
+      displayName: 'Research Bot',
+      model: 'model-b',
+      diagnostics: [] as string[],
+    }
+    const createBot = vi.fn(() => Promise.resolve({
+      ok: true as const,
+      value: {
+        ok: true as const,
+        value: {
+          id: createdMember.id,
+          displayName: 'Research Bot',
+          name: 'research-bot',
+          modelSelection: { provider: 'fixture', model: 'model-b' },
+          member: createdMember,
+        },
+      },
+    }))
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true, value: view })
+      .mockResolvedValueOnce({
+        ok: true,
+        value: { ...view, members: [...view.members, createdMember] },
+      })
+    render(<TeamAction {...props(actions({ load, createBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), {
+      target: { value: ' Research Bot ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: ' fixture ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: ' model-b ' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(createBot).toHaveBeenCalledWith(SESSION, {
+        displayName: 'Research Bot',
+        modelSelection: { provider: 'fixture', model: 'model-b' },
+      })
+    })
+    expect(await screen.findByText('Research Bot')).toBeTruthy()
+    expect(screen.getByText(/research-bot ·/u)).toBeTruthy()
+    expect(screen.queryByPlaceholderText(zh.displayNamePlaceholder)).toBeNull()
+  })
+
+  it('shows createBot Remote and Team rejections and ignores a late success after session switch', async () => {
+    const rejected = actions({
+      createBot: () => Promise.resolve({
+        ok: true as const,
+        value: {
+          ok: false as const,
+          error: { code: 'team-rejected' as const, message: 'displayName must be non-empty' },
+        },
+      }),
+    })
+    const first = render(<TeamAction {...props(rejected)} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-a' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('displayName must be non-empty (team-rejected)')).toBeTruthy()
+    first.unmount()
+
+    const transport = actions({
+      createBot: () => Promise.resolve(remoteFailure('createBot offline')),
+    })
+    const second = render(<TeamAction {...props(transport)} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-a' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    expect(await screen.findByText('createBot offline (gateway/internal)')).toBeTruthy()
+    second.unmount()
+
+    const pending = Promise.withResolvers<Awaited<ReturnType<TeamActionInjected['createBot']>>>()
+    const third = render(<TeamAction {...props(actions({ createBot: () => pending.promise }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Late Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-a' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    third.rerender(<TeamAction {...props(actions(), 'next-session' as SessionId)} />)
+    pending.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          id: 'late-id' as SessionId,
+          displayName: 'Late Bot',
+          name: 'late-bot',
+          modelSelection: { provider: 'fixture', model: 'model-a' },
+          member: {
+            id: 'late-id' as SessionId,
+            name: 'late-bot',
+            role: 'teammate',
+            status: 'inactive',
+            displayName: 'Late Bot',
+            diagnostics: [],
+          },
+        },
+      },
+    })
+    await Promise.resolve()
+    expect(screen.queryByText('Late Bot')).toBeNull()
+  })
+
+  it('does not settle a successful createBot after its reload switches sessions', async () => {
+    const createdMember = {
+      id: 'research-id' as SessionId,
+      name: 'research-bot',
+      role: 'teammate' as const,
+      status: 'inactive' as const,
+      displayName: 'Reload Bot',
+      model: 'model-b',
+      diagnostics: [] as string[],
+    }
+    const reload = Promise.withResolvers<TeamActionResult<TeamView>>()
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true, value: view })
+      .mockImplementationOnce(() => reload.promise)
+    const rendered = render(<TeamAction {...props(actions({
+      load,
+      createBot: () => Promise.resolve({
+        ok: true as const,
+        value: {
+          ok: true as const,
+          value: {
+            id: createdMember.id,
+            displayName: 'Reload Bot',
+            name: 'research-bot',
+            modelSelection: { provider: 'fixture', model: 'model-b' },
+            member: createdMember,
+          },
+        },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Reload Bot' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), { target: { value: 'fixture' } })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), { target: { value: 'model-b' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => { expect(load).toHaveBeenCalledTimes(2) })
+
+    rendered.rerender(<TeamAction {...props(actions(), 'next-session' as SessionId)} />)
+    reload.resolve({
+      ok: true,
+      value: { ...view, members: [...view.members, createdMember] },
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(screen.queryByText('Reload Bot')).toBeNull()
+  })
+
+  it('cancels bot create without calling Host createBot', async () => {
+    const createBot = vi.fn(actions().createBot)
+    render(<TeamAction {...props(actions({ createBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), { target: { value: 'Temp' } })
+    fireEvent.click(screen.getByRole('button', { name: '取消' }))
+    expect(screen.queryByPlaceholderText(zh.displayNamePlaceholder)).toBeNull()
+    expect(createBot).not.toHaveBeenCalled()
   })
 
   it('keeps only the newest overlapping refresh for one session', async () => {

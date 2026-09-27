@@ -8,6 +8,9 @@
   - button "Close":
     - img
   - heading "Members" [level=3]
+  - button "New bot":
+    - img
+    - text: New bot
   - 'button "lead Idle · Model: deepseek-v4-flash" [disabled]'
   - heading "Shared tasks" [level=3]
   - button "New task":

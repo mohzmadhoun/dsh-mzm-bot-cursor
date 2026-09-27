@@ -1,6 +1,7 @@
 /** Source-safe Agent Teams browser registration and Remote mount lifecycle. */
 
 import type {
+  CreateBotInput,
   TeamMemberView as TeamRosterMember,
   TeamView,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -15,13 +16,14 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
 import {
-  TeamAction, type TeamActionInjected, type TeamActionResult, type TeamTaskActionResult,
+  TeamAction, type TeamActionInjected, type TeamActionResult, type TeamCreateBotActionResult,
+  type TeamTaskActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster and task-board copy. */
+    /** Agent Teams roster, bot-create, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -42,6 +44,9 @@ function registerUi(ctx: ClientContext): void {
   const actions: TeamActionInjected = {
     async load(sessionId): Promise<TeamActionResult<TeamView>> {
       return await ctx.remote.agentTeams.view(leadSessionId(sessionId))
+    },
+    async createBot(sessionId, input: CreateBotInput): Promise<TeamCreateBotActionResult> {
+      return await ctx.remote.agentTeams.createBot(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)
