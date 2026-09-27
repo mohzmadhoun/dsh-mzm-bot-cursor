@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done on master 2026-09-27 (SC-005 Pass #136); **P4 Routines cron** next — Spec Kit specify |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done on master 2026-09-27 (SC-005 Pass #136); **P4** epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) — Spec Kit specify [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress |
 | **Date** | 2026-09-25 (living §10 updated 2026-09-27 P4 open) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
@@ -98,7 +98,7 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **In** | Create/pause/resume + pane list; Host jobs; **no** event listeners |
 | **Out** | Slack/GitHub/email/etc triggers (P6); recall UX (P5) |
 | **Exit** | Cron routine fires and is visible in pane; pause/resume verified |
-| **Status** | **Next** — Spec Kit **specify** first. PO opens epic + specify on DeepSeek Harness - Cursor; living gate [living-next-gate.md](./living-next-gate.md). Do **not** rewrite `specs/001`–`003`. |
+| **Status** | Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) In Progress. Spec Kit **specify** [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress. Living gate [living-next-gate.md](./living-next-gate.md). Do **not** rewrite `specs/001`–`003`. |
 
 ### P5 — Memory productization
 
@@ -206,7 +206,7 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** P1 SC-005 live Desktop full replay remains **Deferred** (does **not** block later phases).
 5. ~~P2 Spec Kit design + implement + Verifier~~ **DONE** — epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas); Pass [#104](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/104).
 6. ~~P3 Spec Kit design + implement + Verifier~~ **DONE** 2026-09-27 — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); SC-005 Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`; specs `specs/003-skills-ux/`.
-7. **Current — P4 Spec Kit specify (smallest start):** PO opens epic `P4 — Routines (cron only)` + child `P4 Spec Kit — specify (Routines cron)` on **DeepSeek Harness - Cursor** only → **@DH Spec** `/speckit-specify` → new `specs/004-…` (do not rewrite 001–003). Living gate: [living-next-gate.md](./living-next-gate.md). Clarify/plan/tasks/analyze/implement follow after specify Verifier Pass — do **not** pre-load.
+7. **Current — P4 Spec Kit specify:** epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) + specify [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress on **DeepSeek Harness - Cursor** → **@DH Spec** `/speckit-specify` → new `specs/004-…` (do not rewrite 001–003). Living gate: [living-next-gate.md](./living-next-gate.md). Clarify/plan/tasks/analyze/implement follow after specify Verifier Pass — do **not** pre-load.
 
 ---
 
