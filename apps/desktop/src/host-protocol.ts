@@ -13,6 +13,9 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * must not be added — Host Agent Teams owns that durable store (research R1 / T010).
  * Skill-catalog / skill-attachment / skill-authoring payloads are also not members and
  * must not be added — Host owns durable skill catalog and attachments (research R2/R4 / T013).
+ * Routine-catalog / routine-create / pause / resume / cron-fire / last-run payloads are also not
+ * members and must not be added — Host owns the durable Routine catalog and cron wake path
+ * (research R7 / T010; `specs/004-routines-cron/contracts/`).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',
@@ -24,7 +27,8 @@ export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
 /**
  * Main→Child control `type` values sent on the Host Node IPC channel.
  * There is no mailbox, bot-message, identity, persona, section, bot-delete,
- * skill-catalog, skill-attachment, or skill-authoring control type on this channel.
+ * skill-catalog, skill-attachment, skill-authoring, routine-catalog, routine-create,
+ * pause-routine, resume-routine, cron-fire, or last-run control type on this channel.
  */
 export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
 

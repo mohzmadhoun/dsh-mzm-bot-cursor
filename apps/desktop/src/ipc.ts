@@ -21,6 +21,10 @@ import type { IpcMainInvokeEvent } from 'electron'
  * There is no skill-catalog, skill-attachment, or skill-authoring channel —
  * Host owns durable skill catalog and attachments (research R2/R4 / T013;
  * `specs/003-skills-ux/contracts/`).
+ * There is no routine-catalog, routine-create, pause-routine, resume-routine, cron-fire,
+ * or last-run channel — Host owns the durable Routine catalog, timers, and fire path
+ * (research R7 / T010–T011; `specs/004-routines-cron/contracts/`); Client mutates via
+ * authenticated Host HTTP/WS only.
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
