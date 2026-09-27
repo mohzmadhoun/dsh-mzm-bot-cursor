@@ -1,0 +1,17 @@
+VERDICT: Deferred
+SC: SC-001
+SHA: 187415b1751e039e6d8ed319a282f39c8f253b54
+BRANCH: cursor/p1-t019-ttft-docs-92fa
+OPERATOR: Mohammed (DH Verifier)
+MACHINE: linux x86_64 cloud agent; clean Desktop profile not launched this run
+LAUNCH_MODE: n/a (timed path not started)
+T_START_UTC: n/a
+T_END_UTC: n/a
+TTFT_SECONDS: n/a
+TTFT_LIMIT_SECONDS: 1800
+BOT_A: n/a
+BOT_B: n/a
+DISTINCT_CHECK: n/a
+SESSION_NOTE: No live multi-model Desktop session this certification
+EVIDENCE: evidence/scenario-2/T019-DOCS-VERDICT.txt; evidence/scenario-2/TTFT.txt
+DEFER_REASON: T019 docs Pass certified; live SC-001 wall-clock deferred — credentials UI (US4) not yet primary Pass path; dual-provider timed Desktop run not executed on this Verifier host. Does not mark SC-001 Done. T019 docs alone are not SC-001 Pass.
