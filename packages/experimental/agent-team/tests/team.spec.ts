@@ -4,11 +4,13 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
+import { assembleContextFor } from '@deepseek-ai/dsh-agent'
 import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { SessionLogOffset, SessionId, type Session, type SessionEvent } from '@deepseek-ai/dsh-session'
 import JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
+import { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
 import SubagentService from '@deepseek-ai/dsh-subagent'
 import { deliverSubagentPrompt, type HostPromptDeliverer } from '@deepseek-ai/dsh-subagent/internal'
 import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
@@ -16,7 +18,7 @@ import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
-import { modelAssignmentsAreDistinct } from '../src/validation.ts'
+import { modelAssignmentsAreDistinct, normalizePersonaProfile } from '../src/validation.ts'
 import { TeamRuntimeLifecycle } from '../src/lifecycle.ts'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/index.ts'
@@ -185,6 +187,33 @@ describe('modelAssignmentsAreDistinct', () => {
       role: 'lead',
       modelSelection: { provider: 'mock', model: 'mock' },
     })
+  })
+})
+
+describe('normalizePersonaProfile', () => {
+  it('trims fields, allows empty job/voice, and requires non-empty anti-job items', () => {
+    expect(normalizePersonaProfile('  ship ', '  warm ', [' docs ', 'ops'])).toEqual({
+      job: 'ship',
+      voice: 'warm',
+      antiJobs: ['docs', 'ops'],
+    })
+    expect(normalizePersonaProfile('', '', [])).toEqual({
+      job: '',
+      voice: '',
+      antiJobs: [],
+    })
+    expect(() => normalizePersonaProfile('job', 'voice', ['  ']))
+      .toThrow(/antiJobs\[0\] must be non-empty/)
+    expect(() => normalizePersonaProfile('job', 'voice', { length: 0 } as unknown as string[]))
+      .toThrow(/antiJobs must be an array/)
+    expect(() => normalizePersonaProfile('job', 'voice', Array.from({ length: 65 }, () => 'x')))
+      .toThrow(/antiJobs exceeds 64 items/)
+    expect(() => normalizePersonaProfile('job', 'voice', [1 as unknown as string]))
+      .toThrow(/antiJobs\[0\] must be a string/)
+    expect(() => normalizePersonaProfile(1 as unknown as string, 'voice', []))
+      .toThrow(/job must be a string/)
+    expect(() => normalizePersonaProfile('j'.repeat(201), 'voice', []))
+      .toThrow(/job exceeds 200 characters/)
   })
 })
 
@@ -440,12 +469,6 @@ describe('Team identity and provisioning', () => {
       ok: false,
       error: { code: 'team-rejected', message: 'Host renameBot is not implemented yet' },
     })
-    expect(await ctx.agentTeams.remoteUpdatePersona(lead, {
-      botId: created.id,
-      job: 'review',
-      voice: 'terse',
-      antiJobs: ['merge'],
-    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
     expect(await ctx.agentTeams.remoteSetAvatar(lead, {
       botId: created.id,
       avatar: { shape: 'circle', color: 'blue' },
@@ -466,6 +489,146 @@ describe('Team identity and provisioning', () => {
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
       displayName: 'Identity Stub',
     })
+  })
+
+  it('persists updatePersona, projects persona on view, and rejects without changing prior values', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('persona create'),
+      textResponse('persona follow-up'),
+    ])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Persona Bot',
+      modelSelection: { provider: 'mock', model: 'persona-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+
+    const saved = await ctx.agentTeams.updatePersona(lead, {
+      botId: created.id,
+      job: ' review PRs ',
+      voice: ' terse ',
+      antiJobs: [' merge ', 'docs'],
+      signal: SIGNAL,
+    })
+    expect(saved.persona).toEqual({
+      job: 'review PRs',
+      voice: 'terse',
+      antiJobs: ['merge', 'docs'],
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.persona).toEqual(saved.persona)
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.persona)
+      .toEqual(saved.persona)
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.members.find(row => row.id === created.id)?.persona).toEqual(saved.persona)
+
+    const remoteOk = await ctx.agentTeams.remoteUpdatePersona(lead, {
+      botId: created.id,
+      job: 'ship',
+      voice: '',
+      antiJobs: ['ops'],
+    }, SIGNAL)
+    expect(remoteOk).toMatchObject({
+      ok: true,
+      value: { persona: { job: 'ship', voice: '', antiJobs: ['ops'] } },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.persona).toEqual({
+      job: 'ship',
+      voice: '',
+      antiJobs: ['ops'],
+    })
+
+    const aborted = new AbortController()
+    aborted.abort()
+    await expect(ctx.agentTeams.updatePersona(lead, {
+      botId: created.id,
+      job: 'should-not-persist',
+      voice: 'nope',
+      antiJobs: ['x'],
+      signal: aborted.signal,
+    })).rejects.toBeTruthy()
+    expect(durable(lead).members.find(row => row.id === created.id)?.persona).toEqual({
+      job: 'ship',
+      voice: '',
+      antiJobs: ['ops'],
+    })
+
+    expect(await ctx.agentTeams.remoteUpdatePersona(lead, {
+      botId: SessionId('missing-bot'),
+      job: 'ghost',
+      voice: '',
+      antiJobs: [],
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.persona).toEqual({
+      job: 'ship',
+      voice: '',
+      antiJobs: ['ops'],
+    })
+
+    const hang = await setup(['hang'])
+    const hungChild = (await spawn(hang.ctx, hang.lead, 'peer-writer', {
+      agentOptions: { provider: 'mock', model: 'peer' },
+    })).member
+    const liveChild = await waitRunning(hang.ctx, hungChild.id)
+    await expect(hang.ctx.agentTeams.updatePersona(liveChild, {
+      botId: hungChild.id,
+      job: 'hijack',
+      voice: '',
+      antiJobs: [],
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_LEAD_REQUIRED' })
+    expect(durable(hang.lead).members.find(row => row.id === hungChild.id)?.persona).toBeUndefined()
+  })
+
+  it('binds saved persona fields into Bot instruction assembly on subsequent turns', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('bound persona first'),
+      textResponse('bound persona second'),
+      textResponse('bound persona live update'),
+    ])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Bound Persona',
+      modelSelection: { provider: 'mock', model: 'bound-persona' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+
+    await ctx.agentTeams.updatePersona(lead, {
+      botId: created.id,
+      job: 'code review',
+      voice: 'direct',
+      antiJobs: ['merge without tests'],
+      signal: SIGNAL,
+    })
+
+    const followUp = await ctx.agentTeams.sendMessage(lead, {
+      target: created.name,
+      content: content('second turn with persona bind'),
+      signal: SIGNAL,
+    })
+    expect(followUp.status).toBe('accepted')
+    const live = await waitRunning(ctx, created.id)
+    const prompt = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(live)))
+    expect(prompt).toContain('code review')
+    expect(prompt).toContain('direct')
+    expect(prompt).toContain('merge without tests')
+    expect(prompt).not.toContain('Job: \n')
+
+    // Live Host save refreshes the mutable bind without requiring cold resume.
+    await ctx.agentTeams.updatePersona(lead, {
+      botId: created.id,
+      job: 'ship features',
+      voice: '',
+      antiJobs: [],
+      signal: SIGNAL,
+    })
+    const livePrompt = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(live)))
+    expect(livePrompt).toContain('ship features')
+    expect(livePrompt).not.toContain('code review')
+    await waitNoAgent(ctx, created.id)
   })
 
   it('binds Bot ModelSelection via installModelSelection for subsequent chats only', async () => {

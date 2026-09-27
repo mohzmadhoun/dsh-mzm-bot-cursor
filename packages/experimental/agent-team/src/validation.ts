@@ -2,6 +2,10 @@
 
 import type { ModelSelection } from '@deepseek-ai/dsh-agent'
 import { TeamError } from './error.ts'
+import type { BotPersonaProfile } from './types.ts'
+
+const PERSONA_FIELD_MAX = 200
+const PERSONA_ANTI_JOB_MAX_ITEMS = 64
 
 /**
  * Normalize one required human-authored string.
@@ -58,6 +62,60 @@ export function requiredModelSelection(selection: ModelSelection): ModelSelectio
   return selection.reasoningEffort === undefined
     ? { provider, model }
     : { provider, model, reasoningEffort: selection.reasoningEffort }
+}
+
+/**
+ * Normalize one Host persona profile for durable replace (FR-002 / FR-003).
+ * Empty job, voice, and antiJobs list are allowed; each anti-job item must be non-empty.
+ * @param job - primary responsibility; may be empty after trim.
+ * @param voice - speaking style; may be empty after trim.
+ * @param antiJobs - ordered anti-responsibilities; length ≥ 0.
+ * @returns durable persona snapshot ready for journal append.
+ */
+export function normalizePersonaProfile(
+  job: string,
+  voice: string,
+  antiJobs: readonly string[],
+): BotPersonaProfile {
+  const normalizedJob = optionalPersonaText(job, 'job')
+  const normalizedVoice = optionalPersonaText(voice, 'voice')
+  if (!Array.isArray(antiJobs)) {
+    throw new TeamError('antiJobs must be an array', 'TEAM_INVALID_ARGUMENT')
+  }
+  if (antiJobs.length > PERSONA_ANTI_JOB_MAX_ITEMS) {
+    throw new TeamError(
+      `antiJobs exceeds ${PERSONA_ANTI_JOB_MAX_ITEMS} items`,
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  const normalizedAntiJobs = antiJobs.map((item, index) => {
+    if (typeof item !== 'string') {
+      throw new TeamError(`antiJobs[${index}] must be a string`, 'TEAM_INVALID_ARGUMENT')
+    }
+    return requiredText(item, `antiJobs[${index}]`, PERSONA_FIELD_MAX)
+  })
+  return {
+    job: normalizedJob,
+    voice: normalizedVoice,
+    antiJobs: normalizedAntiJobs,
+  }
+}
+
+/**
+ * Trim one optional persona text field; empty after trim is allowed.
+ * @param value - raw job or voice text.
+ * @param field - diagnostic field name.
+ * @returns trimmed text, possibly empty.
+ */
+function optionalPersonaText(value: string, field: string): string {
+  if (typeof value !== 'string') {
+    throw new TeamError(`${field} must be a string`, 'TEAM_INVALID_ARGUMENT')
+  }
+  const text = value.trim()
+  if (text.length > PERSONA_FIELD_MAX) {
+    throw new TeamError(`${field} exceeds ${PERSONA_FIELD_MAX} characters`, 'TEAM_INVALID_ARGUMENT')
+  }
+  return text
 }
 
 /**
