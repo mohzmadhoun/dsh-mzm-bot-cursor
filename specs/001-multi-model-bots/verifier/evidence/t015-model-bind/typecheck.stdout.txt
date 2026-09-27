@@ -1,0 +1,12 @@
+
+> @deepseek-ai/dsh-root@0.1.6-alpha.2 build:lib:host
+> node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.host.json && tsdown --env.DSH_BUILD_FACE host
+
+packages/experimental/agent-team/src/projection.ts(73,34): error TS2352: Conversion of type 'ZodObject<{ id: ZodPipe<ZodString, ZodTransform<SessionId, string>>; name: ZodString; description: ZodString; displayName: ZodOptional<...>; ... 4 more ...; error: ZodOptional<...>; }, $strict>' to type 'ZodType<TeamMemberSnapshot, unknown, $ZodTypeInternals<TeamMemberSnapshot, unknown>>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The types of '_output.modelSelection' are incompatible between these types.
+    Type '{ provider: string; model: string; reasoningEffort?: string | undefined; } | undefined' is not comparable to type 'ModelSelection'.
+      Type '{ provider: string; model: string; reasoningEffort?: string | undefined; }' is not comparable to type 'ModelSelection'.
+        Types of property 'reasoningEffort' are incompatible.
+          Type 'string | undefined' is not comparable to type 'ReasoningEffortId'.
+            Type 'string' is not comparable to type 'ReasoningEffortId'.
+              Type 'string' is not comparable to type '{ readonly [BRAND]: "ReasoningEffortId"; }'.

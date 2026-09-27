@@ -1,0 +1,19 @@
+VERDICT: Fail
+SC: FR-002 Host bind (T015)
+SHA: 19815ad097f84819c773636ed49bb85b7388186d
+UTC: 2026-09-27T07:48:29Z
+IMPL_SHA: 26ea15fe2d (included; tip also has T015 docs note)
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'binds Bot ModelSelection via installModelSelection'
+STDOUT: evidence/t015-model-bind/vitest-bind.stdout.txt (1 passed | 52 skipped)
+COMMAND2: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/model-selection-bind.spec.ts packages/experimental/agent-team/tests/projection-events.spec.ts -t 'ModelSelection|immutable identity|teammate identity'
+STDOUT2: evidence/t015-model-bind/vitest-helpers.stdout.txt (4 passed | 11 skipped)
+OPTIONAL: evidence/t015-model-bind/vitest-broader.stdout.txt (68/68 Host Team regression)
+HOST_TYPECHECK: Fail (measured)
+TYPECHECK_CMD: npm run build:lib:host (via lefthook pre-push typecheck)
+TYPECHECK_STDOUT: evidence/t015-model-bind/typecheck.stdout.txt
+TYPECHECK_ERROR: packages/experimental/agent-team/src/projection.ts(73,34) TS2352 — modelSelectionSchema.reasoningEffort is string|undefined, not ReasoningEffortId; cast to ZodType<TeamMemberSnapshot> rejected
+NOTE: pnpm exec vitest aborted on lefthook postinstall until DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1; Vitest 4.1.8 binary used for recipe
+CRITERIA: recipe vitest green; Host face does not compile — Verifier refuses Done
+CLAIM: measured (independent re-run; Runtime self-evidence not accepted)
+BLOCKER: DH Runtime must brand/transform reasoningEffort in projection modelSelectionSchema so build:lib:host succeeds
