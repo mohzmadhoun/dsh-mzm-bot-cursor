@@ -13,7 +13,14 @@ const SUPPORTED_TARGETS = new Set(['mac-arm64', 'mac-x64', 'win-x64'])
  * @param {string} hostArch - Build-host architecture used when no target override exists.
  * @returns {'mac-arm64' | 'mac-x64' | 'win-x64'} Supported Desktop target name.
  */
-export function resolveDesktopBuildTarget(
+/**
+ * Compute the packaging target name for a host without validating support.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
+ * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
+ * @param {string} hostArch - Build-host architecture used when no target override exists.
+ * @returns {string} Candidate target name such as `mac-arm64` or `linux-x64`.
+ */
+export function desktopBuildTargetName(
   env = process.env,
   hostPlatform = process.platform,
   hostArch = process.arch,
@@ -22,11 +29,38 @@ export function resolveDesktopBuildTarget(
   const arch = env.DSH_DESKTOP_TARGET_ARCH ?? env.npm_config_arch
     ?? (platform === 'win32' || platform === 'win' ? 'x64' : hostArch)
   const os = platform === 'darwin' ? 'mac' : platform === 'win32' || platform === 'win' ? 'win' : platform
-  const target = `${os}-${arch}`
+  return `${os}-${arch}`
+}
+
+export function resolveDesktopBuildTarget(
+  env = process.env,
+  hostPlatform = process.platform,
+  hostArch = process.arch,
+) {
+  const target = desktopBuildTargetName(env, hostPlatform, hostArch)
   if (!SUPPORTED_TARGETS.has(target)) {
     throw new Error(`desktop build paths: unsupported target ${target}`)
   }
   return /** @type {'mac-arm64' | 'mac-x64' | 'win-x64'} */ (target)
+}
+
+/**
+ * Resolve a packaging target when the host supports one; otherwise return null.
+ * Used by `dev:desktop` / `start:desktop` to skip primary-runtime materialization on Linux.
+ * @param {NodeJS.ProcessEnv} env - Packaging environment.
+ * @param {NodeJS.Platform} hostPlatform - Build-host platform used when no target override exists.
+ * @param {string} hostArch - Build-host architecture used when no target override exists.
+ * @returns {'mac-arm64' | 'mac-x64' | 'win-x64' | null} Supported target, or null when unsupported.
+ */
+export function tryResolveDesktopBuildTarget(
+  env = process.env,
+  hostPlatform = process.platform,
+  hostArch = process.arch,
+) {
+  const target = desktopBuildTargetName(env, hostPlatform, hostArch)
+  return SUPPORTED_TARGETS.has(target)
+    ? /** @type {'mac-arm64' | 'mac-x64' | 'win-x64'} */ (target)
+    : null
 }
 
 /**
