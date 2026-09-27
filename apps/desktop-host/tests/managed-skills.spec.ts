@@ -1,13 +1,27 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
 import SkillRegistry from '@deepseek-ai/dsh-skill'
 import { expect, it } from 'vitest'
 import * as desktopManagedSkills from '../src/managed-skills.ts'
+
+/** T032 Host guard: on-disk thin pack is the sole managed-skills child (Layer A). */
+it('ships exactly one on-disk managed skill directory (mzm-thin-pack)', async () => {
+  const managedRoot = join(dirname(fileURLToPath(import.meta.url)), '../managed-skills')
+  const children = (await readdir(managedRoot, { withFileTypes: true }))
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort()
+  expect(children).toEqual(['mzm-thin-pack'])
+  const shipped = await readFile(join(managedRoot, 'mzm-thin-pack', 'SKILL.md'), 'utf8')
+  expect(shipped).toContain('name: mzm-thin-pack')
+  expect(shipped).toContain('MzM thin pack')
+  expect(shipped).toContain('Follow the MzM thin-pack playbook for Pass.')
+})
 
 it('mounts mzm-thin-pack from managed-skills and a Host-durable user skills root', async () => {
   const root = await mkdtemp(join(tmpdir(), 'desktop-managed-skills-'))
