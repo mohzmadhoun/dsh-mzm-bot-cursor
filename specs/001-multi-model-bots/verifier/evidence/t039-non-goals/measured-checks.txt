@@ -1,0 +1,54 @@
+# T039 non-goals absence checks — measured 2026-09-27T10:11:45Z
+branch: cursor/p1-t039-non-goals-92fa
+commit: f9fc1dcdc66d09118ba5353d5bd29e4abb1584be
+
+## 1) Box / computer-use
+```
+(no matches)
+```
+
+## 2) MCP client mount
+```
+apps/desktop/tests/profile-mcp.spec.ts:27:    expect(rows.filter(row => row.name === '@deepseek-ai/dsh-mcp-client')).toEqual([])
+```
+
+## 3) 1Password / connector vault
+```
+packages/client/ui-chat/README.zh.md:55:Host code 为 `MISSING_CREDENTIAL` 的终止轮次失败会展示本地化的应用内 Models 凭据引导，以及调用 `ctx.settingsShell.openSection('models')` 的**打开模型设置**控件——不以 1Password / 外部保险库为主路径。
+packages/client/ui-chat/README.md:53:Terminal turn failures with Host code `MISSING_CREDENTIAL` show localized in-app Models credential guidance and an **Open Models settings** control that calls `ctx.settingsShell.openSection('models')` — not a 1Password / external vault primary path.
+packages/client/ui-chat/src/client/locale.ts:81:  'message.failure.missingCredential': '缺少提供方 API 密钥。请在应用内「模型」设置中填写，不要使用 1Password 等外部保险库作为主路径。',
+packages/client/ui-chat/src/client/locale.ts:194:  'message.failure.missingCredential': 'Provider API key is missing. Enter it in-app under Models settings — not through a 1Password or external vault product flow.',
+packages/client/ui-chat/src/client/contract/slots.ts:79:   * Wired for Host `MISSING_CREDENTIAL` turn failures (not a 1Password vault).
+```
+
+## 4) Personas / skills / routines / memory product UX
+```
+(no matches)
+```
+
+## 5) Pixel Grok chrome
+```
+(no matches)
+```
+
+## 6) README index
+```
+35:Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of Scope absence checks Pass), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
+```
+
+## 7) Optional vitest profile-mcp.spec.ts
+```
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:11:56
+   Duration  588ms (transform 339ms, setup 213ms, import 236ms, tests 10ms, environment 0ms)
+
+```
+result: PASS (1 file / 1 test)

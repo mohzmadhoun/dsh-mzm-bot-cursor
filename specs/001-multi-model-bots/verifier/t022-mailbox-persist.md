@@ -64,4 +64,4 @@ Record stdout + SHA under [evidence/t022-mailbox-persist/](./evidence/t022-mailb
 - Contract: [../contracts/host-mailbox-1to1.md](../contracts/host-mailbox-1to1.md)
 - Data model: [../data-model.md](../data-model.md) (Host mailbox message)
 - T021 send path: [t021-mailbox-send.md](./t021-mailbox-send.md)
-- Scenario 3 (T025): `scenario-3-mailbox.md` (when present)
+- Scenario 3 (T025): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
