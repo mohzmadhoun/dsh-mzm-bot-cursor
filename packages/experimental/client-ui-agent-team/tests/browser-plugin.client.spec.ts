@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -275,6 +275,25 @@ async function bench(options: {
           },
         })
     },
+    upsertUserSkill: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/upsertUserSkill', args })
+      return Promise.resolve(options.remoteFailure === 'upsertUserSkill'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              skill: {
+                id: 'my-playbook',
+                displayName: 'My playbook',
+                source: 'user' as const,
+                description: 'My playbook',
+              },
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -406,6 +425,10 @@ describe('ui-team browser plugin', () => {
       botId: CHILD,
       skillId: 'mzm-thin-pack',
     })).ok).toBe(true)
+    expect((await actions.upsertUserSkill(SESSION, {
+      displayName: 'My playbook',
+      instructionalBody: 'Follow this authored playbook.',
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -426,6 +449,7 @@ describe('ui-team browser plugin', () => {
       'agentTeams/renameSection',
       'agentTeams/assignSection',
       'agentTeams/attachSkill',
+      'agentTeams/upsertUserSkill',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -463,6 +487,10 @@ describe('ui-team browser plugin', () => {
     expect(b.calls[9]?.args[1]).toEqual({
       botId: CHILD,
       skillId: 'mzm-thin-pack',
+    })
+    expect(b.calls[10]?.args[1]).toEqual({
+      displayName: 'My playbook',
+      instructionalBody: 'Follow this authored playbook.',
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
@@ -594,6 +622,16 @@ describe('ui-team browser plugin', () => {
     await expect(attachSkillActions.attachSkill(SESSION, {
       botId: CHILD,
       skillId: 'mzm-thin-pack',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const upsertUserSkill = await bench({ remoteFailure: 'upsertUserSkill' })
+    const upsertUserSkillActions = (upsertUserSkill.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(upsertUserSkillActions.upsertUserSkill(SESSION, {
+      displayName: 'My playbook',
+      instructionalBody: 'Follow this authored playbook.',
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

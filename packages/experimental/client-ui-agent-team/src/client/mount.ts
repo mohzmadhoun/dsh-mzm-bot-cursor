@@ -12,6 +12,7 @@ import type {
   TeamMemberView as TeamRosterMember,
   TeamView,
   UpdatePersonaInput,
+  UpsertUserSkillInput,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type {} from '@deepseek-ai/dsh-experimental-agent-team/remote'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
@@ -33,13 +34,14 @@ import {
   type TeamCreateBotActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
-  type TeamSetAvatarActionResult, type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamSetAvatarActionResult, type TeamTaskActionResult,
+  type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, sections, skills library/attach/run, bot-create, persona/rename/avatar/delete editors, and task-board copy. */
+    /** Agent Teams roster, sections, skills author/attach/run, bot-create, identity editors, task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -87,6 +89,9 @@ function registerUi(ctx: ClientContext): void {
     },
     async attachSkill(sessionId, input: AttachSkillInput): Promise<TeamAttachSkillActionResult> {
       return await ctx.remote.agentTeams.attachSkill(leadSessionId(sessionId), input)
+    },
+    async upsertUserSkill(sessionId, input: UpsertUserSkillInput): Promise<TeamUpsertUserSkillActionResult> {
+      return await ctx.remote.agentTeams.upsertUserSkill(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)

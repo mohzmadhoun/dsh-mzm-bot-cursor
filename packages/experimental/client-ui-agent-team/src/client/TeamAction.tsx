@@ -37,6 +37,8 @@ import type {
   TeamView,
   UpdatePersonaInput,
   UpdatePersonaResult,
+  UpsertUserSkillInput,
+  UpsertUserSkillResult,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
 import {
@@ -81,6 +83,9 @@ export type TeamAssignSectionActionResult = RemoteResult<BotIdentityMutationResu
 /** Generated Remote result whose business value preserves Team attachSkill rejections. */
 export type TeamAttachSkillActionResult = RemoteResult<BotIdentityMutationResult<AttachSkillResult>>
 
+/** Generated Remote result whose business value preserves Team upsertUserSkill rejections. */
+export type TeamUpsertUserSkillActionResult = RemoteResult<BotIdentityMutationResult<UpsertUserSkillResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -93,6 +98,7 @@ export interface TeamActionInjected {
   renameSection: (sessionId: SessionId, input: RenameSectionInput) => Promise<TeamRenameSectionActionResult>
   assignSection: (sessionId: SessionId, input: AssignSectionInput) => Promise<TeamAssignSectionActionResult>
   attachSkill: (sessionId: SessionId, input: AttachSkillInput) => Promise<TeamAttachSkillActionResult>
+  upsertUserSkill: (sessionId: SessionId, input: UpsertUserSkillInput) => Promise<TeamUpsertUserSkillActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -167,6 +173,15 @@ interface AttachSkillDraft {
   skillId: SkillId | ''
 }
 
+/**
+ * Draft fields for Host user-skill create/edit (FR-006 / FR-013).
+ * Both displayName and instructionalBody MUST be non-empty after trim.
+ */
+interface SkillAuthorDraft {
+  displayName: string
+  instructionalBody: string
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
@@ -174,6 +189,7 @@ const EMPTY_RENAME_DRAFT: RenameDraft = { displayName: '' }
 const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
 const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
 const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
+const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
@@ -362,8 +378,8 @@ function memberLabel(
 /** Render the live Team roster, sidebar sections, Host mailbox handoffs, bot-create form, and task board. */
 export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
-  createSection, renameSection, assignSection, attachSkill, createTask, updateTask,
-  openTeammate, openModelsSettings, t,
+  createSection, renameSection, assignSection, attachSkill, upsertUserSkill,
+  createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -388,6 +404,16 @@ export function TeamAction({
   /** Bot whose Host attachSkill picker is open (per-bot skills surface; T023). */
   const [attachingBotId, setAttachingBotId] = useState<SessionId | null>(null)
   const [attachSkillDraft, setAttachSkillDraft] = useState<AttachSkillDraft>(EMPTY_ATTACH_SKILL_DRAFT)
+  /** Host user-skill create form open (T029). */
+  const [creatingSkill, setCreatingSkill] = useState(false)
+  /** Host user-skill edit target id, or null when not editing (T029). */
+  const [editingSkillId, setEditingSkillId] = useState<SkillId | null>(null)
+  const [skillAuthorDraft, setSkillAuthorDraft] = useState<SkillAuthorDraft>(EMPTY_SKILL_AUTHOR_DRAFT)
+  /**
+   * Session-local instructional bodies from successful upserts (edit prefill).
+   * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
+   */
+  const [authoredBodies, setAuthoredBodies] = useState<ReadonlyMap<SkillId, string>>(() => new Map())
   /**
    * Session-active run indication for attached bot×skill pairs (clarify lock 4 / FR-004).
    * Client-local observability — does not require LLM reply text match.
@@ -444,6 +470,10 @@ export function TeamAction({
     setAssigningBotId(null)
     setAttachingBotId(null)
     setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+    setCreatingSkill(false)
+    setEditingSkillId(null)
+    setSkillAuthorDraft(EMPTY_SKILL_AUTHOR_DRAFT)
+    setAuthoredBodies(new Map())
     setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
     setCreating(false)
@@ -850,6 +880,42 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+
+
+  const settleUpsertUserSkill = useCallback(async (
+    operation: () => Promise<TeamUpsertUserSkillActionResult>,
+  ): Promise<UpsertUserSkillResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add('upsert-user-skill'))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Host empty-reject / author failure: clear reason; catalog unchanged.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const authored = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return authored
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete('upsert-user-skill')
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
     const provider = botDraft.provider.trim()
@@ -1048,6 +1114,55 @@ export function TeamAction({
       next.add(key)
       return next
     })
+  }
+
+  const startCreateSkill = (): void => {
+    setCreatingSkill(true)
+    setEditingSkillId(null)
+    setSkillAuthorDraft(EMPTY_SKILL_AUTHOR_DRAFT)
+  }
+
+  const startEditSkill = (skill: SkillCatalogSummary): void => {
+    /* v8 ignore next -- Edit is only rendered for user-source catalog rows. */
+    if (skill.source !== 'user') return
+    setEditingSkillId(skill.id)
+    setCreatingSkill(false)
+    setSkillAuthorDraft({
+      displayName: skill.displayName,
+      instructionalBody: authoredBodies.get(skill.id) ?? '',
+    })
+  }
+
+  const cancelSkillAuthor = (): void => {
+    setCreatingSkill(false)
+    setEditingSkillId(null)
+    setSkillAuthorDraft(EMPTY_SKILL_AUTHOR_DRAFT)
+  }
+
+  /**
+   * Host upsertUserSkill create/edit (FR-006 / FR-013 / T029).
+   * Empty name or body reject Client-side with clear copy; Host rejects do not invent catalog rows.
+   * Success refreshes discovery and marks the skill available-to-attach (T030).
+   */
+  const submitSkillAuthor = async (): Promise<void> => {
+    const displayName = skillAuthorDraft.displayName.trim()
+    const instructionalBody = skillAuthorDraft.instructionalBody.trim()
+    /* v8 ignore next -- SkillAuthorForm disables Save while either normalized field is empty. */
+    if (displayName === '' || instructionalBody === '') return
+    const saved = await settleUpsertUserSkill(() => upsertUserSkill(sessionId, {
+      ...editingSkillId === null ? {} : { skillId: editingSkillId },
+      displayName,
+      instructionalBody,
+    }))
+    if (saved === undefined) return
+    setAuthoredBodies((current) => {
+      const next = new Map(current)
+      next.set(saved.skill.id, instructionalBody)
+      return next
+    })
+    // T030: authored user skills enter discovery via refresh and behave like managed for attach/run.
+    makeAvailableToAttach(saved.skill.id)
+    cancelSkillAuthor()
   }
 
   const submitCreate = async (): Promise<void> => {
@@ -1566,8 +1681,27 @@ export function TeamAction({
               <section data-team-skills>
                 <div className={css.sectionTitle}>
                   <h3>{t('skills')}</h3>
+                  <button
+                    type="button"
+                    className={css.smallButton}
+                    data-team-create-skill
+                    onClick={() => { startCreateSkill() }}
+                  >
+                    <IconPlusOutline16 size={13} /> {t('createSkill')}
+                  </button>
                 </div>
                 <p className={css.hint}>{t('skillsHint')}</p>
+                {(creatingSkill || editingSkillId !== null) && (
+                  <SkillAuthorForm
+                    draft={skillAuthorDraft}
+                    setDraft={setSkillAuthorDraft}
+                    pending={pendingTasks.has('upsert-user-skill')}
+                    mode={editingSkillId === null ? 'create' : 'edit'}
+                    onSave={() => { void submitSkillAuthor() }}
+                    onCancel={cancelSkillAuthor}
+                    t={t}
+                  />
+                )}
                 {view.skills.length === 0
                   ? (
                     <div
@@ -1584,6 +1718,7 @@ export function TeamAction({
                       <div className={css.skillsList} data-team-skills-list>
                         {view.skills.map((skill) => {
                           const available = availableToAttach.has(skill.id)
+                          const editingThis = editingSkillId === skill.id
                           return (
                             <article
                               key={skill.id}
@@ -1603,25 +1738,38 @@ export function TeamAction({
                                 {skill.description !== undefined && skill.description.trim() !== ''
                                   && <span>{skill.description}</span>}
                               </div>
-                              {available
-                                ? (
-                                  <div
-                                    className={css.skillAvailable}
-                                    data-team-skill-available={skill.id}
-                                  >
-                                    <IconCheckOutline14 /> {t('skillAvailable')}
-                                  </div>
-                                )
-                                : (
+                              <div className={css.identityActions}>
+                                {available
+                                  ? (
+                                    <div
+                                      className={css.skillAvailable}
+                                      data-team-skill-available={skill.id}
+                                    >
+                                      <IconCheckOutline14 /> {t('skillAvailable')}
+                                    </div>
+                                  )
+                                  : (
+                                    <button
+                                      type="button"
+                                      className={css.personaButton}
+                                      data-team-skill-load={skill.id}
+                                      onClick={() => { makeAvailableToAttach(skill.id) }}
+                                    >
+                                      {t('skillMakeAvailable')}
+                                    </button>
+                                  )}
+                                {skill.source === 'user' && !editingThis && (
                                   <button
                                     type="button"
                                     className={css.personaButton}
-                                    data-team-skill-load={skill.id}
-                                    onClick={() => { makeAvailableToAttach(skill.id) }}
+                                    data-team-skill-edit={skill.id}
+                                    disabled={pendingTasks.has('upsert-user-skill')}
+                                    onClick={() => { startEditSkill(skill) }}
                                   >
-                                    {t('skillMakeAvailable')}
+                                    <IconEditOutline16 size={13} /> {t('editSkill')}
                                   </button>
                                 )}
+                              </div>
                             </article>
                           )
                         })}
@@ -2120,6 +2268,67 @@ interface AttachSkillFormProps {
   onSave: () => void
   onCancel: () => void
   t: TeamActionProps['t']
+}
+
+interface SkillAuthorFormProps {
+  draft: SkillAuthorDraft
+  setDraft: (draft: SkillAuthorDraft) => void
+  pending: boolean
+  mode: 'create' | 'edit'
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host user-skill create/edit editor (FR-006 / FR-013 / T029).
+ * Empty displayName or instructionalBody show a clear reject and block Save.
+ */
+function SkillAuthorForm({
+  draft, setDraft, pending, mode, onSave, onCancel, t,
+}: SkillAuthorFormProps) {
+  const ready = draft.displayName.trim() !== '' && draft.instructionalBody.trim() !== ''
+  return (
+    <div
+      className={css.form}
+      data-team-skill-author-editor={mode}
+    >
+      <p className={css.hint}>{t('skillAuthorHint')}</p>
+      {!ready && (
+        <div
+          className={css.error}
+          role="alert"
+          data-team-skill-author-reject=""
+        >
+          {t('skillAuthorEmptyReject')}
+        </div>
+      )}
+      <input
+        aria-label={t('displayName')}
+        data-team-skill-author-name=""
+        value={draft.displayName}
+        placeholder={t('skillAuthorNamePlaceholder')}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          setDraft({ ...draft, displayName: event.target.value })
+        }}
+      />
+      <textarea
+        aria-label={t('description')}
+        data-team-skill-author-body=""
+        value={draft.instructionalBody}
+        placeholder={t('skillAuthorBodyPlaceholder')}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+          setDraft({ ...draft, instructionalBody: event.target.value })
+        }}
+      />
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
 }
 
 /**
