@@ -171,8 +171,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Full Verifier replay, non-goals, no P3/P5 creep, quickstart alignment
 
-- [ ] T039 [P] Add Verifier Scenario 6 full Phase 2 replay recipe in `specs/002-identity-personas/verifier/scenario-6-full-replay.md` covering create/use → rename → persona edit → avatar → section assign → overview anti-jobs → delete confirm/cancel/confirm (FR-012; SC-007) and requiring foundational Pass first
-- [ ] T040 [P] Complete explicit non-goals absence checks (skills library P3; memory product UX P5; image-file avatar upload; transcript/mailbox wipe as Pass gate; P1 topology/mailbox/auth re-litigation; Grok chrome parity) in `specs/002-identity-personas/verifier/non-goals.md`
+- [x] T039 [P] Add Verifier Scenario 6 full Phase 2 replay recipe in `specs/002-identity-personas/verifier/scenario-6-full-replay.md` covering create/use → rename → persona edit → avatar → section assign → overview anti-jobs → delete confirm/cancel/confirm (FR-012; SC-007) and requiring foundational Pass first
+- [x] T040 [P] Complete explicit non-goals absence checks (skills library P3; memory product UX P5; image-file avatar upload; transcript/mailbox wipe as Pass gate; P1 topology/mailbox/auth re-litigation; Grok chrome parity) in `specs/002-identity-personas/verifier/non-goals.md`
 - [ ] T041 [P] Cross-link `specs/002-identity-personas/plan.md` Handoff / Ready section to `tasks.md` and note next commands: `/speckit-analyze` → `/speckit-taskstoissues` → implement (no FR rewrite; do not edit `MzM-Docs/living-next-gate.md` from Spec tasks)
 - [ ] T042 Run `specs/002-identity-personas/quickstart.md` Scenario 1–6 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
 
