@@ -13,7 +13,7 @@
 | Gate artifact | Location |
 |---------------|----------|
 | Scenario 0 recipe | [scenario-0-topology.md](./scenario-0-topology.md) |
-| Pass/Fail evidence (log + screenshot/trace) | `verifier/evidence/scenario-0/` (created when a run records output) |
+| Pass/Fail evidence (log + screenshot/trace) | [evidence/scenario-0/](./evidence/scenario-0/) — **Pass** recorded (SC-007) |
 | Electron automation (T005) | `apps/desktop/tests/topology-handshake.spec.ts` |
 | Optional Verifier driver (T006) | `apps/desktop/tests/topology/verifier-scenario-0.ts` |
 

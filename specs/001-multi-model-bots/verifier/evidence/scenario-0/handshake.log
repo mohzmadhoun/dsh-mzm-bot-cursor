@@ -1,0 +1,47 @@
+# Scenario 0 — Topology handshake evidence log
+# SC-007 / FR-013 — Verifier-owned independent re-run
+# Claim tags: measured | inferred | guess
+
+UTC: 2026-09-26T22:50:18Z
+SHA: 2632992bb393e608c601a424dfadc67e7cc98283
+COMMAND: xvfb-run -a pnpm exec vitest run apps/desktop/tests/topology-handshake.spec.ts
+RESULT: 4/4 tests passed (exit 0) — measured
+HOST: DISPLAY via xvfb-run -a — measured
+SPEC: apps/desktop/tests/topology-handshake.spec.ts
+RECIPE: specs/001-multi-model-bots/verifier/scenario-0-topology.md
+
+## Vitest summary (measured)
+
+Test Files  1 passed (1)
+Tests  4 passed (4)
+Duration  ~440ms
+
+## Assert checklist (all measured from vitest Pass)
+
+| # | Criterion | How measured | Pass? |
+|---|-----------|--------------|-------|
+| 1 | Spawn — exactly one Desktop Host child with ELECTRON_RUN_AS_NODE | it('spawns one Desktop Host child...') asserts ready + idempotent start | Pass |
+| 2 | IPC lifecycle-only — ready with url:string; no chat/mailbox IPC | ready.url + injections=[]; Host event types lifecycle-only | Pass |
+| 3 | Document origin — primary main frame dsh-app:// | it('loads the primary application document under dsh-app://...') | Pass |
+| 4 | Authenticated data plane — HTTP + ≥1 authenticated WS/stream | authenticateWebHost + /api/health + /api/remote.mux WS | Pass |
+| 5 | Shutdown — ordered stop → shutdown-complete | host.stop(true) + stopped marker + handshakeLog shutdown | Pass |
+| 6 | Negative — fake mailbox / bot-message over Electron IPC rejected | it('rejects fake mailbox...') invalid IPC event | Pass |
+
+## Spawn → ready → HTTP/WS → shutdown (measured path)
+
+1. spawn: ELECTRON_RUN_AS_NODE child ready
+2. ready: http://127.0.0.1:<port>/?token=<FIXTURE_TOKEN>
+3. authenticate: Host session cookie (no provider API key material)
+4. http: GET dsh-app://app/api/health → 200 ok runAsNode=1
+5. websocket: ws://127.0.0.1:<port>/api/remote.mux → message "ok"
+6. shutdown: shutdown-complete
+
+## Locked topology confirmation
+
+1. Bundled-Node Desktop Host child (ELECTRON_RUN_AS_NODE) — Pass (measured)
+2. Node IPC lifecycle-only — Pass (measured)
+3. Primary frame dsh-app:// — Pass (measured)
+4. Authenticated HTTP + ≥1 WebSocket/stream to ready.url — Pass (measured)
+
+VERDICT: Pass
+CRITERIA: 1-6 Pass
