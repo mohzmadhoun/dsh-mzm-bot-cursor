@@ -120,7 +120,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T029 [US3] Render chat progress from Host session/agent stream events (≥1 progress update before completion on scripted path) in `packages/client/ui-chat/` / conversation cards — shell MUST NOT synthesize a parallel progress protocol ([contracts/chat-progress-final.md](./contracts/chat-progress-final.md))
 - [ ] T030 [US3] Deliver final result in chat on turn completion / assistant (or handoff) result from session log; support optional `linkedMailboxMessageId` attribution when turn is caused by mailbox message ([data-model.md](./data-model.md) Chat turn)
 - [x] T031 [US3] Make 1:1 handoff / recipient action understandable on relevant chat surfaces without leaving the app — wire US2 projections from `packages/experimental/client-ui-agent-team/` into `packages/client/ui-chat/` / `packages/client/ui-conversation/` under Desktop
-- [ ] T032 [US3] Add Verifier Scenario 4 recipe in `specs/001-multi-model-bots/verifier/scenario-4-progress-final.md` for SC-004 (≥1 progress + final)
+- [x] T032 [US3] Add Verifier Scenario 4 recipe in `specs/001-multi-model-bots/verifier/scenario-4-progress-final.md` for SC-004 (≥1 progress + final)
 
 **Checkpoint**: US3 operable for a real work session without Grok chrome parity
 
