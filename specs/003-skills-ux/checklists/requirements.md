@@ -34,5 +34,6 @@
 - Validation iteration 1 (2026-09-27): All items pass against plan-locked P3 In/Out/Exit from `MzM-Docs/mzm-bot-plan.md` §4.
 - Defaults recorded under Assumptions: thin pack ≥1 managed skill (exact membership → plan/Architect); run = user-visible active/run indication without LLM reply-adherence proof; detach optional; plugin skills → P6.
 - Standing order 11 encoded as FR-012 + per-GUI-story evidence clauses + SC-001…SC-003/SC-005 — desktop screenshots/recordings under `verifier/evidence/` required; unit/jsdom alone fails GUI Pass.
-- No `[NEEDS CLARIFICATION]` markers; clarify held until Verifier gates this specify draft (PO/Lead).
-- Ready for Verifier specify gate, then `/speckit-clarify` only after Pass.
+- Clarification session 2026-09-27: five answers integrated (reject empty author fields; load = available-to-attach; multi-attach allowed; run = control or session UI; instruction application after attach). Re-validated: all checklist items remain pass; no `[NEEDS CLARIFICATION]` markers; FR-012 / standing order 11 retained.
+- Spec Quality Checklist: 16/16 → 16/16 items passing (no regressions).
+- Ready for Verifier clarify gate, then `/speckit-plan` only after Pass.
