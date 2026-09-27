@@ -1,0 +1,27 @@
+T030 / MOH-75 measured checks @ 438b248f60160e53a8b8a0f127ad471b03506b25 (2026-09-27T10:54:19Z)
+Re-verify after Fail fix (JSDoc `authenticated Host HTTP/WS` single-line) on tip after 438b248f60.
+
+[pass] Projection: settled assistant/message final + cold-resume mailbox attribution
+  file: packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts
+  test: delivers settled assistant/message final and links cold-resume mailbox attribution (T030)
+
+[pass] Projection: mid-turn team-message steer → turn-tail linkedMailboxMessageId
+  file: packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts
+  test: attributes mid-turn team-message steer onto turn-tail linkedMailboxMessageId (T030)
+
+[pass] Render: data-chat-final="session-log" + optional data-linked-mailbox-message-id
+  file: packages/client/ui-chat/tests/chat-view.client.spec.tsx
+  test: delivers settled Assistant final from session log with optional mailbox attribution (T030 / FR-006)
+
+[pass] Render: omits linkedMailboxMessageId when turn not mailbox-caused
+  file: packages/client/ui-chat/tests/chat-view.client.spec.tsx
+  test: omits linkedMailboxMessageId on finals not caused by a mailbox message (T030)
+
+[pass] Helper: readLinkedMailboxMessageId (team-message vs ordinary)
+  file: packages/client/ui-chat/tests/team-message-source.client.spec.ts
+  tests: returns messageId for a team-message source; returns null for ordinary user sources
+
+[pass] Shell guard: no parallel Electron chat-final IPC (prior Fail root cause fixed)
+  file: apps/desktop/tests/no-shell-chat-final-ipc.spec.ts (3 tests)
+  source: apps/desktop/src/host-protocol.ts line 9 contains substring `authenticated Host HTTP/WS`
+  rg apps/desktop/src: NO_FORBIDDEN_CHANNELS for dsh-desktop:(chat-final|assistant-final|final-result|turn-complete)
