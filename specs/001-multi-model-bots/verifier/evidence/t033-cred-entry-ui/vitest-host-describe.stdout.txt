@@ -1,0 +1,21 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > publishes the credentials namespace from its own service key
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > reports the actionable configuration error while no credential provider is mounted
+ ✓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > describes a batch of references as one map, values excluded 6ms
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > reports an invalid reference as bad-request
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > answers the largest batch it accepts and reports one reference more as bad-request
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > answers only the fields the view declares, whatever a provider returns
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > stores and removes through the same references the batch describes
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > reports a refused write as credential/rejected naming only the reference
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > reports an empty value as bad-request
+ ↓ |thread-safe| packages/api/settings-controller/tests/credentials-controller.host.spec.ts > the credentials Remote namespace a configuration surface calls > stringifies a refusal that is not an Error
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 9 skipped (10)
+   Start at  10:05:44
+   Duration  347ms (transform 202ms, setup 142ms, import 114ms, tests 7ms, environment 0ms)
