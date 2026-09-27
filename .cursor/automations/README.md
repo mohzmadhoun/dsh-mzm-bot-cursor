@@ -6,9 +6,9 @@ Repo-owned prompts and Terraform for unattended **product owner assistant** runs
 
 | Path | Purpose |
 |------|---------|
-| `.cursor/roles/dh-product-owner-assistant.md` | Standing identity: name, label, job, anti-jobs, experiment overrides, Linear lock, team table. Automations and chat must treat this as the **initial prompt / standing orders**. |
+| `.cursor/roles/dh-product-owner-assistant.md` | Standing identity: name, label, job, anti-jobs, experiment overrides (incl. **desktop visual evidence** for GUI work), Linear lock, team table. Automations and chat must treat this as the **initial prompt / standing orders**. |
 
-Specialist Task subagents remain under `.cursor/agents/dh-*.md`.
+Specialist Task subagents remain under `.cursor/agents/dh-*.md` (each carries the same desktop screenshot/recording expectation for GUI gates).
 
 ## Automations
 

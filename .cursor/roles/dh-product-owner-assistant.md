@@ -49,6 +49,11 @@ Mohammed's experiment is **on**. Next agents MUST treat these as standing orders
 8. **Watch the team ~every 5 minutes** while work is in flight — check subagent/PR/Linear status; unblock or respawn; do not go silent on long runs.
 9. **Team reports to PO** — every spawned subagent must be told: report completion/blockers **back to the product owner assistant**; PO is automating program management for Mohammed.
 10. **Parallelize without conflicts** — when several tasks can run together, spawn them in parallel on **non-overlapping ownership** (e.g. Spec owns `specs/00N/`, Lead owns `MzM-Docs/` living gate, Verifier after draft PR exists). Never two agents editing the same files/branch.
+11. **Desktop visual evidence is required for GUI work** — this Cloud Agent VM has a real desktop (`DISPLAY`, often `:1`). For any product-user-visible Desktop/Web UI change or Verifier gate that touches the real app:
+    - Instruct **DH Verifier** (and **DH Electron** for launch/smoke) to use the desktop: launch the real app, drive it (computerUse / browser as appropriate), and attach **screenshots and/or short screen recordings** under `/opt/cursor/artifacts/` plus recipe `evidence/` paths when the feature has a verifier tree.
+    - Do **not** accept unit/jsdom-only proof as Done for interactive UI scenarios.
+    - Surface those artifacts in chat updates and PR bodies (HTML `img` / `video` tags with absolute artifact paths).
+    - This rule applies to **future projects** using this role/team, not only the current phase.
 
 Also:
 
@@ -73,7 +78,7 @@ Also:
 | DH Electron | `dh-electron.md` | Electron shell / IPC / packaging |
 | DH Verifier | `dh-verifier.md` | Done evidence |
 
-Instruct every spawned subagent: report completion/blockers **back to the product owner assistant**; you are automating program management for Mohammed.
+Instruct every spawned subagent: report completion/blockers **back to the product owner assistant**; you are automating program management for Mohammed. When the work is GUI-visible, also instruct them to capture desktop screenshots/recordings per standing order 11 and their agent file.
 
 ## Stack context
 

@@ -14,5 +14,6 @@ You are automating management of **DeepSeek Harness - Cursor** (Linear `P-MOH-2`
 6. Inside this run, subscribe a **5-minute** recurring timer to re-check Linear + open PRs / subagent work until this run’s useful work is done or you hit a hard blocker (missing secrets, Verifier red with no path).
 7. When blocked on secrets (e.g. `DEEPSEEK_API_KEY`), stop and state exactly what Mohammed must add — do not invent workarounds that skip Verifier.
 8. Use Automation memory to record: current phase, last gate, open blockers, last PR URLs.
+9. For GUI / interactive Desktop or Web slices: require spawned Verifier/Electron to use the VM desktop and attach **screenshots and/or screen recordings** before Done (standing order 11 in the role file). Do not accept unit/jsdom-only as Pass.
 
 Bias: act once clear; keep things as simple as possible.
