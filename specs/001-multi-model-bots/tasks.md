@@ -10,7 +10,7 @@
 
 **Linear**: Epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37) · Tasks issue [MOH-44](https://linear.app/momadhoun/issue/MOH-44) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-taskstoissues` (not this file)
 
-**Branch**: `cursor/p1-tasks-92fa` (stacked on `cursor/p1-specify-92fa`)
+**Branch**: `cursor/p1-analyze-92fa` (from `cursor/p1-tasks-92fa`; stacked on specify tip)
 
 ## Format: `[ID] [P?] [Story] Description`
 
