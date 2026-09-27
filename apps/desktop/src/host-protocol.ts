@@ -11,6 +11,8 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * `contracts/chat-progress-final.md`).
  * Identity / persona / section / avatar / rename / bot-delete payloads are also not members and
  * must not be added — Host Agent Teams owns that durable store (research R1 / T010).
+ * Skill-catalog / skill-attachment / skill-authoring payloads are also not members and
+ * must not be added — Host owns durable skill catalog and attachments (research R2/R4 / T013).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',
@@ -21,8 +23,8 @@ export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
 
 /**
  * Main→Child control `type` values sent on the Host Node IPC channel.
- * There is no mailbox, bot-message, identity, persona, section, or bot-delete control type
- * on this channel.
+ * There is no mailbox, bot-message, identity, persona, section, bot-delete,
+ * skill-catalog, skill-attachment, or skill-authoring control type on this channel.
  */
 export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
 
