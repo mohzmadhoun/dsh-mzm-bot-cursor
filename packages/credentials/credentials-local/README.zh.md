@@ -147,7 +147,7 @@ records:
 
 ### 解析与写入路径
 
-`resolve` 与 `describe` 按优先级顺序读取继承环境快照、已解析文档快照与 `.env` 后备层。`set`/`unset` 排入同一条独占操作链：入口检查提前拒绝（已释放、空值、被环境遮蔽），队列在运行时会重新判定，随后在写锁下执行读-改-写、提交，并恰好触发一次 `credentials/reference-updated`。
+`resolve` 与 `describe` 按优先级顺序读取继承环境快照、已解析文档快照与 `.env` 后备层。每次调用只针对一个 `CredentialRef`：该引用未配置时返回 `undefined`，即使其他引用已有密钥（无静默跨 bot 替换）。`set`/`unset` 排入同一条独占操作链：入口检查提前拒绝（已释放、空值、被环境遮蔽），队列在运行时会重新判定，随后在写锁下执行读-改-写、提交，并恰好触发一次 `credentials/reference-updated`。
 
 `modifyRecord` 走同一条链与同一把锁：它重新读取文档、把当前记录交给变更函数、准入其结果——非空的 API 密钥、能经受 JSON 往返的 grant payload——整体渲染该记录并提交，恰好触发一次 `credentials/record-updated`。并非由产品 CLI（命令行界面）启动的组合只有继承环境这一层。
 

@@ -1311,7 +1311,7 @@ describe('ChatView', () => {
     const view = render(<h.ChatView {...h.props} />)
     const statuses = view.getAllByRole('status')
     expect(statuses.map(status => status.textContent)).toEqual([
-      '本轮运行失败API 密钥无效AUTH',
+      `本轮运行失败${zh['message.failure.auth']}打开模型设置AUTH`,
       '本轮运行失败plugin exploded',
     ])
   })
@@ -1323,8 +1323,33 @@ describe('ChatView', () => {
     expect(status.getAttribute('data-turn-error-code')).toBe('MISSING_CREDENTIAL')
     expect(status.textContent).toContain(zh['message.failure.missingCredential'])
     expect(status.textContent).toMatch(/应用内|模型/u)
-    const handoff = view.getByRole('button', { name: zh['message.failure.missingCredential.action'] })
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
     expect(handoff.hasAttribute('data-missing-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers Models re-entry for AUTH (invalid/revoked) mid-session failures (T035)', () => {
+    const h = makeHarness({ nodes: [user(1, 'try'), turnError(2, 'AUTH')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.getAttribute('data-turn-error-code')).toBe('AUTH')
+    expect(status.textContent).toContain(zh['message.failure.auth'])
+    expect(status.textContent).toMatch(/应用内|模型/u)
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
+    expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
+    fireEvent.click(handoff)
+    expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers Models re-entry for INVALID_CREDENTIAL mid-session failures (T035)', () => {
+    const h = makeHarness({ nodes: [user(1, 'try'), turnError(2, 'INVALID_CREDENTIAL')] })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.getAttribute('data-turn-error-code')).toBe('INVALID_CREDENTIAL')
+    expect(status.textContent).toContain(zh['message.failure.invalidCredential'])
+    const handoff = view.getByRole('button', { name: zh['message.failure.credentialReentry.action'] })
+    expect(handoff.hasAttribute('data-invalid-credential-handoff')).toBe(true)
     fireEvent.click(handoff)
     expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
   })

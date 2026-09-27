@@ -52,6 +52,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T026** No Electron bot↔bot bus | [t026-no-ipc-bus.md](./t026-no-ipc-bus.md) | **Electron** + **Verifier** | FR-004 negative — Main invents no mailbox IPC; Host mailbox only; complements T007 |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
+| **T035** Missing/invalid credential UX | [t035-cred-ux.md](./t035-cred-ux.md) | **Electron/Client** + **Verifier** | FR-008 failure UX: Models re-entry for missing + invalid/revoked; no peer resolve fallback |
 
 ## Fan-out policy
 

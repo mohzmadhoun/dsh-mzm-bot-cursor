@@ -54,8 +54,9 @@ export interface TeamActionInjected {
   }) => Promise<TeamTaskActionResult>
   openTeammate: (sessionId: SessionId, member: TeamRosterMember) => Promise<void>
   /**
-   * Open Settings → Models for in-app credential entry.
-   * Used when create/chat surfaces Host `MISSING_CREDENTIAL` (not 1Password).
+   * Open Settings → Models for in-app credential entry / re-entry.
+   * Used when create/chat surfaces Host `MISSING_CREDENTIAL`, `AUTH`, or
+   * `INVALID_CREDENTIAL` (not 1Password).
    */
   openModelsSettings: () => void
 }
@@ -96,8 +97,22 @@ function failureText(error: { readonly code: string; readonly message: string })
   return `${error.message} (${error.code})`
 }
 
-/** Host LLM missing-credential code (stable; consumers route on code, never message text). */
-const MISSING_CREDENTIAL = 'MISSING_CREDENTIAL'
+/** Host LLM credential-failure codes that offer in-app Models re-entry. */
+const CREDENTIAL_REENTRY_CODES = new Set(['MISSING_CREDENTIAL', 'AUTH', 'INVALID_CREDENTIAL'])
+
+function credentialReentryCopy(
+  code: string,
+  t: TeamActionProps['t'],
+): string {
+  switch (code) {
+    case 'AUTH':
+      return t('invalidCredential')
+    case 'INVALID_CREDENTIAL':
+      return t('invalidCredential')
+    default:
+      return t('missingCredential')
+  }
+}
 
 /**
  * Trim and length limits match Host `requiredModelSelection`.
@@ -199,7 +214,7 @@ export function TeamAction({
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<TeamView | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [credentialHandoff, setCredentialHandoff] = useState(false)
+  const [credentialFailureCode, setCredentialFailureCode] = useState<string | null>(null)
   const [creatingBot, setCreatingBot] = useState(false)
   const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
   const [creating, setCreating] = useState(false)
@@ -213,17 +228,17 @@ export function TeamAction({
 
   const clearError = useCallback((): void => {
     setError(null)
-    setCredentialHandoff(false)
+    setCredentialFailureCode(null)
   }, [])
 
   const reportFailure = useCallback((failure: { readonly code: string; readonly message: string }): void => {
-    if (failure.code === MISSING_CREDENTIAL) {
-      setError(t('missingCredential'))
-      setCredentialHandoff(true)
+    if (CREDENTIAL_REENTRY_CODES.has(failure.code)) {
+      setError(credentialReentryCopy(failure.code, t))
+      setCredentialFailureCode(failure.code)
       return
     }
     setError(failureText(failure))
-    setCredentialHandoff(false)
+    setCredentialFailureCode(null)
   }, [t])
 
   useEffect(() => {
@@ -283,7 +298,7 @@ export function TeamAction({
           if (sessionRef.current !== requestedSession) return undefined
           if (reloaded) {
             setError(t('conflict'))
-            setCredentialHandoff(false)
+            setCredentialFailureCode(null)
           }
         } else {
           reportFailure(result.value.error)
@@ -443,14 +458,16 @@ export function TeamAction({
             <div
               className={css.error}
               role="alert"
-              {...credentialHandoff ? { 'data-team-error': MISSING_CREDENTIAL } : {}}
+              {...credentialFailureCode !== null ? { 'data-team-error': credentialFailureCode } : {}}
             >
               <span>{error}</span>
-              {credentialHandoff && (
+              {credentialFailureCode !== null && (
                 <button
                   type="button"
                   className={css.credentialHandoff}
-                  data-missing-credential-handoff
+                  {...credentialFailureCode === 'MISSING_CREDENTIAL'
+                    ? { 'data-missing-credential-handoff': true }
+                    : { 'data-invalid-credential-handoff': true }}
                   onClick={openModelsSettings}
                 >
                   {t('openModelsSettings')}
@@ -493,7 +510,7 @@ export function TeamAction({
                       onClick={() => {
                         void openTeammate(sessionId, member).catch((reason: unknown) => {
                           setError(String(reason))
-                          setCredentialHandoff(false)
+                          setCredentialFailureCode(null)
                         })
                       }}
                     >
