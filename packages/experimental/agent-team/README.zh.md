@@ -62,7 +62,7 @@ kind: "package-reference"
 
 产品侧 bot 创建使用 Host `createBot(displayName, modelSelection)`：仅 Lead 可授权的 API 要求非空 `displayName` 与恰好一个 model/provider 赋值，推导持久 kebab roster 名，并把 `displayName` 与该 `modelSelection` 保留在 Host member 快照上。创建时（以及冷恢复时），Agent Teams 通过 `installModelSelection` 绑定 live Bot，使后续对话只使用该 bot 自己的赋值——绝不回落到 Lead 路由。随后的模型调用经 Host `ctx.llm` 适配器（`packages/llm/`）按该赋值解析，并由 Host `ctx.credentials` 解析该 provider 凭据——绝不静默使用同伴 bot 的凭据，也绝不由 Electron Main 发明 bot 记录或改写路由。通过 `ctx.agentTeams.createBot` 或生成的 `agentTeams/createBot` Remote 调用。
 
-持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（来自固定 Host 预设 id 的 `shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。Host `updatePersona` 会替换活跃 Bot 上的 job／voice／anti-jobs，经 `listMembers`／`agentTeams/view` 投影，并在 create 与冷恢复时把非空字段绑定进该 Bot 作用域的 `deployment:persona-prefix` 指令文本（空字段不贡献文案；Verifier 观察装配接线，不评分 LLM 回复措辞）。Host `renameBot` 持久化非空 `displayName`（允许重名；kebab `name` 不可变；空 rename 拒绝且不写入）。Host `setAvatar` 替换预设 shape 与／或 color 标记（至少一项；图片文件／URL 上传不在 Pass 范围——clarify lock 3）。二者均经 `listMembers`／`agentTeams/view` 投影。Host `deleteBot` 追加 `active` → `deleted` 身份墓碑（清除 `sectionId`）；Client roster／overview／section membership 省略该 Bot，而 transcript 与 mailbox 行在 Pass 中保持不动（clarify lock 5）。其余身份 Remote `assignSection` 在对应故事任务落地前仍以 `TEAM_NOT_IMPLEMENTED` 拒绝。Electron Main 不得发明身份记录。
+持久 member 快照上的可选 Host Bot 身份字段——`persona`（`job`／`voice`／`antiJobs`）、预设 `avatar`（来自固定 Host 预设 id 的 `shape` 与／或 `color`）以及 `sectionId`（`null`／缺省 ⇒ Unassigned／default）——经 Team journal 的 `team/member` 路径持久化，并投影到 Client roster 视图。P1 `modelSelection` 所有权保持不可变。Host `updatePersona` 会替换活跃 Bot 上的 job／voice／anti-jobs，经 `listMembers`／`agentTeams/view` 投影，并在 create 与冷恢复时把非空字段绑定进该 Bot 作用域的 `deployment:persona-prefix` 指令文本（空字段不贡献文案；Verifier 观察装配接线，不评分 LLM 回复措辞）。Host `renameBot` 持久化非空 `displayName`（允许重名；kebab `name` 不可变；空 rename 拒绝且不写入）。Host `setAvatar` 替换预设 shape 与／或 color 标记（至少一项；图片文件／URL 上传不在 Pass 范围——clarify lock 3）。二者均经 `listMembers`／`agentTeams/view` 投影。Host `createSection`／`renameSection` 把具名侧边栏目录行持久化到 `team/section`（空名称拒绝）；Host `assignSection` 将 Bot.`sectionId` 设为具名目录 id，或设为 `null` 表示 Unassigned／default，且不存储 Unassigned 行（clarify lock 4）。`agentTeams/view` 投影 `sections`（名称＋按 roster 顺序的 `botIds`）与 `unassignedBotIds`。Host `deleteBot` 追加 `active` → `deleted` 身份墓碑（清除 `sectionId`）；Client roster／overview／section membership 省略该 Bot，而 transcript 与 mailbox 行在 Pass 中保持不动（clarify lock 5）。Electron Main 不得发明身份或 section 记录。
 
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
@@ -153,7 +153,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 
 ### 持久性模型
 
-Team 事件追加到精确的 live Lead 会话，并在操作报告成功或唤醒等待者之前 flush。`team/member`、`team/task`、`team/message/queued` 与 `team/message/delivered` 仅存在于日志：它们从不进入会话表面，因此派生模型历史不受协作记录影响。顺序与时间由会话事件的 `seq` 与 `time` 负责，快照不重复保存。`./invariant` 伴生插件把每条候选 Team 事件对照已提交前缀回放，并在 append 前拒绝非法转换。
+Team 事件追加到精确的 live Lead 会话，并在操作报告成功或唤醒等待者之前 flush。`team/member`、`team/section`、`team/task`、`team/message/queued` 与 `team/message/delivered` 仅存在于日志：它们从不进入会话表面，因此派生模型历史不受协作记录影响。顺序与时间由会话事件的 `seq` 与 `time` 负责，快照不重复保存。`./invariant` 伴生插件把每条候选 Team 事件对照已提交前缀回放，并在 append 前拒绝非法转换。
 
 ### Dispose
 
@@ -179,7 +179,7 @@ dispose 会关闭准入、中止并等待已获准的创建与 mailbox dispatch 
 
 ### 浏览器 Remote
 
-`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/renameBot`、`agentTeams/updatePersona`、`agentTeams/setAvatar`、`agentTeams/assignSection`、`agentTeams/deleteBot`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`agentTeams/view` 返回 roster 行（在存在时投影 displayName、persona、avatar 与 sectionId）、未删除任务以及 `handoffs`（Host mailbox 产品行）。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view、handoff、身份 mutation 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
+`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/renameBot`、`agentTeams/updatePersona`、`agentTeams/setAvatar`、`agentTeams/createSection`、`agentTeams/renameSection`、`agentTeams/assignSection`、`agentTeams/deleteBot`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`agentTeams/view` 返回 roster 行（在存在时投影 displayName、persona、avatar 与 sectionId）、具名 `sections` 与派生 membership、`unassignedBotIds`（clarify lock 4——无 Unassigned 目录行）、未删除任务以及 `handoffs`（Host mailbox 产品行）。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view、handoff、身份 mutation 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
 
 ## 模型体验
 
@@ -207,7 +207,7 @@ Peer 消息追加在 target 可复用历史前缀之后。冷恢复会先复用�
 - **实验原型，无稳定性承诺**——本包公开发布，但孵化期间约定仍可自由变更。
 - **单进程、共享 checkout**——成员共享 cwd，修改立即可见；本包不提供 worktree、远端成员、merge 或文件锁。
 - **write scope 仅作提示**——Bash、formatter、代码生成器与直接外部写入可以绕过文件版本检查；Lead 必须协调 owner 并检查最终 diff。
-- **扁平 roster，Host 身份变更为进行中**——只有 Lead 可以创建直接 teammate；kebab `name` 永不复用（含 Host delete 墓碑之后）。Host `updatePersona`、`renameBot`、`setAvatar` 与 `deleteBot` 已持久化并投影 persona／displayName／预设 avatar 标记／身份移除；`assignSection` 在对应故事任务落地前仍为桩。Electron Main 不得发明并行身份存储。
+- **扁平 roster，Host 身份变更**——只有 Lead 可以创建直接 teammate；kebab `name` 永不复用（含 Host delete 墓碑之后）。Host `updatePersona`、`renameBot`、`setAvatar`、`createSection`／`renameSection`／`assignSection` 与 `deleteBot` 已持久化并投影 persona／displayName／预设 avatar 标记／具名侧边栏 section＋Unassigned／身份移除。Electron Main 不得发明并行身份或 section 存储。
 - **不会自动释放 owner**——idle、interrupt、进程退出与工作失败都不会释放任务 owner。
 - **mailbox 不保证跨进程 exactly-once**——不支持多个 harness 进程并发操作同一 Team。
 

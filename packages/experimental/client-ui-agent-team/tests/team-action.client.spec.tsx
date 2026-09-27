@@ -56,6 +56,8 @@ const view: TeamView = {
     },
   ],
   tasks: [task],
+  sections: [],
+  unassignedBotIds: ['worker-id' as SessionId],
   handoffs: [],
 }
 

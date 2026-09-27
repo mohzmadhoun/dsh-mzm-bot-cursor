@@ -3,6 +3,8 @@
 Identity mutations (persona, avatar, displayName, section membership, delete)
 persist by appending validated `team/member` payloads on this journal path —
 field semantics live in the projection; Electron Main must not invent a parallel store.
+Named sidebar section catalog rows append as `team/section` (T031); Unassigned
+has no catalog event (clarify lock 4).
 */
 
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -11,7 +13,12 @@ import type { SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
 import type { TeamEventType, TeamState } from './projection.ts'
 
 type AppendTeamEvent = <T extends TeamEventType>(type: T, data: SessionEventMap[T]) => void
-type MutableTeamEventType = 'team/member' | 'team/task' | 'team/message/queued' | 'team/message/delivered'
+type MutableTeamEventType =
+  | 'team/member'
+  | 'team/task'
+  | 'team/section'
+  | 'team/message/queued'
+  | 'team/message/delivered'
 
 /** Owns per-Lead transaction order and committed Team event publication. */
 export class TeamJournal {

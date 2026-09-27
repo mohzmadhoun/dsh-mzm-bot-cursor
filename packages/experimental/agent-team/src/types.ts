@@ -83,12 +83,14 @@ export type AvatarColorId = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gr
  * Preset avatar marker (shape and/or color ids).
  * When a user sets an avatar for Pass, at least one of shape or color is required.
  * Image-file / URL upload is out of P2 Pass scope.
+ * Persisted as plain strings; Host `setAvatar` validates against {@link AvatarShapeId} /
+ * {@link AvatarColorId} at the mutation boundary.
  */
 export interface AvatarMarker {
   /** Preset shape id from the fixed Host set. */
-  readonly shape?: AvatarShapeId
+  readonly shape?: string
   /** Preset color id from the fixed Host set. */
-  readonly color?: AvatarColorId
+  readonly color?: string
 }
 
 /** Whole durable value written on every teammate lifecycle change. */
@@ -193,10 +195,41 @@ export interface TeamTaskView {
   readonly writeScopeWarnings: string[]
 }
 
-/** Point-in-time roster, task-board, and Host mailbox handoff projection for browser clients. */
+/**
+ * Durable named sidebar section catalog row (FR-006 / clarify lock 4).
+ * Membership is Bot.`sectionId`, not an embedded list — Unassigned has no catalog row.
+ */
+export interface SidebarSectionSnapshot {
+  readonly id: SidebarSectionId
+  /** Non-empty user-visible section title. */
+  readonly name: string
+}
+
+/**
+ * Client-readable named sidebar section with membership derived from roster order.
+ * Empty `botIds` is allowed after last-bot remove (contract Pass).
+ */
+export interface SidebarSectionView {
+  readonly id: SidebarSectionId
+  readonly name: string
+  /** Non-deleted teammate ids whose `sectionId` matches, in Host roster order. */
+  readonly botIds: readonly SessionId[]
+}
+
+/** Point-in-time roster, task-board, sections, and Host mailbox handoff projection for browser clients. */
 export interface TeamView {
   readonly members: TeamMemberView[]
   readonly tasks: TeamTaskView[]
+  /**
+   * Named sidebar sections in Host catalog order with derived membership (FR-006).
+   * Unassigned/default is {@link unassignedBotIds} — never a stored catalog row (clarify lock 4).
+   */
+  readonly sections: readonly SidebarSectionView[]
+  /**
+   * Non-deleted teammate ids with null/absent `sectionId` (or dangling unknown id).
+   * Client renders Unassigned/default from this list; Host never persists an Unassigned row.
+   */
+  readonly unassignedBotIds: readonly SessionId[]
   /**
    * Host mailbox 1:1 handoffs reconstructed from Lead `team/message/*` plus target
    * Session logs (`HostMailboxMessage`). Never Main-synthesized IPC (FR-005).
@@ -394,8 +427,50 @@ export interface SetAvatarResult {
 }
 
 /**
+ * Host named sidebar section create input (FR-006).
+ * Name must be non-empty after trim; Host allocates an opaque section id.
+ */
+export interface CreateSectionInput {
+  readonly name: string
+}
+
+/** Lead-authorized Host section create, including cancellation. */
+export interface CreateSectionRequest extends CreateSectionInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned named section after a successful create. */
+export interface CreateSectionResult {
+  readonly id: SidebarSectionId
+  readonly name: string
+  readonly section: SidebarSectionView
+}
+
+/**
+ * Host named sidebar section rename input (FR-006).
+ * Name must be non-empty after trim; empty rename rejects without writing.
+ */
+export interface RenameSectionInput {
+  readonly sectionId: SidebarSectionId
+  readonly name: string
+}
+
+/** Lead-authorized Host section rename, including cancellation. */
+export interface RenameSectionRequest extends RenameSectionInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned named section after a successful rename. */
+export interface RenameSectionResult {
+  readonly id: SidebarSectionId
+  readonly name: string
+  readonly section: SidebarSectionView
+}
+
+/**
  * Host section assign / move / unassign input (FR-006).
- * `sectionId: null` places the bot under Unassigned/default.
+ * `sectionId: null` places the bot under Unassigned/default (no catalog row).
+ * Non-null id must name an existing Host catalog section.
  */
 export interface AssignSectionInput {
   readonly botId: SessionId
@@ -541,6 +616,11 @@ declare module '@deepseek-ai/dsh-session/types' {
     'team/member': { version: 2; teamId: TeamId; member: TeamMemberSnapshot }
     /** Whole shared-task value, stored only in the Team Lead Session. */
     'team/task': { version: 2; teamId: TeamId; task: TeamTaskSnapshot }
+    /**
+     * Named sidebar section catalog row (id + non-empty name), Lead Session only.
+     * Membership lives on `team/member`.sectionId; Unassigned has no catalog event.
+     */
+    'team/section': { version: 2; teamId: TeamId; section: SidebarSectionSnapshot }
     /** Durable mailbox enqueue, stored before delivery is attempted. */
     'team/message/queued': { version: 2; teamId: TeamId; message: TeamMessageSnapshot }
     /** Durable acknowledgement that the target Session recorded the message. */

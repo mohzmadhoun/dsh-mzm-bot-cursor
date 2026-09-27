@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
-import { teamProjectionDefinition } from '../src/projection.ts'
+import { teamProjectionDefinition, projectSidebarSections } from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
 import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
@@ -41,7 +41,7 @@ function pending(state: TeamState): TeamMessageSnapshot[] {
 
 /** Whether one Team state contains no projected records. */
 function isEmptyState(state: TeamState): boolean {
-  return state.members.length === 0 && state.tasks.length === 0
+  return state.members.length === 0 && state.sections.length === 0 && state.tasks.length === 0
     && state.messages.length === 0 && state.delivered.length === 0
 }
 
@@ -105,6 +105,84 @@ describe('Agent Teams projection events', () => {
     expect(state.members.find(member => member.id === CHILD)?.name).toBe('worker-a')
     expect(teamProjectionDefinition.stateSchema.parse(JSON.parse(JSON.stringify(projected))))
       .toEqual(projected)
+  })
+
+  it('persists named sidebar section catalog and rejects empty names', () => {
+    const created = event('team/section', {
+      version: 2,
+      teamId: TEAM,
+      section: { id: SidebarSectionId('sec-reviews'), name: 'Reviews' },
+    }, SessionSeq(0))
+    const renamed = event('team/section', {
+      version: 2,
+      teamId: TEAM,
+      section: { id: SidebarSectionId('sec-reviews'), name: 'Code Reviews' },
+    }, SessionSeq(1))
+    const state = teamState(project(ROOT, [created, renamed]))
+    expect(state.sections).toEqual([
+      { id: SidebarSectionId('sec-reviews'), name: 'Code Reviews' },
+    ])
+    expect(teamProjectionDefinition.stateSchema.parse(JSON.parse(JSON.stringify(project(ROOT, [created, renamed])))))
+      .toMatchObject({ sections: [{ id: 'sec-reviews', name: 'Code Reviews' }] })
+
+    expect(() => projectTeam(ROOT, [event('team/section', {
+      version: 2,
+      teamId: TEAM,
+      section: { id: SidebarSectionId('sec-empty'), name: '   ' },
+    }, SessionSeq(0))])).toThrow(/name must be non-empty/)
+  })
+
+  it('derives named membership and Unassigned without a stored Unassigned row', () => {
+    const section = event('team/section', {
+      version: 2,
+      teamId: TEAM,
+      section: { id: SidebarSectionId('sec-reviews'), name: 'Reviews' },
+    }, SessionSeq(0))
+    const assignedProv = member({
+      id: SessionId('child-a'),
+      name: 'worker-a',
+      sectionId: SidebarSectionId('sec-reviews'),
+    })
+    const unassignedProv = member({
+      id: SessionId('child-b'),
+      name: 'worker-b',
+      sectionId: null,
+    })
+    const absentProv = member({
+      id: SessionId('child-c'),
+      name: 'worker-c',
+    })
+    const state = teamState(project(ROOT, [
+      section,
+      event('team/member', { version: 2, teamId: TEAM, member: assignedProv }, SessionSeq(1)),
+      event('team/member', {
+        version: 2,
+        teamId: TEAM,
+        member: { ...assignedProv, phase: 'active' },
+      }, SessionSeq(2)),
+      event('team/member', { version: 2, teamId: TEAM, member: unassignedProv }, SessionSeq(3)),
+      event('team/member', {
+        version: 2,
+        teamId: TEAM,
+        member: { ...unassignedProv, phase: 'active' },
+      }, SessionSeq(4)),
+      event('team/member', { version: 2, teamId: TEAM, member: absentProv }, SessionSeq(5)),
+      event('team/member', {
+        version: 2,
+        teamId: TEAM,
+        member: { ...absentProv, phase: 'active' },
+      }, SessionSeq(6)),
+    ]))
+    expect(state.sections).toHaveLength(1)
+    expect(state.sections.some(row => row.name === 'Unassigned')).toBe(false)
+    expect(projectSidebarSections(state)).toEqual({
+      sections: [{
+        id: SidebarSectionId('sec-reviews'),
+        name: 'Reviews',
+        botIds: [SessionId('child-a')],
+      }],
+      unassignedBotIds: [SessionId('child-b'), SessionId('child-c')],
+    })
   })
 
   it('enforces teammate identity and lifecycle', () => {

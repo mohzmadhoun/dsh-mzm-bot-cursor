@@ -36,6 +36,8 @@ const baseView: TeamView = {
     },
   ],
   tasks: [],
+  sections: [],
+  unassignedBotIds: [WORKER],
   handoffs: [],
 }
 
