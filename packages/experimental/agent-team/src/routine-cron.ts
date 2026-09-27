@@ -155,6 +155,37 @@ export function routinesEligibleForWake(
 }
 
 /**
+ * Whether one Host Routine is due for a cron wake at `nowMs` (P4 US4 T025 / FR-005).
+ * Paused rows are never due. Anchor is `lastRunAt` after a fire, else `createdAt`.
+ * @param routine - durable catalog row.
+ * @param nowMs - wall-clock sample (epoch ms).
+ * @returns true when the row is active and its next fire instant is ≤ `nowMs`.
+ */
+export function isRoutineDue(routine: RoutineRecord, nowMs: number): boolean {
+  if (!isRoutineEligibleForWake(routine)) return false
+  if (!Number.isFinite(nowMs)) {
+    throw new TeamError('isRoutineDue nowMs must be a finite number', 'TEAM_INVALID_ARGUMENT')
+  }
+  const parsed = parseScheduleExpr(routine.scheduleExpr)
+  const anchor = routine.lastRunAt ?? routine.createdAt
+  return nextFireAt(parsed, anchor) <= nowMs
+}
+
+/**
+ * Filter Host catalog rows that are due for cron wake at `nowMs`.
+ * Paused rows are omitted even when their schedule would match (FR-003).
+ * @param routines - durable catalog rows.
+ * @param nowMs - wall-clock sample (epoch ms).
+ * @returns active rows whose next fire instant is ≤ `nowMs`.
+ */
+export function routinesDueForWake(
+  routines: readonly RoutineRecord[],
+  nowMs: number,
+): readonly RoutineRecord[] {
+  return routines.filter(routine => isRoutineDue(routine, nowMs))
+}
+
+/**
  * Human-readable schedule label for Client pane projection.
  * @param expr - durable scheduleExpr string.
  * @returns short display form (falls back to the raw expr when parsing fails).

@@ -142,7 +142,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Host cron ticker/evaluator wakes due **active** routines and starts/continues bot turn with intent; updates `lastRunAt` after fire commit (FR-005; research R3/R4)
+- [x] T025 [US4] Host cron ticker/evaluator wakes due **active** routines and starts/continues bot turn with intent; updates `lastRunAt` after fire commit (FR-005; research R3/R4)
 - [ ] T026 [P] [US4] Optional: emit in-flight fire visibility via `ctx.jobs` without making jobs the durable SoT — document behavior in `specs/004-routines-cron/verifier/optional-jobs-visibility.md`
 - [ ] T027 [P] [US4] Client last-run / fire indicator on routines pane (or clearly linked activity) in `packages/experimental/client-ui-agent-team/src/client/`
 - [ ] T028 [US4] Add Verifier Scenario 3/4 recipe in `specs/004-routines-cron/verifier/scenario-4-cron-fire.md` covering SC-003 (≤6 min wait; no sub-5m test schedule required; no LLM scoring) with FR-010/011 evidence under `specs/004-routines-cron/verifier/evidence/scenario-4/` (align folder name with quickstart Scenario 3 if preferred — keep README map consistent)

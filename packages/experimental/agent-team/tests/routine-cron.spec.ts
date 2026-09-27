@@ -6,10 +6,12 @@ import { TeamError } from '../src/error.ts'
 import { RoutineId } from '../src/types.ts'
 import {
   describeScheduleExpr,
+  isRoutineDue,
   isRoutineEligibleForWake,
   MIN_EVERY_INTERVAL_MS,
   nextFireAt,
   parseScheduleExpr,
+  routinesDueForWake,
   routinesEligibleForWake,
 } from '../src/routine-cron.ts'
 
@@ -54,5 +56,35 @@ describe('routine-cron scheduleExpr stub', () => {
     expect(isRoutineEligibleForWake(active)).toBe(true)
     expect(isRoutineEligibleForWake(paused)).toBe(false)
     expect(routinesEligibleForWake([active, paused])).toEqual([active])
+  })
+
+  it('US4 T025: isRoutineDue gates on active + next fire ≤ now', () => {
+    const createdAt = Date.UTC(2026, 0, 1, 12, 0, 0)
+    const active = {
+      routineId: RoutineId('r-due'),
+      botId: SessionId('bot-a'),
+      intent: 'Sweep inbox',
+      scheduleExpr: '@every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt,
+      updatedAt: createdAt,
+    }
+    const paused = { ...active, routineId: RoutineId('r-paused'), status: 'paused' as const }
+    const beforeDue = createdAt + MIN_EVERY_INTERVAL_MS - 1
+    const atDue = createdAt + MIN_EVERY_INTERVAL_MS
+    expect(isRoutineDue(active, beforeDue)).toBe(false)
+    expect(isRoutineDue(active, atDue)).toBe(true)
+    expect(isRoutineDue(paused, atDue)).toBe(false)
+    expect(routinesDueForWake([active, paused], atDue)).toEqual([active])
+
+    const afterFire = {
+      ...active,
+      lastRunAt: atDue,
+      updatedAt: atDue,
+    }
+    expect(isRoutineDue(afterFire, atDue)).toBe(false)
+    expect(isRoutineDue(afterFire, atDue + MIN_EVERY_INTERVAL_MS)).toBe(true)
+    expect(() => isRoutineDue(active, Number.NaN)).toThrow(/nowMs must be a finite number/)
   })
 })

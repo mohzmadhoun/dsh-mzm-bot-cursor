@@ -26,6 +26,7 @@ import TeamService, {
   TeamTaskId,
   RoutineId,
   isRoutineEligibleForWake,
+  MIN_EVERY_INTERVAL_MS,
   routinesEligibleForWake,
 } from '../src/index.ts'
 import {
@@ -2157,6 +2158,158 @@ describe('Team Remote API', () => {
     expect(view.routines.find(row => row.routineId === created.routine.routineId)?.status)
       .toBe('paused')
   })
+
+  it('US4 T025: evaluateDueRoutines wakes active routine and updates lastRunAt; paused does not fire', async () => {
+    // Extra mock turns cover cold-resume wake after fire enqueue (LLM wording not scored).
+    const { ctx, lead } = await setup([
+      textResponse('cron bot create'),
+      textResponse('cron fire turn'),
+      textResponse('cron paused bot'),
+      textResponse('cron fire turn two'),
+      textResponse('cron live followup'),
+    ], { routineCronTickMs: 60_000 })
+    const bot = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Cron Bot',
+      modelSelection: { provider: 'mock', model: 'cron-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, bot.id)
+
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: bot.id,
+      intent: 'Sweep the inbox',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    expect(created.routine.lastRunAt).toBeNull()
+    await expect(ctx.agentTeams.evaluateDueRoutines(Number.NaN))
+      .rejects.toMatchObject({ message: expect.stringMatching(/nowMs must be a finite number/) })
+
+    const beforeDue = created.routine.createdAt + MIN_EVERY_INTERVAL_MS - 1
+    expect(await ctx.agentTeams.evaluateDueRoutines(beforeDue)).toEqual([])
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: bot.id, signal: SIGNAL }).routines[0]?.lastRunAt)
+      .toBeNull()
+
+    const dueAt = created.routine.createdAt + MIN_EVERY_INTERVAL_MS
+    const fired = await ctx.agentTeams.evaluateDueRoutines(dueAt)
+    expect(fired).toHaveLength(1)
+    expect(fired[0]).toMatchObject({
+      routineId: created.routine.routineId,
+      botId: bot.id,
+      intent: 'Sweep the inbox',
+      status: 'active',
+      lastRunAt: dueAt,
+    })
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: bot.id, signal: SIGNAL }).routines[0]?.lastRunAt)
+      .toBe(dueAt)
+
+    // Same due sample must not re-fire until the next interval after lastRunAt.
+    expect(await ctx.agentTeams.evaluateDueRoutines(dueAt)).toEqual([])
+
+    // Wake commit enqueued the intent on the bot session (cold resume / followup path).
+    const events = await storedEvents(ctx, bot.id)
+    expect(events.some(event =>
+      event.type === 'user/message'
+      && Array.isArray(event.data.content)
+      && event.data.content.some(
+        block => block.type === 'text' && block.text === 'Sweep the inbox',
+      ))).toBe(true)
+
+    // Paused routines MUST NOT wake even when schedule would match (FR-003 / T022 invariant).
+    const peer = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Paused Cron Bot',
+      modelSelection: { provider: 'mock', model: 'paused-cron' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, peer.id)
+    const pausedCreate = await ctx.agentTeams.createRoutine(lead, {
+      botId: peer.id,
+      intent: 'Should not fire',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    await ctx.agentTeams.pauseRoutine(lead, {
+      routineId: pausedCreate.routine.routineId,
+      signal: SIGNAL,
+    })
+    const pausedDue = pausedCreate.routine.createdAt + MIN_EVERY_INTERVAL_MS
+    expect(await ctx.agentTeams.evaluateDueRoutines(pausedDue)).toEqual([])
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: peer.id, signal: SIGNAL }).routines[0])
+      .toMatchObject({
+        routineId: pausedCreate.routine.routineId,
+        status: 'paused',
+        lastRunAt: null,
+      })
+  }, 15_000)
+
+  it('US4 T025: live bot followup wake updates lastRunAt', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('live cron create'),
+    ], { routineCronTickMs: 60_000 })
+    const bot = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Live Cron Bot',
+      modelSelection: { provider: 'mock', model: 'live-cron' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, bot.id)
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: bot.id,
+      intent: 'Live wake intent',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    const followup = vi.fn()
+    const originalGet = ctx.agents.get.bind(ctx.agents)
+    const getSpy = vi.spyOn(ctx.agents, 'get').mockImplementation((id) => {
+      if (id === bot.id) {
+        return { id: bot.id, status: 'idle', followup } as unknown as Agent
+      }
+      return originalGet(id)
+    })
+    const dueAt = created.routine.createdAt + MIN_EVERY_INTERVAL_MS
+    const fired = await ctx.agentTeams.evaluateDueRoutines(dueAt)
+    expect(fired).toHaveLength(1)
+    expect(fired[0]?.lastRunAt).toBe(dueAt)
+    expect(followup).toHaveBeenCalledTimes(1)
+
+    // Wake enqueue failure must not advance lastRunAt.
+    followup.mockImplementation(() => {
+      throw new Error('followup rejected')
+    })
+    const nextDue = dueAt + MIN_EVERY_INTERVAL_MS
+    expect(await ctx.agentTeams.evaluateDueRoutines(nextDue)).toEqual([])
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: bot.id, signal: SIGNAL }).routines[0]?.lastRunAt)
+      .toBe(dueAt)
+    getSpy.mockRestore()
+  }, 15_000)
+
+  it('US4 T025: deleted bot skips fire without lastRunAt; disposed evaluator is empty', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('delete cron create'),
+      textResponse('delete cron idle'),
+    ], { routineCronTickMs: 60_000 })
+    const bot = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Delete Cron Bot',
+      modelSelection: { provider: 'mock', model: 'delete-cron' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, bot.id)
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: bot.id,
+      intent: 'Orphan fire',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    await ctx.agentTeams.deleteBot(lead, { botId: bot.id, signal: SIGNAL })
+    const dueAt = created.routine.createdAt + MIN_EVERY_INTERVAL_MS
+    expect(await ctx.agentTeams.evaluateDueRoutines(dueAt)).toEqual([])
+    // Catalog row may still exist; lastRunAt must stay null when the bot is gone.
+    const listed = ctx.agentTeams.listRoutinesByBot(lead, { botId: bot.id, signal: SIGNAL }).routines
+    if (listed[0] !== undefined) expect(listed[0].lastRunAt).toBeNull()
+
+    await teamInternals(ctx).disposeRuntime()
+    expect(await ctx.agentTeams.evaluateDueRoutines(dueAt)).toEqual([])
+  }, 15_000)
 
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {
     const userSkillsRoot = mkdtempSync(join(tmpdir(), 'dsh-team-user-skills-'))
