@@ -1,6 +1,6 @@
 # Scenario 4 — Progress + final (SC-004)
 
-**Status:** Recipe present (T032). Composite FR-006 proof outline for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** (in-flight half) is on `master` with Verifier Pass evidence. **T030** (complete half + optional mailbox attribution) may still be landing — see PR [#60](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/60) / branch `cursor/p1-t030-chat-final-92fa`. This recipe covers **both** contract halves; do **not** stamp SC-004 Pass until T030 is on the checkout under test and the composite commands below exit 0.
+**Status:** Recipe present (T032). Composite FR-006 proof outline for ≥1 Host-stream progress **and** session-log final on a scripted chat path. **T029** (in-flight half) and **T030** (complete half + optional mailbox attribution) are on `master`. This recipe covers **both** contract halves; do **not** stamp SC-004 Pass until the composite commands below exit 0 on the checkout under test and evidence is recorded under `evidence/scenario-4/`.
 **Owners:** DH Verifier (this recipe + evidence) · DH Electron/Client (T029–T030 `ui-chat`) · DH Runtime (session/agent streams + durable session log)
 **Acceptance:** Spec FR-006 · SC-004 · US3 scenario 2 (quickstart Scenario 4)
 **Contract:** [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
@@ -15,7 +15,7 @@ Against [chat-progress-final.md](../contracts/chat-progress-final.md):
 | Contract phase | Obligation | Slice |
 |----------------|------------|-------|
 | In flight | ≥1 progress update before completion on Verifier-scripted path | [t029-chat-progress.md](./t029-chat-progress.md) — `data-chat-progress="host-stream"` from Host `assistant/live-chunk` |
-| Complete | Final result delivered in chat for that turn/path | [t030-chat-final.md](./t030-chat-final.md) (when present) — `data-chat-final="session-log"` from durable `assistant/message` / turn completion |
+| Complete | Final result delivered in chat for that turn/path | [t030-chat-final.md](./t030-chat-final.md) — `data-chat-final="session-log"` from durable `assistant/message` / turn completion |
 | Handoff-linked | When work is caused by mailbox message, progress/final attributable to that path | T030 optional `linkedMailboxMessageId` / `data-linked-mailbox-message-id` (mailbox-caused turns) |
 
 **Fail rules:**
@@ -30,7 +30,7 @@ Does **not** claim Scenario 0 / SC-007, Scenario 2 / SC-001–002, or Scenario 3
 ## Preconditions
 
 - [ ] Checkout includes **T029** on base (`master` @ T029 merge or later) — **measured** required for progress half
-- [ ] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required before SC-004 Pass; until then stamp `T030: Deferred` / `VERDICT: Deferred` (recipe presence alone is not SC-004 Pass)
+- [ ] Checkout includes **T030** (`t030-chat-final.md` + Client/shell suites) — required before SC-004 Pass; recipe alone is not SC-004 Pass
 - [ ] `pnpm install` complete
 - [ ] Node `^22.19 || >=24`
 - [ ] Scenario 0 / SC-007 Topology handshake **Pass** recorded ([README](./README.md#handshake-pass-gate-sc-007--fr-013)) — required before product SC Done
@@ -53,9 +53,9 @@ Reuse T029 + T030 focused suites. Prefer the local vitest binary when `pnpm exec
   apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts
 ```
 
-### T030 — Session-log final + optional mailbox attribution (requires T030 on checkout)
+### T030 — Session-log final + optional mailbox attribution
 
-Until T030 merges, these paths exist on `cursor/p1-t030-chat-final-92fa` / PR #60. Skip and stamp `T030: Deferred` when absent from HEAD.
+T030 is on `master` (PR #60 merged). Run the Client final + shell-negative suites:
 
 ```sh
 ./node_modules/.bin/vitest run \
@@ -68,7 +68,7 @@ Until T030 merges, these paths exist on `cursor/p1-t030-chat-final-92fa` / PR #6
   apps/desktop/tests/no-shell-chat-final-ipc.spec.ts
 ```
 
-### One-shot wrapper (stop on first failure; skip T030 block when files missing)
+### One-shot wrapper (stop on first failure)
 
 ```sh
 set -euo pipefail
@@ -86,24 +86,19 @@ $VITEST run \
   apps/desktop/tests/no-shell-chat-progress-ipc.spec.ts \
   | tee "$EVIDENCE/vitest-t029-shell.log"
 
-if [[ -f apps/desktop/tests/no-shell-chat-final-ipc.spec.ts ]]; then
-  $VITEST run \
-    packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts \
-    packages/client/ui-chat/tests/chat-view.client.spec.tsx \
-    packages/client/ui-chat/tests/team-message-source.client.spec.ts \
-    -t 'T030|session log|linkedMailbox|mailbox attribution|cold-resume mailbox|mid-turn team-message' \
-    | tee "$EVIDENCE/vitest-t030-ui-chat.log"
+$VITEST run \
+  packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts \
+  packages/client/ui-chat/tests/chat-view.client.spec.tsx \
+  packages/client/ui-chat/tests/team-message-source.client.spec.ts \
+  -t 'T030|session log|linkedMailbox|mailbox attribution|cold-resume mailbox|mid-turn team-message' \
+  | tee "$EVIDENCE/vitest-t030-ui-chat.log"
 
-  $VITEST run \
-    apps/desktop/tests/no-shell-chat-final-ipc.spec.ts \
-    | tee "$EVIDENCE/vitest-t030-shell.log"
-else
-  echo "T030 absent on checkout — stamp T030: Deferred; do not Pass SC-004" \
-    | tee "$EVIDENCE/t030-absent.txt"
-fi
+$VITEST run \
+  apps/desktop/tests/no-shell-chat-final-ipc.spec.ts \
+  | tee "$EVIDENCE/vitest-t030-shell.log"
 ```
 
-Slice recipes remain authoritative for per-task evidence homes: [t029-chat-progress.md](./t029-chat-progress.md) · [t030-chat-final.md](./t030-chat-final.md) (when present on checkout).
+Slice recipes remain authoritative for per-task evidence homes: [t029-chat-progress.md](./t029-chat-progress.md) · [t030-chat-final.md](./t030-chat-final.md).
 
 ## Optional live Desktop path (operator)
 
@@ -133,7 +128,7 @@ When recording a live SC-004 Desktop stamp (in addition to keyless Pass):
 |---------|------|
 | **Pass (SC-004 keyless)** | Criteria 1–4 green on one checkout that includes T029+T030; VERDICT + logs under `evidence/scenario-4/`; progress + final + shell negatives all **measured** |
 | **Fail (SC-004)** | Any of 1–4 red; or shell-synthesized progress/final IPC; or final without prior Host-stream progress on the scripted path |
-| **Deferred (SC-004)** | Recipe present (T032) but T030 not yet on checkout, or composite not yet re-run after T030 lands — stamp `VERDICT: Deferred` + `DEFER_REASON`. **Does not** mark SC-004 Done |
+| **Deferred (SC-004)** | Recipe present (T032) but composite not yet re-run with measured T029+T030 logs on the checkout under test — stamp `VERDICT: Deferred` + `DEFER_REASON`. **Does not** mark SC-004 Done |
 | **Blocked** | Missing T029, Scenario 0 Fail, or Desktop/ui-chat harness unusable |
 
 ## Evidence home
@@ -180,6 +175,7 @@ Locked Desktop topology remains: Electron Main + preload lifecycle IPC only; Web
 - Contract: [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
 - Quickstart Scenario 4: [../quickstart.md](../quickstart.md)
 - T029 Host-stream progress: [t029-chat-progress.md](./t029-chat-progress.md) · evidence [evidence/t029-chat-progress/](./evidence/t029-chat-progress/)
-- T030 session-log finals: [t030-chat-final.md](./t030-chat-final.md) (landing PR #60 until on `master`)
+- T030 session-log finals: [t030-chat-final.md](./t030-chat-final.md) · evidence [evidence/t030-chat-final/](./evidence/t030-chat-final/)
 - Scenario 0 topology gate: [scenario-0-topology.md](./scenario-0-topology.md)
 - Scenario 3 mailbox (optional same-session reuse): [scenario-3-mailbox.md](./scenario-3-mailbox.md)
+- Scenario 5 full replay: [scenario-5-full-replay.md](./scenario-5-full-replay.md)
