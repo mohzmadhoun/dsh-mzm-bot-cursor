@@ -2,11 +2,40 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
 The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
 The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
 
- RUN  v4.1.8 /workspace
+ RUN  v4.1.8 /tmp/t018-master
 
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > ignores a stale Team load after the conversation switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > loads roster/task diagnostics on open and navigates a healthy teammate
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a Host-owned bot from displayName plus provider/model assignment 162ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > still calls createBot when the draft repeats a roster distinct-models assignment 44ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a distinct draft message when the draft differs from roster bots 31ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the distinct-models check cannot pass yet for one teammate pair 13ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the roster meets the distinct-models rule for two teammate pairs 10ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > warns when the draft (provider, model) duplicates an existing roster assignment 24ms
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows createBot Remote and Team rejections and ignores a late success after session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful createBot after its reload switches sessions
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > cancels bot create without calling Host createBot 29ms
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps only the newest overlapping refresh for one session
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a successful task mutation newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a created task newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps task and create failures newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > tracks simultaneous create and task mutations independently
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads derived fields for every task after a mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a task from normalized blocker and write-scope lists
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > assigns, edits, completes, reopens, and deletes with contiguous CAS revisions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads and warns instead of retrying a stale task mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps reload failures visible after task and dependency conflicts
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders roster/task state variants and contains navigation, refresh, and close actions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows load and create failures and ignores a create result after a session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains stale-session and ordinary task failures without retrying
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not publish a task conflict after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful task after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains edit and dependency failures and supports form cancellation and unassignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a Remote carrier failure from the dependency mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > skips the dependency mutation when an edit keeps the same blockers
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads a dependency conflict and ignores dependency settlement after a session switch
 
  Test Files  1 passed (1)
-      Tests  3 passed | 23 skipped (26)
-   Start at  08:17:01
-   Duration  4.30s (transform 1.53s, setup 251ms, import 2.43s, tests 232ms, environment 1.26s)
-
+      Tests  7 passed | 23 skipped (30)
+   Start at  08:32:20
+   Duration  2.59s (transform 1.11s, setup 182ms, import 1.62s, tests 313ms, environment 387ms)
