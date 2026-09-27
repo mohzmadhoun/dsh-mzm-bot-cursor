@@ -85,7 +85,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T011 [P] Project skill catalog summaries + per-bot `skillAttachments` to Client-readable views in `packages/experimental/agent-team/src/projection.ts` (and/or session `skills/list` under `packages/api/session-controller/` if Client already consumes it) without Electron IPC synthesis
 - [x] T012 [P] Document Host instruction-bind approach for attached skill instructional bodies via `packages/preset/persona/` / `packages/core/system-prompt/` (compose into bot instructions on subsequent turns after attach) in `specs/003-skills-ux/verifier/instruction-bind.md` — Verifier observes wiring, **not** LLM reply wording (clarify lock 5; SC-007)
 - [x] T013 [P] Add architecture/regression guard that Electron Main has no parallel skill-catalog / attachment / authoring store or bus in `apps/desktop/tests/no-electron-skills-bus.spec.ts` (and document expected absence in `apps/desktop/src/ipc.ts` / `apps/desktop/src/host-protocol.ts`) per research R2/R4
-- [ ] T014 Record foundational Pass checklist (thin-pack ship + mount + attachment types/persistence + mutation stubs + projection + instruction-bind doc + no Electron skills bus) in `specs/003-skills-ux/verifier/README.md` — product SC-001…SC-007 not Done without these foundations
+- [x] T014 Record foundational Pass checklist (thin-pack ship + mount + attachment types/persistence + mutation stubs + projection + instruction-bind doc + no Electron skills bus) in `specs/003-skills-ux/verifier/README.md` — product SC-001…SC-007 not Done without these foundations
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 

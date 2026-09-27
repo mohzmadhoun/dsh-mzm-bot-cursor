@@ -5,20 +5,49 @@
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
 **Thin-pack pick:** [thin-pack-skill.md](./thin-pack-skill.md) (T005)
-**Linear:** Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142) · T001 [MOH-148](https://linear.app/momadhoun/issue/MOH-148) · T004 [MOH-151](https://linear.app/momadhoun/issue/MOH-151) · T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152)
+**Linear:** Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142) · T001 [MOH-148](https://linear.app/momadhoun/issue/MOH-148) · T004 [MOH-151](https://linear.app/momadhoun/issue/MOH-151) · T005 [MOH-152](https://linear.app/momadhoun/issue/MOH-152) · T014 [MOH-161](https://linear.app/momadhoun/issue/MOH-161)
 
-## Foundational Pass gate (T014 — later)
+## Foundational Pass gate (T014)
 
-**Rule:** Product success criteria **SC-001…SC-007** MUST NOT be marked Done without a recorded foundational Pass (thin-pack ship + mount + attachment types/persistence + mutation stubs + projection + instruction-bind doc + no Electron skills bus). Checklist lands in this README under T014; product SC evidence stays under Scenario recipes.
+**Rule:** Product success criteria **SC-001…SC-007** MUST NOT be marked Done without a recorded foundational Pass (thin-pack ship + mount + attachment types/persistence + mutation stubs + projection + instruction-bind doc + no Electron skills bus). Product SC evidence stays under Scenario recipes; this section is the foundation gate only.
 
-| Gate artifact | Location (when present) |
-|---------------|-------------------------|
+| Gate artifact | Location |
+|---------------|----------|
 | Thin-pack skill pick (T005) | [thin-pack-skill.md](./thin-pack-skill.md) |
-| Host skills inventory (T002) | `host-skills-inventory.md` |
-| Attachment/bind inventory (T003) | `attachment-bind-inventory.md` |
-| Instruction-bind doc (T012) | `instruction-bind.md` |
-| Foundational Pass checklist (T014) | this README (section added by T014) |
-| Non-goals absence checks (T033) | `non-goals.md` |
+| Host skills inventory (T002) | [host-skills-inventory.md](./host-skills-inventory.md) |
+| Attachment/bind inventory (T003) | [attachment-bind-inventory.md](./attachment-bind-inventory.md) |
+| Instruction-bind doc (T012) | [instruction-bind.md](./instruction-bind.md) |
+| Foundational Pass checklist (T014) | this README (checklist below) |
+| Non-goals absence checks (T033) | `non-goals.md` (not yet) |
+
+### Foundational Pass checklist — recorded
+
+**Verdict:** **Pass** (foundations only)
+**Stamp:** 2026-09-27 · tip `origin/master` @ `9d43f91bb9` (includes merged [#113](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/113) T013 · [#115](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/115) T002–T012 · [#114](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/114) T001/T004/T005)
+**Linear:** [MOH-161](https://linear.app/momadhoun/issue/MOH-161) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
+**Scope lock:** This Pass does **not** mark SC-001…SC-007 Done. Scenario recipes (T019+) and product US1–US4 implementation (T015+) remain open. US fan-out may begin after this stamp; live instruction bind remains T021.
+
+| # | Foundation | Task | Pass bar | Evidence | Claim |
+|---|------------|------|----------|----------|-------|
+| 1 | **Thin-pack ship** | T006 | Exactly one managed skill at `apps/desktop-host/managed-skills/mzm-thin-pack/SKILL.md` with frontmatter `name: mzm-thin-pack`, description including `MzM thin pack`, instructional body containing `Follow the MzM thin-pack playbook for Pass.` | **measured:** shipped path present; body greps playbook line; only one managed-skills child dir; pick locked in [thin-pack-skill.md](./thin-pack-skill.md); merge [#115](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/115) | Pass |
+| 2 | **Mount** | T007 | Desktop Host mounts managed + Host-durable user skills roots via `dsh-skill-filesystem` so `ctx.skills` lists `mzm-thin-pack` | **measured:** `apps/desktop-host/src/managed-skills.ts` + Host `index.ts` plugin; `apps/desktop-host/tests/managed-skills.spec.ts` asserts list/get + greppable body (`pnpm exec vitest run apps/desktop-host/tests/managed-skills.spec.ts`) | Pass |
+| 3 | **Attachment types + persistence** | T008–T009 | Host Bot `skillAttachments` ordered `{ botId, skillId }[]`; Host-durable via Team roster / journal so restart/reload retains attachments | **measured:** `packages/experimental/agent-team/src/types.ts` exports `SkillAttachment`; snapshot/view/roster carry `skillAttachments`; journal/persisted path documents identity mutations including skills; merge [#115](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/115) | Pass |
+| 4 | **Mutation stubs / Remotes** | T010 | Host attach + user-skill upsert with non-empty `displayName` / `instructionalBody` validation; Electron Main invents no skill/attachment records | **measured:** `@Remote('attachSkill')` + `@Remote('upsertUserSkill')` on `TeamService`; `team.spec.ts` `persists attachSkill…` retains attachments + rejects empty author fields | Pass |
+| 5 | **Projection** | T011 | Project skill catalog summaries + per-bot `skillAttachments` to Client-readable Team view without Electron IPC synthesis | **measured:** `remoteView` returns `skills` via `listSkillCatalog` (`bundled`/`mzm-thin-pack` → `managed`); member views carry `skillAttachments`; same focused team.spec case | Pass |
+| 6 | **Instruction-bind doc** | T012 | Normative Host bind approach for attached skill instructional bodies; Verifier observes wiring only (clarify lock 5; SC-007) | **measured:** [instruction-bind.md](./instruction-bind.md) present (Candidate B primary; empty/missing bodies contribute no prose; SC-007 wiring-only bar). **inferred:** T021 still owns runtime bind implementation | Pass (doc) |
+| 7 | **No Electron skills bus** | T013 | Electron Main has no parallel skill-catalog / attachment / authoring store or bus | **measured:** `apps/desktop/tests/no-electron-skills-bus.spec.ts` — passed (`pnpm exec vitest run apps/desktop/tests/no-electron-skills-bus.spec.ts`); merge [#113](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/113); absence documented in `apps/desktop/src/ipc.ts` / `host-protocol.ts` | Pass |
+
+**Rerun (idempotent):**
+
+```sh
+pnpm exec vitest run apps/desktop-host/tests/managed-skills.spec.ts apps/desktop/tests/no-electron-skills-bus.spec.ts
+pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'persists attachSkill'
+test -f apps/desktop-host/managed-skills/mzm-thin-pack/SKILL.md
+test -f specs/003-skills-ux/verifier/instruction-bind.md
+rg -n 'Follow the MzM thin-pack playbook for Pass\.' apps/desktop-host/managed-skills/mzm-thin-pack/SKILL.md
+```
+
+**PO / DH Lead:** Foundations hold on master tip above. Do **not** close product SC Done on this stamp. Next: US1 discover/load (T015+) + Scenario 1 recipe (T019); live instruction bind is T021.
 
 ## FR-012 / standing order 11 — desktop visual evidence (mandatory)
 
@@ -68,8 +97,8 @@ Recipe markdown files listed above are **paths reserved for later tasks** (T019,
 
 ## Fan-out policy
 
-- Foundational Pass (T014) must hold before Scenarios 1–5 evidence counts toward phase Done.
-- Do not expand US1–US4 Verifier recipes until shared Host skills foundations (T006–T014) land.
+- Foundational Pass (T014) must hold before Scenarios 1–5 evidence counts toward phase Done (checklist recorded above).
+- US1–US4 Verifier recipes may expand now that shared Host skills foundations (T006–T014) hold; product SC still needs Scenario evidence.
 - Scenario 5 requires Scenarios 1–3 (or equivalent observations) plus foundational Pass.
 - Quickstart non-goals MUST NOT appear in Pass criteria ([quickstart.md](../quickstart.md) Scenario 4).
 - Thin-pack id is locked as `mzm-thin-pack` in [thin-pack-skill.md](./thin-pack-skill.md); relocate only with an update to that file in the same change.
