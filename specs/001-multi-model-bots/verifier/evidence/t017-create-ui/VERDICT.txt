@@ -1,0 +1,4 @@
+Electron implementation ready — awaiting DH Verifier Pass/Fail.
+
+Branch: cursor/p1-t017-create-ui-92fa
+Focused Client UI + Remote wiring evidence: vitest.stdout.txt (35 passed, 100% package src coverage on that run).

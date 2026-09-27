@@ -39,6 +39,7 @@ Supporting Verifier docs (later tasks): `non-goals.md` (T010/T039), `trust-floor
 | Slice | Recipe | Primary owners | Notes |
 |-------|--------|----------------|-------|
 | **T014** Host bot-create | [t014-host-bot-create.md](./t014-host-bot-create.md) | **Runtime** + **Verifier** | FR-001 Host half; not SC-001/002 Pass |
+| **T017** Client create + assign-model UI | [t017-client-create-ui.md](./t017-client-create-ui.md) | **Electron/Client** + **Verifier** | FR-001 Client half + FR-007; not SC-001/002 Pass |
 
 ## Fan-out policy
 
