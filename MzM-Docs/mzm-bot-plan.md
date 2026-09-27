@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done on master 2026-09-27; P2 Identity/personas (MOH-88) In Progress — Spec Kit design closed; implement Setup T001–T004 current |
-| **Date** | 2026-09-25 (living §10 updated 2026-09-27) |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done on master 2026-09-27 (SC-005 Pass #136); **P4 Routines cron** next — Spec Kit specify |
+| **Date** | 2026-09-25 (living §10 updated 2026-09-27 P4 open) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
 | **Inputs** | `MzM-Docs/mzm-bot-initial-plan.md` · `docs/designs/mzbot-wedge-to-grok-like.md` · `.specify/memory/constitution.md` · MzM Bot Plan room freeze |
@@ -73,30 +73,32 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **Exit (Verifier-provable)** | ≥2 bots, different models; real session without Alt-Tab for model reasons; recipient acts or handoff visible; TTFT multi-model team session < 30 min on clean machine (documented); Verifier re-runs that path on Electron |
 | **Status** | **Done** — epic [MOH-37](https://linear.app/momadhoun/issue/MOH-37/p1-wedge-a-per-bot-models-11-messaging-electron-ui); specs under `specs/001-multi-model-bots`. **Deferred (non-blocking for P2):** SC-005 live desktop full replay (`verifier/evidence/scenario-5/VERDICT.txt` = Deferred; recipe present). |
 
-### P2 — Identity / personas (current)
+### P2 — Identity / personas (done)
 
 | | |
 |--|--|
 | **In** | Job/voice/anti-jobs; rename/avatar; sidebar sections; delete-confirm; **ADR only** for agent vs user memory layers (no memory UX) |
 | **Out** | Memory productization (P5); skills library (P3) |
 | **Exit (Verifier-provable)** | User can create/rename/delete (with confirm) bots and edit job, voice, anti-jobs, avatar, sidebar section; anti-jobs persist on the profile and appear in bot overview; Verifier re-runs that path |
-| **Status** | Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) In Progress. Spec Kit design closed (specify→analyze); implement Setup T001–T004 in flight, then foundations T005–T012 before US fan-out. Do **not** rewrite `specs/001-multi-model-bots`. |
+| **Status** | **Done** — epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas); specs under `specs/002-identity-personas/`. Product Verifier Pass [#104](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/104). |
 
-### P3 — Skills UX
+### P3 — Skills UX (done)
 
 | | |
 |--|--|
 | **In** | Load/discover + authoring; thin managed pack (not every playbook) |
 | **Out** | Full managed skill catalog parity; learn-from-demonstration |
 | **Exit** | User can attach/run a skill on a bot; Verifier covers load + one authoring path |
+| **Status** | **Done** — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); specs under `specs/003-skills-ux/`. US1–US4 + polish + SC-001…SC-005 stamped; product Verifier Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`. |
 
-### P4 — Routines (cron only)
+### P4 — Routines (cron only) (current)
 
 | | |
 |--|--|
 | **In** | Create/pause/resume + pane list; Host jobs; **no** event listeners |
 | **Out** | Slack/GitHub/email/etc triggers (P6); recall UX (P5) |
 | **Exit** | Cron routine fires and is visible in pane; pause/resume verified |
+| **Status** | **Next** — Spec Kit **specify** first. PO opens epic + specify on DeepSeek Harness - Cursor; living gate [living-next-gate.md](./living-next-gate.md). Do **not** rewrite `specs/001`–`003`. |
 
 ### P5 — Memory productization
 
@@ -201,13 +203,10 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 1. ~~**@DH Spec** re-reads v0.3 — LGTM~~ **DONE** 2026-09-26 — Spec LGTM; P1 specify at `specs/001-multi-model-bots`.
 2. ~~Mohammed ship/no-ship on auth~~ **DONE** — in-app primary.
 3. ~~`/speckit-specify` for P1 only~~ **DONE** (branch `cursor/p1-specify-92fa`).
-4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** SC-005 live Desktop full replay remains **Deferred** (recipe + stubs on master; does **not** block P2 specify).
-5. ~~P2 Spec Kit **specify**~~ **DONE** — [MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas) / PR #67 → `specs/002-identity-personas/`.
-6. ~~P2 Spec Kit **clarify**~~ **DONE** — [MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass.
-7. ~~P2 Spec Kit **plan**~~ **DONE** — [MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) / PR #70; Verifier [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Pass.
-8. ~~P2 Spec Kit **tasks**~~ **DONE** — [MOH-96](https://linear.app/momadhoun/issue/MOH-96/p2-spec-kit-tasks-identity-personas) / PR #72 @ `837152b248`; Verifier [MOH-97](https://linear.app/momadhoun/issue/MOH-97/p2-verifier-gate-tasks-002-identity-personas) Pass.
-9. ~~P2 Spec Kit **analyze + taskstoissues**~~ **DONE** — [MOH-98](https://linear.app/momadhoun/issue/MOH-98/p2-spec-kit-analyze-taskstoissues) / PR #73 @ `97e62765a3`; Verifier [MOH-99](https://linear.app/momadhoun/issue/MOH-99/p2-verifier-gate-analyze-taskstoissues) Pass; issues [MOH-100](https://linear.app/momadhoun/issue/MOH-100)…[MOH-141](https://linear.app/momadhoun/issue/MOH-141).
-10. **Current — P2 implement Setup (T001–T004) in parallel:** Spec T001 ([MOH-100](https://linear.app/momadhoun/issue/MOH-100)); Runtime T002+T003 ([MOH-101](https://linear.app/momadhoun/issue/MOH-101), [MOH-102](https://linear.app/momadhoun/issue/MOH-102)); Verifier T004 ([MOH-103](https://linear.app/momadhoun/issue/MOH-103)). Then **foundations T005–T012** (blocking) before any US1–US5 fan-out. Tracker: **DeepSeek Harness - Cursor** only.
+4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** P1 SC-005 live Desktop full replay remains **Deferred** (does **not** block later phases).
+5. ~~P2 Spec Kit design + implement + Verifier~~ **DONE** — epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas); Pass [#104](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/104).
+6. ~~P3 Spec Kit design + implement + Verifier~~ **DONE** 2026-09-27 — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); SC-005 Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`; specs `specs/003-skills-ux/`.
+7. **Current — P4 Spec Kit specify (smallest start):** PO opens epic `P4 — Routines (cron only)` + child `P4 Spec Kit — specify (Routines cron)` on **DeepSeek Harness - Cursor** only → **@DH Spec** `/speckit-specify` → new `specs/004-…` (do not rewrite 001–003). Living gate: [living-next-gate.md](./living-next-gate.md). Clarify/plan/tasks/analyze/implement follow after specify Verifier Pass — do **not** pre-load.
 
 ---
 
