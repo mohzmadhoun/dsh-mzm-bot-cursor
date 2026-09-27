@@ -384,7 +384,13 @@ export const RetryNodeView = memo(function RetryNodeView({ node, t }: ChatNodeVi
 export const TurnErrorNodeView = memo(function TurnErrorNodeView({
   node, t, openModelsSettings,
 }: ChatNodeViewProps<'turn-error'> & { openModelsSettings?: () => void }) {
-  return <TurnErrorItem node={node.data} t={t} openModelsSettings={openModelsSettings} />
+  return (
+    <TurnErrorItem
+      node={node.data}
+      t={t}
+      {...openModelsSettings === undefined ? {} : { openModelsSettings }}
+    />
+  )
 })
 
 /** Max-tokens turn-end notice keyed Chat renderer. */

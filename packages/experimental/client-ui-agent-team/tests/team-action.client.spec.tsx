@@ -375,7 +375,7 @@ describe('TeamAction', () => {
         code: 'MISSING_CREDENTIAL',
         message: 'no API key for provider route; store through Models page',
       },
-    } as TeamCreateBotActionResult
+    } as unknown as TeamCreateBotActionResult
     const missing = actions({
       openModelsSettings,
       createBot: () => Promise.resolve(missingCredentialFailure),
