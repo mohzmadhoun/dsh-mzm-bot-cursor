@@ -90,7 +90,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T017 [US1] Render saved anti-jobs on bot overview without a separate hidden/advanced-only editor in `packages/experimental/client-ui-agent-team/src/client/` (and related overview chrome) for Verifier observation (FR-003; SC-002)
 - [ ] T018 [US1] On save interrupted / Host unavailable, show clear failure and leave prior durable persona values unchanged — Client error surface in `packages/experimental/client-ui-agent-team/src/client/` + Host reject path in `packages/experimental/agent-team/src/`
   - Host reject path landed with T013 (`TEAM_LEAD_REQUIRED` / `TEAM_MEMBER_NOT_FOUND` / aborted signal → `team-rejected` Remote, prior durable persona unchanged). Client error surface remains T018.
-- [ ] T019 [US1] Add Verifier Scenario 1 recipe in `specs/002-identity-personas/verifier/scenario-1-persona-profile.md` covering SC-001 (job, voice, ≥1 anti-job survive restart/reload), SC-002 (overview anti-jobs), and SC-008 (instruction/prompt assembly contains saved non-empty fields; **do not** score LLM reply wording)
+- [x] T019 [US1] Add Verifier Scenario 1 recipe in `specs/002-identity-personas/verifier/scenario-1-persona-profile.md` covering SC-001 (job, voice, ≥1 anti-job survive restart/reload), SC-002 (overview anti-jobs), and SC-008 (instruction/prompt assembly contains saved non-empty fields; **do not** score LLM reply wording)
 
 **Checkpoint**: US1 independently testable after foundational Pass
 
