@@ -1,4 +1,11 @@
-Electron implementation ready — awaiting DH Verifier Pass/Fail.
-
-Branch: cursor/p1-t017-create-ui-92fa
-Focused Client UI + Remote wiring evidence: vitest.stdout.txt (35 passed, 100% package src coverage on that run).
+VERDICT: Pass
+SC: FR-001 Client create + FR-007 assign-model UI (T017)
+SHA: f83255c364ee146e9505d54f7698451549e6c79c
+UTC: 2026-09-27T07:55:03Z
+COMMAND: pnpm exec vitest run packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts -t 'creates a Host-owned bot|createBot|cancels bot create|RPC-backed bot'
+STDOUT: evidence/t017-create-ui/vitest.stdout.txt (6 passed | 29 skipped)
+COMMAND: xvfb-run -a pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/agent-team-panel.e2e.ts
+STDOUT: evidence/t017-create-ui/vitest-web-e2e.stdout.txt (3 passed)
+NOTE: recipe's bare vitest path for the e2e file is not in the unit include; web lane requires vitest.web.config.ts (+ build + Playwright Chromium).
+CRITERIA: focused createBot/Remote wiring green; form submits displayName+{provider,model} via Host Remote only; assembled Web panel aria shows New bot
+CLAIM: measured (Verifier certified independent re-run; implementer self-evidence not accepted)
