@@ -3,7 +3,7 @@ T018 + T021 Scenario 1 create + pane list — DH Verifier
 Verdict: Pass (full SC-001 / SC-006 / SC-007 create path + US2 pane durability)
 Stamp: 2026-09-27 · tip origin/master @ 85df964e51 (#165 polish on master)
   · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
-Branch: cursor/p4-t018-create-sc005-stamp-fe1d
+Branch: cursor/p4-t018-create-sc005-stamp-fe1d @ d19ddc4525
 Linear: MOH-211 (T018) · Epic MOH-188 — left In Progress (PO closes after merge)
 Recipes:
   specs/004-routines-cron/verifier/scenario-1-create-list.md (T018)

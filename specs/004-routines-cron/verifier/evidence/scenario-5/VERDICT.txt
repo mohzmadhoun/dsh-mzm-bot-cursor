@@ -3,7 +3,7 @@ T031 Verifier Scenario 5 full replay (SC-005) — DH Verifier
 Verdict: Pass (composite SC-005)
 Stamp: 2026-09-27
 Product tip: origin/master @ 85df964e51 (#165 polish)
-Evidence tip: cursor/p4-t018-create-sc005-stamp-fe1d (this PR)
+Evidence tip: cursor/p4-t018-create-sc005-stamp-fe1d @ d19ddc4525
 Linear: MOH-224 (T031) · Epic MOH-188 — left In Progress (PO closes after merge)
 Recipe: specs/004-routines-cron/verifier/scenario-5-full-replay.md
 Evidence home: specs/004-routines-cron/verifier/evidence/scenario-5/
