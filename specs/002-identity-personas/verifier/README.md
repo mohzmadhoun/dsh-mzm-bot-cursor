@@ -4,7 +4,7 @@
 **Role:** DH Verifier evidence home. Recipes are rerunnable acceptance scripts/outlines; they do not implement product features.
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/)
-**Linear:** Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88) · T004 [MOH-103](https://linear.app/momadhoun/issue/MOH-103) · T011 [MOH-110](https://linear.app/momadhoun/issue/MOH-110) · T019 [MOH-118](https://linear.app/momadhoun/issue/MOH-118) · T025 [MOH-124](https://linear.app/momadhoun/issue/MOH-124) · T030 [MOH-129](https://linear.app/momadhoun/issue/MOH-129)
+**Linear:** Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88) · T004 [MOH-103](https://linear.app/momadhoun/issue/MOH-103) · T011 [MOH-110](https://linear.app/momadhoun/issue/MOH-110) · T019 [MOH-118](https://linear.app/momadhoun/issue/MOH-118) · T025 [MOH-124](https://linear.app/momadhoun/issue/MOH-124) · T030 [MOH-129](https://linear.app/momadhoun/issue/MOH-129) · T035 [MOH-134](https://linear.app/momadhoun/issue/MOH-134)
 
 ## Foundational Pass gate (T011)
 
@@ -51,12 +51,12 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 |----------|------------|---------------------------|----------------|------------|
 | **1** Persona edit + persist + overview anti-jobs | [Scenario 1](../quickstart.md) | [scenario-1-persona-profile.md](./scenario-1-persona-profile.md) (T019) · contract [persona-profile.md](../contracts/persona-profile.md) | **Runtime** + **Client** + **Verifier** | SC-001, SC-002, SC-008 |
 | **2** Rename + preset avatar | [Scenario 2](../quickstart.md) | [scenario-2-rename-avatar.md](./scenario-2-rename-avatar.md) (T025) · contract [rename-avatar.md](../contracts/rename-avatar.md) | **Runtime** + **Client** + **Verifier** | SC-003 |
-| **3** Sidebar section + Unassigned | [Scenario 3](../quickstart.md) | `scenario-3-sidebar-sections.md` (T035) · contract [sidebar-sections.md](../contracts/sidebar-sections.md) | **Runtime** + **Client** + **Verifier** | SC-004 |
+| **3** Sidebar section + Unassigned | [Scenario 3](../quickstart.md) | [scenario-3-sidebar-sections.md](./scenario-3-sidebar-sections.md) (T035) · contract [sidebar-sections.md](../contracts/sidebar-sections.md) | **Runtime** + **Client** + **Verifier** | SC-004 |
 | **4** Delete confirm / cancel / confirm | [Scenario 4](../quickstart.md) | [scenario-4-delete-confirm.md](./scenario-4-delete-confirm.md) (T030) · contract [delete-confirm.md](../contracts/delete-confirm.md) | **Runtime** + **Client** + **Verifier** | SC-005 |
 | **5** Memory ADR presence (docs) | [Scenario 5](../quickstart.md) | `scenario-5-memory-adr.md` (T037) · contract [memory-layers-adr.md](../contracts/memory-layers-adr.md) | **Docs** + **Verifier** | SC-006 |
 | **6** Full Phase 2 replay | [Scenario 6](../quickstart.md) | `scenario-6-full-replay.md` (T039) · all contracts above | **Verifier** | SC-007 (+ composite of 1–5) |
 
-Scenario 1, Scenario 2, and Scenario 4 recipes are landed ([scenario-1-persona-profile.md](./scenario-1-persona-profile.md), [scenario-2-rename-avatar.md](./scenario-2-rename-avatar.md), [scenario-4-delete-confirm.md](./scenario-4-delete-confirm.md)). Remaining recipe paths (T035, T037, T039) stay reserved until those tasks land; this README does not create empty stubs.
+Scenario 1, Scenario 2, Scenario 3, and Scenario 4 recipes are landed ([scenario-1-persona-profile.md](./scenario-1-persona-profile.md), [scenario-2-rename-avatar.md](./scenario-2-rename-avatar.md), [scenario-3-sidebar-sections.md](./scenario-3-sidebar-sections.md), [scenario-4-delete-confirm.md](./scenario-4-delete-confirm.md)). Remaining recipe paths (T037, T039) stay reserved until those tasks land; this README does not create empty stubs.
 
 ## Owner roles (T004)
 
