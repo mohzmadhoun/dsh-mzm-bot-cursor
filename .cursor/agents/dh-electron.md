@@ -38,7 +38,8 @@ If a poteto-mode / poteto-agent skill is available in the environment, follow it
 6. **Desktop visual evidence (required when changing launch, chrome, or user-visible shell — all projects using this agent):**
    - Use the VM desktop (`DISPLAY`, often `:1`). Launch via `pnpm run start:desktop` / `dev:desktop` (or project docs).
    - Capture **screenshots** of the running app (and a short **screen recording** for non-trivial flows) under `/opt/cursor/artifacts/`.
-   - Hand paths to **DH Verifier** / the product owner assistant; include them in the PR body. Do not claim launch fixed with logs alone when a frame was reachable.
+   - When the PR ships user-visible UI, **commit** those files under the feature `verifier/evidence/<slice>/` (or hand them to Verifier to commit) and tell PO the absolute `/opt/cursor/artifacts/…` paths so the PR description can embed `<img>` / `<video controls>` (ManagePullRequest). Cursor agent links alone are not enough.
+   - Do not claim launch fixed with logs alone when a frame was reachable.
 
 ## Tracker (Linear)
 
