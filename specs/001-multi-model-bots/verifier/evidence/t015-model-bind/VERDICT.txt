@@ -1,0 +1,11 @@
+VERDICT: Pass
+SC: FR-002 bot model bind (T015)
+SHA: fd8d34bc9d6fc90d92236e2a2d7e9ca6c364b809
+UTC: 2026-09-27T08:05:14Z
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'binds later chats|reads a recorded bot assignment' --reporter=verbose
+STDOUT: evidence/t015-model-bind/vitest.stdout.txt
+RESULT: exit 0; 2 passed, 52 skipped (binds later chats to each bot ModelSelection; reads a recorded bot assignment only from a continuable route)
+SCOPE: keyless Host proof only. Not SC-001/SC-002 phase Done. Not a live provider session. No DEEPSEEK_API_KEY used.
+CRITERIA: after createBot, a later sendMessage on an inactive teammate (agent absent via waitNoAgent) still routes both bots' second mock requests through the recorded ModelSelection. Research keeps provider mock, model research-model, effort high. Coding keeps provider mock, model coding-model, no effort. Poisoned later activation options (other-bot-model, effort low) and the Lead route (lead-switched) do not appear on adapter requests.
+CLAIM: measured (Verifier independent re-run of the filtered team.spec.ts cases)
+BLOCKER: packages/experimental/agent-team/README.i18n.yaml is stale. pnpm run verify-translation-pairing packages/experimental/agent-team/README.md exits 1 (README.md and README.zh.md out of sync with the recorded blobs). Behavior Pass stands; doc-sync does not.
