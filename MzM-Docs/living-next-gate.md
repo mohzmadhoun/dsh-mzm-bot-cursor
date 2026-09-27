@@ -17,38 +17,40 @@
 
 **P3 (Skills UX)** — **Done.** Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux) Done (PO). Specs under `specs/003-skills-ux/`. Phase 3 product Verifier **Pass** merged as [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`.
 
-**P4 (Routines — cron only)** — Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) **In Progress**. Specs under `specs/004-routines-cron/` on `master` (specify [#139](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/139); clarify [#140](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/140); plan [#141](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/141) Architect Option 3; MOH-189…MOH-191 Done). Tasks in flight on `cursor/p4-tasks-3e3a` ([MOH-192](https://linear.app/momadhoun/issue/MOH-192/p4-spec-kit-tasks-routines-cron)).
+**P4 (Routines — cron only)** — Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) **In Progress**. Specs under `specs/004-routines-cron/` on `master` (specify [#139](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/139); clarify [#140](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/140); plan [#141](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/141) Architect Option 3; tasks [#142](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/142); MOH-189…MOH-192 Done). Analyze + taskstoissues in flight on `cursor/p4-analyze-fe1d` ([MOH-193](https://linear.app/momadhoun/issue/MOH-193/p4-spec-kit-analyze-taskstoissues-routines-cron)).
 
 ## Next gate
 
-**P4 Spec Kit — tasks** draft for Verifier gate (no analyze/implement; Linear Done after Pass — PO hang).
+**P4 Spec Kit — analyze + taskstoissues** draft for Verifier gate (no implement; Linear Done after Pass — PO hang).
 
 | Issue | Title | Status | Owner |
 |-------|-------|--------|-------|
 | [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) | P4 — Routines (cron only) | In Progress | PO orchestration |
-| [MOH-189](https://linear.app/momadhoun/issue/MOH-189)…[MOH-191](https://linear.app/momadhoun/issue/MOH-191) | specify / clarify / plan | **Done** | — |
-| [MOH-192](https://linear.app/momadhoun/issue/MOH-192/p4-spec-kit-tasks-routines-cron) | P4 Spec Kit — tasks | In Progress | **DH Spec** → Verifier |
+| [MOH-189](https://linear.app/momadhoun/issue/MOH-189)…[MOH-192](https://linear.app/momadhoun/issue/MOH-192) | specify / clarify / plan / tasks | **Done** | — |
+| [MOH-193](https://linear.app/momadhoun/issue/MOH-193/p4-spec-kit-analyze-taskstoissues-routines-cron) | P4 Spec Kit — analyze + taskstoissues | In Progress | **DH Spec** → Verifier |
+| [MOH-194](https://linear.app/momadhoun/issue/MOH-194)…[MOH-227](https://linear.app/momadhoun/issue/MOH-227) | T001–T034 implement children | Backlog | — (after analyze Pass) |
 
-Do **not** pre-open analyze/implement children — those follow after tasks Verifier Pass.
+Do **not** kick implement until analyze Verifier Pass + PO Done on MOH-193.
 
-### Tasks deliverable (active)
+### Analyze deliverable (active)
 
-- Feature dir: `specs/004-routines-cron/tasks.md` (T001–T034)
-- Branch: `cursor/p4-tasks-3e3a` (off `master` tip including #141)
-- Honors Architect Option 3: Host Routine catalog SoT; NOT `dsh-schedule` as Routines SoT; optional `dsh-jobs` visibility; no Electron bus (T011); schedule≠Routines absence (T012); SO 11+12 evidence tasks (T018/T021/T024/T028/T030/T031)
-- Mark [MOH-192](https://linear.app/momadhoun/issue/MOH-192/p4-spec-kit-tasks-routines-cron) Done only after Verifier Pass. **No** analyze/implement until tasks Pass.
+- Feature dir: `specs/004-routines-cron/analyze-report.md` (**PASS**, 0 CRITICAL) + T→MOH map
+- Linear children: T001–T034 → MOH-194…MOH-227 under epic MOH-188 on **DeepSeek Harness - Cursor** only
+- Branch: `cursor/p4-analyze-fe1d` (off `master` tip including #142)
+- Honors Architect Option 3 + SO 11/12 evidence tasks
+- Mark [MOH-193](https://linear.app/momadhoun/issue/MOH-193/p4-spec-kit-analyze-taskstoissues-routines-cron) Done only after Verifier Pass. **No** implement until analyze Pass.
 
 ## Owners / held
 
 | Role | Action |
 |------|--------|
-| **PO Assistant** | MOH-192 open; hand Verifier tasks gate; Done after Pass |
-| **DH Spec** | MOH-192 tasks draft on `cursor/p4-tasks-3e3a`; report to PO; idle until analyze kick |
-| **DH Architect** | Option 3 locked; idle unless tasks review asked |
-| **DH Runtime / Electron** | Idle — no implement until after analyze/`taskstoissues` |
-| **DH Verifier** | Gate tasks PR (`tasks.md` vs Architect Option 3 + SO11/12) |
+| **PO Assistant** | MOH-193 open; hand Verifier analyze gate; Done after Pass → Lead implement kick |
+| **DH Spec** | MOH-193 analyze + taskstoissues on `cursor/p4-analyze-fe1d`; report to PO; leave In Progress |
+| **DH Architect** | Option 3 locked; idle unless analyze review asked |
+| **DH Runtime / Electron** | Idle — no implement until after analyze Pass |
+| **DH Verifier** | Gate analyze PR (`analyze-report.md` + Linear T001–T034 map) |
 | **DH Lead** | Living gate; idle until Verifier Pass; no feature code |
 
 ## Blockers
 
-None for tasks content. Waiting on Verifier Pass for MOH-192 (then PO Done + analyze/`taskstoissues` kick).
+None for analyze content. Waiting on Verifier Pass for MOH-193 (then PO Done + implement kick).

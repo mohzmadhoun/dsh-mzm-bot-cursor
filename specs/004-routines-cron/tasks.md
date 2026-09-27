@@ -8,9 +8,9 @@
 
 **Organization**: Shared Host Routine catalog foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority**: US1 Create → US2 Pane list → US3 Pause/resume → US4 Cron fire (all P1).
 
-**Linear**: Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) · Plan [MOH-191](https://linear.app/momadhoun/issue/MOH-191) Done (#141, Architect Option 3) · Tasks [MOH-192](https://linear.app/momadhoun/issue/MOH-192/p4-spec-kit-tasks-routines-cron) · Project **DeepSeek Harness - Cursor** only
+**Linear**: Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) · Analyze/taskstoissues [MOH-193](https://linear.app/momadhoun/issue/MOH-193/p4-spec-kit-analyze-taskstoissues-routines-cron) · Tasks [MOH-192](https://linear.app/momadhoun/issue/MOH-192/p4-spec-kit-tasks-routines-cron) Done (#142) · Project **DeepSeek Harness - Cursor** only · T001–T034 → [MOH-194](https://linear.app/momadhoun/issue/MOH-194)…[MOH-227](https://linear.app/momadhoun/issue/MOH-227) (map in [analyze-report.md](./analyze-report.md))
 
-**Branch**: `cursor/p4-tasks-3e3a`
+**Branch**: `cursor/p4-analyze-fe1d`
 
 **Architect Option 3 locks (honor in every story/recipe)**:
 
@@ -240,4 +240,4 @@ Task: "Verifier scenario-1-create-list.md + evidence path"
 - **Architect Option 3** is non-negotiable: Host catalog SoT; reject mount-`dsh-schedule`; optional jobs visibility only; no Electron bus
 - Standing orders **11** + **12** non-negotiable on GUI recipes
 - Do not rewrite specs/001–003
-- Linear Done for MOH-192 only after Verifier Pass (PO hang); this tasks step does not invent implement tickets (those follow analyze/`taskstoissues`)
+- Analyze **PASS** + Linear T001–T034 filed (MOH-194…MOH-227). Await Verifier/Lead analyze gate → implement → Verifier product gate. Leave MOH-193 In Progress until PO Done after Verifier Pass.
