@@ -109,7 +109,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [ ] T022 [P] [US2] Project `displayName` + avatar marker to Client roster/sidebar/overview views in `packages/experimental/agent-team/src/projection.ts`
 - [ ] T023 [US2] Add Client rename control + preset avatar picker (shape and/or color) in `packages/experimental/client-ui-agent-team/src/client/` so sidebar and overview render updated identity after save
 - [ ] T024 [US2] Ensure unsupported custom image upload (if present) MUST NOT block preset-marker Pass — gate or omit upload UI for P2 in `packages/experimental/client-ui-agent-team/src/client/` and note non-goal in `specs/002-identity-personas/verifier/non-goals.md`
-- [ ] T025 [US2] Add Verifier Scenario 2 recipe in `specs/002-identity-personas/verifier/scenario-2-rename-avatar.md` for SC-003 (rename + preset marker survive restart/reload on sidebar and overview; image upload not required)
+- [x] T025 [US2] Add Verifier Scenario 2 recipe in `specs/002-identity-personas/verifier/scenario-2-rename-avatar.md` for SC-003 (rename + preset marker survive restart/reload on sidebar and overview; image upload not required)
 
 **Checkpoint**: US2 independently testable (needs ≥1 bot from P1 create / US1 path)
 
