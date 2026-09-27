@@ -174,7 +174,8 @@ export class TeamService extends TypertRemoteService {
    * Lead-authorized product Bot create: required non-empty `displayName` plus exactly one model assignment.
    * Persists the Bot on the Host Team roster with durable `modelSelection`, spawns with `agentOptions`,
    * and binds the live Agent through `installModelSelection` so subsequent chats keep that assignment.
-   * Electron Main must not invent bot records or routes.
+   * Model calls resolve through Host `ctx.llm` adapters under `packages/llm/` using that assignment and
+   * Host `ctx.credentials` resolve — Electron Main must not invent bot records or route models.
    * @param caller - exact live Lead Agent.
    * @param request - displayName, ModelSelection, and cancellation.
    * @returns Host-owned Bot identity, derived roster name, retained model assignment, and roster row.

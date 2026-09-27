@@ -45,3 +45,15 @@ export const FORBIDDEN_MAILBOX_IPC_PATTERNS = [
   /agent[-_]?chat/i,
   /peer[-_]?message/i,
 ] as const
+
+/**
+ * Forbidden substrings for inventing bot records, model routes, or provider secrets
+ * on Electron Main / preload IPC (T016 — Host `ctx.llm` + credentials own those).
+ */
+export const FORBIDDEN_MODEL_ROUTER_IPC_PATTERNS = [
+  /createBot/i,
+  /modelSelection/i,
+  /installModelSelection/i,
+  /apiKey/i,
+  /credentials?\.(?:set|resolve|get)/i,
+] as const
