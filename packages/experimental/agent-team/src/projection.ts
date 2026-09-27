@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { brandString } from '@deepseek-ai/dsh-brand'
-import type { ContentBlock } from '@deepseek-ai/dsh-llm'
+import { ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import type {
@@ -67,7 +67,7 @@ const contentBlockSchema: z.ZodType<ContentBlock> = z.lazy(() => z.union([
 const modelSelectionSchema = z.object({
   provider: z.string().min(1),
   model: z.string().min(1),
-  reasoningEffort: z.string().min(1).optional(),
+  reasoningEffort: z.string().min(1).transform(value => ReasoningEffortId(value)).optional(),
 }).strict()
 
 const teamMemberSnapshotSchema = z.object({
