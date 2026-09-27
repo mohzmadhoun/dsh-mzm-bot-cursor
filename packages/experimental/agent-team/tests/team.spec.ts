@@ -18,7 +18,11 @@ import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
-import { modelAssignmentsAreDistinct, normalizePersonaProfile } from '../src/validation.ts'
+import {
+  modelAssignmentsAreDistinct,
+  normalizeAvatarMarker,
+  normalizePersonaProfile,
+} from '../src/validation.ts'
 import { TeamRuntimeLifecycle } from '../src/lifecycle.ts'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/index.ts'
@@ -214,6 +218,23 @@ describe('normalizePersonaProfile', () => {
       .toThrow(/job must be a string/)
     expect(() => normalizePersonaProfile('j'.repeat(201), 'voice', []))
       .toThrow(/job exceeds 200 characters/)
+  })
+})
+
+describe('normalizeAvatarMarker', () => {
+  it('requires at least one preset shape or color and rejects unknown ids', () => {
+    expect(normalizeAvatarMarker({ shape: ' circle ', color: ' blue ' })).toEqual({
+      shape: 'circle',
+      color: 'blue',
+    })
+    expect(normalizeAvatarMarker({ shape: 'square' })).toEqual({ shape: 'square' })
+    expect(normalizeAvatarMarker({ color: 'green' })).toEqual({ color: 'green' })
+    expect(() => normalizeAvatarMarker({})).toThrow(/at least one of shape or color/)
+    expect(() => normalizeAvatarMarker({ shape: '  ' })).toThrow(/avatar\.shape must be non-empty/)
+    expect(() => normalizeAvatarMarker({ shape: 'blob' })).toThrow(/avatar\.shape must be one of/)
+    expect(() => normalizeAvatarMarker({ color: 'neon' })).toThrow(/avatar\.color must be one of/)
+    expect(() => normalizeAvatarMarker(null as unknown as { shape?: string }))
+      .toThrow(/avatar must be an object/)
   })
 })
 
@@ -446,7 +467,7 @@ describe('Team identity and provisioning', () => {
     })
   })
 
-  it('exposes Host identity mutation stubs as team-rejected Remotes without Main invention', async () => {
+  it('exposes remaining Host identity mutation stubs as team-rejected Remotes without Main invention', async () => {
     const { ctx, lead } = await setup([textResponse('identity stub bot')])
     const created = await ctx.agentTeams.createBot(lead, {
       displayName: 'Identity Stub',
@@ -455,24 +476,6 @@ describe('Team identity and provisioning', () => {
     })
     await waitNoAgent(ctx, created.id)
 
-    await expect(ctx.agentTeams.renameBot(lead, {
-      botId: created.id,
-      displayName: 'Renamed',
-      signal: SIGNAL,
-    })).rejects.toMatchObject({ code: 'TEAM_NOT_IMPLEMENTED' })
-
-    const remoteRename = await ctx.agentTeams.remoteRenameBot(lead, {
-      botId: created.id,
-      displayName: 'Renamed',
-    }, SIGNAL)
-    expect(remoteRename).toEqual({
-      ok: false,
-      error: { code: 'team-rejected', message: 'Host renameBot is not implemented yet' },
-    })
-    expect(await ctx.agentTeams.remoteSetAvatar(lead, {
-      botId: created.id,
-      avatar: { shape: 'circle', color: 'blue' },
-    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
     expect(await ctx.agentTeams.remoteAssignSection(lead, {
       botId: created.id,
       sectionId: null,
@@ -489,6 +492,207 @@ describe('Team identity and provisioning', () => {
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
       displayName: 'Identity Stub',
     })
+  })
+
+  it('persists renameBot, projects displayName on view, and rejects empty rename without changing prior', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('rename create'),
+      textResponse('rename peer'),
+    ])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Rename Bot',
+      modelSelection: { provider: 'mock', model: 'rename-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+    const priorName = created.name
+
+    const saved = await ctx.agentTeams.renameBot(lead, {
+      botId: created.id,
+      displayName: '  Renamed Label ',
+      signal: SIGNAL,
+    })
+    expect(saved.displayName).toBe('Renamed Label')
+    expect(saved.member).toMatchObject({
+      id: created.id,
+      name: priorName,
+      displayName: 'Renamed Label',
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)).toMatchObject({
+      name: priorName,
+      displayName: 'Renamed Label',
+      description: 'Renamed Label',
+    })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.displayName)
+      .toBe('Renamed Label')
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.members.find(row => row.id === created.id)?.displayName).toBe('Renamed Label')
+
+    const remoteOk = await ctx.agentTeams.remoteRenameBot(lead, {
+      botId: created.id,
+      displayName: 'Remote Renamed',
+    }, SIGNAL)
+    expect(remoteOk).toMatchObject({
+      ok: true,
+      value: { displayName: 'Remote Renamed' },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.displayName)
+      .toBe('Remote Renamed')
+    // Kebab roster name stays immutable across renames (FR-004).
+    expect(durable(lead).members.find(row => row.id === created.id)?.name).toBe(priorName)
+
+    // Duplicate display names are allowed.
+    const peer = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Peer Distinct',
+      modelSelection: { provider: 'mock', model: 'peer-rename' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, peer.id)
+    await expect(ctx.agentTeams.renameBot(lead, {
+      botId: peer.id,
+      displayName: 'Remote Renamed',
+      signal: SIGNAL,
+    })).resolves.toMatchObject({ displayName: 'Remote Renamed' })
+
+    await expect(ctx.agentTeams.renameBot(lead, {
+      botId: created.id,
+      displayName: '   ',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT', message: expect.stringContaining('displayName') })
+    expect(durable(lead).members.find(row => row.id === created.id)?.displayName)
+      .toBe('Remote Renamed')
+
+    expect(await ctx.agentTeams.remoteRenameBot(lead, {
+      botId: created.id,
+      displayName: '',
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringContaining('displayName') },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.displayName)
+      .toBe('Remote Renamed')
+
+    const aborted = new AbortController()
+    aborted.abort()
+    await expect(ctx.agentTeams.renameBot(lead, {
+      botId: created.id,
+      displayName: 'Should Not Persist',
+      signal: aborted.signal,
+    })).rejects.toBeTruthy()
+    expect(durable(lead).members.find(row => row.id === created.id)?.displayName)
+      .toBe('Remote Renamed')
+
+    expect(await ctx.agentTeams.remoteRenameBot(lead, {
+      botId: SessionId('missing-bot'),
+      displayName: 'Ghost',
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+
+    const hang = await setup(['hang'])
+    const hungChild = (await spawn(hang.ctx, hang.lead, 'peer-writer', {
+      agentOptions: { provider: 'mock', model: 'peer' },
+    })).member
+    const liveChild = await waitRunning(hang.ctx, hungChild.id)
+    await expect(hang.ctx.agentTeams.renameBot(liveChild, {
+      botId: hungChild.id,
+      displayName: 'Hijack',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_LEAD_REQUIRED' })
+  })
+
+  it('persists setAvatar, projects preset marker on view, and rejects empty/unknown markers', async () => {
+    const { ctx, lead } = await setup([textResponse('avatar create')])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Avatar Bot',
+      modelSelection: { provider: 'mock', model: 'avatar-model' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+
+    const saved = await ctx.agentTeams.setAvatar(lead, {
+      botId: created.id,
+      avatar: { shape: 'circle', color: 'blue' },
+      signal: SIGNAL,
+    })
+    expect(saved.avatar).toEqual({ shape: 'circle', color: 'blue' })
+    expect(durable(lead).members.find(row => row.id === created.id)?.avatar).toEqual(saved.avatar)
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.avatar)
+      .toEqual(saved.avatar)
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.members.find(row => row.id === created.id)?.avatar).toEqual(saved.avatar)
+
+    // Shape-only and color-only markers are valid Pass paths (clarify lock 3).
+    const shapeOnly = await ctx.agentTeams.remoteSetAvatar(lead, {
+      botId: created.id,
+      avatar: { shape: 'square' },
+    }, SIGNAL)
+    expect(shapeOnly).toMatchObject({
+      ok: true,
+      value: { avatar: { shape: 'square' } },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.avatar)
+      .toEqual({ shape: 'square' })
+
+    const colorOnly = await ctx.agentTeams.setAvatar(lead, {
+      botId: created.id,
+      avatar: { color: 'orange' },
+      signal: SIGNAL,
+    })
+    expect(colorOnly.avatar).toEqual({ color: 'orange' })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)?.avatar)
+      .toEqual({ color: 'orange' })
+
+    await expect(ctx.agentTeams.setAvatar(lead, {
+      botId: created.id,
+      avatar: {},
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_INVALID_ARGUMENT' })
+    expect(durable(lead).members.find(row => row.id === created.id)?.avatar)
+      .toEqual({ color: 'orange' })
+
+    expect(await ctx.agentTeams.remoteSetAvatar(lead, {
+      botId: created.id,
+      avatar: { shape: 'blob' as 'circle' },
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+    expect(durable(lead).members.find(row => row.id === created.id)?.avatar)
+      .toEqual({ color: 'orange' })
+
+    const aborted = new AbortController()
+    aborted.abort()
+    await expect(ctx.agentTeams.setAvatar(lead, {
+      botId: created.id,
+      avatar: { shape: 'hexagon', color: 'red' },
+      signal: aborted.signal,
+    })).rejects.toBeTruthy()
+    expect(durable(lead).members.find(row => row.id === created.id)?.avatar)
+      .toEqual({ color: 'orange' })
+
+    expect(await ctx.agentTeams.remoteSetAvatar(lead, {
+      botId: SessionId('missing-bot'),
+      avatar: { shape: 'circle' },
+    }, SIGNAL)).toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected' },
+    })
+
+    const hang = await setup(['hang'])
+    const hungChild = (await spawn(hang.ctx, hang.lead, 'peer-writer', {
+      agentOptions: { provider: 'mock', model: 'peer' },
+    })).member
+    const liveChild = await waitRunning(hang.ctx, hungChild.id)
+    await expect(hang.ctx.agentTeams.setAvatar(liveChild, {
+      botId: hungChild.id,
+      avatar: { shape: 'triangle' },
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_LEAD_REQUIRED' })
+    expect(durable(hang.lead).members.find(row => row.id === hungChild.id)?.avatar).toBeUndefined()
   })
 
   it('persists updatePersona, projects persona on view, and rejects without changing prior values', async () => {

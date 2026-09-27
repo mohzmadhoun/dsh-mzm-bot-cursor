@@ -2,10 +2,24 @@
 
 import type { ModelSelection } from '@deepseek-ai/dsh-agent'
 import { TeamError } from './error.ts'
-import type { BotPersonaProfile } from './types.ts'
+import type {
+  AvatarColorId,
+  AvatarMarker,
+  AvatarShapeId,
+  BotPersonaProfile,
+} from './types.ts'
 
 const PERSONA_FIELD_MAX = 200
 const PERSONA_ANTI_JOB_MAX_ITEMS = 64
+
+/** Fixed preset shape ids accepted by Host `setAvatar` (FR-005 / clarify lock 3). */
+export const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
+
+/** Fixed preset color ids accepted by Host `setAvatar` (FR-005 / clarify lock 3). */
+export const AVATAR_COLOR_IDS = ['blue', 'green', 'orange', 'purple', 'red', 'gray'] as const satisfies readonly AvatarColorId[]
+
+const AVATAR_SHAPE_SET: ReadonlySet<string> = new Set(AVATAR_SHAPE_IDS)
+const AVATAR_COLOR_SET: ReadonlySet<string> = new Set(AVATAR_COLOR_IDS)
 
 /**
  * Normalize one required human-authored string.
@@ -114,6 +128,64 @@ function optionalPersonaText(value: string, field: string): string {
   const text = value.trim()
   if (text.length > PERSONA_FIELD_MAX) {
     throw new TeamError(`${field} exceeds ${PERSONA_FIELD_MAX} characters`, 'TEAM_INVALID_ARGUMENT')
+  }
+  return text
+}
+
+/**
+ * Normalize one Host preset avatar marker for durable replace (FR-005).
+ * At least one of shape or color is required; both must be ids from the fixed Host preset sets.
+ * Image-file / URL fields are not part of {@link AvatarMarker} — no upload path for Pass.
+ * Accepts untyped wire/JSON candidates and returns a validated durable marker.
+ * @param avatar - candidate marker from Host `setAvatar` (may be untyped at wire).
+ * @returns durable marker retaining only present, validated preset fields.
+ */
+export function normalizeAvatarMarker(avatar: {
+  readonly shape?: string
+  readonly color?: string
+}): AvatarMarker {
+  if (avatar === null || typeof avatar !== 'object' || Array.isArray(avatar)) {
+    throw new TeamError('avatar must be an object', 'TEAM_INVALID_ARGUMENT')
+  }
+  const shape = optionalPresetId(avatar.shape, 'avatar.shape', AVATAR_SHAPE_SET)
+  const color = optionalPresetId(avatar.color, 'avatar.color', AVATAR_COLOR_SET)
+  if (shape === undefined && color === undefined) {
+    throw new TeamError(
+      'avatar requires at least one of shape or color from the Host preset set',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return {
+    ...shape === undefined ? {} : { shape: shape as AvatarShapeId },
+    ...color === undefined ? {} : { color: color as AvatarColorId },
+  }
+}
+
+/**
+ * Accept one optional preset id; absent/undefined stays unset; empty string rejects.
+ * @param value - raw shape or color candidate.
+ * @param field - diagnostic field name.
+ * @param allowed - fixed Host preset id set.
+ * @returns trimmed preset id, or undefined when the field was omitted.
+ */
+function optionalPresetId(
+  value: string | undefined,
+  field: string,
+  allowed: ReadonlySet<string>,
+): string | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== 'string') {
+    throw new TeamError(`${field} must be a string`, 'TEAM_INVALID_ARGUMENT')
+  }
+  const text = value.trim()
+  if (text.length === 0) {
+    throw new TeamError(`${field} must be non-empty when set`, 'TEAM_INVALID_ARGUMENT')
+  }
+  if (!allowed.has(text)) {
+    throw new TeamError(
+      `${field} must be one of: ${[...allowed].join(', ')}`,
+      'TEAM_INVALID_ARGUMENT',
+    )
   }
   return text
 }

@@ -62,6 +62,7 @@ import type {
   UpdateTeamTaskRequest,
 } from './types.ts'
 import {
+  normalizeAvatarMarker,
   normalizePersonaProfile,
   requiredDisplayName,
   requiredModelSelection,
@@ -78,6 +79,7 @@ export {
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
 export { projectMailboxHandoffs } from './projection.ts'
+export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -238,17 +240,45 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host rename stub (FR-004).
+   * Lead-authorized Host rename (FR-004).
    * Persists a non-empty `displayName` on the Bot identity without changing the kebab roster `name`.
+   * Duplicate display names are allowed; empty/whitespace-only names reject without writing.
    * Electron Main must not invent rename records — Host owns the durable write (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - bot id, replacement displayName, and cancellation.
    * @returns updated Host Bot identity after rename.
    */
   async renameBot(caller: Agent, request: RenameBotRequest): Promise<RenameBotResult> {
-    void caller
-    void request
-    throw new TeamError('Host renameBot is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can rename a teammate', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const displayName = requiredDisplayName(request.displayName)
+    const root = membership.root
+    const updated = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const member = { ...current, displayName, description: displayName }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return member
+    })
+    const view = this.roster.list(membership).find(row => row.id === updated.id)
+    /* v8 ignore next 3 -- journal commit above retains the active roster row. */
+    if (view === undefined) {
+      throw new TeamError(`active teammate "${updated.id}" not found`, 'TEAM_MEMBER_NOT_FOUND')
+    }
+    return { id: updated.id, displayName, member: view }
   }
 
   /**
@@ -297,17 +327,45 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host avatar-marker stub (FR-005).
-   * Sets a preset shape and/or color marker; image upload is out of Pass scope.
+   * Lead-authorized Host avatar-marker set (FR-005 / clarify lock 3).
+   * Replaces the Bot’s preset shape and/or color marker; at least one field required.
+   * Image-file / URL upload is out of Pass scope — Host accepts only fixed preset ids.
    * Electron Main must not invent avatar records — Host owns the durable write (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - bot id, avatar marker, and cancellation.
    * @returns updated Host Bot identity after avatar set.
    */
   async setAvatar(caller: Agent, request: SetAvatarRequest): Promise<SetAvatarResult> {
-    void caller
-    void request
-    throw new TeamError('Host setAvatar is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can set a teammate avatar', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const avatar = normalizeAvatarMarker(request.avatar)
+    const root = membership.root
+    const updated = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const member = { ...current, avatar }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return member
+    })
+    const view = this.roster.list(membership).find(row => row.id === updated.id)
+    /* v8 ignore next 3 -- journal commit above retains the active roster row. */
+    if (view === undefined) {
+      throw new TeamError(`active teammate "${updated.id}" not found`, 'TEAM_MEMBER_NOT_FOUND')
+    }
+    return { id: updated.id, avatar, member: view }
   }
 
   /**

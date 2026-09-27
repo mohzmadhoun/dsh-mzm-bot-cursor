@@ -3,7 +3,9 @@
 export type {
   AssignSectionInput,
   AssignSectionResult,
+  AvatarColorId,
   AvatarMarker,
+  AvatarShapeId,
   BotIdentityMutationResult,
   BotPersonaProfile,
   CreateBotInput,

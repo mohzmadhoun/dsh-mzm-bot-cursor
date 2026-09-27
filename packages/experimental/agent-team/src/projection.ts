@@ -3,6 +3,9 @@
 Persona (`job` / `voice` / `antiJobs`), avatar, displayName, and sectionId on
 `team/member` snapshots are Host→Client readable here — Electron Main must not
 invent a parallel identity store (T015 / FR-002 / FR-003).
+Post-active Host `renameBot` / `setAvatar` journal writes update `displayName`
+and preset avatar markers; `listMembers` / `agentTeams/view` re-read those
+fields for Client roster / sidebar / overview (T022 / FR-004 / FR-005).
 */
 
 import { z } from 'zod'
