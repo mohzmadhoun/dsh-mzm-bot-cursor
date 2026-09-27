@@ -1,0 +1,15 @@
+T028 Desktop session chrome create/assign — Electron measured Pass
+
+Composition path:
+- DESKTOP_PROFILE_BUNDLES = web template + Agent Teams Host/Web layers
+- ui-conversation + ui-model-selection (packages/client) from dsh-web-app
+- ui-agent-team create-bot form on conversation.session.header.actions
+- assign-model: conversation.input.model + create form provider/model
+- Default cordis.patch.yml empty — no config-file edit for happy path
+- Electron Main free of createBot / ModelSelection / those slots
+
+Command: pnpm exec vitest run apps/desktop/tests/session-chrome-create-assign.spec.ts apps/desktop/tests/agent-teams-mount.spec.ts
+Result: 3/3 passed
+
+Not Done: product SC / Linear Done await Verifier + PO; ui-settings-models (T033/T035) untouched.
+d8e91511499b35ed5ebff08f262504ecce5807b7c977485410ee18f0de36dc84  specs/001-multi-model-bots/verifier/evidence/t028-session-chrome/vitest.stdout.txt
