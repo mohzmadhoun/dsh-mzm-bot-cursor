@@ -7,8 +7,10 @@ import type {
   CreateRoutineInput,
   CreateSectionInput,
   DeleteBotInput,
+  PauseRoutineInput,
   RenameBotInput,
   RenameSectionInput,
+  ResumeRoutineInput,
   SetAvatarInput,
   TeamMemberView as TeamRosterMember,
   TeamView,
@@ -34,7 +36,8 @@ import {
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
   type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
-  type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
+  type TeamPauseRoutineActionResult, type TeamRenameBotActionResult,
+  type TeamRenameSectionActionResult, type TeamResumeRoutineActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
   type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
 } from './TeamAction.tsx'
@@ -58,6 +61,24 @@ function registerUi(ctx: ClientContext): void {
   const leadSessionId = (sessionId: SessionId): SessionId => {
     const address = sessions.binding(sessionId)?.session.getSnapshot().subagent?.address
     return address?.parentSessionId ?? sessionId
+  }
+
+  /**
+   * Host pause/resume Remotes (P4 US3 T022) may land in parallel with this Client
+   * mount. Narrow-cast until typert regenerates `agentTeams.pauseRoutine` /
+   * `resumeRoutine` onto the generated contribution.
+   */
+  const routineLifecycle = ctx.remote.agentTeams as typeof ctx.remote.agentTeams & {
+    pauseRoutine: (
+      agentId: SessionId,
+      request: PauseRoutineInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamPauseRoutineActionResult>
+    resumeRoutine: (
+      agentId: SessionId,
+      request: ResumeRoutineInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamResumeRoutineActionResult>
   }
 
   const actions: TeamActionInjected = {
@@ -96,6 +117,12 @@ function registerUi(ctx: ClientContext): void {
     },
     async createRoutine(sessionId, input: CreateRoutineInput): Promise<TeamCreateRoutineActionResult> {
       return await ctx.remote.agentTeams.createRoutine(leadSessionId(sessionId), input)
+    },
+    async pauseRoutine(sessionId, input: PauseRoutineInput): Promise<TeamPauseRoutineActionResult> {
+      return await routineLifecycle.pauseRoutine(leadSessionId(sessionId), input)
+    },
+    async resumeRoutine(sessionId, input: ResumeRoutineInput): Promise<TeamResumeRoutineActionResult> {
+      return await routineLifecycle.resumeRoutine(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)

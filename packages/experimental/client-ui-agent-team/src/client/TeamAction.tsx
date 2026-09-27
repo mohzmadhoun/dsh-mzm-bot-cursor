@@ -19,10 +19,15 @@ import type {
   DeleteBotInput,
   DeleteBotResult,
   HostMailboxMessage,
+  PauseRoutineInput,
+  PauseRoutineResult,
   RenameBotInput,
   RenameBotResult,
   RenameSectionInput,
   RenameSectionResult,
+  ResumeRoutineInput,
+  ResumeRoutineResult,
+  RoutineId,
   RoutineProjection,
   RoutineStatus,
   SetAvatarInput,
@@ -46,8 +51,9 @@ import type {
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
 import {
-  IconCheckOutline14, IconCloseOutline16, IconEditOutline16, IconPlusOutline16,
-  IconRefreshOutline14, IconTrashOutline16, IconUserOutline16, StateDot,
+  IconCheckOutline14, IconCloseOutline16, IconEditOutline16, IconPauseOutline16,
+  IconPlayOutline16, IconPlusOutline16, IconRefreshOutline14, IconTrashOutline16,
+  IconUserOutline16, StateDot,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -93,6 +99,12 @@ export type TeamUpsertUserSkillActionResult = RemoteResult<BotIdentityMutationRe
 /** Generated Remote result whose business value preserves Team createRoutine rejections. */
 export type TeamCreateRoutineActionResult = RemoteResult<BotIdentityMutationResult<CreateRoutineResult>>
 
+/** Generated Remote result whose business value preserves Team pauseRoutine rejections. */
+export type TeamPauseRoutineActionResult = RemoteResult<BotIdentityMutationResult<PauseRoutineResult>>
+
+/** Generated Remote result whose business value preserves Team resumeRoutine rejections. */
+export type TeamResumeRoutineActionResult = RemoteResult<BotIdentityMutationResult<ResumeRoutineResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -107,6 +119,8 @@ export interface TeamActionInjected {
   attachSkill: (sessionId: SessionId, input: AttachSkillInput) => Promise<TeamAttachSkillActionResult>
   upsertUserSkill: (sessionId: SessionId, input: UpsertUserSkillInput) => Promise<TeamUpsertUserSkillActionResult>
   createRoutine: (sessionId: SessionId, input: CreateRoutineInput) => Promise<TeamCreateRoutineActionResult>
+  pauseRoutine: (sessionId: SessionId, input: PauseRoutineInput) => Promise<TeamPauseRoutineActionResult>
+  resumeRoutine: (sessionId: SessionId, input: ResumeRoutineInput) => Promise<TeamResumeRoutineActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -430,7 +444,8 @@ function memberLabel(
 export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
   createSection, renameSection, assignSection, attachSkill, upsertUserSkill,
-  createRoutine, createTask, updateTask, openTeammate, openModelsSettings, t,
+  createRoutine, pauseRoutine, resumeRoutine, createTask, updateTask,
+  openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -972,6 +987,42 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleRoutineStatus = useCallback(async (
+    routineId: RoutineId,
+    operation: () => Promise<TeamPauseRoutineActionResult | TeamResumeRoutineActionResult>,
+  ): Promise<PauseRoutineResult | ResumeRoutineResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`routine-status:${routineId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep prior Host status in the loaded view.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not write; pane still shows prior status.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const updated = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return updated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`routine-status:${routineId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
   const settleUpsertUserSkill = useCallback(async (
     operation: () => Promise<TeamUpsertUserSkillActionResult>,
   ): Promise<UpsertUserSkillResult | undefined> => {
@@ -1235,6 +1286,22 @@ export function TeamAction({
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
   }
 
+  /**
+   * Host pauseRoutine for one listed active routine (P4 FR-003 / SC-002 / T023).
+   * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
+   */
+  const submitPauseRoutine = async (routineId: RoutineId): Promise<void> => {
+    await settleRoutineStatus(routineId, () => pauseRoutine(sessionId, { routineId }))
+  }
+
+  /**
+   * Host resumeRoutine for one listed paused routine (P4 FR-004 / SC-002 / T023).
+   * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
+   */
+  const submitResumeRoutine = async (routineId: RoutineId): Promise<void> => {
+    await settleRoutineStatus(routineId, () => resumeRoutine(sessionId, { routineId }))
+  }
+
   /** Dedicated run control: mark attached skill session-active on this bot (FR-004). */
   const markSkillSessionActive = (botId: SessionId, skillId: SkillId): void => {
     setSessionActiveSkills((current) => {
@@ -1367,8 +1434,6 @@ export function TeamAction({
     const assignPending = pendingTasks.has(`assign-section:${member.id}`)
     const attachPending = pendingTasks.has(`attach-skill:${member.id}`)
     const createRoutinePending = pendingTasks.has(`create-routine:${member.id}`)
-    const identityBusy = personaPending || renamePending || avatarPending
-      || deletePending || assignPending || attachPending || createRoutinePending
     const confirmPending = pendingDelete === member.id
     const assignOpen = assigningBotId === member.id
     const attachOpen = attachingBotId === member.id
@@ -1377,6 +1442,9 @@ export function TeamAction({
     const botRoutines = view === null
       ? []
       : view.routines.filter((routine: RoutineProjection) => routine.botId === member.id)
+    const identityBusy = personaPending || renamePending || avatarPending
+      || deletePending || assignPending || attachPending || createRoutinePending
+      || botRoutines.some(routine => pendingTasks.has(`routine-status:${routine.routineId}`))
     const catalogById = view === null
       ? new Map<SkillId, SkillCatalogSummary>()
       : new Map(view.skills.map(skill => [skill.id, skill]))
@@ -1543,41 +1611,66 @@ export function TeamAction({
               ? <div className={css.notice} data-team-bot-routines-empty={member.id}>{t('botRoutinesEmpty')}</div>
               : (
                 <ul className={css.botRoutinesList} data-team-bot-routines-list={member.id}>
-                  {botRoutines.map((routine: RoutineProjection) => (
-                    <li
-                      key={routine.routineId}
-                      className={css.botRoutineRow}
-                      data-team-routine={routine.routineId}
-                      data-team-routine-status={routine.status}
-                      data-team-routine-schedule-expr={routine.scheduleExpr}
-                    >
-                      <span data-team-routine-identity>{routine.identity}</span>
-                      <span
-                        className={css.botRoutineMeta}
-                        data-team-routine-schedule=""
+                  {botRoutines.map((routine: RoutineProjection) => {
+                    const statusPending = pendingTasks.has(`routine-status:${routine.routineId}`)
+                    return (
+                      <li
+                        key={routine.routineId}
+                        className={css.botRoutineRow}
+                        data-team-routine={routine.routineId}
+                        data-team-routine-status={routine.status}
+                        data-team-routine-schedule-expr={routine.scheduleExpr}
                       >
-                        {routine.scheduleLabel}
-                      </span>
-                      <span
-                        className={
-                          routine.status === 'paused'
-                            ? css.botRoutineStatusPaused
-                            : css.botRoutineStatusActive
-                        }
-                        data-team-routine-status-label=""
-                      >
-                        {t(routineStatusKey(routine.status))}
-                      </span>
-                      <span
-                        className={css.botRoutineLastRun}
-                        data-team-routine-last-run={
-                          routine.lastRunAt === null ? 'never' : String(routine.lastRunAt)
-                        }
-                      >
-                        {routineLastRunLabel(routine.lastRunAt, t)}
-                      </span>
-                    </li>
-                  ))}
+                        <span data-team-routine-identity>{routine.identity}</span>
+                        <span
+                          className={css.botRoutineMeta}
+                          data-team-routine-schedule=""
+                        >
+                          {routine.scheduleLabel}
+                        </span>
+                        <span
+                          className={
+                            routine.status === 'paused'
+                              ? css.botRoutineStatusPaused
+                              : css.botRoutineStatusActive
+                          }
+                          data-team-routine-status-label=""
+                        >
+                          {t(routineStatusKey(routine.status))}
+                        </span>
+                        <span
+                          className={css.botRoutineLastRun}
+                          data-team-routine-last-run={
+                            routine.lastRunAt === null ? 'never' : String(routine.lastRunAt)
+                          }
+                        >
+                          {routineLastRunLabel(routine.lastRunAt, t)}
+                        </span>
+                        {canEditIdentity && routine.status === 'active' && (
+                          <button
+                            type="button"
+                            className={css.botRoutineAction}
+                            disabled={identityBusy || statusPending}
+                            data-team-routine-pause={routine.routineId}
+                            onClick={() => { void submitPauseRoutine(routine.routineId) }}
+                          >
+                            <IconPauseOutline16 size={13} /> {t('pauseRoutine')}
+                          </button>
+                        )}
+                        {canEditIdentity && routine.status === 'paused' && (
+                          <button
+                            type="button"
+                            className={css.botRoutineAction}
+                            disabled={identityBusy || statusPending}
+                            data-team-routine-resume={routine.routineId}
+                            onClick={() => { void submitResumeRoutine(routine.routineId) }}
+                          >
+                            <IconPlayOutline16 size={13} /> {t('resumeRoutine')}
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             {canEditIdentity && createRoutineOpen && (

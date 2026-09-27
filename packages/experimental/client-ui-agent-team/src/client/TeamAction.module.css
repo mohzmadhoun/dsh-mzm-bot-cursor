@@ -664,3 +664,22 @@
   color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
 }
+
+.botRoutineAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 2px 6px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.botRoutineAction:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

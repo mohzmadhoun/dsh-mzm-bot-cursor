@@ -252,6 +252,46 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
         },
       },
     }),
+    pauseRoutine: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          routine: {
+            routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+            botId: 'worker-id' as SessionId,
+            identity: 'Ping status',
+            intent: 'Ping status',
+            scheduleExpr: '@every 5m',
+            scheduleLabel: 'Every 5m',
+            status: 'paused' as const,
+            lastRunAt: null,
+            createdAt: 1,
+            updatedAt: 2,
+          },
+        },
+      },
+    }),
+    resumeRoutine: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          routine: {
+            routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+            botId: 'worker-id' as SessionId,
+            identity: 'Ping status',
+            intent: 'Ping status',
+            scheduleExpr: '@every 5m',
+            scheduleLabel: 'Every 5m',
+            status: 'active' as const,
+            lastRunAt: null,
+            createdAt: 1,
+            updatedAt: 3,
+          },
+        },
+      },
+    }),
     createTask: () => Promise.resolve(taskSuccess({ ...task, id: TASK_2, subject: 'New task' })),
     updateTask: () => Promise.resolve({
       ok: true,
@@ -2874,6 +2914,105 @@ describe('TeamAction', () => {
     expect(document.querySelector(
       `[data-team-bot-routines-list="${workerId}"] [data-team-routine="routine-durable"]`,
     )).not.toBeNull()
+  })
+
+
+  it('pauses an active Host routine via pauseRoutine and shows Paused (T023 / US3)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-pause' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const active = {
+      routineId,
+      botId: workerId,
+      identity: 'Morning brief',
+      intent: 'Morning brief',
+      scheduleExpr: '@hourly',
+      scheduleLabel: 'Every hour',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const paused = { ...active, status: 'paused' as const, updatedAt: 2 }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [active] } })
+      .mockResolvedValue({ ok: true as const, value: { ...view, routines: [paused] } })
+    const pauseRoutine = vi.fn((): Promise<
+      import('../src/client/TeamAction.tsx').TeamPauseRoutineActionResult
+    > => Promise.resolve({ ok: true, value: { ok: true, value: { routine: paused } } }))
+    render(<TeamAction {...props(actions({ load, pauseRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Morning brief')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.pauseRoutine }))
+    await waitFor(() => { expect(pauseRoutine).toHaveBeenCalledWith(SESSION, { routineId }) })
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+        ?.getAttribute('data-team-routine-status')).toBe('paused')
+    })
+    expect(screen.getByRole('button', { name: zh.resumeRoutine })).toBeTruthy()
+  })
+
+  it('resumes a paused Host routine via resumeRoutine and shows Active (T023 / US3)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-resume' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const paused = {
+      routineId,
+      botId: workerId,
+      identity: 'Evening sweep',
+      intent: 'Evening sweep',
+      scheduleExpr: '@daily',
+      scheduleLabel: 'Every day',
+      status: 'paused' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const active = { ...paused, status: 'active' as const, updatedAt: 2 }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [paused] } })
+      .mockResolvedValue({ ok: true as const, value: { ...view, routines: [active] } })
+    const resumeRoutine = vi.fn((): Promise<
+      import('../src/client/TeamAction.tsx').TeamResumeRoutineActionResult
+    > => Promise.resolve({ ok: true, value: { ok: true, value: { routine: active } } }))
+    render(<TeamAction {...props(actions({ load, resumeRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Evening sweep')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.resumeRoutine }))
+    await waitFor(() => { expect(resumeRoutine).toHaveBeenCalledWith(SESSION, { routineId }) })
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+        ?.getAttribute('data-team-routine-status')).toBe('active')
+    })
+    expect(screen.getByRole('button', { name: zh.pauseRoutine })).toBeTruthy()
+  })
+
+  it('keeps prior status and shows failure when pauseRoutine transport is unavailable (T023)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-keep' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const active = {
+      routineId,
+      botId: workerId,
+      identity: 'Keep active',
+      intent: 'Keep active',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const pauseRoutine = vi.fn((): Promise<
+      import('../src/client/TeamAction.tsx').TeamPauseRoutineActionResult
+    > => Promise.resolve(remoteFailure('pauseRoutine offline')))
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true as const, value: { ...view, routines: [active] } }),
+      pauseRoutine,
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Keep active')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.pauseRoutine }))
+    expect(await screen.findByText('pauseRoutine offline (gateway/internal)')).toBeTruthy()
+    expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+      ?.getAttribute('data-team-routine-status')).toBe('active')
   })
 
 })

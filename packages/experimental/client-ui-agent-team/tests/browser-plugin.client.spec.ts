@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine' | 'pauseRoutine' | 'resumeRoutine'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -320,6 +320,56 @@ async function bench(options: {
           },
         })
     },
+    pauseRoutine: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/pauseRoutine', args })
+      return Promise.resolve(options.remoteFailure === 'pauseRoutine'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              routine: {
+                routineId: 'routine-1',
+                botId: CHILD,
+                identity: 'Ping',
+                intent: 'Ping',
+                scheduleExpr: '@every 5m',
+                scheduleLabel: 'Every 5m',
+                status: 'paused' as const,
+                lastRunAt: null,
+                createdAt: 1,
+                updatedAt: 2,
+              },
+            },
+          },
+        })
+    },
+    resumeRoutine: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/resumeRoutine', args })
+      return Promise.resolve(options.remoteFailure === 'resumeRoutine'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              routine: {
+                routineId: 'routine-1',
+                botId: CHILD,
+                identity: 'Ping',
+                intent: 'Ping',
+                scheduleExpr: '@every 5m',
+                scheduleLabel: 'Every 5m',
+                status: 'active' as const,
+                lastRunAt: null,
+                createdAt: 1,
+                updatedAt: 3,
+              },
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -460,6 +510,12 @@ describe('ui-team browser plugin', () => {
       intent: 'Ping',
       scheduleExpr: '@every 5m',
     })).ok).toBe(true)
+    expect((await actions.pauseRoutine(SESSION, {
+      routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+    })).ok).toBe(true)
+    expect((await actions.resumeRoutine(SESSION, {
+      routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -482,6 +538,8 @@ describe('ui-team browser plugin', () => {
       'agentTeams/attachSkill',
       'agentTeams/upsertUserSkill',
       'agentTeams/createRoutine',
+      'agentTeams/pauseRoutine',
+      'agentTeams/resumeRoutine',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
