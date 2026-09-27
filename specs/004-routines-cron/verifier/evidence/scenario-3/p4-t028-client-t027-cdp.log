@@ -1,0 +1,33 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
+inventory [
+  {
+    "id": "routine-7093c327-76fc-493d-b19d-895d93ac96c1",
+    "fire": "never",
+    "lastRun": "never",
+    "status": "paused"
+  },
+  {
+    "id": "routine-1a8b5d2f-714b-479b-970f-a8e2c2f75a46",
+    "fire": "fired",
+    "lastRun": "1790538665247",
+    "status": "active"
+  },
+  {
+    "id": "routine-510a2f23-1255-457b-9b61-10159ac641ac",
+    "fire": "fired",
+    "lastRun": "1790538665247",
+    "status": "active"
+  }
+]
+PASS T027 Client fire indicator {
+  "never": {
+    "ok": true
+  },
+  "fired": {
+    "lastRunAt": 1790538665247,
+    "text": "Last run 2026-09-27T19:51:05.247Z"
+  },
+  "afterReturn": {
+    "ok": true
+  }
+}
