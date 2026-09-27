@@ -121,6 +121,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | [`src/roster.ts`](src/roster.ts) | Team 身份、成员关系解析、provisioning 与 roster 拆除 |
 | [`src/mailbox.ts`](src/mailbox.ts) | 持久队列、目标本地投递、确认与恢复 |
 | [`src/delivery-state.ts`](src/delivery-state.ts) | 从 Lead + 目标会话日志观察产品侧 `deliveryState` |
+| [`src/host-mailbox-message.ts`](src/host-mailbox-message.ts) | 从持久日志重建产品侧 Host mailbox 字段（`fromBotId` / `toBotId` / `body` / `createdAt` / 仅 Host 的 `source`） |
 | [`src/task-board.ts`](src/task-board.ts) | 任务 CAS 命令、DAG 校验与派生视图 |
 | [`src/journal.ts`](src/journal.ts) | 串行化的 Lead 日志事务与提交通知 |
 | [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影 |
@@ -136,7 +137,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 
 `sendMessage()` 校验 peer 成员关系，追加 `team/message/queued` 并在尝试投递前 flush。目标消息以 `Team message <id> from <name>:` 开头，并在 `TeamMessageSource` 中保留同一 id 与发送者。只有目标会话在 pending inbox 或已记录历史中持久持有消息身份后，才会以 `team/message/delivered` 确认投递。即时准入按目标与持久队列顺序串行化；恢复按同一顺序重新投递 queued-minus-delivered 记录。重试前会同时折叠 live 与持久目标 inbox／历史状态，因此 inbox 已接受但模型尚未 claim 时发生崩溃不会复制消息。该保证是进程内重试加 target 会话去重，而不是跨进程 exactly-once 投递。
 
-产品侧 `deliveryState`（`queued` → `delivered` → `acted` | `visible-pending`）由上述 Lead-log 边与目标 Session 日志通过 `observeMailboxDeliveryState` 重建——绝不来自 Electron IPC。`visible-pending` 表示接收方持有持久 handoff 但尚未产生后续 turn；`acted` 表示 durable team-message receipt 之后出现了 `request/header`。
+产品侧 `deliveryState`（`queued` → `delivered` → `acted` | `visible-pending`）由上述 Lead-log 边与目标 Session 日志通过 `observeMailboxDeliveryState` 重建——绝不来自 Electron IPC。`visible-pending` 表示接收方持有持久 handoff 但尚未产生后续 turn；`acted` 表示 durable team-message receipt 之后出现了 `request/header`。产品侧 Host mailbox 字段（`id`、`fromBotId`、`toBotId`、`body`、`createdAt`、`deliveryState`、`source: { kind: 'host-mailbox' }`）同样由 `readHostMailboxMessage` 重建：别名来自 Lead `team/message/queued` 快照（`senderId`→`fromBotId`、`targetId`→`toBotId`、`content`→`body`）以及 queued 事件的 `time`→`createdAt`；`source` 仅属 Host，绝不可为 Electron IPC。
 
 投递给 Lead 时直接调用 `Agent.steer()`。投递给 teammate 时使用 continuation owner 的 host-only Steer 路径；该路径会保留 Team 发送者 source，同时授权 Lead-to-child edge 并冷恢复 inactive target。sibling 消息绝不会通过公开的相邻 Agent 消息操作伪装成 Lead。
 

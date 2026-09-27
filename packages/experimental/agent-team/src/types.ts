@@ -259,6 +259,32 @@ export type TeamMailboxDeliveryState =
   | 'acted'
   | 'visible-pending'
 
+/**
+ * Product Host mailbox provenance (data-model `source`).
+ * Always Host Agent Teams Lead-log / team-message path — never Electron IPC.
+ */
+export interface HostMailboxMessageSource {
+  readonly kind: 'host-mailbox'
+}
+
+/**
+ * Product Host mailbox message fields (spec data-model Host mailbox message).
+ * Durable on the Lead Session `team/message/*` log (+ target receipt for deliveryState);
+ * reconstruct with `readHostMailboxMessage` — never from Electron IPC.
+ *
+ * Internal Team snapshot aliases: `fromBotId`←`senderId`, `toBotId`←`targetId`,
+ * `body`←`content`, `createdAt`←queued event `time`.
+ */
+export interface HostMailboxMessage {
+  readonly id: TeamMessageId
+  readonly fromBotId: SessionId
+  readonly toBotId: SessionId
+  readonly body: ContentBlock[]
+  readonly createdAt: number
+  readonly deliveryState: TeamMailboxDeliveryState
+  readonly source: HostMailboxMessageSource
+}
+
 /** Input for creating one shared task. */
 export interface CreateTeamTaskRequest {
   readonly subject: string
