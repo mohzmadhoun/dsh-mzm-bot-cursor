@@ -71,7 +71,7 @@ Host `upsertUserSkill` 创建或更新用户编写的技能：`displayName` 与 
 
 Host `attachSkill(botId, skillId)` 仅把有序 `{ botId, skillId }` 追加到该 Bot 的持久 `skillAttachments`（允许多附；绝不自动附到其他 Bot）。技能必须存在于 Host `ctx.skills`，否则失败响亮且不写入。`listMembers` / `agentTeams/view` 将这些附件投影给 Client 的 bot skills/overview — 绝不用 Electron Main 存储。附上之后（以及 create / 冷恢复时），Agent Teams 把非空的附属技能说明正文绑定到该 Bot 作用域内的 `agent-teams:skill-instructions` system-prompt 段（Candidate B，与 P2 persona 前缀并列；空/缺失正文不贡献文案；Verifier 只观察装配接线，不评判 LLM 回复措辞）。
 
-Host Routine 目录（P4 Architect Option 3）把 `RoutineRecord` 持久化在 Lead 日志路径 `team/routine`——按 `botId` 隔离，含非空 `intent`、产品支持的 `scheduleExpr`（`@every 5m`／`@hourly`／`@daily`／五段 cron）、`status: active|paused` 与 `lastRunAt`。Host `createRoutine`／`listRoutinesByBot` 与 `agentTeams/view.routines` 经已认证 HTTP/WS 投影。这不是 `@deepseek-ai/dsh-schedule` 会话提醒，也不是 Electron Main 存储。Host `routine-cron` 校验表达式并计算下次触发；可选 `ctx.jobs` 稍后仅可用于飞行中触发可见性。
+Host Routine 目录（P4 Architect Option 3）把 `RoutineRecord` 持久化在 Lead 日志路径 `team/routine`——按 `botId` 隔离，含非空 `intent`、产品支持的 `scheduleExpr`（`@every 5m`／`@hourly`／`@daily`／五段 cron）、`status: active|paused` 与 `lastRunAt`。Host `createRoutine`（US1 T015–T016）对空 intent 或不支持的 schedule 以明确 Remote `team-rejected` 原因拒绝且不写入；成功仅为该 `botId` 持久化 `status: active`（SC-006）。无确认步骤、无单独 displayName——面板 `identity` 由 intent 派生（SC-007）。`listRoutinesByBot` 与 `agentTeams/view.routines` 经已认证 HTTP/WS 投影。这不是 `@deepseek-ai/dsh-schedule` 会话提醒，也不是 Electron Main 存储。Host `routine-cron` 校验表达式并计算下次触发；可选 `ctx.jobs` 稍后仅可用于飞行中触发可见性。
 
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 

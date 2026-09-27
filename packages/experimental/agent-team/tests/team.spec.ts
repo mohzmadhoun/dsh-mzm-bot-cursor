@@ -1787,10 +1787,10 @@ describe('Team Remote API', () => {
     })
   })
 
-  it('persists createRoutine, lists by botId, and rejects empty intent / bad schedule', async () => {
+  it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
-      textResponse('routine bot a'),
-      textResponse('routine bot b'),
+      textResponse('routine validate a'),
+      textResponse('routine validate b'),
     ])
     const alpha = await ctx.agentTeams.createBot(lead, {
       displayName: 'Routine Alpha',
@@ -1798,12 +1798,6 @@ describe('Team Remote API', () => {
       signal: SIGNAL,
     })
     await waitNoAgent(ctx, alpha.id)
-    const beta = await ctx.agentTeams.createBot(lead, {
-      displayName: 'Routine Beta',
-      modelSelection: { provider: 'mock', model: 'routine-b' },
-      signal: SIGNAL,
-    })
-    await waitNoAgent(ctx, beta.id)
 
     await expect(ctx.agentTeams.createRoutine(lead, {
       botId: alpha.id,
@@ -1817,6 +1811,38 @@ describe('Team Remote API', () => {
       scheduleExpr: '@every 1m',
       signal: SIGNAL,
     })).rejects.toThrow(/at least 5 minutes/)
+    await expect(ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Check inbox',
+      scheduleExpr: '',
+      signal: SIGNAL,
+    })).rejects.toThrow(/scheduleExpr must be non-empty/)
+    await expect(ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Check inbox',
+      scheduleExpr: 'not-a-schedule',
+      signal: SIGNAL,
+    })).rejects.toThrow(/unsupported/)
+
+    // Remote path surfaces the same reasons as typed Client-visible rejections (FR-001).
+    await expect(ctx.agentTeams.remoteCreateRoutine(lead, {
+      botId: alpha.id,
+      intent: '  ',
+      scheduleExpr: '@hourly',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/intent must be non-empty/) },
+    })
+    await expect(ctx.agentTeams.remoteCreateRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Check inbox',
+      scheduleExpr: '@every 1m',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/at least 5 minutes/) },
+    })
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toEqual([])
 
     const created = await ctx.agentTeams.createRoutine(lead, {
       botId: alpha.id,
@@ -1835,36 +1861,90 @@ describe('Team Remote API', () => {
     })
     expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
       .toEqual([created.routine])
-    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: beta.id, signal: SIGNAL }).routines)
-      .toEqual([])
+  })
 
+  it('US1 T016: createRoutine is per-botId; no confirm or displayName required', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('routine isolate a'),
+      textResponse('routine isolate b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Routine Alpha',
+      modelSelection: { provider: 'mock', model: 'routine-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Routine Beta',
+      modelSelection: { provider: 'mock', model: 'routine-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, beta.id)
+
+    // CreateRoutineInput is botId + intent + scheduleExpr only (SC-007: no confirm / displayName).
+    const createInputKeys = Object.keys({
+      botId: alpha.id,
+      intent: 'Morning digest',
+      scheduleExpr: '@daily',
+    } satisfies Parameters<typeof ctx.agentTeams.remoteCreateRoutine>[1]).sort()
+    expect(createInputKeys).toEqual(['botId', 'intent', 'scheduleExpr'])
+
+    // Single Remote call creates without a confirm token (SC-007).
     const remoteCreate = await ctx.agentTeams.remoteCreateRoutine(lead, {
       botId: alpha.id,
-      intent: 'Second pass',
-      scheduleExpr: '0 * * * *',
+      intent: 'Morning digest',
+      scheduleExpr: '@daily',
     }, SIGNAL)
     expect(remoteCreate).toMatchObject({
       ok: true,
       value: {
         routine: {
           botId: alpha.id,
-          intent: 'Second pass',
+          intent: 'Morning digest',
+          identity: 'Morning digest',
+          scheduleExpr: '@daily',
+          status: 'active',
+        },
+      },
+    })
+
+    const cronCreate = await ctx.agentTeams.remoteCreateRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Hourly sweep',
+      scheduleExpr: '0 * * * *',
+    }, SIGNAL)
+    expect(cronCreate).toMatchObject({
+      ok: true,
+      value: {
+        routine: {
+          botId: alpha.id,
+          intent: 'Hourly sweep',
           scheduleExpr: '0 * * * *',
           status: 'active',
         },
       },
     })
+
+    // Per-bot isolation (SC-006): bot B must not list A's routines solely because A created them.
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toHaveLength(2)
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: beta.id, signal: SIGNAL }).routines)
+      .toEqual([])
+
     const listed = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: alpha.id }, SIGNAL)
     expect(listed).toMatchObject({ ok: true })
     if (!listed.ok) throw new Error('listRoutinesByBot failed')
     expect(listed.value.routines).toHaveLength(2)
     expect(listed.value.routines.every(row => row.botId === alpha.id)).toBe(true)
+    expect(listed.value.routines.every(row => row.identity === row.intent)).toBe(true)
+
+    const betaListed = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: beta.id }, SIGNAL)
+    expect(betaListed).toMatchObject({ ok: true, value: { routines: [] } })
 
     const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
     expect(view.routines).toHaveLength(2)
     expect(view.routines.every(row => row.botId === alpha.id)).toBe(true)
   })
-
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {
     const userSkillsRoot = mkdtempSync(join(tmpdir(), 'dsh-team-user-skills-'))
     roots.push(userSkillsRoot)

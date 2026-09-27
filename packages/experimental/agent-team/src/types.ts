@@ -659,8 +659,10 @@ export interface UpsertUserSkillResult {
 }
 
 /**
- * Host create-routine input (P4 FR-001 / T007 / T009).
+ * Host create-routine input (P4 FR-001 / T015–T016).
  * Non-empty `intent` and product-supported `scheduleExpr` required; empty / invalid reject without writing.
+ * Scoped by `botId` (SC-006). No confirm token and no separate `displayName` —
+ * pane identity derives from `intent` (SC-007 / FR-001).
  * Electron Main must not invent routine records — Host owns the durable write (research R1).
  */
 export interface CreateRoutineInput {
