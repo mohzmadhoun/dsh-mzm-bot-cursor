@@ -26,13 +26,29 @@ import { requiredText } from './validation.ts'
 const MEMBER_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
 /**
+ * Project Host-durable Bot identity fields onto a Client-readable roster row.
+ * Electron Main must not invent these values — they come from the Lead `team/member` snapshot.
+ * @param member - durable teammate snapshot.
+ * @returns optional displayName, persona, avatar, and sectionId fields for {@link TeamMemberView}.
+ */
+function identityViewFields(member: TeamMemberSnapshot):
+Pick<TeamMemberView, 'displayName' | 'persona' | 'avatar' | 'sectionId'> {
+  return {
+    ...member.displayName === undefined ? {} : { displayName: member.displayName },
+    ...member.persona === undefined ? {} : { persona: member.persona },
+    ...member.avatar === undefined ? {} : { avatar: member.avatar },
+    ...member.sectionId === undefined ? {} : { sectionId: member.sectionId },
+  }
+}
+
+/**
  * Project the live Agent LLM route onto a roster row.
  * Spawn-backend `provider` stays on {@link TeamMemberView.provider}; this pair is Verifier identity.
  * @param options - Agent options that may carry provider + model ids.
  * @returns model and optional modelSelection fields for one TeamMemberView.
  */
 function llmRouteFields(options: { provider?: string; model?: string } | undefined):
-  Pick<TeamMemberView, 'model' | 'modelSelection'> {
+Pick<TeamMemberView, 'model' | 'modelSelection'> {
   if (options?.model === undefined) return {}
   if (options.provider === undefined) return { model: options.model }
   return {
@@ -170,7 +186,7 @@ export class TeamRoster {
             ? 'provisioning'
             : live?.status ?? 'inactive',
         description: member.description,
-        ...member.displayName === undefined ? {} : { displayName: member.displayName },
+        ...identityViewFields(member),
         provider: member.provider,
         context: member.context,
         ...route,
@@ -469,7 +485,7 @@ export class TeamRoster {
       role: 'teammate',
       status: live?.status ?? 'inactive',
       description: member.description,
-      ...member.displayName === undefined ? {} : { displayName: member.displayName },
+      ...identityViewFields(member),
       provider: member.provider,
       context: member.context,
       ...route,

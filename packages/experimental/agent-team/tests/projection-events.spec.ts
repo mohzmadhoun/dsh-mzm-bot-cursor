@@ -3,7 +3,7 @@ import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
-import { TeamId, TeamMessageId, TeamTaskId } from '../src/types.ts'
+import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
 
 const ROOT = SessionId('team-root')
@@ -143,6 +143,56 @@ describe('Agent Teams projection events', () => {
       teamId: TEAM,
       member: duplicateName,
     }, SessionSeq(1))])).toThrow(/name .* reused/)
+  })
+
+  it('persists and allows post-active Host identity field updates', () => {
+    const withIdentity = member({
+      displayName: 'Worker A',
+      persona: { job: 'review', voice: 'terse', antiJobs: ['merge'] },
+      avatar: { shape: 'circle', color: 'blue' },
+      sectionId: SidebarSectionId('sec-reviews'),
+    })
+    const base = event('team/member', { version: 2, teamId: TEAM, member: withIdentity }, SessionSeq(0))
+    const active = event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: { ...withIdentity, phase: 'active' },
+    }, SessionSeq(1))
+    const renamed = event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: {
+        ...withIdentity,
+        phase: 'active',
+        displayName: 'Worker Renamed',
+        persona: { job: 'ship', voice: 'warm', antiJobs: ['docs', 'ops'] },
+        avatar: { shape: 'square' },
+        sectionId: null,
+      },
+    }, SessionSeq(2))
+
+    const projected = project(ROOT, [base, active, renamed])
+    const state = teamState(projected)
+    expect(state.members).toHaveLength(1)
+    expect(state.members[0]).toMatchObject({
+      displayName: 'Worker Renamed',
+      persona: { job: 'ship', voice: 'warm', antiJobs: ['docs', 'ops'] },
+      avatar: { shape: 'square' },
+      sectionId: null,
+      phase: 'active',
+    })
+    expect(teamProjectionDefinition.stateSchema.parse(JSON.parse(JSON.stringify(projected))))
+      .toMatchObject({ members: [{ displayName: 'Worker Renamed', sectionId: null }] })
+
+    expect(() => projectTeam(ROOT, [base, event('team/member', {
+      version: 2,
+      teamId: TEAM,
+      member: {
+        ...withIdentity,
+        phase: 'active',
+        displayName: 'Changed During Provisioning',
+      },
+    }, SessionSeq(1))])).toThrow(/during provisioning settlement/)
   })
 
   it('enforces task revision continuity', () => {

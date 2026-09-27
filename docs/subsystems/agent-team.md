@@ -17,8 +17,31 @@ interface TeamMemberSnapshot {
   /**
    * Product-facing Bot label from Host create (FR-001).
    * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
+   * Mutable after active via Host rename (FR-004); kebab {@link name} stays immutable.
    */
   readonly displayName?: string
+  /**
+   * Durable per-bot LLM route from spawn `agentOptions` / Host create (FR-002).
+   * Bound onto the live Agent via `installModelSelection` so subsequent chats
+   * keep this assignment. Absent when spawn omitted `agentOptions`.
+   * P1 ownership unchanged — immutable after first durable write.
+   */
+  readonly modelSelection?: ModelSelection
+  /**
+   * Optional persona profile retained with the Bot (FR-002 / FR-003).
+   * Mutable after active via Host `updatePersona`.
+   */
+  readonly persona?: BotPersonaProfile
+  /**
+   * Optional preset avatar marker (FR-005).
+   * Mutable after active via Host `setAvatar`.
+   */
+  readonly avatar?: AvatarMarker
+  /**
+   * Named sidebar section membership, or `null` / absent ⇒ Unassigned/default (FR-006).
+   * Mutable after active via Host `assignSection`.
+   */
+  readonly sectionId?: SidebarSectionId | null
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -26,7 +49,7 @@ interface TeamMemberSnapshot {
 }
 ```
 
-Every member starts in `provisioning` and reaches exactly one terminal roster phase, `active` or `failed`. Runtime `running`/`idle`/`inactive` status is derived separately and never rewrites this record.
+Every member starts in `provisioning` and reaches exactly one terminal roster phase, `active` or `failed`. After `active`, Host identity mutations may append further `active` snapshots that change only mutable product fields (`displayName`, `persona`, `avatar`, `sectionId`, `description`); kebab `name`, subagent `provider`, `context`, and `modelSelection` stay immutable. Runtime `running`/`idle`/`inactive` status is derived separately and never rewrites this record.
 
 ## Durable mailbox
 

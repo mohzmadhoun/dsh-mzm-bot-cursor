@@ -44,6 +44,43 @@ export function TeamMessageId(id: string): TeamMessageId {
 /** Durable teammate lifecycle. */
 export type TeamMemberPhase = 'provisioning' | 'active' | 'failed'
 
+/** Stable Host id for one named sidebar section grouping. */
+export type SidebarSectionId = Branded<'SidebarSectionId'>
+
+/**
+ * Brand a validated sidebar section id.
+ * @param id - Host section identity.
+ * @returns the same string branded as a sidebar section identity.
+ */
+export function SidebarSectionId(id: string): SidebarSectionId {
+  return id as SidebarSectionId
+}
+
+/**
+ * Per-bot persona profile (job / voice / anti-jobs).
+ * Empty job, voice, or antiJobs list are allowed; empty fields contribute no instruction text.
+ */
+export interface BotPersonaProfile {
+  /** Primary responsibility statement; may be empty. */
+  readonly job: string
+  /** How the bot should speak / present; may be empty. */
+  readonly voice: string
+  /** Explicit anti-responsibilities in order; length ≥ 0. */
+  readonly antiJobs: readonly string[]
+}
+
+/**
+ * Preset avatar marker (shape and/or color ids).
+ * When a user sets an avatar for Pass, at least one of shape or color is required.
+ * Image-file / URL upload is out of P2 Pass scope.
+ */
+export interface AvatarMarker {
+  /** Preset shape id from the fixed Host set. */
+  readonly shape?: string
+  /** Preset color id from the fixed Host set. */
+  readonly color?: string
+}
+
 /** Whole durable value written on every teammate lifecycle change. */
 export interface TeamMemberSnapshot {
   readonly id: SessionId
@@ -52,14 +89,31 @@ export interface TeamMemberSnapshot {
   /**
    * Product-facing Bot label from Host create (FR-001).
    * Absent on model-tool `spawn_teammate` rows that only supply a kebab roster name.
+   * Mutable after active via Host rename (FR-004); kebab {@link name} stays immutable.
    */
   readonly displayName?: string
   /**
    * Durable per-bot LLM route from spawn `agentOptions` / Host create (FR-002).
    * Bound onto the live Agent via `installModelSelection` so subsequent chats
    * keep this assignment. Absent when spawn omitted `agentOptions`.
+   * P1 ownership unchanged — immutable after first durable write.
    */
   readonly modelSelection?: ModelSelection
+  /**
+   * Optional persona profile retained with the Bot (FR-002 / FR-003).
+   * Mutable after active via Host `updatePersona`.
+   */
+  readonly persona?: BotPersonaProfile
+  /**
+   * Optional preset avatar marker (FR-005).
+   * Mutable after active via Host `setAvatar`.
+   */
+  readonly avatar?: AvatarMarker
+  /**
+   * Named sidebar section membership, or `null` / absent ⇒ Unassigned/default (FR-006).
+   * Mutable after active via Host `assignSection`.
+   */
+  readonly sectionId?: SidebarSectionId | null
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -87,6 +141,16 @@ export interface TeamMemberView {
    * Verifier “different models” compares these pairs (FR-003 / SC-002).
    */
   readonly modelSelection?: Pick<ModelSelection, 'provider' | 'model'>
+  /**
+   * Durable persona profile when Host retained one (overview reads `antiJobs` here).
+   */
+  readonly persona?: BotPersonaProfile
+  /** Preset avatar marker when Host retained one. */
+  readonly avatar?: AvatarMarker
+  /**
+   * Named sidebar section id when assigned; `null` or absent ⇒ Unassigned/default.
+   */
+  readonly sectionId?: SidebarSectionId | null
   readonly diagnostics: string[]
 }
 
@@ -237,6 +301,126 @@ export type CreateBotMutationResult =
       readonly message: string
     }
   }
+
+/**
+ * Browser result envelope for Host bot-identity mutations beyond P1 create.
+ * Team rejections stay distinct from transport failures (same pattern as createBot).
+ */
+export type BotIdentityMutationResult<T> =
+  | { readonly ok: true; readonly value: T }
+  | {
+    readonly ok: false
+    readonly error: {
+      readonly code: 'team-rejected'
+      readonly message: string
+    }
+  }
+
+/**
+ * Host rename input (FR-004).
+ * New displayName MUST be non-empty; kebab roster `name` does not change; duplicates allowed.
+ */
+export interface RenameBotInput {
+  /** Existing Bot Session id. */
+  readonly botId: SessionId
+  /** Replacement product-facing label (non-empty after trim). */
+  readonly displayName: string
+}
+
+/** Lead-authorized Host rename, including cancellation. */
+export interface RenameBotRequest extends RenameBotInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Bot identity after a successful rename. */
+export interface RenameBotResult {
+  readonly id: SessionId
+  readonly displayName: string
+  readonly member: TeamMemberView
+}
+
+/**
+ * Host persona update input (FR-002 / FR-003).
+ * Values replace the prior profile; empty job/voice/antiJobs are allowed.
+ */
+export interface UpdatePersonaInput {
+  readonly botId: SessionId
+  readonly job: string
+  readonly voice: string
+  readonly antiJobs: readonly string[]
+}
+
+/** Lead-authorized Host persona update, including cancellation. */
+export interface UpdatePersonaRequest extends UpdatePersonaInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Bot identity after a successful persona update. */
+export interface UpdatePersonaResult {
+  readonly id: SessionId
+  readonly persona: BotPersonaProfile
+  readonly member: TeamMemberView
+}
+
+/**
+ * Host avatar-marker input (FR-005).
+ * At least one of shape or color required when setting an avatar for Pass.
+ */
+export interface SetAvatarInput {
+  readonly botId: SessionId
+  readonly avatar: AvatarMarker
+}
+
+/** Lead-authorized Host avatar set, including cancellation. */
+export interface SetAvatarRequest extends SetAvatarInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Bot identity after a successful avatar set. */
+export interface SetAvatarResult {
+  readonly id: SessionId
+  readonly avatar: AvatarMarker
+  readonly member: TeamMemberView
+}
+
+/**
+ * Host section assign / move / unassign input (FR-006).
+ * `sectionId: null` places the bot under Unassigned/default.
+ */
+export interface AssignSectionInput {
+  readonly botId: SessionId
+  readonly sectionId: SidebarSectionId | null
+}
+
+/** Lead-authorized Host section membership update, including cancellation. */
+export interface AssignSectionRequest extends AssignSectionInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Bot identity after a successful section assign/unassign. */
+export interface AssignSectionResult {
+  readonly id: SessionId
+  readonly sectionId: SidebarSectionId | null
+  readonly member: TeamMemberView
+}
+
+/**
+ * Host delete input (FR-007 / FR-008).
+ * Confirm UX is Client-owned; this mutation performs identity removal when invoked.
+ */
+export interface DeleteBotInput {
+  readonly botId: SessionId
+}
+
+/** Lead-authorized Host delete, including cancellation. */
+export interface DeleteBotRequest extends DeleteBotInput {
+  readonly signal: AbortSignal
+}
+
+/** Host acknowledgement after durable Bot identity removal. */
+export interface DeleteBotResult {
+  readonly id: SessionId
+}
 
 /** Input for one durable peer message. */
 export interface SendTeamMessageRequest {

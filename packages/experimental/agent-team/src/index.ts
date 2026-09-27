@@ -28,9 +28,22 @@ import type {
   CreateBotRequest,
   CreateBotResult,
   CreateTeamTaskRequest,
+  AssignSectionInput,
+  AssignSectionRequest,
+  AssignSectionResult,
+  BotIdentityMutationResult,
+  DeleteBotInput,
+  DeleteBotRequest,
+  DeleteBotResult,
   HostMailboxMessage,
+  RenameBotInput,
+  RenameBotRequest,
+  RenameBotResult,
   SendTeamMessageRequest,
   SendTeamMessageResult,
+  SetAvatarInput,
+  SetAvatarRequest,
+  SetAvatarResult,
   SpawnTeammateRequest,
   SpawnTeammateResult,
   TeamMemberView,
@@ -38,6 +51,9 @@ import type {
   TeamTaskView,
   TeamView,
   TeamWaitResult,
+  UpdatePersonaInput,
+  UpdatePersonaRequest,
+  UpdatePersonaResult,
   UpdateTeamTaskRequest,
 } from './types.ts'
 import {
@@ -48,7 +64,7 @@ import {
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
-export { TeamId, TeamMessageId, TeamTaskId } from './types.ts'
+export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId } from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
 export {
@@ -210,6 +226,76 @@ export class TeamService extends TypertRemoteService {
       modelSelection,
       member,
     }
+  }
+
+  /**
+   * Lead-authorized Host rename stub (FR-004).
+   * Persists a non-empty `displayName` on the Bot identity without changing the kebab roster `name`.
+   * Electron Main must not invent rename records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, replacement displayName, and cancellation.
+   * @returns updated Host Bot identity after rename.
+   */
+  async renameBot(caller: Agent, request: RenameBotRequest): Promise<RenameBotResult> {
+    void caller
+    void request
+    throw new TeamError('Host renameBot is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+  }
+
+  /**
+   * Lead-authorized Host persona update stub (FR-002 / FR-003).
+   * Replaces job / voice / antiJobs on the Bot; empty fields are allowed.
+   * Electron Main must not invent persona records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, persona fields, and cancellation.
+   * @returns updated Host Bot identity after persona save.
+   */
+  async updatePersona(caller: Agent, request: UpdatePersonaRequest): Promise<UpdatePersonaResult> {
+    void caller
+    void request
+    throw new TeamError('Host updatePersona is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+  }
+
+  /**
+   * Lead-authorized Host avatar-marker stub (FR-005).
+   * Sets a preset shape and/or color marker; image upload is out of Pass scope.
+   * Electron Main must not invent avatar records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, avatar marker, and cancellation.
+   * @returns updated Host Bot identity after avatar set.
+   */
+  async setAvatar(caller: Agent, request: SetAvatarRequest): Promise<SetAvatarResult> {
+    void caller
+    void request
+    throw new TeamError('Host setAvatar is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+  }
+
+  /**
+   * Lead-authorized Host section assign / unassign stub (FR-006).
+   * `sectionId: null` places the bot under Unassigned/default.
+   * Electron Main must not invent section membership — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, section id or null, and cancellation.
+   * @returns updated Host Bot identity after section membership change.
+   */
+  async assignSection(caller: Agent, request: AssignSectionRequest): Promise<AssignSectionResult> {
+    void caller
+    void request
+    throw new TeamError('Host assignSection is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
+  }
+
+  /**
+   * Lead-authorized Host delete stub (FR-007 / FR-008).
+   * Removes Bot identity from roster / overview / section membership; transcript cleanup is out of band.
+   * Electron Main must not invent delete records — Host owns the durable write (research R1).
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id and cancellation.
+   * @returns acknowledgement after durable identity removal.
+   */
+  async deleteBot(caller: Agent, request: DeleteBotRequest): Promise<DeleteBotResult> {
+    void caller
+    void request
+    throw new TeamError('Host deleteBot is not implemented yet', 'TEAM_NOT_IMPLEMENTED')
   }
 
   /**
@@ -379,6 +465,86 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Rename one product Bot through the generated Remote API (FR-004).
+   * @param agent - exact live Lead Agent authorizing rename.
+   * @param request - bot id and non-empty replacement displayName.
+   * @param signal - Remote call cancellation.
+   * @returns the renamed Bot or a typed Team rejection.
+   */
+  @Remote('renameBot')
+  remoteRenameBot(
+    agent: Agent,
+    request: RenameBotInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<RenameBotResult>> {
+    return this.botIdentityMutationResult(this.renameBot(agent, { ...request, signal }))
+  }
+
+  /**
+   * Update one product Bot persona through the generated Remote API (FR-002 / FR-003).
+   * @param agent - exact live Lead Agent authorizing the update.
+   * @param request - bot id plus job / voice / antiJobs (empty allowed).
+   * @param signal - Remote call cancellation.
+   * @returns the updated Bot or a typed Team rejection.
+   */
+  @Remote('updatePersona')
+  remoteUpdatePersona(
+    agent: Agent,
+    request: UpdatePersonaInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<UpdatePersonaResult>> {
+    return this.botIdentityMutationResult(this.updatePersona(agent, { ...request, signal }))
+  }
+
+  /**
+   * Set one product Bot avatar marker through the generated Remote API (FR-005).
+   * @param agent - exact live Lead Agent authorizing the update.
+   * @param request - bot id and preset avatar marker.
+   * @param signal - Remote call cancellation.
+   * @returns the updated Bot or a typed Team rejection.
+   */
+  @Remote('setAvatar')
+  remoteSetAvatar(
+    agent: Agent,
+    request: SetAvatarInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<SetAvatarResult>> {
+    return this.botIdentityMutationResult(this.setAvatar(agent, { ...request, signal }))
+  }
+
+  /**
+   * Assign or unassign one product Bot sidebar section through the generated Remote API (FR-006).
+   * @param agent - exact live Lead Agent authorizing the update.
+   * @param request - bot id and section id or `null` for Unassigned/default.
+   * @param signal - Remote call cancellation.
+   * @returns the updated Bot or a typed Team rejection.
+   */
+  @Remote('assignSection')
+  remoteAssignSection(
+    agent: Agent,
+    request: AssignSectionInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<AssignSectionResult>> {
+    return this.botIdentityMutationResult(this.assignSection(agent, { ...request, signal }))
+  }
+
+  /**
+   * Delete one product Bot identity through the generated Remote API (FR-007 / FR-008).
+   * @param agent - exact live Lead Agent authorizing delete.
+   * @param request - bot id to remove.
+   * @param signal - Remote call cancellation.
+   * @returns deletion acknowledgement or a typed Team rejection.
+   */
+  @Remote('deleteBot')
+  remoteDeleteBot(
+    agent: Agent,
+    request: DeleteBotInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<DeleteBotResult>> {
+    return this.botIdentityMutationResult(this.deleteBot(agent, { ...request, signal }))
+  }
+
+  /**
    * Apply one task mutation and preserve Team rejections as business results.
    * @param agent - exact live Team member authorizing the mutation.
    * @param request - task identity, expected revision, action, and action fields.
@@ -406,7 +572,12 @@ export class TeamService extends TypertRemoteService {
   }
 
   /** Preserve Team createBot rejections while allowing unexpected failures to reject the Remote call. */
-  private async createBotMutationResult(operation: Promise<CreateBotResult>): Promise<CreateBotMutationResult> {
+  private createBotMutationResult(operation: Promise<CreateBotResult>): Promise<CreateBotMutationResult> {
+    return this.botIdentityMutationResult(operation)
+  }
+
+  /** Preserve Team bot-identity rejections while allowing unexpected failures to reject the Remote call. */
+  private async botIdentityMutationResult<T>(operation: Promise<T>): Promise<BotIdentityMutationResult<T>> {
     try {
       return { ok: true, value: await operation }
     } catch (error) {

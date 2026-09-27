@@ -62,6 +62,8 @@ Ask the Lead to create a teammate: give it a unique lowercase name such as `revi
 
 Product bot create uses Host `createBot(displayName, modelSelection)`: the Lead-authorized API requires a non-empty `displayName` and exactly one model/provider assignment, derives the durable kebab roster name, and retains `displayName` plus that `modelSelection` on the Host member snapshot. At create (and on cold resume), Agent Teams binds the live Bot through `installModelSelection` so subsequent chats keep that bot’s assignment only — never the Lead’s route. Model calls then resolve through Host `ctx.llm` adapters (`packages/llm/`) with Host `ctx.credentials` resolve for that provider — never a peer bot’s credential, and never Electron Main inventing bot records or routes. Call it through `ctx.agentTeams.createBot` or the generated `agentTeams/createBot` Remote.
 
+Optional Host Bot identity fields on the durable member snapshot — `persona` (`job` / `voice` / `antiJobs`), preset `avatar` (`shape` and/or `color`), and `sectionId` (`null`/absent ⇒ Unassigned/default) — persist with the Team journal `team/member` path and project onto Client roster views. P1 `modelSelection` ownership stays immutable. Beyond create, Host exposes `renameBot`, `updatePersona`, `setAvatar`, `assignSection`, and `deleteBot` (and matching Remotes); foundational stubs reject with `TEAM_NOT_IMPLEMENTED` until story implementations land. Electron Main must not invent identity records.
+
 `modelAssignmentsAreDistinct` compares two assignments after the same trim as `requiredModelSelection`. Optional reasoning effort does not make them distinct. A row missing either id is not an assignment, and the subagent backend id remains `provider`.
 
 The roster shows every member with its role (`lead` or `teammate`) and current status: `running`, `idle`, `inactive` (a member that exists but is not loaded), `provisioning`, or `failed`. A member that is not loaded receives its messages when it wakes.
@@ -177,7 +179,7 @@ Read these pages when the package-level contract is not enough. They move from t
 
 ### Browser Remote
 
-`TeamService` owns the generated `agentTeams/view`, `agentTeams/createBot`, `agentTeams/createTask`, and `agentTeams/updateTask` Remote methods beside the roster, mailbox, task, and lifecycle operations. `agentTeams/view` returns roster rows, non-deleted tasks, and `handoffs` (Host mailbox product rows). The `./remote` export supplies the Client contribution mounted by the Web UI, while `./client` re-exports the request, view, handoff, and task-mutation result types that are safe in a browser compilation face. Typert retains transport failures in its outer `RemoteResult`; create and update rejections remain explicit domain results inside a successful transport response, with stale update revisions distinguished as task conflicts.
+`TeamService` owns the generated `agentTeams/view`, `agentTeams/createBot`, `agentTeams/renameBot`, `agentTeams/updatePersona`, `agentTeams/setAvatar`, `agentTeams/assignSection`, `agentTeams/deleteBot`, `agentTeams/createTask`, and `agentTeams/updateTask` Remote methods beside the roster, mailbox, task, and lifecycle operations. `agentTeams/view` returns roster rows (including projected displayName, persona, avatar, and sectionId when present), non-deleted tasks, and `handoffs` (Host mailbox product rows). The `./remote` export supplies the Client contribution mounted by the Web UI, while `./client` re-exports the request, view, handoff, identity-mutation, and task-mutation result types that are safe in a browser compilation face. Typert retains transport failures in its outer `RemoteResult`; create and update rejections remain explicit domain results inside a successful transport response, with stale update revisions distinguished as task conflicts.
 
 ## Model Experience
 
@@ -205,7 +207,7 @@ These limits describe what a team cannot do yet or what needs special operationa
 - **Experimental prototype with no stability promise** — the package is public, but its contracts can change freely while it incubates.
 - **One process and one shared checkout** — members share cwd and observe edits immediately; this package provides no worktree, remote member, merge, or filesystem lock.
 - **Advisory write scopes** — Bash, formatters, code generators, and direct external writers can bypass filesystem version checks; Leads must coordinate ownership and review the final diff.
-- **Flat immutable roster** — only the Lead creates direct teammates; there is no nested Team, rename, deletion, or name reuse.
+- **Flat roster with Host identity mutations in progress** — only the Lead creates direct teammates; kebab `name` is never reused. Product `displayName` / persona / avatar / section mutations are Host-owned Remotes (stubs until story tasks land); Electron Main must not invent a parallel identity store.
 - **No automatic ownership release** — idle, interruption, process exit, and failed work do not release a task owner.
 - **Mailbox is not cross-process exactly-once** — concurrent harness processes over one Team are unsupported.
 

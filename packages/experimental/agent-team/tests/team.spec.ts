@@ -417,6 +417,57 @@ describe('Team identity and provisioning', () => {
     })
   })
 
+  it('exposes Host identity mutation stubs as team-rejected Remotes without Main invention', async () => {
+    const { ctx, lead } = await setup([textResponse('identity stub bot')])
+    const created = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Identity Stub',
+      modelSelection: { provider: 'mock', model: 'mock' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, created.id)
+
+    await expect(ctx.agentTeams.renameBot(lead, {
+      botId: created.id,
+      displayName: 'Renamed',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({ code: 'TEAM_NOT_IMPLEMENTED' })
+
+    const remoteRename = await ctx.agentTeams.remoteRenameBot(lead, {
+      botId: created.id,
+      displayName: 'Renamed',
+    }, SIGNAL)
+    expect(remoteRename).toEqual({
+      ok: false,
+      error: { code: 'team-rejected', message: 'Host renameBot is not implemented yet' },
+    })
+    expect(await ctx.agentTeams.remoteUpdatePersona(lead, {
+      botId: created.id,
+      job: 'review',
+      voice: 'terse',
+      antiJobs: ['merge'],
+    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
+    expect(await ctx.agentTeams.remoteSetAvatar(lead, {
+      botId: created.id,
+      avatar: { shape: 'circle', color: 'blue' },
+    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
+    expect(await ctx.agentTeams.remoteAssignSection(lead, {
+      botId: created.id,
+      sectionId: null,
+    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
+    expect(await ctx.agentTeams.remoteDeleteBot(lead, {
+      botId: created.id,
+    }, SIGNAL)).toMatchObject({ ok: false, error: { code: 'team-rejected' } })
+
+    // Prior create identity remains Host-durable; stubs do not invent Electron records.
+    expect(durable(lead).members.find(row => row.id === created.id)).toMatchObject({
+      displayName: 'Identity Stub',
+      phase: 'active',
+    })
+    expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
+      displayName: 'Identity Stub',
+    })
+  })
+
   it('binds Bot ModelSelection via installModelSelection for subsequent chats only', async () => {
     const { ctx, lead } = await setup([
       textResponse('bound first turn'),
