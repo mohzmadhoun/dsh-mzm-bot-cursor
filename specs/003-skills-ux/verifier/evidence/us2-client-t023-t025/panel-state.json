@@ -1,0 +1,16 @@
+{
+  "members": [
+    {
+      "id": "c92d4a8c-a423-4bc4-b015-79167899239d",
+      "name": "Attach Demo Bot",
+      "botSkills": true,
+      "attach": "c92d4a8c-a423-4bc4-b015-79167899239d"
+    }
+  ],
+  "skills": [
+    "mzm-thin-pack",
+    "office-docx",
+    "office-pptx",
+    "office-xlsx"
+  ]
+}
