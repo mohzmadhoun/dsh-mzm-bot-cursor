@@ -58,4 +58,4 @@ Locked Desktop topology remains: Electron Main + preload lifecycle IPC only; Web
 
 - Contract: [../contracts/chat-progress-final.md](../contracts/chat-progress-final.md)
 - T030 final delivery in chat
-- Scenario 4 (T032): `scenario-4-progress-final.md` (when present)
+- Scenario 4 (T032): [scenario-4-progress-final.md](./scenario-4-progress-final.md)

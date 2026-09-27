@@ -29,7 +29,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **1** In-app auth + clean dump | Scenario 1 | [scenario-1-credentials.md](./scenario-1-credentials.md) (T037 SC-006 Pass; FR-009 table; live Desktop dump optional) | **Verifier** + Runtime + Client | SC-006 / FR-008…009, FR-012 |
 | **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
 | **3** Host mailbox 1:1 | Scenario 3 | [scenario-3-mailbox.md](./scenario-3-mailbox.md) (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
-| **4** Progress + final | Scenario 4 | `scenario-4-progress-final.md` (T032) | **Verifier** + Client | SC-004 / FR-006 |
+| **4** Progress + final | Scenario 4 | [scenario-4-progress-final.md](./scenario-4-progress-final.md) (T032 recipe; SC-004 Pass Deferred until T030 on checkout) | **Verifier** + Client | SC-004 / FR-006 |
 | **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
 Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of Scope absence checks Pass), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
@@ -53,6 +53,8 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of
 | **T027** Thin Electron shell (no Main routers) | [t027-thin-shell.md](./t027-thin-shell.md) | **Electron** + **Verifier** | FR-007 Main lifecycle/`dsh-app://` HTTP forward only; not SC-004 Pass; leaves T026/T034 files alone |
 | **T028** Desktop session chrome create/assign | [t028-session-chrome.md](./t028-session-chrome.md) | **Electron** + **Verifier** | FR-007 Host profile composes Client create-bot + assign-model into session chrome; no config-file edit; not SC-001/002 Pass |
 | **T029** Chat progress from Host streams | [t029-chat-progress.md](./t029-chat-progress.md) | **Electron/Client** + **Verifier** | FR-006 in-flight half; `data-chat-progress="host-stream"`; no shell progress IPC; not SC-004 Pass (T030/T032) |
+| **T030** Chat final + mailbox attribution | `t030-chat-final.md` (landing — PR #60) | **Electron/Client** + **Verifier** | FR-006 final half; session-log delivery + optional `linkedMailboxMessageId`; not SC-004 Pass until Scenario 4 composite |
+| **T032** Scenario 4 progress + final | [scenario-4-progress-final.md](./scenario-4-progress-final.md) | **Verifier** + Client | SC-004 recipe (≥1 progress + final); evidence stubs under [evidence/scenario-4/](./evidence/scenario-4/); SC-004 Pass Deferred while T030 landing |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
 | **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
 | **T035** Missing/invalid credential UX | [t035-cred-ux.md](./t035-cred-ux.md) | **Electron/Client** + **Verifier** | FR-008 failure UX: Models re-entry for missing + invalid/revoked; no peer resolve fallback |
