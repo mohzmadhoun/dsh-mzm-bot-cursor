@@ -1759,6 +1759,7 @@ describe('Team Remote API', () => {
       unassignedBotIds: [],
       handoffs: [],
       skills: [],
+      routines: [],
     })
 
     const createdResult = await ctx.agentTeams.remoteCreateTask(lead, {
@@ -1782,7 +1783,86 @@ describe('Team Remote API', () => {
       tasks: [expect.objectContaining({ id: created.id })],
       handoffs: [],
       skills: [],
+      routines: [],
     })
+  })
+
+  it('persists createRoutine, lists by botId, and rejects empty intent / bad schedule', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('routine bot a'),
+      textResponse('routine bot b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Routine Alpha',
+      modelSelection: { provider: 'mock', model: 'routine-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Routine Beta',
+      modelSelection: { provider: 'mock', model: 'routine-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, beta.id)
+
+    await expect(ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: '   ',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })).rejects.toThrow(/intent must be non-empty/)
+    await expect(ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Check inbox',
+      scheduleExpr: '@every 1m',
+      signal: SIGNAL,
+    })).rejects.toThrow(/at least 5 minutes/)
+
+    const created = await ctx.agentTeams.createRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Check inbox',
+      scheduleExpr: '@every 5m',
+      signal: SIGNAL,
+    })
+    expect(created.routine).toMatchObject({
+      botId: alpha.id,
+      intent: 'Check inbox',
+      identity: 'Check inbox',
+      scheduleExpr: '@every 5m',
+      scheduleLabel: 'Every 5m',
+      status: 'active',
+      lastRunAt: null,
+    })
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: alpha.id, signal: SIGNAL }).routines)
+      .toEqual([created.routine])
+    expect(ctx.agentTeams.listRoutinesByBot(lead, { botId: beta.id, signal: SIGNAL }).routines)
+      .toEqual([])
+
+    const remoteCreate = await ctx.agentTeams.remoteCreateRoutine(lead, {
+      botId: alpha.id,
+      intent: 'Second pass',
+      scheduleExpr: '0 * * * *',
+    }, SIGNAL)
+    expect(remoteCreate).toMatchObject({
+      ok: true,
+      value: {
+        routine: {
+          botId: alpha.id,
+          intent: 'Second pass',
+          scheduleExpr: '0 * * * *',
+          status: 'active',
+        },
+      },
+    })
+    const listed = await ctx.agentTeams.remoteListRoutinesByBot(lead, { botId: alpha.id }, SIGNAL)
+    expect(listed).toMatchObject({ ok: true })
+    if (!listed.ok) throw new Error('listRoutinesByBot failed')
+    expect(listed.value.routines).toHaveLength(2)
+    expect(listed.value.routines.every(row => row.botId === alpha.id)).toBe(true)
+
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.routines).toHaveLength(2)
+    expect(view.routines.every(row => row.botId === alpha.id)).toBe(true)
   })
 
   it('persists attachSkill, projects skillAttachments on view, and rejects empty author fields', async () => {

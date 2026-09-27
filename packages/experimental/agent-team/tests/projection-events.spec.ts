@@ -3,7 +3,7 @@ import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
 import { teamProjectionDefinition, projectSidebarSections, projectSkillCatalog } from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
-import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId } from '../src/types.ts'
+import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId, RoutineId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
 
 const ROOT = SessionId('team-root')
@@ -41,7 +41,8 @@ function pending(state: TeamState): TeamMessageSnapshot[] {
 
 /** Whether one Team state contains no projected records. */
 function isEmptyState(state: TeamState): boolean {
-  return state.members.length === 0 && state.sections.length === 0 && state.tasks.length === 0
+  return state.members.length === 0 && state.sections.length === 0 && state.routines.length === 0
+    && state.tasks.length === 0
     && state.messages.length === 0 && state.delivered.length === 0
 }
 
@@ -130,6 +131,62 @@ describe('Agent Teams projection events', () => {
       teamId: TEAM,
       section: { id: SidebarSectionId('sec-empty'), name: '   ' },
     }, SessionSeq(0))])).toThrow(/name must be non-empty/)
+  })
+
+  it('persists Host Routine catalog rows and rejects empty intent', () => {
+    const created = event('team/routine', {
+      version: 2,
+      teamId: TEAM,
+      routine: {
+        routineId: RoutineId('routine-1'),
+        botId: CHILD,
+        intent: 'Ping status',
+        scheduleExpr: '@every 5m',
+        status: 'active',
+        lastRunAt: null,
+        createdAt: 10,
+        updatedAt: 10,
+      },
+    }, SessionSeq(0))
+    const paused = event('team/routine', {
+      version: 2,
+      teamId: TEAM,
+      routine: {
+        routineId: RoutineId('routine-1'),
+        botId: CHILD,
+        intent: 'Ping status',
+        scheduleExpr: '@every 5m',
+        status: 'paused',
+        lastRunAt: null,
+        createdAt: 10,
+        updatedAt: 20,
+      },
+    }, SessionSeq(1))
+    const state = teamState(project(ROOT, [created, paused]))
+    expect(state.routines).toEqual([{
+      routineId: RoutineId('routine-1'),
+      botId: CHILD,
+      intent: 'Ping status',
+      scheduleExpr: '@every 5m',
+      status: 'paused',
+      lastRunAt: null,
+      createdAt: 10,
+      updatedAt: 20,
+    }])
+    expect(() => projectTeam(ROOT, [event('team/routine', {
+      version: 2,
+      teamId: TEAM,
+      routine: {
+        routineId: RoutineId('routine-empty'),
+        botId: CHILD,
+        intent: '   ',
+        scheduleExpr: '@every 5m',
+        status: 'active',
+        lastRunAt: null,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }, SessionSeq(0))])).toThrow(/intent must be non-empty/)
   })
 
   it('derives named membership and Unassigned without a stored Unassigned row', () => {

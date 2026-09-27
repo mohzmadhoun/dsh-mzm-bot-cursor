@@ -76,6 +76,8 @@ async function main(): Promise<void> {
     root: join(resolveDshHome(), 'dsh-runtimes', 'dsh-primary-runtime'),
   })
   // P3 thin pack + Host-durable user skills — Host owns catalog; Electron Main must not.
+  // P4: jobs-local stays on the desktop/base profile for optional in-flight fire visibility only
+  // (T013) — never Routine catalog / cron SoT (see specs/004-routines-cron/verifier/optional-jobs-visibility.md).
   await ctx.plugin(desktopManagedSkills, {
     managedRoot: MANAGED_SKILLS_ROOT,
     userRoot: join(resolveDshHome(), 'desktop-user-skills'),

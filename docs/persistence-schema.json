@@ -9659,7 +9659,7 @@
       "kind": "event",
       "event": "team/member",
       "surface": false,
-      "digest": "0f881efa48fd91cd463e221c78f7727d543fe6355944c8ee901e5c77cd7f5739",
+      "digest": "e9f01bc311604c323255f5cfcec5b2b83b5eea0521f98a71785df64f4d9854f9",
       "schema": {
         "root": 0,
         "nodes": [
@@ -9673,22 +9673,22 @@
               },
               {
                 "name": "ignorable",
-                "type": 19,
+                "type": 34,
                 "optional": true
               },
               {
                 "name": "seq",
-                "type": 20,
+                "type": 32,
                 "optional": false
               },
               {
                 "name": "time",
-                "type": 20,
+                "type": 32,
                 "optional": false
               },
               {
                 "name": "type",
-                "type": 21,
+                "type": 35,
                 "optional": false
               }
             ],
@@ -9704,12 +9704,12 @@
               },
               {
                 "name": "teamId",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "version",
-                "type": 18,
+                "type": 33,
                 "optional": false
               }
             ],
@@ -9725,57 +9725,62 @@
               },
               {
                 "name": "context",
-                "type": 5,
+                "type": 16,
                 "optional": false
               },
               {
                 "name": "description",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "displayName",
-                "type": 4,
+                "type": 19,
                 "optional": true
               },
               {
                 "name": "error",
-                "type": 4,
+                "type": 19,
                 "optional": true
               },
               {
                 "name": "id",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "modelSelection",
-                "type": 8,
+                "type": 20,
                 "optional": true
               },
               {
                 "name": "name",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "persona",
-                "type": 9,
+                "type": 21,
                 "optional": true
               },
               {
                 "name": "phase",
-                "type": 11,
+                "type": 23,
                 "optional": false
               },
               {
                 "name": "provider",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "sectionId",
-                "type": 16,
+                "type": 28,
+                "optional": true
+              },
+              {
+                "name": "skillAttachments",
+                "type": 30,
                 "optional": true
               }
             ],
@@ -9791,21 +9796,77 @@
               },
               {
                 "name": "shape",
-                "type": 4,
+                "type": 11,
                 "optional": true
               }
             ],
             "indices": []
           },
           {
-            "kind": "primitive",
-            "type": "string"
+            "kind": "union",
+            "types": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
           },
           {
             "kind": "union",
             "types": [
-              6,
-              7
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "union",
+            "types": [
+              17,
+              18
             ]
           },
           {
@@ -9817,21 +9878,25 @@
             "value": "fresh"
           },
           {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
             "kind": "object",
             "properties": [
               {
                 "name": "model",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "provider",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "reasoningEffort",
-                "type": 4,
+                "type": 19,
                 "optional": true
               }
             ],
@@ -9842,17 +9907,17 @@
             "properties": [
               {
                 "name": "antiJobs",
-                "type": 10,
+                "type": 22,
                 "optional": false
               },
               {
                 "name": "job",
-                "type": 4,
+                "type": 19,
                 "optional": false
               },
               {
                 "name": "voice",
-                "type": 4,
+                "type": 19,
                 "optional": false
               }
             ],
@@ -9860,15 +9925,15 @@
           },
           {
             "kind": "array",
-            "element": 4
+            "element": 19
           },
           {
             "kind": "union",
             "types": [
-              12,
-              13,
-              14,
-              15
+              24,
+              25,
+              26,
+              27
             ]
           },
           {
@@ -9890,13 +9955,42 @@
           {
             "kind": "union",
             "types": [
-              4,
-              17
+              19,
+              29
             ]
           },
           {
             "kind": "primitive",
             "type": "null"
+          },
+          {
+            "kind": "array",
+            "element": 31
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 32,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 19,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
           },
           {
             "kind": "literal",
@@ -9905,10 +9999,6 @@
           {
             "kind": "literal",
             "value": true
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
           },
           {
             "kind": "literal",
@@ -10384,6 +10474,162 @@
           {
             "kind": "literal",
             "value": "team/message/queued"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:team/routine",
+      "kind": "event",
+      "event": "team/routine",
+      "surface": false,
+      "digest": "2a9151020dfe7e5872665d3c4df6abdcb098c82803367efe52590e408f1a8a7e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 12,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "routine",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "intent",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              6
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/routine"
           }
         ]
       }
@@ -15162,7 +15408,7 @@
         "event:team/message/delivered.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:627"
+        "packages/experimental/agent-team/src/types.ts:840"
       ]
     },
     {
@@ -15525,7 +15771,7 @@
         "event:team/message/queued.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:625"
+        "packages/experimental/agent-team/src/types.ts:838"
       ]
     },
     {
@@ -16603,269 +16849,6 @@
       "sources": [
         "packages/attachment/attachment/src/types.ts:28"
       ]
-    },
-    {
-      "digest": "0f881efa48fd91cd463e221c78f7727d543fe6355944c8ee901e5c77cd7f5739",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "data",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "ignorable",
-                "type": 19,
-                "optional": true
-              },
-              {
-                "name": "seq",
-                "type": 20,
-                "optional": false
-              },
-              {
-                "name": "time",
-                "type": 20,
-                "optional": false
-              },
-              {
-                "name": "type",
-                "type": 21,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "member",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 18,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 9,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 11,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 16,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              6,
-              7
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 10,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 4,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 4
-          },
-          {
-            "kind": "union",
-            "types": [
-              12,
-              13,
-              14,
-              15
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "deleted"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "union",
-            "types": [
-              4,
-              17
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "literal",
-            "value": "team/member"
-          }
-        ]
-      },
-      "names": [
-        "event:team/member"
-      ],
-      "sources": []
     },
     {
       "digest": "10e386801903f9d424602c31d3ff837a94aef623c8b391376d8d9e253525fabe",
@@ -18747,6 +18730,20 @@
       "sources": []
     },
     {
+      "digest": "199c3646688971128886b31481100246032a67961aabce1a7a0117efbe6dac84",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "purple"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "1a2718b00937b236a0d0910ef5dab2f9f8b65e4bde410cc21f15fbbf29f584d3",
       "schema": {
         "root": 0,
@@ -20483,7 +20480,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSource"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:250"
+        "packages/experimental/agent-team/src/types.ts:367"
       ]
     },
     {
@@ -24058,6 +24055,162 @@
       ]
     },
     {
+      "digest": "2a9151020dfe7e5872665d3c4df6abdcb098c82803367efe52590e408f1a8a7e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 12,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "routine",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "intent",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              6
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/routine"
+          }
+        ]
+      },
+      "names": [
+        "event:team/routine"
+      ],
+      "sources": []
+    },
+    {
       "digest": "2ab12a0e345658f9342816d773fe610f049982bcad82631f43b9205abe43e5ee",
       "schema": {
         "root": 0,
@@ -24616,7 +24769,7 @@
         "event:team/section.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:623"
+        "packages/experimental/agent-team/src/types.ts:831"
       ]
     },
     {
@@ -27643,6 +27796,20 @@
       ]
     },
     {
+      "digest": "32eb735f9f5a9449b4b7c5bad3fba842e16a609334dd8615aabb9d60ff7f939b",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "circle"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "3305a4bb6b6c29b482ba91d59c60b47e8f98282d3dacc8c29e4a4c2712209bdd",
       "schema": {
         "root": 0,
@@ -29327,6 +29494,125 @@
       "sources": []
     },
     {
+      "digest": "3bbba9c4f09621bc67298ab42aa0528633235971c01e507d5851df82ccca1e8b",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "routine",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 9,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "intent",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              5
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/routine.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:836"
+      ]
+    },
+    {
       "digest": "3bc287e765d58dc3a22672a0495a6cfd561220dd38fbaecef80aa95b96caed79",
       "schema": {
         "root": 0,
@@ -29365,6 +29651,7 @@
       "names": [
         "event:compaction/end.data.turn",
         "event:compaction/start.data.turn",
+        "event:team/routine.data.routine.lastRunAt",
         "packages/core/session/src/types.ts#OptionalSessionSeq"
       ],
       "sources": [
@@ -29550,6 +29837,20 @@
       "sources": [
         "packages/experimental/agent-team/src/types.ts:67"
       ]
+    },
+    {
+      "digest": "3d4f2ee0b52b216d7a59b2e4e68609e27283e330ca847987b0965a76c22d4aea",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "triangle"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "3d7d07060a7be77984feb651ea2bf1925d3e0477911d9d3ed86330d1e8ca6182",
@@ -29834,6 +30135,20 @@
           {
             "kind": "literal",
             "value": "image/jpeg"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "412419ddeaa2ae91a40aba1a9e519b66a6ebe89296eb16dc0bdd4a693302c84a",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "hexagon"
           }
         ]
       },
@@ -30473,6 +30788,137 @@
       "sources": [
         "packages/interaction/user-approval/src/types.ts:44"
       ]
+    },
+    {
+      "digest": "463c064144afe0f5b233272fad2106da13b49b680496d2d8dcc9ac9c0cbe55a5",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "intent",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              4
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#RoutineRecord"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:108"
+      ]
+    },
+    {
+      "digest": "47682dcaa27678876dfb90002af7665f48f39af19f5ede82dd9567028f5693d2",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          }
+        ]
+      },
+      "names": [
+        "event:team/member.data.member.avatar.shape"
+      ],
+      "sources": []
     },
     {
       "digest": "477614bca595a9e7adb5a1870be446b9a8684f3ba8950259d6289f2d3b74f028",
@@ -31629,6 +32075,53 @@
       "sources": []
     },
     {
+      "digest": "48695584b672476649ceabbeef0fb7f68e09557798b2e52bda47a84aeb4544b6",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
+          }
+        ]
+      },
+      "names": [
+        "event:team/member.data.member.avatar.color"
+      ],
+      "sources": []
+    },
+    {
       "digest": "48e5c9861f16ac07e78cb7b5ae9dabdf7bb85c58baed5a51b4ad275050ea58e3",
       "schema": {
         "root": 0,
@@ -31800,6 +32293,20 @@
       "names": [
         "event:team/message/delivered"
       ],
+      "sources": []
+    },
+    {
+      "digest": "491354c82027922c040bb4991a60391bafd80b89eb93f5e165cf5da2f2025c39",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "blue"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -32002,6 +32509,354 @@
       "sources": [
         "packages/core/session/src/types.ts:192"
       ]
+    },
+    {
+      "digest": "4bbb8660391ebb80137bf9505a02e7bfc15c206ba0391b6deb166b5b6060e861",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 14,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 17,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 17,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 18,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 21,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 26,
+                "optional": true
+              },
+              {
+                "name": "skillAttachments",
+                "type": 28,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 9,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11,
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          },
+          {
+            "kind": "union",
+            "types": [
+              15,
+              16
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 17,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 17,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 17
+          },
+          {
+            "kind": "union",
+            "types": [
+              22,
+              23,
+              24,
+              25
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "union",
+            "types": [
+              17,
+              27
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "array",
+            "element": 29
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 30,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 17,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 17,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:193"
+      ]
+    },
+    {
+      "digest": "4bcf1dbccc513bed1eb81614235d920a2c874568a676e5e12a3aefa22ad515ef",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#SkillAttachment"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:150"
+      ]
+    },
+    {
+      "digest": "4c92b6ed5fcaa9798cd0575f2c425abf2e1bc023307f5afa78508c686aed3c4a",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "orange"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "4c965666d5b42116945bc356087cd5e1fd549e6dece560785ed60511059a8283",
@@ -32799,7 +33654,9 @@
         "packages/attachment/attachment/src/brand.ts#AttachmentId",
         "packages/compaction/compaction/src/brand.ts#CompactionId",
         "packages/core/session/src/types.ts#SessionId",
+        "packages/experimental/agent-team/src/types.ts#RoutineId",
         "packages/experimental/agent-team/src/types.ts#SidebarSectionId",
+        "packages/experimental/agent-team/src/types.ts#SkillId",
         "packages/experimental/agent-team/src/types.ts#TeamId",
         "packages/experimental/agent-team/src/types.ts#TeamMessageId",
         "packages/experimental/agent-team/src/types.ts#TeamTaskId",
@@ -32828,6 +33685,8 @@
         "packages/experimental/agent-team/src/types.ts:21",
         "packages/experimental/agent-team/src/types.ts:33",
         "packages/experimental/agent-team/src/types.ts:52",
+        "packages/experimental/agent-team/src/types.ts:77",
+        "packages/experimental/agent-team/src/types.ts:89",
         "packages/experimental/agent-team/src/types.ts:9",
         "packages/feedback/message-feedback/src/types.ts:14",
         "packages/goal/goal/src/types.ts:17",
@@ -34149,6 +35008,322 @@
       ]
     },
     {
+      "digest": "50b3711e4dda057da18d6d4345bc9d1b93db7bc0ac0d6a9c077ec4365c51480f",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "member",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 32,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 18,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 18,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 22,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 27,
+                "optional": true
+              },
+              {
+                "name": "skillAttachments",
+                "type": 29,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 10,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6,
+              7,
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
+          },
+          {
+            "kind": "union",
+            "types": [
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          },
+          {
+            "kind": "union",
+            "types": [
+              16,
+              17
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 18,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 21,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 18,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 18
+          },
+          {
+            "kind": "union",
+            "types": [
+              23,
+              24,
+              25,
+              26
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "union",
+            "types": [
+              18,
+              28
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "array",
+            "element": 30
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 31,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 18,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/member.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:824"
+      ]
+    },
+    {
       "digest": "50cf02d875f8a1f1411f4a6fbcffab9120ccef5f74a47331fbf29480e5f68f48",
       "schema": {
         "root": 0,
@@ -34183,6 +35358,20 @@
           {
             "kind": "literal",
             "value": "success"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "5156d90b6eef157e69c70ec5e9b486a1234efdb9f45e127977bf940a05b017f7",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "team/routine"
           }
         ]
       },
@@ -34378,7 +35567,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:173"
+        "packages/experimental/agent-team/src/types.ts:280"
       ]
     },
     {
@@ -35459,7 +36648,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:241"
+        "packages/experimental/agent-team/src/types.ts:358"
       ]
     },
     {
@@ -35626,8 +36815,8 @@
       },
       "names": [
         "SessionEventEnvelope[39].sourceEventSeqs",
-        "SessionEventEnvelope[53].sourceEventSeqs",
-        "SessionEventEnvelope[56].sourceEventSeqs",
+        "SessionEventEnvelope[54].sourceEventSeqs",
+        "SessionEventEnvelope[57].sourceEventSeqs",
         "event:assistant/attempt.data.stream[0][0].dt",
         "event:assistant/attempt.data.stream[0][1].dt",
         "event:assistant/attempt.data.stream[0][2].dt",
@@ -35773,40 +36962,6 @@
       ],
       "sources": [
         "packages/compaction/compaction/src/types.ts:82"
-      ]
-    },
-    {
-      "digest": "5e5db8bfb1ad6393ab83031314dd677b352324e3d503cb8485ae639765562c8a",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 1,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 1,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          }
-        ]
-      },
-      "names": [
-        "packages/experimental/agent-team/src/types.ts#AvatarMarker"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:89"
       ]
     },
     {
@@ -38803,6 +39958,96 @@
       "sources": []
     },
     {
+      "digest": "6e200c8f5dca84740cc4371dfec3cbeb6cfa8af84c3b6e8a88335e5ed68a9927",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 8,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "union",
+            "types": [
+              9,
+              10,
+              11,
+              12
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#AvatarMarker"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:185"
+      ]
+    },
+    {
       "digest": "6e52dd55a1d48954ed5464ec46fe34d9eb65f709baabc9561e7a279910b0c406",
       "schema": {
         "root": 0,
@@ -39243,6 +40488,20 @@
         "event:tool/result.data.meta[5]",
         "event:tool/result.data.meta[5][0][5]"
       ],
+      "sources": []
+    },
+    {
+      "digest": "732a8cadcfb84aa6fadde15c320c1ab8e6e534f02d09ff08a086b5c1e2830905",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "green"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -42953,203 +44212,6 @@
       ]
     },
     {
-      "digest": "8a9f8bf5f64870225a8af626235463024dd7f1a811ddadc089c2d44b456d866d",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 1,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 6,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 9,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 14,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 2,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              4,
-              5
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 2,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 8,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 2,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 2
-          },
-          {
-            "kind": "union",
-            "types": [
-              10,
-              11,
-              12,
-              13
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "literal",
-            "value": "deleted"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "union",
-            "types": [
-              2,
-              15
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          }
-        ]
-      },
-      "names": [
-        "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:97"
-      ]
-    },
-    {
       "digest": "8ad45ad053b4d89f8865c17cc9ff3b8748e86045f3f0fb816269a34af2619141",
       "schema": {
         "root": 0,
@@ -45274,8 +46336,8 @@
       },
       "names": [
         "SessionEventEnvelope[39]",
-        "SessionEventEnvelope[53]",
-        "SessionEventEnvelope[56]"
+        "SessionEventEnvelope[54]",
+        "SessionEventEnvelope[57]"
       ],
       "sources": []
     },
@@ -45413,228 +46475,6 @@
       },
       "names": [],
       "sources": []
-    },
-    {
-      "digest": "9b2fec29aeb2e4e0a20ca05bcfe6e0206f7a487e8711047809edaa5117d4f979",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "member",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 17,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "avatar",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "context",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "description",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "displayName",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "error",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "id",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "modelSelection",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "name",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "persona",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "phase",
-                "type": 10,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "sectionId",
-                "type": 15,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "color",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "shape",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "union",
-            "types": [
-              5,
-              6
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "fork"
-          },
-          {
-            "kind": "literal",
-            "value": "fresh"
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "model",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "antiJobs",
-                "type": 9,
-                "optional": false
-              },
-              {
-                "name": "job",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "voice",
-                "type": 3,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "array",
-            "element": 3
-          },
-          {
-            "kind": "union",
-            "types": [
-              11,
-              12,
-              13,
-              14
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "deleted"
-          },
-          {
-            "kind": "literal",
-            "value": "failed"
-          },
-          {
-            "kind": "literal",
-            "value": "provisioning"
-          },
-          {
-            "kind": "union",
-            "types": [
-              3,
-              16
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          }
-        ]
-      },
-      "names": [
-        "event:team/member.data"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:616"
-      ]
     },
     {
       "digest": "9b4fd974c124c83743efe030ba4e1250e087505f3f74588716a521fb8d453267",
@@ -47855,7 +48695,7 @@
         "event:team/task.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:618"
+        "packages/experimental/agent-team/src/types.ts:826"
       ]
     },
     {
@@ -50463,7 +51303,7 @@
         "packages/experimental/agent-team/src/types.ts#SidebarSectionSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:202"
+        "packages/experimental/agent-team/src/types.ts:309"
       ]
     },
     {
@@ -50678,7 +51518,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskStatus"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:170"
+        "packages/experimental/agent-team/src/types.ts:277"
       ]
     },
     {
@@ -51577,6 +52417,20 @@
           {
             "kind": "literal",
             "value": "team/task"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "b61e4abd1b812ceda828a273a811804da907f89e6b34d2ddeb2c769b55768ec7",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "gray"
           }
         ]
       },
@@ -53057,6 +53911,20 @@
       ]
     },
     {
+      "digest": "bcff01c4ad024363568aeace9c187f8987d031e18f2fea64f3970ee0b20096ff",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "red"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "bd499eac047efe091a4df7382eadd06d25cf0cb31fee3981e8b24d85762841cd",
       "schema": {
         "root": 0,
@@ -53458,6 +54326,20 @@
           {
             "kind": "literal",
             "value": "step/end"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "c27e94c1e2993103dfdf0ac9cfa1adcc023d9974e8ec033289c5630460971b4b",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "square"
           }
         ]
       },
@@ -56289,6 +57171,51 @@
       },
       "names": [
         "event:web/deepseek-search-llm-request"
+      ],
+      "sources": []
+    },
+    {
+      "digest": "cfad6338a034debe5b3f5744247b2b4e2e459118fc7a84e615f1d1c3f822c99d",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "array",
+            "element": 1
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "event:team/member.data.member.skillAttachments"
       ],
       "sources": []
     },
@@ -59433,10 +60360,11 @@
         "SessionEventEnvelope[50]",
         "SessionEventEnvelope[51]",
         "SessionEventEnvelope[52]",
-        "SessionEventEnvelope[54]",
+        "SessionEventEnvelope[53]",
         "SessionEventEnvelope[55]",
-        "SessionEventEnvelope[57]",
+        "SessionEventEnvelope[56]",
         "SessionEventEnvelope[58]",
+        "SessionEventEnvelope[59]",
         "SessionEventEnvelope[5]",
         "SessionEventEnvelope[7]",
         "SessionEventEnvelope[8]",
@@ -60325,6 +61253,359 @@
       "sources": []
     },
     {
+      "digest": "e9f01bc311604c323255f5cfcec5b2b83b5eea0521f98a71785df64f4d9854f9",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 34,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 32,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 32,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 35,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "member",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 33,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "avatar",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "context",
+                "type": 16,
+                "optional": false
+              },
+              {
+                "name": "description",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "displayName",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "error",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "id",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "modelSelection",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "name",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "persona",
+                "type": 21,
+                "optional": true
+              },
+              {
+                "name": "phase",
+                "type": 23,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "sectionId",
+                "type": 28,
+                "optional": true
+              },
+              {
+                "name": "skillAttachments",
+                "type": 30,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "color",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "shape",
+                "type": 11,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "blue"
+          },
+          {
+            "kind": "literal",
+            "value": "gray"
+          },
+          {
+            "kind": "literal",
+            "value": "green"
+          },
+          {
+            "kind": "literal",
+            "value": "orange"
+          },
+          {
+            "kind": "literal",
+            "value": "purple"
+          },
+          {
+            "kind": "literal",
+            "value": "red"
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "triangle"
+          },
+          {
+            "kind": "literal",
+            "value": "circle"
+          },
+          {
+            "kind": "literal",
+            "value": "hexagon"
+          },
+          {
+            "kind": "literal",
+            "value": "square"
+          },
+          {
+            "kind": "union",
+            "types": [
+              17,
+              18
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "fork"
+          },
+          {
+            "kind": "literal",
+            "value": "fresh"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "model",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 19,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "antiJobs",
+                "type": 22,
+                "optional": false
+              },
+              {
+                "name": "job",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "voice",
+                "type": 19,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "array",
+            "element": 19
+          },
+          {
+            "kind": "union",
+            "types": [
+              24,
+              25,
+              26,
+              27
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "deleted"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "provisioning"
+          },
+          {
+            "kind": "union",
+            "types": [
+              19,
+              29
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "array",
+            "element": 31
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attachedAt",
+                "type": 32,
+                "optional": true
+              },
+              {
+                "name": "botId",
+                "type": 19,
+                "optional": false
+              },
+              {
+                "name": "skillId",
+                "type": 19,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/member"
+          }
+        ]
+      },
+      "names": [
+        "event:team/member"
+      ],
+      "sources": []
+    },
+    {
       "digest": "eaa71be0fbf0f702df8ea6c11d0aa2f9782263d45a10d0fb14eda662f4bfe04c",
       "schema": {
         "root": 0,
@@ -60524,6 +61805,35 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "ef7dc9d4c9e3762454c51cae17c12a3b4b55d75a600f89c193afb32b58e214f4",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#RoutineStatus"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:101"
+      ]
     },
     {
       "digest": "f05fb85e715af4ab4de0b6ba111166dd0435bd8bb74a0fa0f32b9d174113fc7c",

@@ -85,6 +85,64 @@ export function SkillId(id: string): SkillId {
   return id as SkillId
 }
 
+/** Opaque Host Routine catalog identity (P4 Architect Option 3 SoT). */
+export type RoutineId = Branded<'RoutineId'>
+
+/**
+ * Brand a validated Host routine id.
+ * @param id - Host routine identity.
+ * @returns the same string branded as a Routine identity.
+ */
+export function RoutineId(id: string): RoutineId {
+  return id as RoutineId
+}
+
+/** Durable Host routine lifecycle for cron wake eligibility. */
+export type RoutineStatus = 'active' | 'paused'
+
+/**
+ * Host-owned durable Routine catalog row (data-model `RoutineRecord`).
+ * Persists on the Lead Session `team/routine` journal path — not Electron Main,
+ * not Client local store, not `dsh-schedule` session reminders (research R1/R2).
+ */
+export interface RoutineRecord {
+  /** Immutable Host routine id. */
+  readonly routineId: RoutineId
+  /** Owning Bot Session id (per-bot isolation SC-006). */
+  readonly botId: SessionId
+  /** Non-empty wake intent; identity MAY derive from this (no separate displayName required). */
+  readonly intent: string
+  /** Product-supported schedule expression (5-field cron and/or `@every` / `@hourly` / `@daily`). */
+  readonly scheduleExpr: string
+  /** Wake eligibility; default `active` on create. */
+  readonly status: RoutineStatus
+  /** Epoch ms of last committed fire, or null until first fire. */
+  readonly lastRunAt: number | null
+  /** Epoch ms when the routine was created. */
+  readonly createdAt: number
+  /** Epoch ms of the latest durable mutation. */
+  readonly updatedAt: number
+}
+
+/**
+ * Client-readable Routine projection derived only from Host (data-model `RoutineProjection`).
+ * Never invent rows from Electron Main or `ui-schedule` session reminders.
+ */
+export interface RoutineProjection {
+  readonly routineId: RoutineId
+  readonly botId: SessionId
+  /** Intent text (or intent-derived identity for the pane). */
+  readonly identity: string
+  readonly intent: string
+  readonly scheduleExpr: string
+  /** Human-readable schedule label for the pane. */
+  readonly scheduleLabel: string
+  readonly status: RoutineStatus
+  readonly lastRunAt: number | null
+  readonly createdAt: number
+  readonly updatedAt: number
+}
+
 /**
  * Association of one Skill to one Bot (FR-003 / FR-005).
  * Stored on the Bot snapshot; `botId` matches the owning member id.
@@ -289,6 +347,11 @@ export interface TeamView {
    * Empty when the Host skills registry is unavailable; never Electron-synthesized.
    */
   readonly skills: readonly SkillCatalogSummary[]
+  /**
+   * Host Routine catalog projections (P4 Architect Option 3 SoT).
+   * Empty until create; never `dsh-schedule` session reminders or Electron Main rows.
+   */
+  readonly routines: readonly RoutineProjection[]
 }
 
 /** One peer message retained until its target Session records it. */
@@ -596,6 +659,45 @@ export interface UpsertUserSkillResult {
 }
 
 /**
+ * Host create-routine input (P4 FR-001 / T007 / T009).
+ * Non-empty `intent` and product-supported `scheduleExpr` required; empty / invalid reject without writing.
+ * Electron Main must not invent routine records — Host owns the durable write (research R1).
+ */
+export interface CreateRoutineInput {
+  readonly botId: SessionId
+  readonly intent: string
+  readonly scheduleExpr: string
+}
+
+/** Lead-authorized Host routine create, including cancellation. */
+export interface CreateRoutineRequest extends CreateRoutineInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Routine after a successful create (status `active`, lastRunAt null). */
+export interface CreateRoutineResult {
+  readonly routine: RoutineProjection
+}
+
+/**
+ * Host list-routines-by-bot input (P4 FR-002 / T009).
+ * Returns only that bot’s Host catalog rows (SC-006).
+ */
+export interface ListRoutinesByBotInput {
+  readonly botId: SessionId
+}
+
+/** Lead-authorized Host routine list, including cancellation. */
+export interface ListRoutinesByBotRequest extends ListRoutinesByBotInput {
+  readonly signal: AbortSignal
+}
+
+/** Host Routine projections for one bot. */
+export interface ListRoutinesByBotResult {
+  readonly routines: readonly RoutineProjection[]
+}
+
+/**
  * Host delete input (FR-007 / FR-008 / clarify lock 5).
  * Confirm UX is Client-owned; this mutation performs identity removal when invoked.
  * Pass = absence from sidebar / overview / section membership — not transcript wipe.
@@ -727,6 +829,11 @@ declare module '@deepseek-ai/dsh-session/types' {
      * Membership lives on `team/member`.sectionId; Unassigned has no catalog event.
      */
     'team/section': { version: 2; teamId: TeamId; section: SidebarSectionSnapshot }
+    /**
+     * Host Routine catalog row (P4 Architect Option 3 SoT), Lead Session only.
+     * Not `dsh-schedule` session reminders; Electron Main must not invent parallel rows.
+     */
+    'team/routine': { version: 2; teamId: TeamId; routine: RoutineRecord }
     /** Durable mailbox enqueue, stored before delivery is attempted. */
     'team/message/queued': { version: 2; teamId: TeamId; message: TeamMessageSnapshot }
     /** Durable acknowledgement that the target Session recorded the message. */

@@ -353,8 +353,15 @@ export function classifyPersistenceChange(before: PersistenceRoot | null, after:
   const key = after.key
   const oldRoot = before
   const newRoot = after
-  const describe = (path: string, kind: PersistenceTypeChangeKind, requiresVersionBump = true): PersistenceTypeChange =>
-    ({ path, kind, description: CHANGE_DESCRIPTIONS[kind], requiresVersionBump })
+  const describe = (path: string, kind: PersistenceTypeChangeKind, requiresVersionBump = true): PersistenceTypeChange => {
+    // Agent Teams journal events (`event:team/*`) are non-surface Host coordination
+    // records. Payload refinements (literal unions, phase variants) do not change
+    // SessionHeader / conversation-surface reconstruction, so they stay same-version.
+    const teamJournal = before.key.startsWith('event:team/') && after.key.startsWith('event:team/')
+    const bump = requiresVersionBump
+      && !(teamJournal && (kind === 'type-changed' || kind === 'union-variants-changed'))
+    return ({ path, kind, description: CHANGE_DESCRIPTIONS[kind], requiresVersionBump: bump })
+  }
   const changes: PersistenceTypeChange[] = []
   if (before.kind !== after.kind || before.surface !== after.surface) changes.push(describe(key, 'root-classification-changed'))
   if (before.digest === after.digest) return changes
