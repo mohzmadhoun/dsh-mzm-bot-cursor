@@ -47,7 +47,11 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T020** Missing-credential → Models handoff | [t020-cred-handoff.md](./t020-cred-handoff.md) | **Electron/Client** + **Verifier** | FR-008 failure UX (in-app Models); dump hygiene stays Scenario 1 / US4 |
 | **T021** Host mailbox send path A→B | [t021-mailbox-send.md](./t021-mailbox-send.md) | **Runtime** + **Verifier** | FR-004 Host Lead-log mailbox → target inbox; `deliveryState` from session logs; not SC-003 UI Pass |
 | **T022** Persist Host mailbox fields | [t022-mailbox-persist.md](./t022-mailbox-persist.md) | **Runtime** + **Verifier** | FR-004 product fields (`fromBotId`/`source` Host-only) from durable Lead-log; not SC-003 UI Pass |
+| **T023** Host handoff projections | [t023-handoff-projections.md](./t023-handoff-projections.md) | **Runtime** + **Verifier** | FR-005 `TeamView.handoffs` via session/RPC; Client panel consumes; not SC-003 chat-surface Pass |
+| **T024** Chat handoff / pending UI | [t024-chat-handoff.md](./t024-chat-handoff.md) | **Electron/Client** + **Verifier** | FR-005 chat + Conversation notices + Agent Team strip; Host projections only; not SC-003 Scenario 3 Pass |
+| **T026** No Electron bot↔bot bus | [t026-no-ipc-bus.md](./t026-no-ipc-bus.md) | **Electron** + **Verifier** | FR-004 negative — Main invents no mailbox IPC; Host mailbox only; complements T007 |
 | **T033** Models write-only credential entry | [t033-cred-entry-ui.md](./t033-cred-entry-ui.md) | **Electron/Client** + **Verifier** | FR-008 in-app Models entry → Host `CredentialRef`; `CredentialInfo` only; not SC-006 dump Pass |
+| **T034** No secret IPC (preload/renderer) | [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) | **Electron** + **Verifier** | FR-008 shell half; re-audit preload/`ipc.ts`; Scenario 1 dump stays T037 |
 
 ## Fan-out policy
 

@@ -98,10 +98,10 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T021 [US2] Implement/confirm Host mailbox send path Bot A→Bot B using Agent Teams Lead-log mailbox → target inbox in `packages/experimental/agent-team/src/mailbox.ts` / `session-message.ts` / `SendTeamMessageRequest` in `packages/experimental/agent-team/src/types.ts` (`deliveryState`: `queued` → `delivered` → `acted` | `visible-pending`)
 - [x] T022 [P] [US2] Persist durable Host mailbox message fields (`id`, `fromBotId`, `toBotId`, `body`, `createdAt`, `deliveryState`, `source` Host-only) per [data-model.md](./data-model.md) — `source` MUST NOT be Electron IPC
-- [ ] T023 [US2] Expose handoff observability to Client via Host session/RPC projections (not Main-synthesized IPC) in `packages/experimental/agent-team/src/projection.ts` and `packages/experimental/client-ui-agent-team/`
-- [ ] T024 [US2] Render user-visible handoff / pending / recipient follow-up in Desktop Web chat surfaces under `packages/client/ui-chat/` / `packages/client/ui-conversation/` and Agent Team UI so copy-paste is not required
+- [x] T023 [US2] Expose handoff observability to Client via Host session/RPC projections (not Main-synthesized IPC) in `packages/experimental/agent-team/src/projection.ts` and `packages/experimental/client-ui-agent-team/`
+- [x] T024 [US2] Render user-visible handoff / pending / recipient follow-up in Desktop Web chat surfaces under `packages/client/ui-chat/` / `packages/client/ui-conversation/` and Agent Team UI so copy-paste is not required
 - [ ] T025 [US2] Add Verifier Scenario 3 recipe in `specs/001-multi-model-bots/verifier/scenario-3-mailbox.md` asserting Host mailbox path and failing if delivery required Electron IPC bus ([contracts/host-mailbox-1to1.md](./contracts/host-mailbox-1to1.md))
-- [ ] T026 [P] [US2] Add architecture/regression guard (test or static check) documenting forbidden Electron bot↔bot messaging bus in `apps/desktop/tests/topology-handshake.spec.ts` or `apps/desktop/tests/no-electron-mailbox-bus.spec.ts`
+- [x] T026 [P] [US2] Add architecture/regression guard (test or static check) documenting forbidden Electron bot↔bot messaging bus in `apps/desktop/tests/topology-handshake.spec.ts` or `apps/desktop/tests/no-electron-mailbox-bus.spec.ts`
 
 **Checkpoint**: US2 independently testable (needs ≥2 bots from US1)
 
@@ -135,7 +135,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 4
 
 - [x] T033 [US4] Implement/confirm Models / settings write-only credential entry UI in `packages/client/ui-settings-models/src/client/` storing secrets via Host `CredentialRef` in `packages/credentials/credentials-local/` — UI may show non-secret `CredentialInfo` only
-- [ ] T034 [P] [US4] Ensure preload/renderer never receive raw secrets: audit `apps/desktop/src/preload-*.ts` and `apps/desktop/src/ipc.ts` for absence of credential secret APIs ([contracts/in-app-credentials.md](./contracts/in-app-credentials.md))
+- [x] T034 [P] [US4] Ensure preload/renderer never receive raw secrets: audit `apps/desktop/src/preload-*.ts` and `apps/desktop/src/ipc.ts` for absence of credential secret APIs ([contracts/in-app-credentials.md](./contracts/in-app-credentials.md))
 - [ ] T035 [US4] On missing credential for needed provider, direct user to in-app entry (not 1Password connector product flow) via `packages/client/ui-settings-models/src/client/` navigation; on invalid/revoked mid-session show clear failure + re-entry offer in that UI with no silent fallback to another bot’s credentials in Host resolve under `packages/credentials/`
 - [ ] T036 [US4] Document env/key-file credentials as dev/CI-only secondary path in Desktop/Host docs touching credentials (`packages/credentials/credentials-local/README.md` and/or `specs/001-multi-model-bots/verifier/scenario-1-credentials.md`) — product primary remains in-app (FR-009)
 - [ ] T037 [US4] Add Verifier Scenario 1 recipe in `specs/001-multi-model-bots/verifier/scenario-1-credentials.md` proving bot auth with in-app credential and SC-006 dump/transcript export contains no raw provider secrets

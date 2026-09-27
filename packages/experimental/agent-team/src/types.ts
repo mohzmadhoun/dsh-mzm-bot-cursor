@@ -119,10 +119,15 @@ export interface TeamTaskView {
   readonly writeScopeWarnings: string[]
 }
 
-/** Point-in-time roster and task-board projection returned to browser clients. */
+/** Point-in-time roster, task-board, and Host mailbox handoff projection for browser clients. */
 export interface TeamView {
   readonly members: TeamMemberView[]
   readonly tasks: TeamTaskView[]
+  /**
+   * Host mailbox 1:1 handoffs reconstructed from Lead `team/message/*` plus target
+   * Session logs (`HostMailboxMessage`). Never Main-synthesized IPC (FR-005).
+   */
+  readonly handoffs: HostMailboxMessage[]
 }
 
 /** One peer message retained until its target Session records it. */
