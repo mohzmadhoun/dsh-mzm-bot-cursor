@@ -6,6 +6,7 @@
 **Research:** [../research.md](../research.md) R4 · R5 · R7
 **Plan:** [MzM-Docs/mzm-bot-plan.md](../../../MzM-Docs/mzm-bot-plan.md) P1 Out / P6 connector deferral
 **Evidence log (T010 baseline):** [evidence/t010-t011/measured-checks.txt](./evidence/t010-t011/measured-checks.txt)
+**Evidence log (T039):** [evidence/t039-non-goals/](./evidence/t039-non-goals/) — VERDICT Pass
 
 ## Verdict
 
