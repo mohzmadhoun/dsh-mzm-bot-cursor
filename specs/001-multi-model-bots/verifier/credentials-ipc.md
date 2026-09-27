@@ -59,5 +59,6 @@ Fail T011 if any of:
 
 ## Related later work
 
-- US4 / T033–T037: Models UI write-only flow + Scenario 1 dump hygiene (SC-006).
-- T034 US4 re-audit: [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) (`apps/desktop/tests/no-secret-ipc.spec.ts`); this file remains the T011 Pass baseline.
+- US4 / T033 Models write-only entry: [t033-cred-entry-ui.md](./t033-cred-entry-ui.md).
+- US4 / T034 re-audit: [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) (`apps/desktop/tests/no-secret-ipc.spec.ts`); this file remains the T011 Pass baseline.
+- US4 / T035–T037: invalid/revoked UX + env docs + Scenario 1 dump hygiene (SC-006).
