@@ -6,7 +6,7 @@
 
 **Linear**: Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) · Plan issue [MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) · Verifier gate [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) · Project **DeepSeek Harness - Cursor** only
 
-**Note**: Filled by `/speckit-plan`. Phase 0–1 design only — no feature implementation in this change. Next: `/speckit-tasks` → analyze → `taskstoissues` → implement. Do **not** rewrite `specs/001-multi-model-bots`.
+**Note**: Filled by `/speckit-plan`. Phase 0–1 design only — no feature implementation in this change. Tasks landed (PR #72); next: analyze → `taskstoissues` → implement. Do **not** rewrite `specs/001-multi-model-bots`.
 
 ## Summary
 
@@ -72,7 +72,8 @@ specs/002-identity-personas/
 │   ├── delete-confirm.md
 │   └── memory-layers-adr.md
 ├── checklists/          # From specify/clarify
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+├── tasks.md             # /speckit-tasks (PR #72)
+└── analyze-report.md    # /speckit-analyze (this gate)
 ```
 
 ### Source Code (repository root) — touch targets for later implement
@@ -143,6 +144,6 @@ See [research.md](./research.md). All Technical Context unknowns resolved. Clari
 2. **Runtime (tasks):** Exact mutation API names for rename / persona update / delete on Agent Teams (extend `createBot` surface; P1 had create only).
 3. **Not gaps:** Clarify resolutions (Done MOH-92/93); P2 In/Out (living plan); ADR path (locked under `MzM-Docs/adr/`); Verifier gate issue (MOH-95).
 
-## Ready for next command
+## Ready for next command / Handoff
 
-**`/speckit-tasks`** then **`/speckit-analyze`** then **`/speckit-taskstoissues`** (Linear **DeepSeek Harness - Cursor** / MOH-88). Do not implement feature code from Spec Kit design commits. Leave MOH-94 In Progress until Verifier MOH-95 Pass and PO merge.
+**`/speckit-analyze`** (this report) → **`/speckit-taskstoissues`** (Linear **DeepSeek Harness - Cursor** / MOH-88, T001–T042) → implement (Host foundations T005–T012 before US fan-out). See [tasks.md](./tasks.md) and [analyze-report.md](./analyze-report.md). Do not implement feature code from Spec Kit design commits. Leave MOH-98 In Progress until Verifier MOH-99 Pass and PO path.
