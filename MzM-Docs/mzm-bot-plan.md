@@ -202,8 +202,10 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 2. ~~Mohammed ship/no-ship on auth~~ **DONE** — in-app primary.
 3. ~~`/speckit-specify` for P1 only~~ **DONE** (branch `cursor/p1-specify-92fa`).
 4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** SC-005 live Desktop full replay remains **Deferred** (recipe + stubs on master; does **not** block P2 specify).
-5. **Current — P2 Identity / personas (MOH-88):** Lead kickoff **authorizes** DH Spec Spec Kit **`specify` only** ([MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas)). New feature directory under `specs/` (suggested slug `002-identity-personas`); **do not** overwrite `001-multi-model-bots`. Scope locked to §4 P2 In/Out.
-6. After specify lands: clarify → plan → tasks → analyze → `taskstoissues` on **DeepSeek Harness - Cursor** only; Architect seam map after specify; Electron/Runtime only after Spec+Architect gates for P2.
+5. ~~P2 Spec Kit **specify**~~ **DONE** — [MOH-90](https://linear.app/momadhoun/issue/MOH-90/p2-spec-kit-specify-identity-personas) / PR #67 → `specs/002-identity-personas/`.
+6. ~~P2 Spec Kit **clarify**~~ **DONE** — [MOH-92](https://linear.app/momadhoun/issue/MOH-92/p2-spec-kit-clarify-identity-personas) / PR #68 @ `86aebfadb3`; Verifier [MOH-93](https://linear.app/momadhoun/issue/MOH-93/p2-verifier-gate-clarify-002-identity-personas) Pass.
+7. **Current — P2 plan authorized:** DH Spec Spec Kit **`plan` only** ([MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas), branch `cursor/p2-plan-92fa`). Scope locked to §4 P2 In/Out. Verifier plan gate [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) Todo until draft PR.
+8. After plan draft + Verifier Pass: **tasks** → analyze → `taskstoissues` on **DeepSeek Harness - Cursor** only; Architect seam map after plan; Electron/Runtime only after Spec+Architect gates for P2.
 
 ---
 
