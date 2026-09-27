@@ -60,4 +60,4 @@ Fail T011 if any of:
 ## Related later work
 
 - US4 / T033–T037: Models UI write-only flow + Scenario 1 dump hygiene (SC-006).
-- T034 re-audits preload/ipc when US4 lands; this file is the foundational Pass baseline.
+- T034 US4 re-audit: [t034-no-secret-ipc.md](./t034-no-secret-ipc.md) (`apps/desktop/tests/no-secret-ipc.spec.ts`); this file remains the T011 Pass baseline.
