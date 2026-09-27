@@ -71,9 +71,14 @@ export type UseChatNodeTurnData = <Key extends Extract<keyof ConversationTurnDat
   key: Key,
 ) => Readonly<ConversationTurnDataMap[Key]> | undefined
 
-/** Slot-level Hook factory for keyed Chat renderers. */
+/** Slot-level inject face for keyed Chat renderers. */
 export interface ChatNodeTurnDataInjected {
   hooks: { turnData: SlotHookFactory<'conversation.chat.node', UseChatNodeTurnData> }
+  /**
+   * Open Settings → Models for in-app credential entry.
+   * Wired for Host `MISSING_CREDENTIAL` turn failures (not a 1Password vault).
+   */
+  openModelsSettings: () => void
 }
 
 /** Stable owner currency delivered to a keyed Chat renderer. */

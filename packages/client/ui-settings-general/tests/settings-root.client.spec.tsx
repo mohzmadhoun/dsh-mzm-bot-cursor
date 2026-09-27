@@ -69,6 +69,13 @@ function mount({
   const listeners = new Set<() => void>()
   const connectionListeners = new Set<() => void>()
   const reconnect = vi.fn()
+  let boundOpenSection: ((id: string) => void) | undefined
+  const bindOpenSection = vi.fn((handler: (id: string) => void) => {
+    boundOpenSection = handler
+    return () => {
+      if (boundOpenSection === handler) boundOpenSection = undefined
+    }
+  })
   const renderSlot = vi.fn(
     ((key: string, _owner: unknown, opts?: { only?: string }) => {
       if (key === 'settings.section') return <div data-testid={`section-${opts?.only ?? 'all'}`} />
@@ -99,6 +106,7 @@ function mount({
     wide,
     reconnect,
     openDesktopUpdate: () => {},
+    bindOpenSection,
     useDesktopUpdate: select => select(desktopUpdate),
     t: makeTranslate(dictionary),
     useConnectionState: (select) => {
@@ -139,7 +147,10 @@ function mount({
     desktopUpdate = next
     view.rerender(<SettingsRoot {...props} />)
   }
-  return { view, renderSlot, bump, listeners, reconnect, setConnectionState, setDesktopUpdate }
+  return {
+    view, renderSlot, bump, listeners, reconnect, setConnectionState, setDesktopUpdate,
+    bindOpenSection, getBoundOpenSection: () => boundOpenSection,
+  }
 }
 
 function openPanel() {
@@ -360,6 +371,19 @@ describe('SettingsPanel navigation', () => {
     expect(screen.getByRole('button', { name: 'Models' }).getAttribute('aria-current')).toBe('true')
     expect(screen.getByTestId('section-models')).toBeTruthy()
     expect(screen.queryByTestId('section-general')).toBeNull()
+  })
+
+  it('binds openSection to settingsShell so MISSING_CREDENTIAL handoff can open Models', () => {
+    const f = mount()
+    expect(f.bindOpenSection).toHaveBeenCalledTimes(1)
+    const open = f.getBoundOpenSection()
+    expect(open).toBeTypeOf('function')
+    act(() => { open!('models') })
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    expect(screen.getByTestId('section-models')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Models' }).getAttribute('aria-current')).toBe('true')
+    f.view.unmount()
+    expect(f.getBoundOpenSection()).toBeUndefined()
   })
 
   it('mounts onboarding steps in order and transfers ownership only on completion', () => {

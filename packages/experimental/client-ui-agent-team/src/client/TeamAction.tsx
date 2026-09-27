@@ -51,6 +51,11 @@ export interface TeamActionInjected {
     owner?: string
   }) => Promise<TeamTaskActionResult>
   openTeammate: (sessionId: SessionId, member: TeamRosterMember) => Promise<void>
+  /**
+   * Open Settings → Models for in-app credential entry.
+   * Used when create/chat surfaces Host `MISSING_CREDENTIAL` (not 1Password).
+   */
+  openModelsSettings: () => void
 }
 
 /** Full props of the Team conversation-header action. */
@@ -88,6 +93,9 @@ function taskIds(value: string): TeamTaskId[] {
 function failureText(error: { readonly code: string; readonly message: string }): string {
   return `${error.message} (${error.code})`
 }
+
+/** Host LLM missing-credential code (stable; consumers route on code, never message text). */
+const MISSING_CREDENTIAL = 'MISSING_CREDENTIAL'
 
 /**
  * Trim and length limits match Host `requiredModelSelection`.
@@ -156,12 +164,13 @@ function memberStatusKey(status: TeamRosterMember['status']): TeamKey {
 
 /** Render the live Team roster, Host bot-create form, and compare-and-set task board. */
 export function TeamAction({
-  sessionId, load, createBot, createTask, updateTask, openTeammate, t,
+  sessionId, load, createBot, createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<TeamView | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [credentialHandoff, setCredentialHandoff] = useState(false)
   const [creatingBot, setCreatingBot] = useState(false)
   const [botDraft, setBotDraft] = useState<BotDraft>(EMPTY_BOT_DRAFT)
   const [creating, setCreating] = useState(false)
@@ -173,12 +182,27 @@ export function TeamAction({
   const refreshGeneration = useRef(0)
   sessionRef.current = sessionId
 
+  const clearError = useCallback((): void => {
+    setError(null)
+    setCredentialHandoff(false)
+  }, [])
+
+  const reportFailure = useCallback((failure: { readonly code: string; readonly message: string }): void => {
+    if (failure.code === MISSING_CREDENTIAL) {
+      setError(t('missingCredential'))
+      setCredentialHandoff(true)
+      return
+    }
+    setError(failureText(failure))
+    setCredentialHandoff(false)
+  }, [t])
+
   useEffect(() => {
     refreshGeneration.current += 1
     setOpen(false)
     setLoading(false)
     setView(null)
-    setError(null)
+    clearError()
     setCreatingBot(false)
     setBotDraft(EMPTY_BOT_DRAFT)
     setCreating(false)
@@ -186,7 +210,7 @@ export function TeamAction({
     setEditing(null)
     setEditDraft(EMPTY_DRAFT)
     setPendingTasks(new Set())
-  }, [sessionId])
+  }, [clearError, sessionId])
 
   const refresh = useCallback(async (): Promise<boolean> => {
     const requestedSession = sessionId
@@ -197,13 +221,13 @@ export function TeamAction({
     setLoading(false)
     if (result.ok) {
       setView(result.value)
-      setError(null)
+      clearError()
       return true
     } else {
-      setError(failureText(result.error))
+      reportFailure(result.error)
       return false
     }
-  }, [load, sessionId])
+  }, [clearError, load, reportFailure, sessionId])
 
   const invalidateRefresh = useCallback((): void => {
     refreshGeneration.current += 1
@@ -221,21 +245,24 @@ export function TeamAction({
       const result = await operation()
       if (sessionRef.current !== requestedSession) return undefined
       if (!result.ok) {
-        setError(failureText(result.error))
+        reportFailure(result.error)
         return undefined
       }
       if (!result.value.ok) {
         if (result.value.error.code === 'team-task-conflict') {
           const reloaded = await refresh()
           if (sessionRef.current !== requestedSession) return undefined
-          if (reloaded) setError(t('conflict'))
+          if (reloaded) {
+            setError(t('conflict'))
+            setCredentialHandoff(false)
+          }
         } else {
-          setError(failureText(result.value.error))
+          reportFailure(result.value.error)
         }
         return undefined
       }
       const task = result.value.value
-      setError(null)
+      clearError()
       await refresh()
       if (sessionRef.current !== requestedSession) return undefined
       return task
@@ -248,7 +275,7 @@ export function TeamAction({
         })
       }
     }
-  }, [invalidateRefresh, refresh, sessionId, t])
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId, t])
 
   const settleCreateBot = useCallback(async (
     operation: () => Promise<TeamCreateBotActionResult>,
@@ -260,15 +287,15 @@ export function TeamAction({
       const result = await operation()
       if (sessionRef.current !== requestedSession) return undefined
       if (!result.ok) {
-        setError(failureText(result.error))
+        reportFailure(result.error)
         return undefined
       }
       if (!result.value.ok) {
-        setError(failureText(result.value.error))
+        reportFailure(result.value.error)
         return undefined
       }
       const created = result.value.value
-      setError(null)
+      clearError()
       await refresh()
       if (sessionRef.current !== requestedSession) return undefined
       return created
@@ -281,7 +308,7 @@ export function TeamAction({
         })
       }
     }
-  }, [invalidateRefresh, refresh, sessionId])
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
   const submitCreateBot = async (): Promise<void> => {
     const displayName = botDraft.displayName.trim()
@@ -383,7 +410,25 @@ export function TeamAction({
               <IconCloseOutline16 size={14} />
             </button>
           </div>
-          {error !== null && <div className={css.error} role="alert">{error}</div>}
+          {error !== null && (
+            <div
+              className={css.error}
+              role="alert"
+              {...credentialHandoff ? { 'data-team-error': MISSING_CREDENTIAL } : {}}
+            >
+              <span>{error}</span>
+              {credentialHandoff && (
+                <button
+                  type="button"
+                  className={css.credentialHandoff}
+                  data-missing-credential-handoff
+                  onClick={openModelsSettings}
+                >
+                  {t('openModelsSettings')}
+                </button>
+              )}
+            </div>
+          )}
           {loading && view === null && <div className={css.notice}>{t('loading')}</div>}
           {view !== null && (
             <>
@@ -417,7 +462,10 @@ export function TeamAction({
                       disabled={member.role === 'lead' || member.status === 'failed' || member.status === 'provisioning'}
                       title={member.role === 'teammate' ? t('open') : undefined}
                       onClick={() => {
-                        void openTeammate(sessionId, member).catch((reason: unknown) => { setError(String(reason)) })
+                        void openTeammate(sessionId, member).catch((reason: unknown) => {
+                          setError(String(reason))
+                          setCredentialHandoff(false)
+                        })
                       }}
                     >
                       <StateDot state={member.status === 'running' ? 'ongoing' : member.status === 'failed' ? 'error' : 'done'} />

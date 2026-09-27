@@ -239,6 +239,23 @@
   font-size: 12px;
 }
 
+.credentialHandoff {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--dsw-alias-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.credentialHandoff:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
 .hint {
   margin: 0 0 6px;
   color: var(--dsw-alias-label-tertiary);

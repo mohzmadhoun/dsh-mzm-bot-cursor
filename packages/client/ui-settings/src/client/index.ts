@@ -23,6 +23,7 @@ import type {} from '@deepseek-ai/dsh-settings/types'
 import { SettingsSchemaService } from './schema.ts'
 import { SettingsScopeBinder } from './settings-scope.ts'
 import { SettingsDescribeMirror } from './settings-mirror.ts'
+import { SettingsShellController } from './settings-shell.ts'
 
 export type {
   SettingsGeneralItemOwnerProps, SettingsHeaderOwnerProps, SettingsOnboardingOwnerProps,
@@ -35,6 +36,8 @@ export type { SchemaNode } from './schema.ts'
 export type {
   SettingsDescribeFace, SettingsDescribeView, SettingsMirrorSnapshot,
 } from './settings-mirror.ts'
+export type { ISettingsShell } from './settings-shell.ts'
+export { MODELS_SECTION_ID, SettingsShellController } from './settings-shell.ts'
 
 /**
  * Required services: the Remote namespace the mirror reads through and the
@@ -57,6 +60,9 @@ export function apply(ctx: Context): void {
   // `inject`; the binder hands the same answer to every scope it binds.
   const persistence = ctx.remote.$host.isLoopback ? 'host' : 'memory'
   const mirror = new SettingsDescribeMirror(ctx, persistence)
+  // Shell navigation face: ui-settings-general binds openSection while mounted;
+  // Chat / Agent Team call openSection('models') for MISSING_CREDENTIAL handoff.
+  new SettingsShellController(ctx)
   ctx.effect(() => {
     const disposers = [
       ctx.remote.$on('settings/document-updated', () => { void mirror.load() }),

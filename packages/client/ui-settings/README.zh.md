@@ -35,6 +35,10 @@ kind: "package-reference"
 
 设置界面会注册进本包声明的 slot 类型。外壳（`sidebar.settings` 占位方、导航、界面框架）位于 ui-settings-general；功能页面注册 `settings.section` 贡献；「插件」分区承载 `settings.plugins.tab` 页面；首次使用引导步骤注册 `settings.onboarding`。跨命名空间的表面（schema 内省、已服务命名空间目录、`hasDocument`）通过 `ctx.settingsScope.describe()` 读同一面镜像。
 
+### 从其他插件打开分区
+
+`ctx.settingsShell.openSection(id)` 在外壳已绑定处理器时（ui-settings-general 的 SettingsRoot）打开设置面板并选中已注册分区。Chat 与 Agent Team 对 Host `MISSING_CREDENTIAL` 使用 `openSection('models')`（`MODELS_SECTION_ID`）切入应用内 Models 凭据入口。外壳未挂载时该调用为空操作。Electron Main 既不发明凭据路由，也不提供密钥 IPC。
+
 ### 可观察的成功与失败
 
 绑定后的 scope 会立即反映当前文档 revision；提交成功的写入把应答折回镜像、不再重读。被拒绝或失败的最新写入触发一次镜像恢复读取；被取代的写入把恢复留给后继者。若 spec 未提供 `decode`，则分区不是普通对象或未通过 schema 重建时一律不发布任何值，于是行渲染自己的缺失状态，而不是一份半解码的值。

@@ -60,7 +60,9 @@ const NS = 'settings'
  * ui-settings' apply, whose activation order relative to this one is NOT
  * constrained; registrations depend on their slots through `slots.inject()`.
  */
-export const inject = ['slots', 'locale', 'connection', 'remote', 'remote.settings', 'settingsScope']
+export const inject = [
+  'slots', 'locale', 'connection', 'remote', 'remote.settings', 'settingsScope', 'settingsShell',
+]
 
 /**
  * Register the `settings` dictionaries, the chrome content, and the General
@@ -106,6 +108,7 @@ export function apply(ctx: ClientContext): void {
   const shellInjected = (): SettingsRootInjected => ({
     openDesktopUpdate: () => { desktopUpdate.open() },
     reconnect: () => { connection.reconnect() },
+    bindOpenSection: handler => ctx.settingsShell.bindOpenSection(handler),
     hooks: {
       desktopUpdate: desktopUpdate.store,
       connectionState: connection.state,

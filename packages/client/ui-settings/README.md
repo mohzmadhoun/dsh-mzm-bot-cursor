@@ -35,6 +35,10 @@ A feature calls `ctx.settingsScope.bind(spec)` with a per-namespace spec and get
 
 A settings surface registers into the slot types this package declares. The shell (`sidebar.settings` occupant, navigation, chrome) lives in ui-settings-general; feature pages register `settings.section` contributions; the Plugins section hosts `settings.plugins.tab` pages; onboarding steps register `settings.onboarding`. Cross-namespace surfaces (schema introspection, the served-namespace directory, `hasDocument`) read the same mirror through `ctx.settingsScope.describe()`.
 
+### Opening a section from another plugin
+
+`ctx.settingsShell.openSection(id)` opens the Settings panel on a registered section when the shell has bound its handler (ui-settings-general's SettingsRoot). Chat and Agent Team use `openSection('models')` (`MODELS_SECTION_ID`) for Host `MISSING_CREDENTIAL` handoff into in-app Models credential entry. The call no-ops when the shell is unmounted. Electron Main invents neither credential routing nor secret IPC.
+
 ### Observable success and failures
 
 A bound scope reflects the current document revision immediately; a committed write folds its answer back into the mirror with no re-read. A rejected or failed latest write triggers one mirror recovery read; a superseded write leaves recovery to its successor. Without a `decode` in the spec, a section that is not a plain object or fails schema rehydration publishes no value, so a row renders its own absent state instead of a half-decoded one.
