@@ -83,14 +83,12 @@ export type AvatarColorId = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'gr
  * Preset avatar marker (shape and/or color ids).
  * When a user sets an avatar for Pass, at least one of shape or color is required.
  * Image-file / URL upload is out of P2 Pass scope.
- * Persisted as plain strings; Host `setAvatar` validates against {@link AvatarShapeId} /
- * {@link AvatarColorId} at the mutation boundary.
  */
 export interface AvatarMarker {
   /** Preset shape id from the fixed Host set. */
-  readonly shape?: string
+  readonly shape?: AvatarShapeId
   /** Preset color id from the fixed Host set. */
-  readonly color?: string
+  readonly color?: AvatarColorId
 }
 
 /** Whole durable value written on every teammate lifecycle change. */
