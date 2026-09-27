@@ -53,7 +53,7 @@ The completed-turn action footer starts 20px below the preceding prose or extens
 
 Terminal turn failures with Host codes `MISSING_CREDENTIAL`, `AUTH`, or `INVALID_CREDENTIAL` show localized in-app Models credential guidance and an **Open Models settings** control that calls `ctx.settingsShell.openSection('models')` — not a 1Password / external vault primary path. Missing keys use `data-missing-credential-handoff`; invalid/revoked mid-session keys use `data-invalid-credential-handoff`.
 
-Host mailbox peer receipts (`user/message` or pending inbox with durable `team-message` source) render as Mailbox handoff rows (`data-chat-handoff`, Host-only `data-handoff-source="host-mailbox"`) with pending / recipient-acted labels so FR-005 does not require copy-paste. Full `TeamView.handoffs` deliveryState for involved bots also appears in the Conversation notices strip from the Agent Teams Client plugin.
+Host mailbox peer receipts (`user/message` or pending inbox with durable `team-message` source) render as Mailbox handoff rows (`data-chat-handoff`, Host-only `data-handoff-source="host-mailbox"`) with pending / recipient-acted labels so FR-005 does not require copy-paste. Durable rows fold to **acted** when a later turn Node follows the receipt (Host `request/header` after delivery). Full `TeamView.handoffs` deliveryState for involved bots also appears in the Conversation notices strip from the Agent Teams Client plugin.
 
 <a id="host-stream-chat-progress"></a>
 ## Host-stream chat progress

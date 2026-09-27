@@ -3,12 +3,12 @@
 import type { ReactNode } from 'react'
 import type { ChatViewSlotProps } from '../contract/slots.ts'
 import {
-  handoffBodyPreview, readTeamMessageSource, type TeamMessageSourceView,
+  handoffBodyPreview, readTeamMessageSource,
+  type ChatHandoffDeliveryState, type TeamMessageSourceView,
 } from './team-message-source.ts'
 import css from './MessageItem.module.css'
 
-/** Delivery observation shown on the chat handoff row. */
-export type ChatHandoffDeliveryState = 'visible-pending' | 'acted'
+export type { ChatHandoffDeliveryState }
 
 /** Props for a durable or pending Host mailbox handoff row. */
 export interface MailboxHandoffRowProps {

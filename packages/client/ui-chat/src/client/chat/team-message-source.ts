@@ -13,6 +13,22 @@ export interface TeamMessageSourceView {
   readonly teamId: string
 }
 
+/** Delivery observation shown on a durable Chat handoff row (FR-005 / FR-007). */
+export type ChatHandoffDeliveryState = 'visible-pending' | 'acted'
+
+/**
+ * Chat Node kinds that mean the recipient started a follow-up turn after the
+ * durable team-message receipt (mirrors Host `request/header` after receipt).
+ */
+const RECIPIENT_ACTED_KINDS: ReadonlySet<string> = new Set([
+  'assistant-step',
+  'turn-process',
+  'turn-tail',
+  'turn-error',
+  'turn-max-tokens',
+  'model-retry',
+])
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
@@ -57,4 +73,28 @@ export function handoffBodyPreview(content: readonly unknown[]): string {
     }
   }
   return ''
+}
+
+/**
+ * Derive Chat handoff delivery from later transcript Nodes after a durable
+ * team-message row. Pending inbox rows stay `visible-pending` at the call site.
+ * @param order - Chat snapshot Node key order.
+ * @param nodes - Chat Node store (key → kind).
+ * @param handoffKey - stable key of the team-message context Node.
+ * @returns `acted` when a later turn Node exists; otherwise `visible-pending`.
+ */
+export function chatHandoffDeliveryState(
+  order: readonly string[],
+  nodes: { get(key: string): { readonly kind: string } | undefined },
+  handoffKey: string,
+): ChatHandoffDeliveryState {
+  const index = order.indexOf(handoffKey)
+  if (index < 0) return 'visible-pending'
+  for (let i = index + 1; i < order.length; i++) {
+    const key = order[i]
+    if (key === undefined) continue
+    const later = nodes.get(key)
+    if (later !== undefined && RECIPIENT_ACTED_KINDS.has(later.kind)) return 'acted'
+  }
+  return 'visible-pending'
 }

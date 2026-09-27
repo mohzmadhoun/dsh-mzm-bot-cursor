@@ -1,0 +1,62 @@
+VERDICT: Pass
+SC: FR-007 US2 handoff / recipient-acted visible on Desktop chat + conversation without leaving app; no Main mailbox IPC (T031 / US3 surface wire)
+SHA: ff64748d40991c614cf72d4c3ffc4ed1f45850c8
+UTC: 2026-09-27T10:49:27Z
+IMPL_SHA: 94d06e4d8b (Phase 1 - T031 - wire handoff acted into Desktop chat surfaces); tip ff64748d40 Merge phase 1: forward T031 onto master
+BRANCH: cursor/p1-t031-chat-handoff-surface-92fa
+VERIFIER_BRANCH: cursor/p1-t031-verifier-pass-5363
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/61
+LINEAR: MOH-76 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t031-chat-handoff-surface.md
+NODE: v24.21.0
+VITEST: 4.1.8
+
+RECIPE_DESKTOP: Pass (measured)
+COMMAND: pnpm exec vitest run apps/desktop/tests/chat-handoff-surface.spec.ts
+STDOUT: evidence/t031-chat-handoff-surface/vitest-desktop.stdout.txt (Test Files 1 passed; Tests 2 passed; EXIT:0)
+PASSED_TESTS (measured):
+  1. composes ui-chat, ui-conversation, and ui-agent-team without a profile patch
+  2. wires Host TeamView.handoffs into conversation.session.notices and chat rows
+
+RECIPE_CLIENT: Pass (measured)
+COMMAND2: pnpm exec vitest run packages/client/ui-chat/tests/team-message-source.client.spec.ts packages/client/ui-chat/tests/chat-view.client.spec.tsx packages/experimental/client-ui-agent-team/tests/handoff-notices.client.spec.tsx -t 'T031|T024|chatHandoffDeliveryState|handoff|acted'
+STDOUT2: evidence/t031-chat-handoff-surface/vitest-client.stdout.txt (Test Files 3 passed; Tests 11 passed | 97 skipped; EXIT:0)
+VERBOSE2: evidence/t031-chat-handoff-surface/vitest-client-verbose.stdout.txt
+PASSED_TESTS (measured):
+  1. chatHandoffDeliveryState (T031) — stays visible-pending when no later turn Node
+  2. chatHandoffDeliveryState (T031) — folds to acted when later assistant/turn follows
+  3. chatHandoffDeliveryState (T031) — visible-pending when handoff key absent from order
+  4. ChatView — durable team-message as Host mailbox handoff (T024)
+  5. ChatView — folds durable handoff to acted after recipient follow-up (T031)
+  6. ChatView — pending inbox team-message visible without copy-paste (T024)
+  7. HandoffNotices — TeamView.handoffs with Host deliveryState (T024)
+  8. HandoffNotices — recipient-acted from Host TeamView.handoffs (T031)
+  9. HandoffNotices — hides strip when no handoff involves viewed Session
+  (+ handoffBodyPreview ×2 matched by filter)
+
+OPTIONAL_CONVERSATION_SEAT: Pass (measured)
+COMMAND3: pnpm exec vitest run packages/client/ui-conversation/tests/skeleton.client.spec.tsx -t 'active phase: fixed header'
+STDOUT3: evidence/t031-chat-handoff-surface/vitest-conversation.stdout.txt (1 passed | 23 skipped; EXIT:0)
+
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND4: pnpm exec vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT4: evidence/t031-chat-handoff-surface/vitest-topology-negative.stdout.txt (1 passed | 4 skipped; EXIT:0)
+
+SOURCE_SPOTCHECK (measured):
+  - client-ui-agent-team mount injects HandoffNotices on conversation.session.notices (id agent-team-handoffs) from agentTeams.view
+  - MailboxHandoffRow sets data-chat-handoff + data-handoff-source="host-mailbox" + data-delivery-state
+  - ConversationContent renders conversation.session.notices between chat and composer
+  - apps/desktop/src DESKTOP_IPC has no dsh-desktop:(mailbox|bot-message|handoff); main/ipc free of SendTeamMessage product routers
+
+CRITERIA_CHECKED:
+  1. Desktop composes ui-chat + ui-conversation + ui-agent-team with empty user patch — Pass (measured)
+  2. Agent Teams mounts HandoffNotices on conversation.session.notices from Host TeamView.handoffs (pending + acted) — Pass (measured)
+  3. Conversation notices seat present between Chat View and composer — Pass (measured; source + optional skeleton)
+  4. Chat renders durable handoffs as MailboxHandoffRow; folds to acted after recipient follow-up — Pass (measured)
+  5. Electron Main / preload invent no mailbox / handoff IPC — Pass (measured; desktop inventory + topology negative)
+
+CLAIM: measured (independent Verifier re-run @ ff64748d40)
+SCOPE_OUT: T025 Scenario 3 live Desktop Pass; T032 progress/final Scenario 4
+CI_NOTE: PR #61 GitHub Actions showed many FAILURE conclusions at verify time (Release/Issue policy/e2e/node matrix; inferred: fork/workflow permission noise, not recipe failure). Recipe acceptance proven locally. Main CI still queued in places.
+BLOCKER: none
+LINEAR_STATUS: leave MOH-76 In Progress until PO merges after Pass

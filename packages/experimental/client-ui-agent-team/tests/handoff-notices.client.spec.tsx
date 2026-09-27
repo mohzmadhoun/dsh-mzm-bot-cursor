@@ -79,6 +79,28 @@ describe('HandoffNotices', () => {
     })
   })
 
+  it('shows recipient-acted deliveryState from Host TeamView.handoffs (T031)', async () => {
+    const handoff: HostMailboxMessage = {
+      id: 'msg-acted' as HostMailboxMessage['id'],
+      fromBotId: LEAD,
+      toBotId: WORKER,
+      body: [{ type: 'text', text: 'recipient already followed up' }],
+      createdAt: 2,
+      deliveryState: 'acted',
+      source: { kind: 'host-mailbox' },
+    }
+    const load = vi.fn(async () => ({
+      ok: true as const,
+      value: { ...baseView, handoffs: [handoff] },
+    }))
+    render(<HandoffNotices {...props({ load, openTeammate: vi.fn(async () => {}) })} />)
+    const row = await screen.findByText('recipient already followed up')
+    const article = row.closest('[data-chat-handoff]')
+    expect(article?.getAttribute('data-delivery-state')).toBe('acted')
+    expect(article?.getAttribute('data-handoff-source')).toBe('host-mailbox')
+    expect(article?.textContent).toContain(zh['deliveryState.acted'])
+  })
+
   it('hides the strip when no handoff involves the viewed Session', async () => {
     const handoff: HostMailboxMessage = {
       id: 'msg-other' as HostMailboxMessage['id'],
