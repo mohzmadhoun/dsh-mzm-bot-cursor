@@ -1,0 +1,21 @@
+VERDICT: Deferred
+SC: SC-005
+SHA: <fill on full Phase 1 replay Pass>
+BRANCH: cursor/p1-t038-scenario5-92fa
+UTC: 2026-09-27T10:59:16Z
+OPERATOR: DH Verifier (Composer; acting as Mohammed)
+LINEAR: MOH-83 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/scenario-5-full-replay.md
+SCENARIO_0: Pass (measured — evidence/scenario-0/VERDICT.txt; gate holds; not re-stamped here)
+SCENARIO_1: Deferred (see evidence/scenario-1/; not re-run in T038)
+SCENARIO_2: Deferred (T018 rule Pass on master; live SC-001/002 remain Verifier)
+SCENARIO_3: Pass (prior keyless — evidence/scenario-3/; not re-run in T038)
+SCENARIO_4: Deferred (T029+T030 on master; Scenario 4 composite Pass not re-stamped in T038)
+NON_GOALS: Pass (prior T039 — evidence/t039-non-goals/; not re-run in T038)
+LIVE_DESKTOP: Skipped
+EVIDENCE: evidence/scenario-5/
+CLAIM: inferred (recipe + stubs only; full desktop replay not executed)
+DEFER_REASON: T038 delivers Scenario 5 recipe + evidence stubs only. Scenario 0 Pass already recorded (hard gate satisfied for recipe authorship). US3 (T027–T032) complete on master including T030/T031. Do not stamp SC-005 Pass until Verifier re-runs Scenarios 0–4 on the real desktop app per scenario-5-full-replay.md and records measured live evidence.
+SCOPE_OUT: SC-005 product Done; live Desktop full-path stamp; feature code; T042 recipe-gap validation
+BLOCKER: none for T038 recipe presence — Scenario 0 Pass exists; full SC-005 Pass deferred until replay run
+LINEAR_STATUS: leave MOH-83 In Progress (do not Done; do not merge)

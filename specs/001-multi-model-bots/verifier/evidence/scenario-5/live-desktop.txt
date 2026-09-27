@@ -1,0 +1,4 @@
+LIVE_DESKTOP: Skipped
+REASON: T038 delivers recipe + evidence stubs only. Operator live Desktop full Phase 1 path (create-bot → assign-model → multi-model work → mailbox handoff → progress+final) not run on this Verifier host.
+WHEN_TO_FILL: On SC-005 Pass attempt, record launch command, profile, observed FR-007 surfaces, screenshot/trace path, and UTC.
+CLAIM: inferred (stub)

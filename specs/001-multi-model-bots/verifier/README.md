@@ -30,7 +30,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **2** Multi-model team session | Scenario 2 | [scenario-2-multi-model.md](./scenario-2-multi-model.md) (T018 rule Pass; T019 TTFT path documented; live SC-001/002 Verifier) | **Verifier** + Runtime + Client | SC-001, SC-002 / FR-001…003, FR-007 |
 | **3** Host mailbox 1:1 | Scenario 3 | [scenario-3-mailbox.md](./scenario-3-mailbox.md) (T025) | **Verifier** + Runtime | SC-003 / FR-004…005 |
 | **4** Progress + final | Scenario 4 | [scenario-4-progress-final.md](./scenario-4-progress-final.md) (T032; SC-004 keyless **Pass** — [evidence/scenario-4/](./evidence/scenario-4/)) | **Verifier** + Client | SC-004 / FR-006 |
-| **5** Full Phase 1 replay | Scenario 5 | `scenario-5-full-replay.md` (T038) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
+| **5** Full Phase 1 replay | Scenario 5 | [scenario-5-full-replay.md](./scenario-5-full-replay.md) (T038; evidence stubs under [evidence/scenario-5/](./evidence/scenario-5/) — Deferred until full desktop replay) | **Verifier** | SC-005 (requires Scenario 0 Pass) |
 
 Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 Out of Scope absence checks Pass), [credentials-ipc.md](./credentials-ipc.md) (T011 Pass), [trust-floor.md](./trust-floor.md) (T013 Verifier Pass — FR-011/FR-012; [evidence/t013-trust-floor/](./evidence/t013-trust-floor/)).
 
