@@ -1,0 +1,26 @@
+VERDICT: Pass
+SC: FR-002 Host llm route + credentials (T016)
+SHA: 54bcbe6c687b6f86530166d2e07a462f7bf7a663
+UTC: 2026-09-27T08:17:07Z
+IMPL_SHA: 54bcbe6c68 (Phase 1 - T016 - route bot model calls via ctx.llm)
+RECIPE: specs/001-multi-model-bots/verifier/t016-llm-route.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/llm-route.spec.ts -t 'ctx.llm|MISSING_CREDENTIAL|Host credential'
+STDOUT: evidence/t016-llm-route/vitest-llm-route.stdout.txt (2 passed; EXIT:0)
+COMMAND2: ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'createBot / ModelSelection / provider-credential'
+STDOUT2: evidence/t016-llm-route/vitest-topology.stdout.txt (1 passed | 4 skipped; EXIT:0)
+HOST_BUILD: Pass (measured)
+BUILD_CMD: pnpm run build:lib:host
+BUILD_ENV: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 (lefthook postinstall otherwise aborts pnpm install preflight)
+BUILD_STDOUT: evidence/t016-llm-route/build-lib-host.stdout.txt (tsc -b tsconfig.host.json + tsdown host; EXIT:0; no error TS)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; no provider API secrets (in-memory Host credentials + scripted adapter)
+CRITERIA_CHECKED:
+  1. Bot chats dispatch through Host ctx.llm with bot {provider, model} — Pass (measured; adapter.requests)
+  2. Host credential resolve supplies API key for provider CredentialRef — Pass (measured; adapter.resolves)
+  3. Missing Bot B credential → MISSING_CREDENTIAL; never uses Bot A secret — Pass (measured)
+  4. After Host stores Bot B ref, follow-up resolves only that ref — Pass (measured)
+  5. Session log does not embed raw Host credential secret — Pass (measured; dump excludes SECRET_A)
+  6. Electron Main/preload/IPC expose no createBot / ModelSelection / provider-credential secret APIs — Pass (measured; topology inventory)
+CLAIM: measured (independent Verifier re-run @ 54bcbe6c68)
+SCOPE_OUT: SC-001/SC-002 Desktop multi-model (Scenario 2 / T018–T019); T017 Client UI; T019 TTFT; US4 credential entry UI / Scenario 1 dump (T033–T037)
+BLOCKER: none
