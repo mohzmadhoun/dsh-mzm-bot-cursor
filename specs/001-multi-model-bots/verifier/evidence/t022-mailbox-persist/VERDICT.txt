@@ -1,0 +1,39 @@
+VERDICT: Pass
+SC: FR-004 Persist durable Host mailbox message fields (T022 / US2)
+SHA: 5a21c88bf1d52813da27cb7d937291999f2b8396
+UTC: 2026-09-27T09:29:08Z
+IMPL_SHA: 5a21c88bf1 (Phase 1 - T022 - persist Host mailbox message fields)
+BRANCH: cursor/p1-t022-mailbox-persist-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/42
+LINEAR: MOH-67 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t022-mailbox-persist.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/host-mailbox-message.spec.ts packages/experimental/agent-team/tests/mailbox-persist.spec.ts --reporter=verbose
+STDOUT: evidence/t022-mailbox-persist/vitest-focused.log (Test Files 2 passed; Tests 8 passed; EXIT:0)
+PASSED_TESTS (measured):
+  host-mailbox-message.spec.ts (6):
+    1. returns undefined when the Lead never queued the message
+    2. reconstructs product fields from Lead queued edge with Host-only source
+    3. clones body so callers cannot mutate the durable snapshot content
+    4. folds deliveryState to visible-pending after Lead delivered + target receipt
+    5. folds deliveryState to acted when a request/header follows the receipt
+    6. throws when queue edge exists but deliveryState observation is missing
+  mailbox-persist.spec.ts (2):
+    1. persists product fields on Lead-log and reconstructs after cold read
+    2. keeps Host-only source when deliveryState stays queued
+OPTIONAL_T021_DELIVERY_SEND: Pass (measured)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/delivery-state.spec.ts packages/experimental/agent-team/tests/mailbox-send.spec.ts
+STDOUT2: evidence/t022-mailbox-persist/vitest-optional-t021.log (Test Files 2 passed; Tests 9 passed; EXIT:0)
+OPTIONAL_TOPOLOGY_NEGATIVE: Pass (measured)
+COMMAND3: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'rejects fake mailbox'
+STDOUT3: evidence/t022-mailbox-persist/vitest-topology-negative.log (1 passed | 4 skipped; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; mock LLM — no provider API secrets
+CRITERIA_CHECKED:
+  1. After Bot A→B Host mailbox send, product fields reconstruct from persisted Lead + target Session logs (cold sessionPersistence read) — Pass (measured; mailbox-persist storedEvents + readHostMailboxMessage)
+  2. Field aliases: id / fromBotId←senderId / toBotId←targetId / body←content / createdAt←queued.time / deliveryState fold / source { kind: 'host-mailbox' } — Pass (measured; host-mailbox-message + mailbox-persist equality asserts)
+  3. source is Host-only; never Electron IPC; target receipts keep team-message Host attribution — Pass (measured; source.kind host-mailbox; peer user/message source.kind team-message; JSON.stringify no electron-ipc)
+  4. Session-log reconstructable without Main-synthesized mailbox payloads — Pass (measured; readHostMailboxMessage over cold logs only)
+  5. Optional topology negative: no Main mailbox channel — Pass (measured; rejects fake mailbox)
+CLAIM: measured (independent Verifier re-run @ 5a21c88bf1)
+SCOPE_OUT: T023 Client projections; T024 Desktop UI; T025 Scenario 3; T026 Electron bus guard (topology negative already green)
+BLOCKER: none
