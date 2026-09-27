@@ -1,0 +1,63 @@
+T032 Layer C filter (Host product slice) — DH Verifier
+=======================================================
+Verdict: PASS (Host product / Layer B filter only)
+Stamp: 2026-09-27
+Branch: cursor/p3-t032-thin-pack-filter-fe1d @ 9faee4bb34
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/130 (OPEN, MERGEABLE)
+Linear: MOH-179 (T032) — left In Progress (Desktop SC-004 / Scenario 4 stamp still open; PO closes after merge + Layer C)
+
+Rebase note
+-----------
+Tip 9faee4bb34 is 0 behind / 1 ahead of origin/master (ea0297a61c).
+master is ancestor of HEAD (merge-base --is-ancestor origin/master HEAD = OK).
+No rebase required.
+
+Acceptance (T032 / Host product filter — not Desktop SC-004)
+------------------------------------------------------------
+[x] 0 behind master; filter-only diff (no scenario-2 paths).
+[x] projectSkillCatalog omits non-thin-pack provider bundled skills (office-*)
+    from Pass discovery so managedCount === 1 (sole id mzm-thin-pack).
+[x] Office bundled rows stay out of listSkills / remoteView.skills managed set;
+    user-authored rows still project as source=user.
+[x] Layer A on-disk thin pack still sole child under managed-skills/ (mzm-thin-pack).
+
+Evidence (measured)
+-------------------
+Commands @ 9faee4bb34:
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/projection-events.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'projectSkillCatalog|excludes office bundled|projects Host skill catalog'
+  → 5 passed | 84 skipped (2 files)
+    - projectSkillCatalog > maps thin-pack to managed and other sources to user
+    - projectSkillCatalog > forces thin-pack id to managed even when source is not bundled
+    - projectSkillCatalog > omits office bundled skills … managed count is exactly one (T032)
+    - Team Remote API > projects Host skill catalog with mzm-thin-pack managed + user skills (T015)
+    - Team Remote API > excludes office bundled skills from listSkills so Pass managed count is one (T032)
+
+  Layer A (Host ship guard, unchanged this tip):
+    find apps/desktop-host/managed-skills -mindepth 1 -maxdepth 1 -type d | wc -l → 1
+    test -d apps/desktop-host/managed-skills/mzm-thin-pack → OK
+
+Logs: p3-t032-filter-vitest.log · p3-t032-filter-vitest-verbose.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (origin/master...HEAD): 7 files
+  packages/experimental/agent-team/{src/projection.ts,tests/*,README*} +
+  specs/003-skills-ux/{tasks.md,verifier/thin-pack-skill.md}
+  Zero scenario-2 / SC-002 paths. Zero Client UI paths.
+
+Claims
+------
+- 0 behind master; filter-only tip @ 9faee4bb34: **measured**
+- No scenario-2 in PR diff: **measured**
+- managedCount === 1 / office-* omitted from projectSkillCatalog: **measured**
+- listSkills / remoteView.skills managed length === 1: **measured**
+- Layer A on-disk thin pack count === 1: **measured**
+- Desktop Scenario 4 / SC-004 GUI stamp: **not run** (out of scope this gate; follows separately)
+
+Scope lock
+----------
+Does NOT stamp Desktop SC-004 / Scenario 4 discovery GUI evidence.
+Does NOT Fail or Pass on CI rollup noise on PR #130 (Host Pass bar is focused Agent Teams vitest).
+Next: Desktop Layer C Scenario 4 stamp (expect managedCount === 1) after PO merges #130 or on a Desktop evidence pass.
