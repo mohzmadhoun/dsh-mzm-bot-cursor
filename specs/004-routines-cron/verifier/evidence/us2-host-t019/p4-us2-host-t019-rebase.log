@@ -1,0 +1,6 @@
+HEAD=b49a51fa29f501e546f3e2fa1fb5726b71f39457
+origin tip=b49a51fa29f501e546f3e2fa1fb5726b71f39457
+behind master=0
+ahead of master=1
+113:- [x] T019 [US2] Host listRoutinesByBot projects `RoutineProjection` (intent/identity, schedule, status, lastRunAt) over HTTP/WS from Host catalog only
+232:1. **DH Runtime**: T006–T009, T015–T016, T019, T022, T025 (+ optional T013/T026 jobs visibility)

@@ -1,0 +1,105 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > projects current-team records independently from inherited records
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > persists named sidebar section catalog and rejects empty names
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > persists Host Routine catalog rows and rejects empty intent
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > derives named membership and Unassigned without a stored Unassigned row
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > enforces teammate identity and lifecycle
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > persists and allows post-active Host identity field updates
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > allows active → deleted Host identity tombstone and rejects further transitions
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > enforces task revision continuity
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > rejects every invalid persisted task dependency relation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > leaves numeric allocation unchanged for a branded nonstandard task id
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > rejects a persisted numeric task id outside the safe integer range
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > enforces mailbox queue and acknowledgement relations
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > validates every current-version persisted payload before projecting it
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > retains merge-extensible content blocks while rejecting malformed core variants
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > records unsupported event versions without applying them
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > isolates unsupported inherited Team records from the current Team
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > Agent Teams projection events > ignores malformed current-version records inherited from another Team
+ ✓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > projectRoutine / projectRoutines (US2 T019 / FR-002) > projects intent/identity, scheduleLabel, status, and lastRunAt from Host rows 2ms
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > projectSkillCatalog (T015 / T032) > maps thin-pack to managed and other sources to user
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > projectSkillCatalog (T015 / T032) > forces thin-pack id to managed even when provider source is not bundled
+ ↓ |thread-safe| packages/experimental/agent-team/tests/projection-events.spec.ts > projectSkillCatalog (T015 / T032) > omits office bundled skills from Pass discovery so managed count is exactly one (T032)
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > treats trimmed (provider, model) tuples as distinct and ignores reasoningEffort
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > rejects an empty provider or model through required text
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > modelAssignmentsAreDistinct > does not project the Lead pair as an inactive teammate modelSelection
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > normalizePersonaProfile > trims fields, allows empty job/voice, and requires non-empty anti-job items
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > normalizeAvatarMarker > requires at least one preset shape or color and rejects unknown ids
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects missing and failed authoritative Team projections
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects deployment limits that are not positive safe integers
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > supports direct-constructor defaults and recovers roots that already exist
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > creates fresh and fork teammates with immutable names and bounded roster size
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > applies per-teammate LLM agentOptions at create without sharing the Lead route
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > creates a Host-owned bot from displayName plus required model assignment
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects Host bot create without displayName or model assignment
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects non-Lead Host bot create and surfaces Remote createBot rejections
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > persists createSection / assignSection / unassign and projects Unassigned without a catalog row
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > persists deleteBot tombstone, omits identity from view, and rejects without removing prior
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > persists renameBot, projects displayName on view, and rejects empty rename without changing prior
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > persists setAvatar, projects preset marker on view, and rejects empty/unknown markers
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > persists updatePersona, projects persona on view, and rejects without changing prior values
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > binds saved persona fields into Bot instruction assembly on subsequent turns
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > binds Bot ModelSelection via installModelSelection for subsequent chats only
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > flushes the accepted child prompt before committing the active roster edge
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > checkpoints live and detached inbox receipts and aborts an unresolved checkpoint
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > drains an accepted child when its initial durability checkpoint fails
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > records failed provisioning durably, reserves its name, and counts it against the limit
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > records non-Error provider failures and contains a reversed provisioning settlement race
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > cleans up a child when recovery settles its provisioning record first
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > handles a continuation that settles before the active roster view or conflict cleanup lookup
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > validates names and permits only the Lead to create or interrupt teammates
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > validates teammate text fields and pre-provisioning cancellation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > treats an ordinary fork as a new Root Team and filters inherited Team state
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > rejects stale Agent identities and non-Team subagent children
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team identity and provisioning > does not reinterpret an orphaned provider child or malformed parent stream as a Team root
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > fails loudly when the durable numeric task id space is exhausted
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > bounds non-deleted tasks while retaining deleted task ids as tombstones
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > enforces CAS, ownership, dependencies, transitions, and write-scope warnings
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > rejects malformed scopes and every invalid dependency relation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > rejects incomplete mutations, invalid transitions, and deletion of a live blocker
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > supports Lead reassignment, completion, reopen, and deletion permissions
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team shared task DAG > covers partial edits, Lead ownership, unassignment, and blocked reassignment
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > exports Team views and task mutations from the owning service
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > US1 T016: createRoutine is per-botId; no confirm or displayName required
+ ✓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > US2 T019: listRoutinesByBot projects RoutineProjection over Remote from Host catalog 112ms
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > persists attachSkill, projects skillAttachments on view, and rejects empty author fields
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > persists user skills Host-durably and keeps rejected empty saves out of discovery (T027/T028)
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > rejects upsertUserSkill when userSkillsRoot is not configured
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > binds attached skill instructional bodies into Bot instruction assembly (FR-014 / SC-007)
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > projects Host skill catalog with mzm-thin-pack managed + user skills (T015)
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > excludes office bundled skills from listSkills so Pass managed count is one (T032)
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team Remote API > preserves Team task rejections and propagates unexpected failures
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > steers a message addressed to the Lead and checkpoints its receipt
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > acknowledges steered messages persisted by a busy Lead before model claim
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > flushes a live pending receipt before acknowledgement without inserting a duplicate
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > acknowledges steered messages accepted by a busy target inbox
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > serializes concurrent Steer delivery admission for one target
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > delivers persisted mail before the later message that cold-resumes its target
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > deduplicates live target history and contains inspection and delivery failures
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > cold-resumes an inactive sibling with sender attribution
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > enforces message byte and pending-count limits without encouraging retry after enqueue
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > interrupts only the current turn and retains an already accepted follow-up
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > waits for one change, supports cancellation, times out, and releases waiters on HMR disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > disposes live teammate Activations and their waits when the Team service unloads
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > closes creation admission and drains an in-flight spawn before unload completes
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > retains an in-flight creation cleanup failure during disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > recognizes wrapped and coded runtime cancellation during disposal settlement
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > disposes a live child even after its durable member edge becomes failed
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > aborts and awaits an admitted cold mailbox dispatch during disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > awaits an admitted asynchronous acknowledgement before disposal completes
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > bounds Team runtime disposal when a continuation drain never settles
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > bounds disposal while an admitted creation ignores cancellation
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > contains recovery callback failures and ignores work scheduled after disposal
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > reports contained teardown failures without retaining the Team service
+ ↓ |thread-safe| packages/experimental/agent-team/tests/team.spec.ts > Team mailbox and waiting > reconciles mismatched persisted children and ignores a concurrently settled member
+
+ Test Files  2 passed (2)
+      Tests  2 passed | 92 skipped (94)
+   Start at  18:53:27
+   Duration  1.50s (transform 1.51s, setup 340ms, import 1.53s, tests 116ms, environment 0ms)
