@@ -5,7 +5,9 @@ import { brandString } from '@deepseek-ai/dsh-brand'
 import { ReasoningEffortId, type ContentBlock } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-session'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
+import { readHostMailboxMessage } from './host-mailbox-message.ts'
 import type {
+  HostMailboxMessage,
   TeamId,
   TeamMemberSnapshot,
   TeamMessageId,
@@ -338,3 +340,30 @@ export const teamProjectionDefinition = {
     return state
   },
 } satisfies ProjectionDefinition<'agentTeam', TeamProjectionState>
+
+/**
+ * Project Client-visible Host mailbox handoffs from Lead Session events plus
+ * per-target Session logs (FR-005). Order follows Lead queue order. Each row is
+ * a product {@link HostMailboxMessage} with Host-only `source` — never Electron IPC.
+ * @param leadEvents - Lead Session events (owns `team/message/*`).
+ * @param targetEventsById - recipient Session event logs keyed by `toBotId`.
+ * @param teamId - durable Team identity; events for other Teams are ignored.
+ * @returns detached handoff rows reconstructable without Main-synthesized IPC.
+ */
+export function projectMailboxHandoffs(
+  leadEvents: readonly SessionEvent[],
+  targetEventsById: ReadonlyMap<SessionId, readonly SessionEvent[]>,
+  teamId: TeamId,
+): HostMailboxMessage[] {
+  const handoffs: HostMailboxMessage[] = []
+  for (const event of leadEvents) {
+    if (event.type !== 'team/message/queued') continue
+    if (event.data.teamId !== teamId) continue
+    const messageId = event.data.message.id
+    const targetId = event.data.message.targetId
+    const targetEvents = targetEventsById.get(targetId) ?? []
+    const handoff = readHostMailboxMessage(leadEvents, targetEvents, messageId)
+    if (handoff !== undefined) handoffs.push(handoff)
+  }
+  return handoffs
+}

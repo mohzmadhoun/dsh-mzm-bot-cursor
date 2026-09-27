@@ -7,7 +7,9 @@ import type { ChatNodeOwnerProps, ChatNodeViewProps, ChatViewSlotProps } from '.
 import type { ModelRetryNode, TurnErrorNode, UserMessageNode } from '../contract/snapshot.ts'
 import { CompactionItem } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
+import { MailboxHandoffRow } from './MailboxHandoffRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
+import { readTeamMessageSource } from './team-message-source.ts'
 import css from './MessageItem.module.css'
 
 type UserImage = Extract<UserMessageNode['content'][number], { type: 'image' }>
@@ -358,6 +360,17 @@ export const UserMessageNodeView = memo(function UserMessageNodeView({
 /** Injected-context keyed Chat renderer. */
 export const ContextMessageNodeView = memo(function ContextMessageNodeView({ node, t }: ChatNodeViewProps<'context'>) {
   const data = node.data
+  // Host mailbox peer receipt: show handoff chrome instead of generic inject.
+  if (readTeamMessageSource(data.source) !== null) {
+    return (
+      <MailboxHandoffRow
+        content={data.content}
+        source={data.source}
+        deliveryState="visible-pending"
+        t={t}
+      />
+    )
+  }
   return (
     <ContextInjectionRow
       content={data.content}
