@@ -1,6 +1,6 @@
 # Scenario 1 — Discover / load managed skill
 
-**Status:** Recipe delivered — product SC Pass **not** stamped (await US1 Client discovery + FR-012 evidence)
+**Status:** Product SC-001 **Pass** stamped 2026-09-27 — FR-012 evidence under `evidence/scenario-1/` (tip c5742bff46)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host catalog / thin pack) · DH Client (discovery / load UI)
 **Linear:** [MOH-166](https://linear.app/momadhoun/issue/MOH-166) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T019 — Verifier Scenario 1 recipe covering SC-001 with mandatory FR-012 desktop evidence
@@ -16,7 +16,7 @@
 | Recipe present | This file documents Steps A–C with Pass/Fail and evidence tags |
 | SC coverage | SC-001 — discover thin-pack managed skill, make available to attach, survive leave/return + restart/reload |
 | FR-012 | Desktop screenshot(s) and/or short screen recording under `verifier/evidence/scenario-1/` — unit/jsdom alone **fails** |
-| Product SC stamp | Deferred until Client discovery/load (T015–T018) + Verifier desktop evidence land |
+| Product SC stamp | **Pass** — see `evidence/scenario-1/VERDICT.txt` (2026-09-27) |
 
 ---
 
@@ -201,4 +201,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T019).** Product SC Pass **not** stamped. Host thin-pack ship/mount + catalog projection are on master via [#115](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/115) / foundational [#116](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/116). Full Scenario 1 Done waits on US1 Client discovery/load (T015–T018) plus Verifier FR-012 desktop evidence using Steps A–C above.
+**Scenario 1 / SC-001 Pass stamped (2026-09-27).** FR-012 desktop screenshots + walkthrough under [`evidence/scenario-1/`](./evidence/scenario-1/) (`VERDICT.txt`). Client T016–T018 on master via [#120](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/120); Host catalog T015 via [#118](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/118). T019 recipe checkbox remains `[x]`.
