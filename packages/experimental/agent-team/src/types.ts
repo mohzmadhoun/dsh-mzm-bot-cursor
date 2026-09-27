@@ -246,6 +246,19 @@ export interface SendTeamMessageResult {
   readonly status: 'accepted' | 'queued'
 }
 
+/**
+ * Product Host mailbox delivery observation (FR-004 / FR-005).
+ * Reconstruct from Lead `team/message/*` edges plus the target Session log —
+ * never from Electron IPC.
+ *
+ * Transitions: `queued` → `delivered` → `acted` | `visible-pending`.
+ */
+export type TeamMailboxDeliveryState =
+  | 'queued'
+  | 'delivered'
+  | 'acted'
+  | 'visible-pending'
+
 /** Input for creating one shared task. */
 export interface CreateTeamTaskRequest {
   readonly subject: string

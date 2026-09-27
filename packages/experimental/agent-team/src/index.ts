@@ -47,6 +47,7 @@ export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
 export { TeamId, TeamMessageId, TeamTaskId } from './types.ts'
 export { TeamError } from './error.ts'
+export { observeMailboxDeliveryState } from './delivery-state.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
