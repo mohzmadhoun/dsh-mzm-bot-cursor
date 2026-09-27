@@ -23,7 +23,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -109,6 +109,53 @@ async function bench(options: {
                 status: 'inactive' as const,
                 displayName: 'Research Bot',
                 persona: { job: 'review', voice: 'terse', antiJobs: ['docs'] },
+                diagnostics: [],
+              },
+            },
+          },
+        })
+    },
+    renameBot: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/renameBot', args })
+      return Promise.resolve(options.remoteFailure === 'renameBot'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              displayName: 'Rename Target',
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Rename Target',
+                diagnostics: [],
+              },
+            },
+          },
+        })
+    },
+    setAvatar: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/setAvatar', args })
+      return Promise.resolve(options.remoteFailure === 'setAvatar'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              id: CHILD,
+              avatar: { shape: 'circle', color: 'blue' },
+              member: {
+                id: CHILD,
+                name: 'research-bot',
+                role: 'teammate' as const,
+                status: 'inactive' as const,
+                displayName: 'Research Bot',
+                avatar: { shape: 'circle' as const, color: 'blue' as const },
                 diagnostics: [],
               },
             },
@@ -220,6 +267,14 @@ describe('ui-team browser plugin', () => {
       voice: 'terse',
       antiJobs: ['docs'],
     })).ok).toBe(true)
+    expect((await actions.renameBot(SESSION, {
+      botId: CHILD,
+      displayName: 'Rename Target',
+    })).ok).toBe(true)
+    expect((await actions.setAvatar(SESSION, {
+      botId: CHILD,
+      avatar: { shape: 'circle', color: 'blue' },
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -233,6 +288,8 @@ describe('ui-team browser plugin', () => {
       'agentTeams/view',
       'agentTeams/createBot',
       'agentTeams/updatePersona',
+      'agentTeams/renameBot',
+      'agentTeams/setAvatar',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -246,6 +303,14 @@ describe('ui-team browser plugin', () => {
       job: 'review',
       voice: 'terse',
       antiJobs: ['docs'],
+    })
+    expect(b.calls[3]?.args[1]).toEqual({
+      botId: CHILD,
+      displayName: 'Rename Target',
+    })
+    expect(b.calls[4]?.args[1]).toEqual({
+      botId: CHILD,
+      avatar: { shape: 'circle', color: 'blue' },
     })
     expect(b.calls.at(-1)?.args[1]).toMatchObject({ owner: 'worker' })
 
@@ -309,6 +374,26 @@ describe('ui-team browser plugin', () => {
       job: 'review',
       voice: '',
       antiJobs: [],
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const renameBot = await bench({ remoteFailure: 'renameBot' })
+    const renameActions = (renameBot.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(renameActions.renameBot(SESSION, {
+      botId: CHILD,
+      displayName: 'Rename Target',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const setAvatar = await bench({ remoteFailure: 'setAvatar' })
+    const avatarActions = (setAvatar.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(avatarActions.setAvatar(SESSION, {
+      botId: CHILD,
+      avatar: { shape: 'circle', color: 'blue' },
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

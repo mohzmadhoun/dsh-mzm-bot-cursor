@@ -2,6 +2,8 @@
 
 import type {
   CreateBotInput,
+  RenameBotInput,
+  SetAvatarInput,
   TeamMemberView as TeamRosterMember,
   TeamView,
   UpdatePersonaInput,
@@ -22,13 +24,14 @@ import {
 } from './HandoffNotices.tsx'
 import {
   TeamAction, type TeamActionInjected, type TeamActionResult, type TeamCreateBotActionResult,
-  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamRenameBotActionResult, type TeamSetAvatarActionResult, type TeamTaskActionResult,
+  type TeamUpdatePersonaActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, bot-create, persona editor, and task-board copy. */
+    /** Agent Teams roster, bot-create, persona/rename/avatar editors, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -55,6 +58,12 @@ function registerUi(ctx: ClientContext): void {
     },
     async updatePersona(sessionId, input: UpdatePersonaInput): Promise<TeamUpdatePersonaActionResult> {
       return await ctx.remote.agentTeams.updatePersona(leadSessionId(sessionId), input)
+    },
+    async renameBot(sessionId, input: RenameBotInput): Promise<TeamRenameBotActionResult> {
+      return await ctx.remote.agentTeams.renameBot(leadSessionId(sessionId), input)
+    },
+    async setAvatar(sessionId, input: SetAvatarInput): Promise<TeamSetAvatarActionResult> {
+      return await ctx.remote.agentTeams.setAvatar(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)

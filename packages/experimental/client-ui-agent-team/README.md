@@ -41,6 +41,12 @@ When the draft has both ids and roster bots already have pairs, the form says wh
 
 **Edit persona** on a healthy teammate opens the Host identity/profile editor for `job`, `voice`, and an ordered anti-jobs list (one item per line; empty fields allowed). Save calls Host Remote `agentTeams/updatePersona`; success reloads the roster. Saved anti-jobs render on the bot overview for Verifier observation — not in a hidden/advanced-only surface. When save is interrupted or the Host is unavailable, the panel shows a clear failure and leaves the prior durable persona on the overview unchanged. Electron Main does not invent persona records.
 
+### Rename a Bot and set a preset avatar
+
+**Rename** on a healthy teammate opens a Host displayName editor. Save is blocked while the trimmed name is empty; success calls Host Remote `agentTeams/renameBot` and reloads the roster so sidebar and overview show the new label. Duplicate names are allowed. Kebab roster `name` stays the create-time id.
+
+**Set avatar** opens a preset shape and/or color picker (Host fixed ids). At least one of shape or color is required to save. Save calls Host Remote `agentTeams/setAvatar`; the marker renders on the roster/overview row (`data-team-avatar`). There is **no** image-file or URL upload control for P2 Pass (clarify lock 3 / T024). Electron Main does not invent name or avatar stores.
+
 ### Observe Host mailbox handoffs
 
 Opening or refreshing the panel loads `TeamView.handoffs` from Host `agentTeams/view`. Each row is a product Host mailbox message (`id`, from/to bots, body preview, `deliveryState`, Host-only `source`) reconstructed on the Host from Lead + target Session logs — never Main-synthesized IPC. Delivery labels cover `queued`, `delivered`, `visible-pending`, and `acted` (FR-005). The same projection also mounts a Conversation notices strip (`conversation.session.notices`) for handoffs involving the viewed Session, and Chat renders durable / pending `team-message` receipts as handoff rows so copy-paste is not required.
@@ -64,7 +70,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, persona editor, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, Host mailbox handoffs, Host bot-create, persona/rename/avatar editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
