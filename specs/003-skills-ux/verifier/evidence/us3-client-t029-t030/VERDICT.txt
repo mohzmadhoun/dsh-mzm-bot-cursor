@@ -1,0 +1,77 @@
+T029–T030 Client US3 skill authoring — DH Verifier
+===================================================
+Verdict: PASS (Client product UI slice only)
+Stamp: 2026-09-27
+Branch: cursor/p3-us3-client-author-fe1d @ 1e1506aaa4
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/132 (OPEN, MERGEABLE)
+Linear: MOH-176 (T029), MOH-177 (T030) — left In Progress (PO closes after merge)
+
+Rebase note
+-----------
+Earlier tip 63b372d51b was 2 behind master (master NOT ancestor). PO rebased to
+02cec61a48 (0 behind 728fd23a31 / #131). Tip later rebased onto #133 SC-004:
+1e1506aaa4 is 0 behind / 2 ahead of origin/master (e993167843); master is
+ancestor of HEAD. PR #132 mergeable=MERGEABLE (mergeStateStatus=UNSTABLE —
+CI rollup noise, not used as this gate bar).
+
+Acceptance (T029–T030 / Client product UI — not SC-003)
+-------------------------------------------------------
+[x] T029 Client skill-authoring create/edit surface: New user skill opens
+    author editor; empty name/body show clear reject + Save disabled;
+    Host upsertUserSkill rejection does not invent a catalog row (vitest).
+[x] T030 Authored user skills appear in discovery (source=user) and are
+    available-to-attach; attach/run path covered by vitest; Desktop shows
+    user skill alongside managed thin pack with Edit skill.
+[x] No Electron Main skills bus (T013 regression still green).
+
+Evidence (measured)
+-------------------
+Commands @ 1e1506aaa4 (Client authoring identical to 02cec61a48 product tip):
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'rejects empty skill author|creates a user skill via Host|edits a user skill through Host|shows Host upsertUserSkill rejection|attaches and runs an authored'
+  → 5 passed | 62 skipped
+    - rejects empty skill author drafts with clear Client messaging (T029)
+    - creates a user skill via Host upsertUserSkill and lists it in discovery (T029/T030)
+    - edits a user skill through Host upsertUserSkill with skillId (T029)
+    - shows Host upsertUserSkill rejection without inventing a catalog row (T029)
+    - attaches and runs an authored user skill like managed (T030)
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-skills-bus.spec.ts
+  → 3 passed
+
+Desktop (Standing Order 11) — restart start:desktop DISPLAY=:1 CDP 9222:
+  03-reject-empty.png — New user skill editor; empty reject alert; Save disabled
+  03b-reject-empty-body.png — name-only fill still rejected
+  04-author-save.png / 05-discovery-authored.png — mzm-authored-skill source=user,
+    Available to attach, Edit skill (alongside managed mzm-thin-pack)
+  06-edit-form.png — edit author editor
+  07-edit-saved.png — displayName "MzM authored skill (edited)" in discovery
+  us3-client-author-walkthrough.mp4 — Desktop walkthrough
+  final-state.json — user skill id=mzm-authored-skill available=true; thin pack present
+  panel-state.json — createSkill control present
+
+Also under /opt/cursor/artifacts/ (us3-01…05 prefixed copies + walkthrough.mp4).
+
+Logs: p3-us3-client-t029-t030-vitest.log ·
+      p3-us3-client-no-electron-skills-bus.log ·
+      p3-us3-client-author-cdp.log
+      (start-desktop.log under /opt/cursor/artifacts/ only — dbus noise)
+
+Claims
+------
+- Client empty-reject / create→discovery / edit / Host-reject UI: **measured** (vitest).
+- No Main skills IPC bus: **measured** (no-electron-skills-bus.spec.ts).
+- Desktop author create reject + discovery + edit path: **measured** (screenshots +
+  final-state.json + mp4). Desktop create persist observed on first CDP pass
+  (id=mzm-authored-skill); second pass reconfirmed reject + edit + discovery.
+- Attach/run of authored skill on Desktop: **not filmed** this gate; covered by
+  vitest T030. Acceptable for Client product UI slice; full Scenario 3 may
+  exercise attach later.
+
+Scope lock
+----------
+Does NOT stamp SC-003 / Scenario 3 desktop Done (FR-012 full recipe stamp
+deferred post-merge per PO).
+CI UNSTABLE on PR #132 not used as this Pass bar.
+MOH-176 / MOH-177 remain In Progress.

@@ -1,0 +1,63 @@
+initial {
+  "createSkill": true,
+  "rejectOpen": false,
+  "editor": null,
+  "userSkills": [
+    {
+      "id": "mzm-authored-skill",
+      "source": "user",
+      "name": "MzM authored skill",
+      "available": "true"
+    }
+  ],
+  "match": {
+    "id": "mzm-authored-skill",
+    "source": "user",
+    "name": "MzM authored skill",
+    "available": "true"
+  }
+}
+shot /opt/cursor/artifacts/04-author-save.png
+shot /opt/cursor/artifacts/05-discovery-authored.png
+discovery {
+  "userSkills": [
+    {
+      "id": "mzm-authored-skill",
+      "source": "user",
+      "name": "MzM authored skill",
+      "available": "true"
+    }
+  ],
+  "match": {
+    "id": "mzm-authored-skill",
+    "source": "user",
+    "name": "MzM authored skill",
+    "available": "true"
+  },
+  "createSkill": true
+}
+reject recheck {
+  text: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+  saveDisabled: true
+}
+shot /opt/cursor/artifacts/03-reject-empty.png
+shot /opt/cursor/artifacts/06-edit-form.png
+shot /opt/cursor/artifacts/07-edit-saved.png
+final {
+  "createSkill": true,
+  "skills": [
+    {
+      "id": "mzm-authored-skill",
+      "source": "user",
+      "name": "MzM authored skill (edited)",
+      "available": "true"
+    },
+    {
+      "id": "mzm-thin-pack",
+      "source": "managed",
+      "name": "MzM thin pack",
+      "available": "false"
+    }
+  ]
+}
+PASS_DESKTOP_AUTHORING
