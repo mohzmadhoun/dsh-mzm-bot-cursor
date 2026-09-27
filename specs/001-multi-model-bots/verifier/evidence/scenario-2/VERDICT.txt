@@ -1,0 +1,13 @@
+VERDICT: Pass
+SC: FR-003 / SC-002 rule definition (T018 slice); FR-001…002 / FR-007 create path reused
+SHA: 5cc1cf4612900c40d64dda7341a0e482266c2474
+UTC: 2026-09-27T08:17:45Z
+BRANCH: cursor/p1-t018-distinct-models-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/33
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'creates a Host-owned bot|warns when the draft|cancels bot create'
+STDOUT: evidence/scenario-2/vitest-client.stdout.txt (3 passed | 23 skipped)
+COMMAND: ./node_modules/.bin/vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'applies per-teammate LLM agentOptions|creates a Host-owned bot from displayName'
+STDOUT: evidence/scenario-2/vitest-host.stdout.txt (2 passed | 50 skipped)
+CRITERIA: distinct-models hint + duplicate soft warning + multiModel pending/ready copy green; Host createBot/agentOptions expose member.modelSelection; recipe defines distinct (provider, model) with no marketing catalog
+DEFERRED: SC-001 wall-clock + live multi-provider session Pass remain T019
+CLAIM: measured (Verifier certified independent re-run at 5cc1cf4612900c40d64dda7341a0e482266c2474; Save stays enabled on duplicate — disabled={pending || !ready} only, measured from TeamAction.tsx)

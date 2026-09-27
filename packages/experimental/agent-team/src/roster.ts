@@ -25,6 +25,22 @@ import { requiredText } from './validation.ts'
 
 const MEMBER_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
+/**
+ * Project the live Agent LLM route onto a roster row.
+ * Spawn-backend `provider` stays on {@link TeamMemberView.provider}; this pair is Verifier identity.
+ * @param options - Agent options that may carry provider + model ids.
+ * @returns model and optional modelSelection fields for one TeamMemberView.
+ */
+function llmRouteFields(options: { provider?: string; model?: string } | undefined):
+  Pick<TeamMemberView, 'model' | 'modelSelection'> {
+  if (options?.model === undefined) return {}
+  if (options.provider === undefined) return { model: options.model }
+  return {
+    model: options.model,
+    modelSelection: { provider: options.provider, model: options.model },
+  }
+}
+
 /** Caller identity inside one implicit Team. */
 export interface TeamMembership {
   readonly root: Agent
@@ -134,13 +150,16 @@ export class TeamRoster {
       name: 'lead',
       role: 'lead',
       status: root.status,
-      ...root.options.model === undefined ? {} : { model: root.options.model },
+      ...llmRouteFields(root.options),
       diagnostics: [],
     }]
     for (const member of state.members) {
       const live = this.ctx.agents.get(member.id)
-      // Prefer durable Host assignment (FR-002); never fall back to the Lead route.
-      const model = member.modelSelection?.model ?? live?.options.model
+      // Prefer durable Host assignment (FR-002). Project Verifier (provider, model)
+      // via llmRouteFields. Never fall back to the Lead route as modelSelection.
+      const route = member.modelSelection !== undefined
+        ? llmRouteFields(member.modelSelection)
+        : llmRouteFields(live?.options)
       result.push({
         id: member.id,
         name: member.name,
@@ -154,7 +173,7 @@ export class TeamRoster {
         ...member.displayName === undefined ? {} : { displayName: member.displayName },
         provider: member.provider,
         context: member.context,
-        ...model === undefined ? {} : { model },
+        ...route,
         diagnostics: member.error === undefined ? [] : [member.error],
       })
     }
@@ -441,7 +460,9 @@ export class TeamRoster {
   /** Build one runtime member row after successful creation. */
   private memberView(member: TeamMemberSnapshot & { readonly phase: 'active' }): TeamMemberView {
     const live = this.ctx.agents.get(member.id)
-    const model = member.modelSelection?.model ?? live?.options.model
+    const route = member.modelSelection !== undefined
+      ? llmRouteFields(member.modelSelection)
+      : llmRouteFields(live?.options)
     return {
       id: member.id,
       name: member.name,
@@ -451,7 +472,7 @@ export class TeamRoster {
       ...member.displayName === undefined ? {} : { displayName: member.displayName },
       provider: member.provider,
       context: member.context,
-      ...model === undefined ? {} : { model },
+      ...route,
       diagnostics: [],
     }
   }

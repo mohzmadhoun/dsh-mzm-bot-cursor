@@ -33,13 +33,22 @@ const task: TeamTask = {
 }
 const view: TeamView = {
   members: [
-    { id: SESSION, name: 'lead', role: 'lead', status: 'idle', model: 'model-a', diagnostics: [] },
+    {
+      id: SESSION,
+      name: 'lead',
+      role: 'lead',
+      status: 'idle',
+      model: 'model-a',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
+      diagnostics: [],
+    },
     {
       id: 'worker-id' as SessionId,
       name: 'worker',
       role: 'teammate',
       status: 'inactive',
       model: 'model-a',
+      modelSelection: { provider: 'fixture', model: 'model-a' },
       diagnostics: [],
     },
   ],
@@ -149,6 +158,7 @@ describe('TeamAction', () => {
       status: 'inactive' as const,
       displayName: 'Research Bot',
       model: 'model-b',
+      modelSelection: { provider: 'fixture', model: 'model-b' },
       diagnostics: [] as string[],
     }
     const createBot = vi.fn(() => Promise.resolve({
@@ -173,7 +183,9 @@ describe('TeamAction', () => {
     render(<TeamAction {...props(actions({ load, createBot }))} />)
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
+    expect(screen.getByText(zh.multiModelPending)).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    expect(screen.getByText(zh.distinctModelsHint)).toBeTruthy()
     fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), {
       target: { value: ' Research Bot ' },
     })
@@ -192,7 +204,165 @@ describe('TeamAction', () => {
     })
     expect(await screen.findByText('Research Bot')).toBeTruthy()
     expect(screen.getByText(/research-bot ·/u)).toBeTruthy()
+    expect(await screen.findByText(zh.multiModelReady)).toBeTruthy()
     expect(screen.queryByPlaceholderText(zh.displayNamePlaceholder)).toBeNull()
+  })
+
+  it('still calls createBot when the draft repeats a roster distinct-models assignment', async () => {
+    const createBot = vi.fn(actions().createBot)
+    render(<TeamAction {...props(actions({ createBot }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.displayNamePlaceholder), {
+      target: { value: ' Same Bot ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: ' fixture ' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: ' model-a ' },
+    })
+    expect(screen.getByText(zh.duplicateAssignment)).toBeTruthy()
+    expect(screen.queryByText(zh.draftDistinctAssignment)).toBeNull()
+    expect((screen.getByRole('button', { name: '保存' }) as HTMLButtonElement).disabled).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => {
+      expect(createBot).toHaveBeenCalledWith(SESSION, {
+        displayName: 'Same Bot',
+        modelSelection: { provider: 'fixture', model: 'model-a' },
+      })
+    })
+  })
+
+  it('shows a distinct draft message when the draft differs from roster bots', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: 'prov-b' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-b' },
+    })
+    expect(await screen.findByText(zh.draftDistinctAssignment)).toBeTruthy()
+    expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: '   ' },
+    })
+    await waitFor(() => {
+      expect(screen.queryByText(zh.draftDistinctAssignment)).toBeNull()
+      expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: 'p'.repeat(201) },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-b' },
+    })
+    expect(screen.queryByText(zh.draftDistinctAssignment)).toBeNull()
+    expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
+  })
+
+  it('shows the distinct-models check cannot pass yet for one teammate pair', async () => {
+    const onePair: TeamView = {
+      ...view,
+      members: [
+        {
+          id: SESSION,
+          name: 'lead',
+          role: 'lead',
+          status: 'idle',
+          provider: 'spawn',
+          model: 'lead-model',
+          modelSelection: { provider: 'lead-prov', model: 'lead-model' },
+          diagnostics: [],
+        },
+        {
+          id: 'backend-only' as SessionId,
+          name: 'backend-only',
+          role: 'teammate',
+          status: 'inactive',
+          provider: 'spawn',
+          model: 'orphan-model',
+          diagnostics: [],
+        },
+        {
+          id: 'worker-id' as SessionId,
+          name: 'worker',
+          role: 'teammate',
+          status: 'inactive',
+          model: 'model-a',
+          modelSelection: { provider: 'prov-a', model: 'model-a' },
+          diagnostics: [],
+        },
+      ],
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true, value: onePair }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.multiModelPending)).toBeTruthy()
+    expect(screen.queryByText(zh.multiModelReady)).toBeNull()
+  })
+
+  it('shows the roster meets the distinct-models rule for two teammate pairs', async () => {
+    const twoPairs: TeamView = {
+      ...view,
+      members: [
+        {
+          id: SESSION,
+          name: 'lead',
+          role: 'lead',
+          status: 'idle',
+          diagnostics: [],
+        },
+        {
+          id: 'worker-id' as SessionId,
+          name: 'worker',
+          role: 'teammate',
+          status: 'inactive',
+          provider: 'spawn',
+          modelSelection: { provider: 'prov-a', model: 'model-a' },
+          diagnostics: [],
+        },
+        {
+          id: 'second-id' as SessionId,
+          name: 'second',
+          role: 'teammate',
+          status: 'inactive',
+          modelSelection: { provider: 'prov-a', model: 'model-b' },
+          diagnostics: [],
+        },
+      ],
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({ ok: true, value: twoPairs }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    expect(await screen.findByText(zh.multiModelReady)).toBeTruthy()
+    expect(screen.queryByText(zh.multiModelPending)).toBeNull()
+  })
+
+  it('warns when the draft (provider, model) duplicates an existing roster assignment', async () => {
+    render(<TeamAction {...props(actions())} />)
+    fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
+    await screen.findByText('Implement runtime')
+    fireEvent.click(screen.getByRole('button', { name: /新建 Bot/u }))
+    fireEvent.change(screen.getByPlaceholderText(zh.providerPlaceholder), {
+      target: { value: 'fixture' },
+    })
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-a' },
+    })
+    expect(await screen.findByText(zh.duplicateAssignment)).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText(zh.modelIdPlaceholder), {
+      target: { value: 'model-b' },
+    })
+    await waitFor(() => {
+      expect(screen.queryByText(zh.duplicateAssignment)).toBeNull()
+    })
   })
 
   it('shows createBot Remote and Team rejections and ignores a late success after session switch', async () => {

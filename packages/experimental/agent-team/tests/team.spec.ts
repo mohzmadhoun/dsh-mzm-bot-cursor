@@ -13,8 +13,10 @@ import SubagentService from '@deepseek-ai/dsh-subagent'
 import { deliverSubagentPrompt, type HostPromptDeliverer } from '@deepseek-ai/dsh-subagent/internal'
 import * as SubagentFork from '@deepseek-ai/dsh-subagent-fork-in-process'
 import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
+import { ReasoningEffortId } from '@deepseek-ai/dsh-llm/brand'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import TeamService, { TeamError, TeamId, TeamMessageId, TeamTaskId } from '../src/index.ts'
+import { modelAssignmentsAreDistinct } from '../src/validation.ts'
 import { TeamRuntimeLifecycle } from '../src/lifecycle.ts'
 import { teamProjectionDefinition } from '../src/projection.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/index.ts'
@@ -139,6 +141,53 @@ async function waitRunning(ctx: Context, id: SessionId): Promise<Agent> {
   }, { timeout: 5_000 })
 }
 
+describe('modelAssignmentsAreDistinct', () => {
+  it('treats trimmed (provider, model) tuples as distinct and ignores reasoningEffort', () => {
+    expect(modelAssignmentsAreDistinct(
+      { provider: ' prov-a ', model: ' model-a ' },
+      { provider: 'prov-a', model: 'model-a', reasoningEffort: ReasoningEffortId('high') },
+    )).toBe(false)
+    expect(modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'model-a', reasoningEffort: ReasoningEffortId('low') },
+      { provider: 'prov-a', model: 'model-b', reasoningEffort: ReasoningEffortId('high') },
+    )).toBe(true)
+    expect(modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'shared-id' },
+      { provider: 'prov-b', model: 'shared-id' },
+    )).toBe(true)
+  })
+
+  it('rejects an empty provider or model through required text', () => {
+    expect(() => modelAssignmentsAreDistinct(
+      { provider: '  ', model: 'model-a' },
+      { provider: 'prov-a', model: 'model-a' },
+    )).toThrow(expect.objectContaining({ code: 'TEAM_INVALID_ARGUMENT' }))
+    expect(() => modelAssignmentsAreDistinct(
+      { provider: 'prov-a', model: 'model-a' },
+      { provider: 'prov-a', model: '' },
+    )).toThrow(expect.objectContaining({ code: 'TEAM_INVALID_ARGUMENT' }))
+  })
+
+  it('does not project the Lead pair as an inactive teammate modelSelection', async () => {
+    const { ctx, lead } = await setup([textResponse('done')])
+    const spawned = await spawn(ctx, lead, 'quiet-bot', {
+      agentOptions: { provider: 'mock', model: 'quiet-model' },
+    })
+    await waitNoAgent(ctx, spawned.member.id)
+    const row = ctx.agentTeams.listMembers(lead).find(member => member.name === 'quiet-bot')
+    // Durable Host assignment (FR-002) survives unload; Lead pair stays on the Lead row only.
+    expect(row).toMatchObject({
+      provider: 'spawn',
+      model: 'quiet-model',
+      modelSelection: { provider: 'mock', model: 'quiet-model' },
+    })
+    expect(ctx.agentTeams.listMembers(lead)[0]).toMatchObject({
+      role: 'lead',
+      modelSelection: { provider: 'mock', model: 'mock' },
+    })
+  })
+})
+
 describe('Team identity and provisioning', () => {
   it('rejects missing and failed authoritative Team projections', async () => {
     const first = await setup([])
@@ -242,7 +291,11 @@ describe('Team identity and provisioning', () => {
     })
     const alphaLive = await waitRunning(ctx, alpha.member.id)
     expect(alphaLive.options).toMatchObject({ provider: 'mock', model: 'alpha-model' })
-    expect(alpha.member).toMatchObject({ name: 'alpha-bot', model: 'alpha-model' })
+    expect(alpha.member).toMatchObject({
+      name: 'alpha-bot',
+      model: 'alpha-model',
+      modelSelection: { provider: 'mock', model: 'alpha-model' },
+    })
     expect(lead.options.model).toBe('mock')
 
     const beta = await spawn(ctx, lead, 'beta-bot', {
@@ -250,7 +303,11 @@ describe('Team identity and provisioning', () => {
     })
     const betaLive = await waitRunning(ctx, beta.member.id)
     expect(betaLive.options).toMatchObject({ provider: 'mock', model: 'beta-model' })
-    expect(beta.member).toMatchObject({ name: 'beta-bot', model: 'beta-model' })
+    expect(beta.member).toMatchObject({
+      name: 'beta-bot',
+      model: 'beta-model',
+      modelSelection: { provider: 'mock', model: 'beta-model' },
+    })
     expect(alphaLive.options.model).toBe('alpha-model')
 
     const alphaDescriptor = (await storedEvents(ctx, alpha.member.id))
@@ -277,6 +334,7 @@ describe('Team identity and provisioning', () => {
         name: 'research-bot',
         displayName: 'Research Bot',
         model: 'research-model',
+        modelSelection: { provider: 'mock', model: 'research-model' },
         role: 'teammate',
       },
     })
@@ -289,6 +347,7 @@ describe('Team identity and provisioning', () => {
     expect(ctx.agentTeams.listMembers(lead).find(row => row.id === created.id)).toMatchObject({
       displayName: 'Research Bot',
       model: 'research-model',
+      modelSelection: { provider: 'mock', model: 'research-model' },
     })
 
     const second = await ctx.agentTeams.createBot(lead, {
