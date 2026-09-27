@@ -169,12 +169,12 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 **Purpose**: Full replay, evidence layout, quickstart cross-links, analyze readiness
 
-- [ ] T035 [P] Create evidence directory placeholders + README expectations under `specs/003-skills-ux/verifier/evidence/{scenario-1,scenario-2,scenario-3,non-goals,scenario-5}/` documenting required screenshot/recording filenames for FR-012
-- [ ] T036 Add Verifier Scenario 5 full Phase 3 replay recipe in `specs/003-skills-ux/verifier/scenario-5-full-replay.md` covering SC-005 (re-run Scenarios 1–3 with FR-012 evidence; foundational Pass required first)
-- [ ] T037 [P] Cross-link [quickstart.md](./quickstart.md) Scenarios 1–5 to landed `verifier/scenario-*.md` recipes (and recipes back to quickstart) — Spec validates link coverage only
-- [ ] T038 [P] Re-validate Out-of-Scope / non-goals absence (full catalog, learn-from-demo, plugin skills, memory UX, routines, MCP, Box/Shell, detach-as-Pass-gate) in `specs/003-skills-ux/verifier/non-goals.md`
-- [ ] T039 Update `specs/003-skills-ux/verifier/README.md` Scenario 1–5 owners map + foundational Pass stamp section to match P2 pattern
-- [ ] T040 Confirm no edits to `specs/001-multi-model-bots/**` or `specs/002-identity-personas/**` in this feature’s implement PRs (document check in `specs/003-skills-ux/verifier/README.md`)
+- [x] T035 [P] Create evidence directory placeholders + README expectations under `specs/003-skills-ux/verifier/evidence/{scenario-1,scenario-2,scenario-3,non-goals,scenario-5}/` documenting required screenshot/recording filenames for FR-012
+- [x] T036 Add Verifier Scenario 5 full Phase 3 replay recipe in `specs/003-skills-ux/verifier/scenario-5-full-replay.md` covering SC-005 (re-run Scenarios 1–3 with FR-012 evidence; foundational Pass required first)
+- [x] T037 [P] Cross-link [quickstart.md](./quickstart.md) Scenarios 1–5 to landed `verifier/scenario-*.md` recipes (and recipes back to quickstart) — Spec validates link coverage only
+- [x] T038 [P] Re-validate Out-of-Scope / non-goals absence (full catalog, learn-from-demo, plugin skills, memory UX, routines, MCP, Box/Shell, detach-as-Pass-gate) in `specs/003-skills-ux/verifier/non-goals.md`
+- [x] T039 Update `specs/003-skills-ux/verifier/README.md` Scenario 1–5 owners map + foundational Pass stamp section to match P2 pattern
+- [x] T040 Confirm no edits to `specs/001-multi-model-bots/**` or `specs/002-identity-personas/**` in this feature’s implement PRs (document check in `specs/003-skills-ux/verifier/README.md`)
 
 **Checkpoint**: Analyze **PASS** + Linear T001–T040 filed (MOH-148…MOH-187). Await Verifier/Lead analyze gate → implement → Verifier product gate
 
