@@ -73,6 +73,46 @@ export interface BotPersonaProfile {
   readonly antiJobs: readonly string[]
 }
 
+/** Opaque Host skill identity (kebab skill catalog name for filesystem-backed skills). */
+export type SkillId = Branded<'SkillId'>
+
+/**
+ * Brand a validated skill catalog id.
+ * @param id - Host skill identity (typically the winning `ctx.skills` name).
+ * @returns the same string branded as a Skill identity.
+ */
+export function SkillId(id: string): SkillId {
+  return id as SkillId
+}
+
+/**
+ * Association of one Skill to one Bot (FR-003 / FR-005).
+ * Stored on the Bot snapshot; `botId` matches the owning member id.
+ */
+export interface SkillAttachment {
+  /** Owning Bot Session id. */
+  readonly botId: SessionId
+  /** Attached skill catalog id. */
+  readonly skillId: SkillId
+  /** Optional attach timestamp for observability (not required for Pass). */
+  readonly attachedAt?: number
+}
+
+/**
+ * Client-readable skill catalog summary (managed thin pack + user-authored).
+ * Host projects from `ctx.skills`; Electron Main must not invent rows.
+ */
+export interface SkillCatalogSummary {
+  /** Host skill id (catalog name). */
+  readonly id: SkillId
+  /** Human-readable discovery label. */
+  readonly displayName: string
+  /** Product source bucket for Pass. */
+  readonly source: 'managed' | 'user'
+  /** Optional short discovery description. */
+  readonly description?: string
+}
+
 /** Fixed Host avatar shape preset ids (clarify lock 3 — no image upload). */
 export type AvatarShapeId = 'circle' | 'square' | 'triangle' | 'hexagon'
 
@@ -124,6 +164,12 @@ export interface TeamMemberSnapshot {
    * Mutable after active via Host `assignSection`.
    */
   readonly sectionId?: SidebarSectionId | null
+  /**
+   * Ordered skill attachments for this Bot (FR-003 / FR-005).
+   * ≥0 items; same skill may attach to multiple bots independently.
+   * Mutable after active via Host `attachSkill` (detach optional / not Pass-gated).
+   */
+  readonly skillAttachments?: readonly SkillAttachment[]
   readonly provider: string
   readonly context: 'fresh' | 'fork'
   readonly phase: TeamMemberPhase
@@ -161,6 +207,11 @@ export interface TeamMemberView {
    * Named sidebar section id when assigned; `null` or absent ⇒ Unassigned/default.
    */
   readonly sectionId?: SidebarSectionId | null
+  /**
+   * Ordered skill attachments when Host retained any (FR-003).
+   * Empty / absent ⇒ none attached; Client bot skills surface reads this list.
+   */
+  readonly skillAttachments?: readonly SkillAttachment[]
   readonly diagnostics: string[]
 }
 
@@ -233,6 +284,11 @@ export interface TeamView {
    * Session logs (`HostMailboxMessage`). Never Main-synthesized IPC (FR-005).
    */
   readonly handoffs: HostMailboxMessage[]
+  /**
+   * Host skill catalog summaries (managed thin pack + user skills) for Client discovery.
+   * Empty when the Host skills registry is unavailable; never Electron-synthesized.
+   */
+  readonly skills: readonly SkillCatalogSummary[]
 }
 
 /** One peer message retained until its target Session records it. */
@@ -485,6 +541,51 @@ export interface AssignSectionResult {
   readonly id: SessionId
   readonly sectionId: SidebarSectionId | null
   readonly member: TeamMemberView
+}
+
+/**
+ * Host skill attach input (FR-003 / FR-005).
+ * `skillId` must name a load-available catalog skill; multi-attach allowed.
+ * Electron Main must not invent attachment records — Host owns the durable write.
+ */
+export interface AttachSkillInput {
+  readonly botId: SessionId
+  readonly skillId: SkillId | string
+}
+
+/** Lead-authorized Host skill attach, including cancellation. */
+export interface AttachSkillRequest extends AttachSkillInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Bot identity after a successful skill attach. */
+export interface AttachSkillResult {
+  readonly id: SessionId
+  readonly skillAttachments: readonly SkillAttachment[]
+  readonly member: TeamMemberView
+}
+
+/**
+ * Host user-authored skill create/update input (FR-006 / FR-013).
+ * `displayName` and `instructionalBody` MUST be non-empty after trim; empty rejects without writing.
+ */
+export interface UpsertUserSkillInput {
+  /** Existing skill id for update; omit / empty for create (Host allocates kebab id from displayName). */
+  readonly skillId?: SkillId | string
+  readonly displayName: string
+  readonly instructionalBody: string
+  /** Optional short discovery description. */
+  readonly description?: string
+}
+
+/** Lead-authorized Host user-skill upsert, including cancellation. */
+export interface UpsertUserSkillRequest extends UpsertUserSkillInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned user skill after a successful create/update. */
+export interface UpsertUserSkillResult {
+  readonly skill: SkillCatalogSummary
 }
 
 /**

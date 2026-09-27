@@ -3,6 +3,8 @@
 export type {
   AssignSectionInput,
   AssignSectionResult,
+  AttachSkillInput,
+  AttachSkillResult,
   AvatarColorId,
   AvatarMarker,
   AvatarShapeId,
@@ -26,6 +28,9 @@ export type {
   SetAvatarResult,
   SidebarSectionId,
   SidebarSectionView,
+  SkillAttachment,
+  SkillCatalogSummary,
+  SkillId,
   TeamMailboxDeliveryState,
   TeamMemberView,
   TeamMessageId,
@@ -37,5 +42,7 @@ export type {
   TeamView,
   UpdatePersonaInput,
   UpdatePersonaResult,
+  UpsertUserSkillInput,
+  UpsertUserSkillResult,
   UpdateTeamTaskRequest,
 } from './types.ts'

@@ -1,14 +1,19 @@
 /** Launch the Desktop profile through the Web application and report its URL to Electron. */
 
 import { delimiter, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { loadLayeredEnv, loadProfileDirectory } from '@deepseek-ai/dsh-app-boot'
 import { runProfile } from '@deepseek-ai/dsh/profile-boot'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
+import * as desktopManagedSkills from './managed-skills.ts'
 import * as desktopOffice from './office.ts'
 
 import { installDesktopUpdateTaskControl } from './update-tasks.ts'
+
+/** Shipped thin managed pack root (`mzm-thin-pack/SKILL.md`). */
+const MANAGED_SKILLS_ROOT = fileURLToPath(new URL('../managed-skills/', import.meta.url))
 
 async function main(): Promise<void> {
   const runtimeDir = process.argv[2] as string
@@ -69,6 +74,11 @@ async function main(): Promise<void> {
   await ctx.plugin(desktopOffice, {
     source: process.argv[4] ?? join(runtimeDir, '..', 'runtime', 'primary-runtime'),
     root: join(resolveDshHome(), 'dsh-runtimes', 'dsh-primary-runtime'),
+  })
+  // P3 thin pack + Host-durable user skills — Host owns catalog; Electron Main must not.
+  await ctx.plugin(desktopManagedSkills, {
+    managedRoot: MANAGED_SKILLS_ROOT,
+    userRoot: join(resolveDshHome(), 'desktop-user-skills'),
   })
   const url = ctx.connection.authenticatedUrl(`http://127.0.0.1:${String(ctx.webServer.port)}`)
   if (process.connected) process.send?.({ type: 'ready', url, injections: ctx.webServer.collectIndexInjections() }, (error) => { if (error !== null) console.error(error) })

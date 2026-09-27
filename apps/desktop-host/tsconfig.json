@@ -11,6 +11,8 @@
     { "path": "../../vendor/cordis" },
     { "path": "../../packages/core/agent" },
     { "path": "../../packages/jobs/jobs" },
+    { "path": "../../packages/skill/skill" },
+    { "path": "../../packages/skill/skill-filesystem" },
     { "path": "../../packages/skill/skill-office" },
     { "path": "../../packages/util/home-paths" },
     { "path": "../../packages/core/tools" },

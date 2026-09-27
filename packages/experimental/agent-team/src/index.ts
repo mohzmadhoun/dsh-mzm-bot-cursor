@@ -25,7 +25,7 @@ import { projectMailboxHandoffs, projectSidebarSections, teamProjectionDefinitio
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { SidebarSectionId, TeamId, TeamTaskId } from './types.ts'
+import { SidebarSectionId, SkillId, TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
   CreateBotInput,
@@ -39,6 +39,9 @@ import type {
   AssignSectionInput,
   AssignSectionRequest,
   AssignSectionResult,
+  AttachSkillInput,
+  AttachSkillRequest,
+  AttachSkillResult,
   BotIdentityMutationResult,
   BotPersonaProfile,
   DeleteBotInput,
@@ -57,6 +60,8 @@ import type {
   SetAvatarRequest,
   SetAvatarResult,
   SidebarSectionView,
+  SkillAttachment,
+  SkillCatalogSummary,
   SpawnTeammateRequest,
   SpawnTeammateResult,
   TeamMemberView,
@@ -68,6 +73,9 @@ import type {
   UpdatePersonaRequest,
   UpdatePersonaResult,
   UpdateTeamTaskRequest,
+  UpsertUserSkillInput,
+  UpsertUserSkillRequest,
+  UpsertUserSkillResult,
 } from './types.ts'
 import {
   normalizeAvatarMarker,
@@ -75,12 +83,16 @@ import {
   requiredDisplayName,
   requiredModelSelection,
   requiredSectionName,
+  requiredSkillDisplayName,
+  requiredSkillId,
+  requiredSkillInstructionalBody,
+  skillIdFromDisplayName,
   teammateNameFromDisplayName,
 } from './validation.ts'
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
-export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId } from './types.ts'
+export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId } from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
 export {
@@ -527,6 +539,99 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Lead-authorized Host skill attach (FR-003 / FR-005).
+   * Appends `{ botId, skillId }` onto that Bot’s ordered `skillAttachments` (multi-attach allowed).
+   * Does not auto-attach other bots. Electron Main must not invent attachment records (research R4).
+   * Instruction bind of attached bodies is owned by T021; this mutation only persists associations.
+   * @param caller - exact live Lead Agent.
+   * @param request - bot id, skill id, and cancellation.
+   * @returns updated Host Bot identity after attach.
+   */
+  async attachSkill(caller: Agent, request: AttachSkillRequest): Promise<AttachSkillResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can attach a skill to a teammate', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const skillId = requiredSkillId(String(request.skillId))
+    const root = membership.root
+    const updated = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).members.find(member => member.id === request.botId)
+      if (current === undefined || current.phase !== 'active') {
+        throw new TeamError(
+          `active teammate "${request.botId}" not found`,
+          'TEAM_MEMBER_NOT_FOUND',
+        )
+      }
+      const prior = current.skillAttachments ?? []
+      const attachment: SkillAttachment = {
+        botId: current.id,
+        skillId,
+        attachedAt: Date.now(),
+      }
+      const skillAttachments = [...prior, attachment]
+      const member = { ...current, skillAttachments }
+      await this.journal.appendAndFlush(root, 'team/member', {
+        version: 2,
+        teamId: TeamId(root.id),
+        member,
+      })
+      return member
+    })
+    const view = this.roster.list(membership).find(row => row.id === updated.id)
+    /* v8 ignore next 3 -- journal commit above retains the active roster row. */
+    if (view === undefined) {
+      throw new TeamError(`active teammate "${updated.id}" not found`, 'TEAM_MEMBER_NOT_FOUND')
+    }
+    return {
+      id: updated.id,
+      skillAttachments: updated.skillAttachments ?? [],
+      member: view,
+    }
+  }
+
+  /**
+   * Lead-authorized Host user-skill create/update stub (FR-006 / FR-013).
+   * Rejects empty `displayName` or `instructionalBody` without writing.
+   * When `ctx.skills` is present, registers a runtime catalog entry for this Host process
+   * (T027 owns Host-durable filesystem authoring under the Desktop user skills root).
+   * Electron Main must not invent skill records (research R3).
+   * @param caller - exact live Lead Agent.
+   * @param request - display name, instructional body, optional skill id, and cancellation.
+   * @returns Host-owned skill catalog summary after validation (+ optional runtime register).
+   */
+  async upsertUserSkill(caller: Agent, request: UpsertUserSkillRequest): Promise<UpsertUserSkillResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can author a user skill', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const displayName = requiredSkillDisplayName(request.displayName)
+    const instructionalBody = requiredSkillInstructionalBody(request.instructionalBody)
+    const skillId = request.skillId === undefined || String(request.skillId).trim().length === 0
+      ? skillIdFromDisplayName(displayName)
+      : requiredSkillId(String(request.skillId))
+    const description = request.description?.trim() || displayName
+    const skill: SkillCatalogSummary = {
+      id: skillId,
+      displayName,
+      source: 'user',
+      description,
+    }
+    const skills = this.ctx.get('skills')
+    if (skills !== undefined) {
+      skills.register({
+        name: skillId,
+        description,
+        content: instructionalBody,
+        source: 'user-dsh',
+      })
+    }
+    return { skill }
+  }
+
+  /**
    * Lead-authorized Host delete (FR-007 / FR-008 / clarify lock 5).
    * Appends an `active` → `deleted` identity tombstone and clears section membership.
    * Client roster / overview / section projections omit the Bot after commit.
@@ -651,11 +756,13 @@ export class TeamService extends TypertRemoteService {
 
   /**
    * Read the current roster, non-deleted task board, sidebar sections + Unassigned,
-   * and Host mailbox handoffs through the generated Remote API (FR-005 / FR-006).
+   * Host mailbox handoffs, and skill catalog summaries through the generated Remote API
+   * (FR-005 / FR-006 / P3 T011).
    * Handoffs reconstruct from Lead Session + target Session logs — never Main-synthesized IPC.
+   * Skills project from Host `ctx.skills` when present — never Electron-synthesized.
    * @param agent - exact live Team member used as the authority credential.
    * @param signal - cancellation for cold target Session reads.
-   * @returns detached current roster, task, section, and handoff views.
+   * @returns detached current roster, task, section, handoff, and skill catalog views.
    */
   @Remote('view')
   async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView> {
@@ -667,7 +774,36 @@ export class TeamService extends TypertRemoteService {
       sections,
       unassignedBotIds,
       handoffs: await this.listHandoffs(membership.root, signal),
+      skills: await this.listSkillCatalog(signal),
     }
+  }
+
+  /**
+   * Project Host skill catalog summaries for Client discovery (T011).
+   * Maps filesystem/provider sources onto product `managed` | `user`.
+   * @param signal - cancellation for provider list.
+   * @returns catalog rows, or `[]` when the skills service is absent.
+   */
+  private async listSkillCatalog(signal: AbortSignal): Promise<readonly SkillCatalogSummary[]> {
+    const skills = this.ctx.get('skills')
+    if (skills === undefined) return []
+    const summaries = await skills.list({ signal }) as ReadonlyArray<{
+      readonly name: string
+      readonly description: string
+      readonly source: string
+    }>
+    return summaries.map((summary): SkillCatalogSummary => {
+      const managed = summary.source === 'bundled'
+        || summary.name === 'mzm-thin-pack'
+      return {
+        id: SkillId(summary.name),
+        displayName: managed && summary.name === 'mzm-thin-pack'
+          ? 'MzM thin pack'
+          : (summary.description.trim().length > 0 ? summary.description : summary.name),
+        source: managed ? 'managed' : 'user',
+        ...(summary.description.trim().length > 0 ? { description: summary.description } : {}),
+      }
+    })
   }
 
   /**
@@ -832,6 +968,39 @@ export class TeamService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<BotIdentityMutationResult<AssignSectionResult>> {
     return this.botIdentityMutationResult(this.assignSection(agent, { ...request, signal }))
+  }
+
+  /**
+   * Attach one catalog skill to a product Bot through the generated Remote API (FR-003).
+   * @param agent - exact live Lead Agent authorizing attach.
+   * @param request - bot id and skill id.
+   * @param signal - Remote call cancellation.
+   * @returns the updated Bot or a typed Team rejection.
+   */
+  @Remote('attachSkill')
+  remoteAttachSkill(
+    agent: Agent,
+    request: AttachSkillInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<AttachSkillResult>> {
+    return this.botIdentityMutationResult(this.attachSkill(agent, { ...request, signal }))
+  }
+
+  /**
+   * Create or update one user-authored skill through the generated Remote API (FR-006 / FR-013).
+   * Empty displayName or instructionalBody reject without writing.
+   * @param agent - exact live Lead Agent authorizing authoring.
+   * @param request - display name, instructional body, optional skill id.
+   * @param signal - Remote call cancellation.
+   * @returns the skill summary or a typed Team rejection.
+   */
+  @Remote('upsertUserSkill')
+  remoteUpsertUserSkill(
+    agent: Agent,
+    request: UpsertUserSkillInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<UpsertUserSkillResult>> {
+    return this.botIdentityMutationResult(this.upsertUserSkill(agent, { ...request, signal }))
   }
 
   /**

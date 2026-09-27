@@ -7,7 +7,9 @@ import type {
   AvatarMarker,
   AvatarShapeId,
   BotPersonaProfile,
+  SkillId,
 } from './types.ts'
+import { SkillId as toSkillId } from './types.ts'
 
 const PERSONA_FIELD_MAX = 200
 const PERSONA_ANTI_JOB_MAX_ITEMS = 64
@@ -54,6 +56,54 @@ export function requiredDisplayName(value: string): string {
  */
 export function requiredSectionName(value: string): string {
   return requiredText(value, 'section name', 200)
+}
+
+/**
+ * Normalize one required skill catalog id (FR-003).
+ * @param value - raw skill id from Host attach / authoring.
+ * @returns branded non-empty skill id.
+ */
+export function requiredSkillId(value: string): SkillId {
+  return toSkillId(requiredText(value, 'skillId', 200))
+}
+
+/**
+ * Normalize user-authored skill display name (FR-013).
+ * Empty / whitespace-only names reject without writing.
+ * @param value - raw display name.
+ * @returns trimmed non-empty label.
+ */
+export function requiredSkillDisplayName(value: string): string {
+  return requiredText(value, 'displayName', 200)
+}
+
+/**
+ * Normalize user-authored skill instructional body (FR-013).
+ * Empty / whitespace-only bodies reject without writing.
+ * @param value - raw instructional Markdown/body.
+ * @returns trimmed non-empty body.
+ */
+export function requiredSkillInstructionalBody(value: string): string {
+  return requiredText(value, 'instructionalBody', 100_000)
+}
+
+/**
+ * Derive the durable kebab skill id from a product displayName.
+ * @param displayName - already-normalized non-empty display name.
+ * @returns skill id accepted by Host catalog naming.
+ */
+export function skillIdFromDisplayName(displayName: string): SkillId {
+  const slug = displayName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '')
+  if (slug.length === 0 || slug.length > 64 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug)) {
+    throw new TeamError(
+      'displayName must yield a lower-kebab-case skill id of at most 64 characters',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return toSkillId(slug)
 }
 
 /**
