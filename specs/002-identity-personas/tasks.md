@@ -48,8 +48,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 **Purpose**: Orient implementers to P2 seams; create Verifier recipe home; no product behavior yet
 
 - [ ] T001 Confirm feature design tree is complete (`spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/*`, `checklists/requirements.md`) under `specs/002-identity-personas/` and point implementers at [contracts/README.md](./contracts/README.md)
-- [ ] T002 [P] Inventory Host bot-identity touch points for P2 mutations in `packages/experimental/agent-team/src/{types,roster,index,projection,journal}.ts` against [data-model.md](./data-model.md) Bot extension fields (`persona`, `avatar`, `sectionId`) and note P1 `createBot` as the extend point (research R7)
-- [ ] T003 [P] Inventory instruction-bind seam candidates in `packages/preset/persona/src/index.ts`, `packages/core/system-prompt/src/`, and Agent Teams spawn/scope wiring under `packages/experimental/agent-team/src/` for FR-013 / [contracts/persona-profile.md](./contracts/persona-profile.md)
+- [x] T002 [P] Inventory Host bot-identity touch points for P2 mutations in `packages/experimental/agent-team/src/{types,roster,index,projection,journal}.ts` against [data-model.md](./data-model.md) Bot extension fields (`persona`, `avatar`, `sectionId`) and note P1 `createBot` as the extend point (research R7) — [verifier/host-identity-inventory.md](./verifier/host-identity-inventory.md)
+- [x] T003 [P] Inventory instruction-bind seam candidates in `packages/preset/persona/src/index.ts`, `packages/core/system-prompt/src/`, and Agent Teams spawn/scope wiring under `packages/experimental/agent-team/src/` for FR-013 / [contracts/persona-profile.md](./contracts/persona-profile.md) — [verifier/instruction-bind-inventory.md](./verifier/instruction-bind-inventory.md)
 - [ ] T004 Create Verifier recipe directory `specs/002-identity-personas/verifier/README.md` listing Scenario 1–6 owners (Runtime / Client / Verifier / Docs) mapped to [quickstart.md](./quickstart.md)
 
 ---
