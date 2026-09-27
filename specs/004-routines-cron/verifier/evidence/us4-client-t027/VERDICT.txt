@@ -1,20 +1,64 @@
-PASS — Client US4 T027 last-run / fire indicator (product UI slice)
+T027 Client US4 last-run / fire indicator — DH Verifier
+=======================================================
+Verdict: PASS (Client product UI slice only)
+Stamp: 2026-09-27
+Product tip: origin/cursor/p4-us4-client-last-run-fe1d @ 464f36ac70
+Evidence tip: 17ba810a8e (+ this verifier stamp)
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/163 (OPEN)
+Linear: MOH-220 — left In Progress (PO closes after SO12 embed / merge)
 
-Tip: cursor/p4-us4-client-last-run-fe1d @ 464f36ac70
-Linear: MOH-220 (leave Done to PO)
-Date: 2026-09-27
+Acceptance (T027 / Client product UI — not full SC-003 / T028 Scenario Done)
+---------------------------------------------------------------------------
+[x] Routines pane shows last-run / fire indicator from Host lastRunAt
+    (data-team-routine-fire-indicator never|fired + StateDot + locale copy).
+[x] Locale-owned copy (routineLastRun / routineLastRunNever / routineFireHint
+    in locales.ts; TeamAction uses t() — no hardcoded fire strings).
+[x] No Electron Main routines bus
+    (apps/desktop/tests/no-electron-routines-bus.spec.ts — 3 passed).
+[x] Focused client tests pass (T027|T020|T023 → 19 passed; T027 / US4 → 3).
+[x] SO11 Desktop visual: screenshots + mp4 + CDP panel-state (never + fired
+    + leave/return) committed under verifier/evidence/us4-client-t027/.
+[!] SO12: PR #163 body uses Cursor CDN artifact URLs, not absolute
+    /opt/cursor/artifacts/… HTML embeds — PO must fix embeds.
 
-Measured:
-- Desktop CDP hard-assert: data-team-routine-fire-indicator never|fired from Host lastRunAt
-- never row: Not run yet (paused catalog row)
-- fired row: Last run 2026-09-27T19:51:05.247Z (Host numeric lastRunAt)
-- leave/return keeps fired indicator (Host TeamView.routines projection)
-- focused vitest: T027 / T020 / T023 filters green
-- no Electron Main routines bus (apps/desktop no-electron-routines-bus.spec.ts)
+Evidence (measured)
+-------------------
+Commands @ 17ba810a8e (/workspace):
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T027|T020|T023'
+  → 19 passed | 60 skipped
 
-Not claimed:
-- Full SC-003 / quickstart Scenario 3 Done (T028 Verifier recipe)
-- T026 jobs visibility
-- Linear Done
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T027 / US4'
+  → 3 passed (never / fired / never→fired projection update)
 
-SO11 evidence: this directory + /opt/cursor/artifacts/p4-us4-t027-*
+  pnpm exec vitest run apps/desktop/tests/no-electron-routines-bus.spec.ts
+  → 3 passed
+
+Desktop (Standing Order 11 / FR-010) — implementer CDP hard-assert spot-checked:
+  panel-state.json @ tip 464f36ac70:
+    never.ok=true (paused row · Not run yet)
+    fired.lastRunAt=1790538665247 · text=Last run 2026-09-27T19:51:05.247Z
+    afterReturn.ok=true
+    inventory: 1× never + 2× fired
+  Screenshots: 01–04 png + fire-indicator-walkthrough.mp4 (git-tracked)
+  Also under /opt/cursor/artifacts/p4-us4-t027-*
+  Desktop re-run skipped — evidence sufficient (screenshots + CDP log + mp4).
+
+Standing Order 12 / FR-011
+--------------------------
+[x] Evidence committed under verifier/evidence/us4-client-t027/ on PR branch.
+[!] PR #163 body needs absolute /opt/cursor/artifacts/… HTML embeds.
+    Recommended embeds for PO / product-owner assistant:
+      <img src="/opt/cursor/artifacts/p4-us4-t027-02-fire-never.png" alt="fire indicator never — Not run yet" />
+      <img src="/opt/cursor/artifacts/p4-us4-t027-03-fire-fired.png" alt="fire indicator fired — Host lastRunAt" />
+      <img src="/opt/cursor/artifacts/p4-us4-t027-04-after-return-fired.png" alt="fired after leave/return" />
+      <video src="/opt/cursor/artifacts/p4-us4-t027-fire-indicator-walkthrough.mp4" controls></video>
+
+Claims
+------
+Pass: Client US4 T027 product UI slice only.
+Not claimed: full SC-003 / quickstart Scenario 3 Done (T028); T026 jobs visibility;
+Linear Done; merge.
