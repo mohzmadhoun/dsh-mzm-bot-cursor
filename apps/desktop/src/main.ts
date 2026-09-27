@@ -1,5 +1,8 @@
 import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
-/** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
+/**
+ * Electron shell: desktop project ownership, custom protocol, windows, and lifecycle.
+ * Product mailbox, credentials, and model routing stay on the Host HTTP/WS plane — not Main.
+ */
 
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'

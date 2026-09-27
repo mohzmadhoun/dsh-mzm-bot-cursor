@@ -1,0 +1,12 @@
+T027 thin shell — Electron measured Pass
+
+Surfaces audited:
+- apps/desktop/src/main.ts — lifecycle, dsh-app:// serve/forward, boot/chrome/update IPC only
+- apps/desktop/src/web-document.ts — static Web + Host cookie auth + HTTP forward
+- apps/desktop/src/backend-controller.ts — Host child start/stop/close only
+
+Command: ./node_modules/.bin/vitest run apps/desktop/tests/thin-shell-main.spec.ts
+Result: 3/3 passed (related web-document + backend-controller: 16/16)
+
+Not Done: product SC / Linear Done await Verifier + PO; T026/T034 files untouched.
+aabd81686993b6929b16e80c89062a386209448db8ce04a3289dbe398f891efb  specs/001-multi-model-bots/verifier/evidence/t027-thin-shell/measured-checks.txt

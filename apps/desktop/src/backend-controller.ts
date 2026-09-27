@@ -1,4 +1,7 @@
-/** Owns one backend startup and its quiescent teardown independently of windows. */
+/**
+ * Owns one backend startup and its quiescent teardown independently of windows.
+ * Host child lifecycle only — no mailbox, credential, or model IPC routing.
+ */
 
 import { desktopErrorState } from './startup-error.ts'
 

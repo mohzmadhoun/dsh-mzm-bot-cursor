@@ -47,6 +47,7 @@ Supporting Verifier docs: [non-goals.md](./non-goals.md) (T010 Pass; T039 expand
 | **T020** Missing-credential → Models handoff | [t020-cred-handoff.md](./t020-cred-handoff.md) | **Electron/Client** + **Verifier** | FR-008 failure UX (in-app Models); dump hygiene stays Scenario 1 / US4 |
 | **T021** Host mailbox send path A→B | [t021-mailbox-send.md](./t021-mailbox-send.md) | **Runtime** + **Verifier** | FR-004 Host Lead-log mailbox → target inbox; `deliveryState` from session logs; not SC-003 UI Pass |
 | **T022** Persist Host mailbox fields | [t022-mailbox-persist.md](./t022-mailbox-persist.md) | **Runtime** + **Verifier** | FR-004 product fields (`fromBotId`/`source` Host-only) from durable Lead-log; not SC-003 UI Pass |
+| **T027** Thin Electron shell (no Main routers) | [t027-thin-shell.md](./t027-thin-shell.md) | **Electron** + **Verifier** | FR-007 Main lifecycle/`dsh-app://` HTTP forward only; not SC-004 Pass; leaves T026/T034 files alone |
 
 ## Fan-out policy
 
