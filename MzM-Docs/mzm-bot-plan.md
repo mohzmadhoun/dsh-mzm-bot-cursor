@@ -67,7 +67,7 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 
 | | |
 |--|--|
-| **Entry gate (before Electron/Runtime fan-out)** | Shell↔Host topology locked: **bundled-Node Desktop Host child + framed pipes + Node IPC lifecycle-only + `dsh-app://`**. Framing handshake (open B) must pass Verifier before feature tasks. |
+| **Entry gate (before Electron/Runtime fan-out)** | Shell↔Host topology locked: **bundled-Node Desktop Host child + shipped authenticated Host HTTP/WS data plane + Node IPC lifecycle-only + `dsh-app://`**. Topology handshake must pass Verifier before feature tasks. *(Freeze wording amended 2026-09-27 — T040 / open B; was “framed pipes”; see §12.)* |
 | **In** | Chat-only Host (sessions + llm adapters + tools registry **without** local shell backends); **user-initiated basic bot create**; per-bot model via Host isolate/`ctx.llm`; async 1:1 via **Host mailbox/inbox only**; **chat progress updates + final result delivery**; Electron shell UI sufficient for design success criteria; trust floor (below) |
 | **Out** | Box/Shell; MCP; group channels; voice; send-on-behalf; user machines; pixel Grok chrome; CreateAgent-from-peer; event-driven routines; 1Password connector; chat chrome beyond progress+final delivery |
 | **Exit (Verifier-provable)** | ≥2 bots, different models; real session without Alt-Tab for model reasons; recipient acts or handoff visible; TTFT multi-model team session < 30 min on clean machine (documented); Verifier re-runs that path on Electron |
@@ -216,7 +216,9 @@ Frozen 2026-09-25 in channel **MzM Bot Plan** by DH Spec / DH Lead / DH Architec
 
 - P4 cron before P6 events (do not bundle)
 - P1 chat-only; box → P7
-- One shell↔Host topology only (bundled-Node Desktop Host child + framed pipes + …)
+- One shell↔Host topology only (bundled-Node Desktop Host child + shipped authenticated Host HTTP/WS data plane + Node IPC lifecycle-only + `dsh-app://`)
 - Auth primary **LOCKED**: in-app (Mohammed 2026-09-25)
 - Verifier every phase
 - v0.3 Spec four-edit patch: P2 exit (no “anti-job visibility”); §9 + P1 In basic create + chat progress/final; P6/P7 Verifier-provable exits
+
+**Amendment (2026-09-27, T040 / open B):** Room-freeze bullet above replaces literal “framed pipes” with the **shipped authenticated Host HTTP/WS data plane** (Architect pick 2). Lock intent unchanged: lifecycle IPC + `dsh-app://` + no parallel bus. Wording-only; does **not** block implement. Cross-link: [research.md R1](../specs/001-multi-model-bots/research.md#r1--shellhost-process-topology).
