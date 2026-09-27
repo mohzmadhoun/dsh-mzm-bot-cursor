@@ -48,6 +48,10 @@ export type { TeamMembership } from './roster.ts'
 export { TeamId, TeamMessageId, TeamTaskId } from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
+export {
+  HOST_MAILBOX_MESSAGE_SOURCE,
+  readHostMailboxMessage,
+} from './host-mailbox-message.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
