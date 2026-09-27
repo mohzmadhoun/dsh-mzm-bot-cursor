@@ -6,7 +6,7 @@
 
 **Linear**: Epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas) · Plan issue [MOH-94](https://linear.app/momadhoun/issue/MOH-94/p2-spec-kit-plan-identity-personas) · Verifier gate [MOH-95](https://linear.app/momadhoun/issue/MOH-95/p2-verifier-gate-plan-002-identity-personas) · Project **DeepSeek Harness - Cursor** only
 
-**Note**: Filled by `/speckit-plan`. Phase 0–1 design only — no feature implementation in this change. Tasks landed (PR #72); next: analyze → `taskstoissues` → implement. Do **not** rewrite `specs/001-multi-model-bots`.
+**Note**: Filled by `/speckit-plan`. Spec Kit design pipeline for this feature is complete: analyze → `taskstoissues` → implement (see Handoff). Do **not** rewrite FRs or `specs/001-multi-model-bots`. Do **not** edit `MzM-Docs/living-next-gate.md` from Spec tasks.
 
 ## Summary
 
@@ -146,4 +146,4 @@ See [research.md](./research.md). All Technical Context unknowns resolved. Clari
 
 ## Ready for next command / Handoff
 
-**`/speckit-analyze`** (this report) → **`/speckit-taskstoissues`** (Linear **DeepSeek Harness - Cursor** / MOH-88, T001–T042) → implement (Host foundations T005–T012 before US fan-out). See [tasks.md](./tasks.md) and [analyze-report.md](./analyze-report.md). Do not implement feature code from Spec Kit design commits. Leave MOH-98 In Progress until Verifier MOH-99 Pass and PO path.
+Work units live in [tasks.md](./tasks.md) (Phase 2 identity / personas). **`/speckit-analyze` → `/speckit-taskstoissues` → implement** is **done** for this feature ([analyze-report.md](./analyze-report.md) PASS · Linear epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88) · Analyze [MOH-98](https://linear.app/momadhoun/issue/MOH-98) · issues T001–T042 on **DeepSeek Harness - Cursor**). Polish T039–T042 checkboxes are checked in [tasks.md](./tasks.md); Verifier Pass evidence stays under [verifier/](./verifier/). This handoff does **not** rewrite FRs. Do **not** edit `MzM-Docs/living-next-gate.md` from Spec tasks.

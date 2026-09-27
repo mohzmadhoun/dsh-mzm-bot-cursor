@@ -173,8 +173,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T039 [P] Add Verifier Scenario 6 full Phase 2 replay recipe in `specs/002-identity-personas/verifier/scenario-6-full-replay.md` covering create/use → rename → persona edit → avatar → section assign → overview anti-jobs → delete confirm/cancel/confirm (FR-012; SC-007) and requiring foundational Pass first
 - [x] T040 [P] Complete explicit non-goals absence checks (skills library P3; memory product UX P5; image-file avatar upload; transcript/mailbox wipe as Pass gate; P1 topology/mailbox/auth re-litigation; Grok chrome parity) in `specs/002-identity-personas/verifier/non-goals.md`
-- [ ] T041 [P] Cross-link `specs/002-identity-personas/plan.md` Handoff / Ready section to `tasks.md` and note next commands: `/speckit-analyze` → `/speckit-taskstoissues` → implement (no FR rewrite; do not edit `MzM-Docs/living-next-gate.md` from Spec tasks)
-- [ ] T042 Run `specs/002-identity-personas/quickstart.md` Scenario 1–6 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
+- [x] T041 [P] Cross-link `specs/002-identity-personas/plan.md` Handoff / Ready section to `tasks.md` and note analyze → `taskstoissues` → implement **done** for this feature (no FR rewrite; do not edit `MzM-Docs/living-next-gate.md` from Spec tasks)
+- [x] T042 Run `specs/002-identity-personas/quickstart.md` Scenario 1–6 validation outline against Verifier recipes and fix recipe gaps (no feature code in Spec role — implementers execute)
 
 ---
 
@@ -283,4 +283,4 @@ Task: "Non-goals memory UX absence in verifier/non-goals.md"
 - Do not invent skills library (P3), memory productization (P5), image-upload avatars, or transcript-wipe Pass gates
 - Sidebar store exact API closed in T012 (plan open gap #1); Host mutation API names closed in T007 (plan open gap #2)
 - Commit after each task or logical group during implement; this Spec change commits only `tasks.md` under `specs/002-identity-personas/`
-- Next: `/speckit-analyze` → `/speckit-taskstoissues` (Linear **DeepSeek Harness - Cursor** / MOH-88) → implement → Verifier MOH-97
+- Spec Kit pipeline analyze → `taskstoissues` → implement is **done** for this feature (plan Handoff / T041); polish T039–T042 checked; Verifier Pass evidence → epic MOH-88 / MOH-97
