@@ -1,0 +1,50 @@
+UTC: 2026-09-27T15:08:05.817Z
+tip_sha: b6f17280bccdf92c19ca9f4f751621fad24b10df
+Verdict: Pass
+phase_before: hero
+phase_after: active
+MISSING_CREDENTIAL: false
+provider_key_missing_copy: false
+turn_failed_banner: false
+user_prompt_visible: true
+live_reply_marker_in_body: true
+agent_team_button: true
+agent_team_opened: true
+create_bot_chrome: true
+claim: measured
+
+--- after-send body excerpt ---
+DSH Local Build
+0.1.6-alpha.2-fe8816b
+New Session
+Plugins
+Workspaces
+go
+Live key smoke test
+now
+ping for chrome
+now
+Settings
+Live key smoke test
+Standard mode
+Agent Team
+Chat
+Trajectory
+System prompt
+Reply with exactly: LIVE_KEY_SMOKE_OK
+15:08
+Thought for a while
+Think
+
+LIVE_KEY_SMOKE_OK
+
+Usage 9.3K tok
+Ran for 1s
+15:08
+Message or run a task, / commands, @ files or sessions
+Workspace Write
+DeepSeek-V41-Flash
+High
+1 turns 1 steps·310 tok/s
+9.3K tok·Cache hit 94%
+1%

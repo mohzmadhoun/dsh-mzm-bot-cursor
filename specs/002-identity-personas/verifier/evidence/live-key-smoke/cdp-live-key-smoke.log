@@ -1,0 +1,62 @@
+newSession true
+
+=== before-prompt ===
+{
+  "phase": "hero",
+  "header": "me1oza_header me1oza_headerBlank",
+  "missingCredential": false,
+  "providerKeyMissing": false,
+  "agentTeam": false,
+  "turnFailed": false,
+  "liveMarker": false,
+  "bodyPreview": "DSH Local Build\n0.1.6-alpha.2-fe8816b\nNew Session\nPlugins\nWorkspaces\ngo\nNew Session\nping for chrome\nnow\nSettings\nInto the Unknown\nPreview\ngo\nStandard mode\nDescribe what you want to build, / commands, @ files or sessions\nWorkspace Write\nDeepSeek-V41-Flash\nHigh"
+}
+shot 01-blank-hero
+typed { ok: true, text: '' }
+
+=== poll-0 ===
+{
+  "phase": "active",
+  "header": "me1oza_header",
+  "missingCredential": false,
+  "providerKeyMissing": false,
+  "agentTeam": true,
+  "turnFailed": false,
+  "liveMarker": true,
+  "bodyPreview": "DSH Local Build\n0.1.6-alpha.2-fe8816b\nNew Session\nPlugins\nWorkspaces\ngo\nLive key smoke test\nnow\nping for chrome\nnow\nSettings\nLive key smoke test\nStandard mode\nAgent Team\nChat\nTrajectory\nSystem prompt\nReply with exactly: LIVE_KEY_SMOKE_OK\n15:08\nThought for a while\nThink\n\nLIVE_KEY_SMOKE_OK\n\nUsage 9.3K tok\nRan for 1s\n15:08\nMessage or run a task, / commands, @ files or sessions\nWorkspace Write\nDeepSeek-V41-Flash\nHigh\n1 turns 1 steps·310 tok/s\n9.3K tok·Cache hit 94%\n1%"
+}
+settled true
+shot 02-after-send
+openedAgentTeam true
+
+=== agent-team ===
+{
+  "phase": "active",
+  "header": "me1oza_header",
+  "missingCredential": false,
+  "providerKeyMissing": false,
+  "agentTeam": true,
+  "turnFailed": false,
+  "liveMarker": true,
+  "bodyPreview": "DSH Local Build\n0.1.6-alpha.2-fe8816b\nNew Session\nPlugins\nWorkspaces\ngo\nLive key smoke test\nnow\nping for chrome\nnow\nSettings\nLive key smoke test\nStandard mode\nAgent Team\nAgent Team\nMembers\nNew bot\nCreate another bot with a different (provider, model) before Verifier can Pass a multi-model session.\nSidebar sections\nNew section\nUnassigned\n\nBots never assigned to a named section appear here; Host does not persist an Unassigned catalog row.\n\nMailbox handoffs\nNo 1:1 handoffs yet\nShared tasks\nNew task\nNo shared tasks yet\nChat\nTrajectory\nSystem prompt\nReply with exactly: LIVE_KEY_SMOKE_OK\n15:08\nThought for a while\nThink\n\nLIVE_KEY_SMOKE_OK\n\nUsage 9.3K tok\nRan for 1s\n15:08\nMessage or run a task, / commands, @ files or sessions\nWorkspace Write\nDeepSeek-V41-Flash\nHigh\n1 turns 1 steps·310 tok/s\n9.3K tok·Cache hit 94%\n1%"
+}
+shot 03-agent-team
+createBotChrome true
+
+=== FINAL ===
+UTC: 2026-09-27T15:08:05.817Z
+tip_sha: b6f17280bccdf92c19ca9f4f751621fad24b10df
+Verdict: Pass
+phase_before: hero
+phase_after: active
+MISSING_CREDENTIAL: false
+provider_key_missing_copy: false
+turn_failed_banner: false
+user_prompt_visible: true
+live_reply_marker_in_body: true
+agent_team_button: true
+agent_team_opened: true
+create_bot_chrome: true
+claim: measured
+
+--- after-send body excerpt ---
