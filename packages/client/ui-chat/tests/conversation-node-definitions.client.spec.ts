@@ -175,6 +175,21 @@ function textMessage(id: string, text: string) {
   }
 }
 
+function teamPeerMessage(id: string, messageId: string, text: string) {
+  return {
+    id,
+    role: 'user',
+    content: [{ type: 'text', text }],
+    source: {
+      kind: 'team-message',
+      messageId,
+      senderId: 'bot-a',
+      senderName: 'Alice',
+      teamId: 'lead',
+    },
+  }
+}
+
 function systemMessage(text: string) {
   return {
     id: `system-${text}`,
@@ -778,6 +793,56 @@ describe('built-in conversation node Definitions', () => {
     expect(answer?.anchorSeq).toBe(52)
     expect(processData)
       .toMatchObject({ answerAnchorSeq: null, answerStep: null })
+  })
+
+  it('delivers settled assistant/message final and links cold-resume mailbox attribution (T030)', () => {
+    const value = assembler([
+      at(1, 'user/message', teamPeerMessage('peer-1', 'msg-mailbox-cold', 'act on this'), {
+        surfaceOp: 'append',
+      }),
+      at(2, 'turn/start', { turn: 1 }),
+      at(3, 'step/start', { turn: 1, step: 1 }),
+      at(4, 'assistant/message', {
+        turn: 1,
+        step: 1,
+        message: assistantMessage('assistant-final', 'acted on mailbox'),
+      }, { surfaceOp: 'append' }),
+      at(5, 'step/end', { turn: 1, step: 1 }),
+      at(6, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+    ])
+    const current = snapshot(value)
+    const settled = node(current, 'assistant-step')
+    expect(settled?.data).toMatchObject({
+      status: 'settled',
+      blocks: [{ kind: 'text', text: 'acted on mailbox' }],
+    })
+    const tail = current.timeline.turns.get(1)?.data.get('turn-tail') as TurnTailChatData | undefined
+    expect(tail).toMatchObject({
+      closing: { status: 'settled' },
+      linkedMailboxMessageId: 'msg-mailbox-cold',
+    })
+  })
+
+  it('attributes mid-turn team-message steer onto turn-tail linkedMailboxMessageId (T030)', () => {
+    const value = assembler([
+      at(1, 'turn/start', { turn: 1 }),
+      at(2, 'user/message', teamPeerMessage('peer-2', 'msg-mailbox-steer', 'steer handoff'), {
+        surfaceOp: 'append',
+      }),
+      at(3, 'step/start', { turn: 1, step: 1 }),
+      at(4, 'assistant/message', {
+        turn: 1,
+        step: 1,
+        message: assistantMessage('assistant-steer-final', 'handled steer'),
+      }, { surfaceOp: 'append' }),
+      at(5, 'step/end', { turn: 1, step: 1 }),
+      at(6, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+    ])
+    const current = snapshot(value)
+    expect(current.timeline.turns.get(1)?.data.get('linkedMailboxMessageId')).toBe('msg-mailbox-steer')
+    const tail = current.timeline.turns.get(1)?.data.get('turn-tail') as TurnTailChatData | undefined
+    expect(tail?.linkedMailboxMessageId).toBe('msg-mailbox-steer')
+    expect(tail?.closing).toMatchObject({ status: 'settled' })
   })
 
   it('keeps one keyed Assistant node while streaming settles and materializes interruption from Location', () => {

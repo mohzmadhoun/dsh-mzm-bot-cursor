@@ -30,6 +30,16 @@ export interface AssistantMarkdownProps {
   streaming: boolean
   /** Frozen partial of an aborted turn: rendered with a stopped marker. */
   interrupted?: boolean | undefined
+  /**
+   * Settled / interrupted Assistant text from the Host session log
+   * (`assistant/message`), not a shell-synthesized final channel (T030 / FR-006).
+   */
+  finalDelivery?: boolean | undefined
+  /**
+   * Optional Chat-turn `linkedMailboxMessageId` when this final is attributable
+   * to a Host mailbox peer message.
+   */
+  linkedMailboxMessageId?: string | undefined
   /** Render consecutive image blocks through the attachment slot. */
   renderMessageImages: ChatNodeOwnerProps['renderMessageImages']
   /** Hide reasoning that belongs to the Turn-level process disclosure. */
@@ -44,7 +54,8 @@ export interface AssistantMarkdownProps {
 
 /** Reasoning block as the Think variant summary row (figma 39:28304). */
 export const AssistantMarkdown = memo(function AssistantMarkdown({
-  blocks, streaming, interrupted, renderMessageImages,
+  blocks, streaming, interrupted, finalDelivery = false, linkedMailboxMessageId,
+  renderMessageImages,
   reasoningHidden = false, revealProcess, mentions, t,
 }: AssistantMarkdownProps) {
   // Stable per locale revision (t identity changes on switch): a fresh object
@@ -132,7 +143,18 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     }
   }
   return (
-    <div className={css.root} data-streaming={streaming || undefined}>
+    <div
+      className={css.root}
+      data-streaming={streaming || undefined}
+      // Durable turn completion / assistant result from the session log —
+      // shell MUST NOT invent a parallel chat-final IPC bus (T030 / FR-006).
+      data-chat-final={finalDelivery && !streaming ? 'session-log' : undefined}
+      data-linked-mailbox-message-id={
+        finalDelivery && !streaming && linkedMailboxMessageId !== undefined
+          ? linkedMailboxMessageId
+          : undefined
+      }
+    >
       <div className={css.body}>
         {rendered}
         {interrupted && <span className={css.stopped}>{t('message.stopped')}</span>}

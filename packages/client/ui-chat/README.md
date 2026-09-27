@@ -54,6 +54,8 @@ Terminal turn failures with Host code `MISSING_CREDENTIAL` show localized in-app
 
 Host mailbox peer receipts (`user/message` or pending inbox with durable `team-message` source) render as Mailbox handoff rows (`data-chat-handoff`, Host-only `data-handoff-source="host-mailbox"`) with pending / recipient-acted labels so FR-005 does not require copy-paste. Full `TeamView.handoffs` deliveryState for involved bots also appears in the Conversation notices strip from the Agent Teams Client plugin.
 
+Settled Assistant replies from the Host session log (`assistant/message`) mark `data-chat-final="session-log"` after turn completion. When the turn is caused by a Host mailbox `team-message` receipt, turn-tail carries optional `linkedMailboxMessageId` and the closing final exposes `data-linked-mailbox-message-id` — Electron Main does not synthesize a parallel chat-final channel.
+
 -----
 
 <a id="turn-process-folding"></a>

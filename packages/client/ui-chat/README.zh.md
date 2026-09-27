@@ -56,6 +56,8 @@ Host code 为 `MISSING_CREDENTIAL` 的终止轮次失败会展示本地化的应
 
 Host mailbox 对端回执（带持久化 `team-message` source 的 `user/message` 或 pending inbox）渲染为 Mailbox 交接行（`data-chat-handoff`，Host-only `data-handoff-source="host-mailbox"`），并带待处理 / 接收方已跟进标签，因此 FR-005 不需要在 bot 之间复制粘贴。涉及 bot 的完整 `TeamView.handoffs` deliveryState 也会出现在 Agent Teams Client 插件贡献的 Conversation notices 条中。
 
+来自 Host session log（`assistant/message`）的已结算 Assistant 回复在轮次完成后标记 `data-chat-final="session-log"`。当轮次由 Host mailbox 的 `team-message` 回执引起时，turn-tail 携带可选的 `linkedMailboxMessageId`，收尾 final 暴露 `data-linked-mailbox-message-id`——Electron Main 不合成并行的 chat-final 通道。
+
 -----
 
 <a id="turn-process-folding"></a>

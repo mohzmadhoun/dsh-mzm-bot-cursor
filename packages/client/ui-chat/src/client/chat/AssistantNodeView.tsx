@@ -26,11 +26,20 @@ export const AssistantNodeView = memo(function AssistantNodeView({
     && turnProcess.spec.inlineReasoning
     && !turnProcess.open
   const revealProcess = useCallback(() => { turnProcess?.setOpen(true) }, [turnProcess])
+  // Final delivery + mailbox attribution ride Host session-log / turn-tail —
+  // never Electron IPC (contracts/chat-progress-final.md, T030).
+  const finalDelivery = data.status !== 'running' && data.finalNode !== undefined
+  const linkedMailboxMessageId = finalDelivery
+    && tail?.closing?.finalNode.seq === data.finalNode?.seq
+    ? tail.linkedMailboxMessageId
+    : undefined
   return (
     <AssistantMarkdown
       blocks={data.blocks}
       streaming={data.status === 'running'}
       interrupted={data.status === 'interrupted'}
+      finalDelivery={finalDelivery}
+      linkedMailboxMessageId={linkedMailboxMessageId}
       renderMessageImages={renderMessageImages}
       reasoningHidden={reasoningHidden}
       revealProcess={revealProcess}

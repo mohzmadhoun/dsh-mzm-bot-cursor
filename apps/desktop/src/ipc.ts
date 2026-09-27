@@ -11,6 +11,8 @@ import type { IpcMainInvokeEvent } from 'electron'
  * Host agentTeams / llm / credentials own those routes (T016).
  * FR-008 / T034: preload and renderer never receive raw provider secrets
  * (`contracts/in-app-credentials.md`); Host credential resolve stays off this surface.
+ * There is no chat-final / assistant-final channel — Client `ui-chat` delivers finals from Host
+ * session log turn completion only (`contracts/chat-progress-final.md`, T030).
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
