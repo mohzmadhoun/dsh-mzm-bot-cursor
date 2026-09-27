@@ -1362,13 +1362,14 @@ describe('ChatView', () => {
     const pendingPeer = {
       id: 'pending-peer' as never,
       role: 'user' as const,
+      // Wire source uses branded Team ids; fixture casts the opaque peer source.
       source: {
-        kind: 'team-message' as const,
+        kind: 'team-message',
         messageId: 'msg-pending-1',
         senderId: 'bot-a',
         senderName: 'Alice',
         teamId: 'lead',
-      },
+      } as never,
       content: [{ type: 'text' as const, text: 'inbox handoff body' }],
       preview: 'inbox handoff body',
       text: 'inbox handoff body',
