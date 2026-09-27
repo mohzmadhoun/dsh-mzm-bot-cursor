@@ -39,7 +39,7 @@ kind: "package-reference"
 
 ### 观察 Host mailbox handoff
 
-打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一 handoff 在 Desktop 聊天表面的呈现属于后续任务。
+打开或刷新 panel 时，从 Host `agentTeams/view` 加载 `TeamView.handoffs`。每一行都是产品侧 Host mailbox 消息（`id`、收发 Bot、正文预览、`deliveryState`、仅 Host 的 `source`），由 Host 根据 Lead 与目标 Session 日志重建——绝非 Main 合成的 IPC。投递标签覆盖 `queued`、`delivered`、`visible-pending` 与 `acted`（FR-005）。同一投影还会在 Conversation notices 条（`conversation.session.notices`）中挂载涉及当前 Session 的 handoff；Chat 将持久化 / pending 的 `team-message` 回执渲染为交接行，因此不需要复制粘贴。
 
 ### 管理任务板
 
@@ -53,7 +53,7 @@ kind: "package-reference"
 <details>
 <summary>实现细节——点击展开</summary>
 
-Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](../agent-team/README.zh.md) 的生成的 `ctx.remote.agentTeams` contribution，然后通过 Cordis effect 注册 locale dictionary 与一个 conversation-header slot。Dispose plugin fiber 会移除这两项 registration。
+Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](../agent-team/README.zh.md) 的生成的 `ctx.remote.agentTeams` contribution，然后通过 Cordis effect 注册 locale dictionary、conversation-header Team action，以及 `conversation.session.notices` handoff 条。Dispose plugin fiber 会移除这些 registration。
 
 开始 create 或 update 会让更早的 refresh 失效。成功后会重新读取完整 Team view，使每个 task 的派生字段保持最新。`team-task-conflict` 结果仅在重新读取成功后显示状态陈旧提示；如果重新读取失败，则改为显示重新读取错误。由于 Team 服务把任务文本或 scope 编辑与 dependency 修改公开为独立 action，两者使用两个连续的 compare-and-set mutation。
 
@@ -61,6 +61,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
 | [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、Host mailbox handoff、Host bot 创建与任务板交互状态 |
+| [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |
 
@@ -105,4 +106,4 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 
 </details>
 
-**运行时不变式：** 不发布伴生入口。RPC 是权威来源，本包只持有一个可释放的 slot 注册。
+**运行时不变式：** 不发布伴生入口。RPC 是权威来源，本包持有 header action 与 handoff notices 的可释放 slot 注册。

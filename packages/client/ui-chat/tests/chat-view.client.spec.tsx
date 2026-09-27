@@ -1329,6 +1329,66 @@ describe('ChatView', () => {
     expect(h.openModelsSettings).toHaveBeenCalledTimes(1)
   })
 
+  it('renders durable team-message context as a Host mailbox handoff (T024)', () => {
+    const teamContext: ContextMessageNode = {
+      kind: 'context',
+      seq: 2,
+      time: 2_000,
+      content: [{ type: 'text', text: 'please continue the plan' }],
+      source: {
+        kind: 'team-message',
+        messageId: 'msg-handoff-1',
+        senderId: 'bot-a',
+        senderName: 'Alice',
+        teamId: 'lead',
+      },
+      producer: { role: 'inject', label: 'team-message' },
+      form: null,
+    }
+    const h = makeHarness({ nodes: [user(1, 'start'), teamContext] })
+    const view = render(<h.ChatView {...h.props} />)
+    const row = view.container.querySelector('[data-chat-handoff]')
+    expect(row).not.toBeNull()
+    expect(row?.getAttribute('data-handoff-id')).toBe('msg-handoff-1')
+    expect(row?.getAttribute('data-delivery-state')).toBe('visible-pending')
+    expect(row?.getAttribute('data-handoff-source')).toBe('host-mailbox')
+    expect(row?.textContent).toContain(zh['message.handoff.title'])
+    expect(row?.textContent).toContain(zh['message.handoff.pending'])
+    expect(row?.textContent).toContain('please continue the plan')
+    expect(row?.textContent).toContain('Alice')
+  })
+
+  it('renders pending inbox team-message as a visible handoff without copy-paste (T024)', () => {
+    const pendingPeer = {
+      id: 'pending-peer' as never,
+      role: 'user' as const,
+      source: {
+        kind: 'team-message' as const,
+        messageId: 'msg-pending-1',
+        senderId: 'bot-a',
+        senderName: 'Alice',
+        teamId: 'lead',
+      },
+      content: [{ type: 'text' as const, text: 'inbox handoff body' }],
+      preview: 'inbox handoff body',
+      text: 'inbox handoff body',
+    }
+    const h = makeHarness(
+      { nodes: [user(1, 'idle')] },
+      {
+        testInbox: { 'next-turn': [], 'next-step': [pendingPeer] },
+        running: true,
+      },
+    )
+    const view = render(<h.ChatView {...h.props} />)
+    const row = view.container.querySelector('[data-chat-handoff]')
+    expect(row).not.toBeNull()
+    expect(row?.getAttribute('data-handoff-id')).toBe('msg-pending-1')
+    expect(row?.getAttribute('data-delivery-state')).toBe('visible-pending')
+    expect(row?.getAttribute('data-handoff-source')).toBe('host-mailbox')
+    expect(row?.textContent).toContain('inbox handoff body')
+  })
+
   it('renders the max-tokens notice with localized guidance, distinct from turn errors', () => {
     const h = makeHarness({ nodes: [user(1, 'try'), assistant(2, 'truncated'), turnMaxTokens(3)] })
     const view = render(<h.ChatView {...h.props} />)

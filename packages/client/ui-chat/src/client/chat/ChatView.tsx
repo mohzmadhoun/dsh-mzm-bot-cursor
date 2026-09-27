@@ -10,7 +10,9 @@ import type { InboxState } from '@deepseek-ai/dsh-agent/types'
 import { Button, IconChevronDownOutline14, MarkdownDelegateProvider, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ChatViewSlotProps, OpenFileOptions } from '../contract/slots.ts'
 import type { ChatSnapshot } from '../contract/snapshot.ts'
+import { MailboxHandoffRow } from './MailboxHandoffRow.tsx'
 import { PendingSteeringBubble, PendingSubmissionBubble } from './MessageItem.tsx'
+import { readTeamMessageSource } from './team-message-source.ts'
 import { ChatNodeSeat } from './ChatNodeSeat.tsx'
 import { TurnNavigator } from './TurnNavigator.tsx'
 import { mergeTurnRailItems, type TurnRailItem } from './turn-rail-items.ts'
@@ -285,6 +287,15 @@ export function ChatView({
     () => inbox?.['next-step'].filter(message => message.source.kind === 'user') ?? [],
     [inbox],
   )
+  // Host mailbox peer receipts held only in the pending inbox (FR-005).
+  const pendingMailboxHandoffs = useMemo(() => {
+    if (inbox === undefined) return []
+    const rows = [...inbox['next-step'], ...inbox['next-turn']]
+    return rows.flatMap((message) => {
+      const source = readTeamMessageSource(message.source)
+      return source === null ? [] : [{ id: message.id, content: message.content, source }]
+    })
+  }, [inbox])
   const pendingSubmissions = useSession(s => s.pendingSubmissions)
   // Submission echoes still awaiting their durable counterpart. `order` is the
   // recompute trigger: durable user material always arrives as an append, and
@@ -342,8 +353,9 @@ export function ChatView({
   const lastKey = order.at(-1) ?? null
   const lastNode = lastKey === null ? undefined : nodeStore.get(lastKey)
   const lastSteeringId = pendingSteering[pendingSteering.length - 1]?.id ?? null
+  const lastHandoffId = pendingMailboxHandoffs[pendingMailboxHandoffs.length - 1]?.id ?? null
   const lastSubmissionId = visibleSubmissions[visibleSubmissions.length - 1]?.requestId ?? null
-  const followSig = `${openState}:${firstSeq}:${lastKey}:${order.length}:${running ? 1 : 0}:${lastSteeringId ?? ''}:${lastSubmissionId ?? ''}`
+  const followSig = `${openState}:${firstSeq}:${lastKey}:${order.length}:${running ? 1 : 0}:${lastSteeringId ?? ''}:${lastHandoffId ?? ''}:${lastSubmissionId ?? ''}`
 
   const syncActiveTurn = useCallback((): void => {
     if (scrollSamplePendingRef.current) return
@@ -814,6 +826,15 @@ export function ChatView({
               key={item.id}
               content={item.content}
               renderMessageImages={renderMessageImages}
+              t={t}
+            />
+          ))}
+          {pendingMailboxHandoffs.map(item => (
+            <MailboxHandoffRow
+              key={item.id}
+              content={item.content}
+              source={item.source}
+              deliveryState="visible-pending"
               t={t}
             />
           ))}
