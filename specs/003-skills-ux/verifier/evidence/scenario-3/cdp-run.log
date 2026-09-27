@@ -1,0 +1,59 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
+before {
+  "skills": [
+    {
+      "id": "mzm-authored-skill",
+      "source": "user",
+      "name": "MzM authored skill (edited)",
+      "available": "false"
+    },
+    {
+      "id": "mzm-thin-pack",
+      "source": "managed",
+      "name": "MzM thin pack",
+      "available": "false"
+    }
+  ],
+  "createSkill": true
+}
+reject empty both {
+  rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+  saveDisabled: true,
+  name: '',
+  body: ''
+}
+shot 01-reject-empty.png
+reject empty name {
+  rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+  saveDisabled: true,
+  name: '',
+  body: 'Follow the MzM authored-skill playbook for Pass.'
+}
+shot 01b-reject-empty-name.png
+reject empty body {
+  rejectText: 'Display name and instructional body must both be non-empty. Empty saves are rejected and do not appear in the Skills library.',
+  saveDisabled: true,
+  name: 'MzM authored skill',
+  body: ''
+}
+shot 01c-reject-empty-body.png
+ready to save {
+  rejectText: null,
+  saveDisabled: false,
+  name: 'MzM authored skill',
+  body: 'Follow the MzM authored-skill playbook for Pass.'
+}
+shot 02-author-save.png
+authored {
+  id: 'mzm-authored-skill',
+  source: 'user',
+  name: 'MzM authored skill',
+  available: 'true'
+}
+persist {
+  skillMd: '/workspace/apps/desktop/.desktop-build/development/home/desktop-user-skills/mzm-authored-skill/SKILL.md',
+  hasFixtureBody: true,
+  hasFixtureName: true
+}
+shot 03-discovery-authored.png
+PASS_SC003_DESKTOP

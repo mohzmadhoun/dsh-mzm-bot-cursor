@@ -1,6 +1,6 @@
 # Scenario 3 — Author skill (+ reject empty)
 
-**Status:** Recipe delivered — product SC Pass **not** stamped (await US3 Host/Client authoring T027–T030 + FR-012 evidence)
+**Status:** Product SC-003 **Pass** stamped 2026-09-27 — tip `4d2eb47840` (#132) · evidence [evidence/scenario-3/VERDICT.txt](./evidence/scenario-3/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host user-skill persist / reject empty) · DH Client (authoring + discovery surfaces)
 **Linear:** [MOH-178](https://linear.app/momadhoun/issue/MOH-178) · Epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142)
 **Acceptance slice:** T031 — Verifier Scenario 3 recipe covering SC-003 with mandatory FR-012 desktop evidence
@@ -15,7 +15,7 @@
 | Recipe present | This file documents Steps A–C with Pass/Fail and evidence tags |
 | SC coverage | SC-003 — reject empty save; happy-path author (non-empty name + body); appears in discovery |
 | FR-012 | Desktop screenshot(s) and/or short screen recording under `verifier/evidence/scenario-3/` — unit/jsdom alone **fails** |
-| Product SC stamp | Deferred until US3 Host/Client authoring (T027–T030) + Verifier desktop evidence land |
+| Product SC stamp | **Pass** — [evidence/scenario-3/VERDICT.txt](./evidence/scenario-3/VERDICT.txt) (FR-012 desktop) |
 
 ---
 
@@ -27,10 +27,10 @@
 | Host `upsertUserSkill` stub + empty reject (T010) | Host validation half | **measured:** foundational checklist item 4; `team.spec.ts` rejects empty author fields |
 | User skills root mount (T007) | Host-durable user skill persist | **measured:** Desktop Host mounts user skills root via `dsh-skill-filesystem` |
 | US1 discovery surface | Observe authored skill in discovery | **measured:** Client discovery on master (T016–T018 / [#120](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/120)); Scenario 1 [scenario-1-discover-load.md](./scenario-1-discover-load.md) |
-| Host user-skill create/update (T027) | Persist non-empty user skills | **inferred:** open until Runtime lands product path |
-| Rejected empty not discoverable (T028) | FR-013 catalog half | **inferred:** open until Runtime lands |
-| Client authoring surface (T029) | SC-003 desktop path | **inferred:** open until Client lands |
-| Wire authored → discovery + attach (T030) | Discovery + US3 IT attach | **inferred:** open until Client lands |
+| Host user-skill create/update (T027) | Persist non-empty user skills | **measured:** on master (US3 Host); Desktop upsert writes `desktop-user-skills/` |
+| Rejected empty not discoverable (T028) | FR-013 catalog half | **measured:** empty reject does not invent catalog row (Client + Host) |
+| Client authoring surface (T029) | SC-003 desktop path | **measured:** #132 on master; Desktop create/edit surface |
+| Wire authored → discovery + attach (T030) | Discovery + US3 IT attach | **measured:** discovery lists `source=user`; attach available (IT) |
 
 **Desktop prerequisites** (full Scenario 3 Pass): buildable Desktop (`apps/desktop`, `apps/desktop-host`) with P1 create-bot available; skills discovery (US1) openable; in-app authoring surface; real Desktop app (`DISPLAY` when Cloud Agent).
 
@@ -102,7 +102,7 @@ Assert non-empty upsert writes Host-durable user skill and catalog projection ca
 | Identity | Distinct from managed thin pack | Overwrites or masquerades as `mzm-thin-pack` |
 | Evidence | Desktop frame of successful author/save | Unit/jsdom-only claim |
 
-**Blocked until T027/T029** for product SC-003 Done. Host upsert alone is supporting (**inferred** for authoring UI).
+**Product path measured** on tip `4d2eb47840` (T027/T029 landed). Host upsert alone remains supporting when Client UI is unavailable.
 
 ---
 
@@ -121,7 +121,7 @@ Assert non-empty upsert writes Host-durable user skill and catalog projection ca
 | Labeling | Recognizable as user-authored (not presented as managed thin pack) | Mis-sourced as managed / thin pack |
 | Evidence | Desktop screenshot/recording filed | Unit/jsdom-only claim |
 
-**Blocked until T028/T030** for product discovery half. US1 discovery chrome without user-skill wiring is insufficient (**inferred**).
+**Product discovery half measured** on tip `4d2eb47840` (T028/T030 landed). US1 discovery chrome without user-skill wiring remains insufficient alone.
 
 ---
 
@@ -217,4 +217,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T031).** Product SC Pass **not** stamped. Foundational Host `upsertUserSkill` empty-reject stub is on master (T010 / T014). Full Scenario 3 Done waits on US3 Host/Client authoring (T027–T030) plus Verifier FR-012 desktop evidence using Steps A–C above.
+**Recipe delivered (T031).** Product SC-003 **Pass** stamped 2026-09-27 on tip `4d2eb47840` (#132) with FR-012 desktop evidence under [evidence/scenario-3/](./evidence/scenario-3/). Leave Linear Done marking to PO after stamp PR merge.
