@@ -1,0 +1,36 @@
+page dsh-app://app/ Live key smoke test — DSH Local Build
+{
+  "tip": "85df964e51",
+  "paneCount": 3,
+  "fixture": {
+    "intent": "Check inbox",
+    "scheduleExpr": "@every 5m"
+  },
+  "steps": {
+    "reject": {
+      "rejectText": "Intent and schedule must both be non-empty, and the schedule must be a product-supported expression. Empty or invalid saves are rejected and do not appear in the list.",
+      "saveDisabled": true,
+      "rowsBeforeCreate": 0
+    },
+    "create": {
+      "routineId": "routine-4e97abca-69ad-4b00-a889-2af545dd199b",
+      "status": "active",
+      "scheduleExpr": "@every 5m",
+      "text": "Check inbox Every 5m Active Not run yet Pause"
+    },
+    "isolation": {
+      "botBId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+      "botBRowCount": 2,
+      "botBTexts": [
+        "Summarize inbox every five minutes Every 5m Paused Not run yet Resume",
+        "US2 pane list smoke Every 5m Active Last run 2026-09-27T20:06:05.254Z Pause"
+      ],
+      "containsCheckInbox": false,
+      "containsCreatedId": false
+    }
+  },
+  "botAId": "5c08c574-e488-4645-ad6a-bd27ea9021c8",
+  "botBId": "c92d4a8c-a423-4bc4-b015-79167899239d",
+  "pass": true,
+  "sc007": "confirm/edit absence did not block create path"
+}

@@ -1,6 +1,6 @@
 # Scenario 1 — Create cron routine + pane list (create path)
 
-**Status:** Recipe drafted — product SC Pass **not** stamped (FR-010/011 evidence pending Client create UI + Desktop run)
+**Status:** Recipe + product SC Pass stamped — see [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host create / per-bot catalog) · DH Client (create UI + pane list)
 **Linear:** [MOH-211](https://linear.app/momadhoun/issue/MOH-211) · Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188)
 **Acceptance slice:** T018 — Verifier Scenario 1 recipe covering SC-001 / SC-006 / SC-007 create path with mandatory FR-010/011 (standing orders **11** + **12**) desktop evidence
@@ -16,7 +16,7 @@
 | SC coverage | SC-001 create + reject · SC-006 per-bot · SC-007 confirm/edit absence must not fail Pass |
 | FR-010 (SO 11) | Desktop screenshot(s) and/or short screen recording of the **real Desktop app** under `verifier/evidence/scenario-1/` — unit/jsdom alone **fails** |
 | FR-011 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
-| Product SC stamp | **Deferred** — fill `evidence/scenario-1/VERDICT.txt` only after Desktop FR-010/011 media lands |
+| Product SC stamp | **measured:** `evidence/scenario-1/VERDICT.txt` Pass (01–03 create path + retained 04–05 pane durability) |
 
 **T021 pane-list durability:** Split recipe [scenario-2-pane-list.md](./scenario-2-pane-list.md) owns leave/return or reload durability + FR-002 field checks (evidence still under `verifier/evidence/scenario-1/` as `04-`/`05-`). Initial list appearance after create (SC-001) remains required here (Step A).
 
@@ -235,4 +235,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T018 docs).** Product SC Pass **not** stamped. Host create / reject / per-bot and Client create/pane are on master (T015–T017, T019–T020). Full Scenario 1 Done waits on Verifier desktop FR-010/011 evidence for Steps A–D here **plus** T021 durability media (`04-`/`05-`) per [scenario-2-pane-list.md](./scenario-2-pane-list.md). Leave [MOH-211](https://linear.app/momadhoun/issue/MOH-211) **In Progress** until evidence + stamp land.
+**T018 create path Pass stamped** with Desktop FR-010/011 media `01–03` + walkthrough under [evidence/scenario-1/](./evidence/scenario-1/) (plus retained T021 `04–`/`05-`). Leave [MOH-211](https://linear.app/momadhoun/issue/MOH-211) **In Progress** until PO merges the stamp PR and completes SO12 PR embeds — Verifier does **not** mark Linear Done.

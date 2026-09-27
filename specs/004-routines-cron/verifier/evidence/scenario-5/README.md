@@ -10,8 +10,8 @@
 | Artifact | Content | Notes |
 |----------|---------|-------|
 | `s1-01-create-listed-active.png` (or pointer) | Scenario 1 create path | May reuse / link `../scenario-1/` when present |
-| `s1-02-reject-empty-or-invalid.png` | Scenario 1 reject | T018 path — may be Pending |
-| `s1-03-bot-b-isolation.png` | Scenario 1 per-bot | T018 path — may be Pending |
+| `s1-02-reject-empty-or-invalid.png` | Scenario 1 reject | Cite `../scenario-1/02-` — **Present** |
+| `s1-03-bot-b-isolation.png` | Scenario 1 per-bot | Cite `../scenario-1/03-` — **Present** |
 | `s1-04-pane-listed-fields.png` · `s1-05-pane-after-leave-return.png` | US2 pane durability | Prefer reuse from `../scenario-1/04-` / `05-` |
 | `s2-01` … `s2-06` pause/resume frames (or pointer) | Scenario 2 | Prefer reuse from `../scenario-2/` |
 | `s3-01` … `s3-04` fire / last-run frames (or pointer) | Scenario 3 | Prefer reuse from `../scenario-3/` |

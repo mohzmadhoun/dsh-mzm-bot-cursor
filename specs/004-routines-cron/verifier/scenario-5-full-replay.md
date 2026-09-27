@@ -1,6 +1,6 @@
 # Scenario 5 — Full Phase 4 Verifier replay (SC-005)
 
-**Status:** Recipe + measured composite stamp — see [evidence/scenario-5/VERDICT.txt](./evidence/scenario-5/VERDICT.txt)
+**Status:** Recipe + composite SC-005 Pass stamped — see [evidence/scenario-5/VERDICT.txt](./evidence/scenario-5/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + composite evidence) · DH Runtime / Client / Electron (slice owners under Scenarios 1–4) · PO (scope)
 **Linear:** T031 [MOH-224](https://linear.app/momadhoun/issue/MOH-224) · Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188)
 **Acceptance slice:** T031 — Verifier Scenario 5 recipe covering FR-010/011 / SC-005
@@ -55,7 +55,7 @@ Does **not** by itself re-open US1–US4 implementation. Recipe presence alone i
 | Layer | Required for | Status at T031 polish |
 |-------|--------------|------------------------|
 | Foundational Pass (T014) | Any product SC / SC-005 | **measured:** stamped in [README.md](./README.md#foundational-pass-checklist--recorded) |
-| Scenario 1 create (T018 01–03) | Full SC-001 | **measured gap:** create/reject/isolation desktop media **Pending** (US2 pane-list half Pass only) |
+| Scenario 1 create (T018 01–03) | Full SC-001 | **measured:** Pass under `evidence/scenario-1/` (`01–03` + create walkthrough) |
 | Scenario 1 pane durability (T021) | FR-002 half | **measured:** Pass under `evidence/scenario-1/` |
 | Scenario 2 pause/resume (T024) | SC-002 | **measured:** Pass under `evidence/scenario-2/` |
 | Scenario 3 cron fire (T028) | SC-003 | **measured:** Pass under `evidence/scenario-3/` |

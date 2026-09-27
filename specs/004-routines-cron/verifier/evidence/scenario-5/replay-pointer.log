@@ -1,18 +1,8 @@
-T031 Scenario 5 replay-pointer (measured from existing evidence; no new product code)
-UTC: 2026-09-27T20:05:10Z
-SHA: 1c0b6698b5750f12485e1167f30be1accd8ff059
-BASE: origin/master @ 7294304388 (T028 #164)
-POLISH: cursor/p4-polish-t029-t034-fe1d @ 1c0b6698b5
-
-FOUNDATIONAL_GATE: Pass (README T014 @ 5a53ddac83; bus guard re-green T033)
-SC-001 create 01-03: Deferred/Blocked — media Pending (T018 unchecked)
-SC-001/FR-002 pane durability: Pass — evidence/scenario-1/04-05 + walkthrough
-SC-002: Pass — evidence/scenario-2/ VERDICT
-SC-003: Pass — evidence/scenario-3/ VERDICT (master #164)
-SC-004: Pass — non-goals.md + measured-checks + T033/T034 logs
-SC-005 composite: Blocked — full SC-001 create/reject/isolation desktop media still Pending
-
-Cited SO11 media (existing; not re-captured this polish):
-  scenario-1: 04-pane-listed-fields.png 05-pane-after-leave-return.png scenario-1-pane-list-walkthrough.mp4
-  scenario-2: 02-06 png + pause-resume-walkthrough.mp4
-  scenario-3: 02-04 png + cron-fire-walkthrough.mp4
+FOUNDATIONAL_GATE: README foundational Pass holds; electron bus re-green
+SCENARIO_1_CREATE: evidence/scenario-1/01-03 present (T018)
+SCENARIO_1_PANE: evidence/scenario-1/04-05 Pass (T021)
+SCENARIO_2: evidence/scenario-2/ Pass (T024)
+SCENARIO_3: evidence/scenario-3/ Pass (T028)
+NON_GOALS: evidence/non-goals/ Pass (T029)
+UTC: 2026-09-27T20:09:42Z
+SHA: 85df964e51389cc3c38b8727a0f8762828489b34
