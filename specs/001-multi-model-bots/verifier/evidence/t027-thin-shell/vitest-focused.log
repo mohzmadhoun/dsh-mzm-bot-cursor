@@ -4,8 +4,11 @@ The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths r
 
  RUN  v4.1.8 /workspace
 
+ ✓ |thread-safe| apps/desktop/tests/thin-shell-main.spec.ts > Desktop thin shell Main (T027) > keeps main.ts / web-document.ts / backend-controller.ts free of mailbox, credential, and model routers 2ms
+ ✓ |thread-safe| apps/desktop/tests/thin-shell-main.spec.ts > Desktop thin shell Main (T027) > loads the Web client over dsh-app:// and forwards application traffic to the Host HTTP plane 1ms
+ ✓ |thread-safe| apps/desktop/tests/thin-shell-main.spec.ts > Desktop thin shell Main (T027) > registers only boot, chrome, and update IPC channels in Main — no product data-plane handlers 3ms
 
  Test Files  1 passed (1)
-      Tests  1 passed (1)
-   Start at  10:11:56
-   Duration  588ms (transform 339ms, setup 213ms, import 236ms, tests 10ms, environment 0ms)
+      Tests  3 passed (3)
+   Start at  10:13:37
+   Duration  435ms (transform 237ms, setup 258ms, import 17ms, tests 7ms, environment 0ms)

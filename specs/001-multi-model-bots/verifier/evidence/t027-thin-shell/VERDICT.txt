@@ -1,0 +1,33 @@
+VERDICT: Pass
+SC: FR-007 Desktop Electron thin shell — lifecycle + dsh-app:// HTTP forward only (T027 / US3)
+SHA: 030382572f93ae3017b156598272bc4251633edd
+UTC: 2026-09-27T10:13:45Z
+IMPL_SHA: 030382572f (Phase 1 - T027 - keep Electron Main lifecycle/HTTP-forward only)
+BRANCH: cursor/p1-t027-thin-shell-92fa
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/52
+LINEAR: MOH-72 (project DeepSeek Harness - Cursor / P-MOH-2); epic MOH-37
+RECIPE: specs/001-multi-model-bots/verifier/t027-thin-shell.md
+RECIPE_VITEST: Pass (measured)
+COMMAND: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/thin-shell-main.spec.ts --reporter=verbose
+STDOUT: evidence/t027-thin-shell/vitest-focused.log (Test Files 1 passed; Tests 3 passed; EXIT:0)
+PASSED_TESTS (measured):
+  thin-shell-main.spec.ts (3):
+    1. keeps main.ts / web-document.ts / backend-controller.ts free of mailbox, credential, and model routers
+    2. loads the Web client over dsh-app:// and forwards application traffic to the Host HTTP plane
+    3. registers only boot, chrome, and update IPC channels in Main — no product data-plane handlers
+OPTIONAL_TOPOLOGY: Pass (measured)
+COMMAND2: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/topology-handshake.spec.ts -t 'mailbox / bot-message|createBot / ModelSelection'
+STDOUT2: evidence/t027-thin-shell/vitest-topology-optional.log (2 passed | 3 skipped; EXIT:0)
+OPTIONAL_RELATED: Pass (measured)
+COMMAND3: DSH_LEFTHOOK_ALLOW_HOOKS_PATH_OVERRIDE=1 ./node_modules/.bin/vitest run apps/desktop/tests/web-document.spec.ts apps/desktop/tests/backend-controller.spec.ts
+STDOUT3: evidence/t027-thin-shell/vitest-related.log (Test Files 2 passed; Tests 13 passed; EXIT:0)
+NOTE: Vitest 4.1.8 binary; Node v24.21.0; static source inventory + unit tests — no provider API secrets; no Electron GUI launch
+CRITERIA_CHECKED:
+  1. Three Main thin-shell modules contain no mailbox / bot-message / createBot / ModelSelection / provider-credential / ctx.llm router code — Pass (measured; forbidden-pattern inventory)
+  2. main.ts serves Web client on dsh-app://app/ and forwards non-static paths via authenticateWebHost + forwardWebRequest — Pass (measured; SCHEME + protocol.handle + serve/forward/auth symbols)
+  3. backend-controller.ts owns Host child start/stop/close only; no ipcMain product handlers — Pass (measured; class methods present; ipcMain/protocol.handle absent)
+  4. Main ipcMain registrations use only DESKTOP_IPC boot / chrome / update channels — Pass (measured; handle/on keys subset of DESKTOP_IPC; no mailbox|bot|credential|model|llm|chat)
+CLAIM: measured (independent DH Verifier re-run @ 030382572f)
+SCOPE_OUT: SC-004 / T029–T032 chat progress+final; T026 no-electron-mailbox-bus.spec.ts ownership; T034 no-secret-ipc.spec.ts re-audit
+STATUS_LINEAR: leave MOH-72 In Progress (Verifier Pass ≠ product Done; PO gates Done)
+BLOCKER: none
