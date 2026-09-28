@@ -1,5 +1,5 @@
 Verdict: Pass
-Stamp: 2026-09-28 · tip 059c1bf9e9 · desktop DSH Local Build 0.1.6-alpha.2 @ origin/master 059c1bf9e9 (DISPLAY=:1 CDP 9222)
+Stamp: 2026-09-28 · tip 640e53cae9 (media) · branch tip after retip commits · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-379 · Epic MOH-350 · P-MOH-2
 Branch: cursor/p7-us2-sc002-evidence-dc28 (PO opens PR + independent re-gate)
 SC-002: Pass — evidence: evidence/computer-use/{01-computer-use-observation,02-computer-use-parent-handoff}.png + scenario-2-computer-use-walkthrough.mp4
@@ -10,7 +10,7 @@ FR-015: LLM wording not scored
 Path A: Host SoT (desktop-pass-fixture + computer_use_pass_screenshot + spawn subagent); Client HTTP/WS projection (data-computer-use-observation / data-computer-use-handoff); no Electron Main computer-use bus
 Blockers: none for SC-002 after Desktop observation + parent handoff frames
 
-## Measured Desktop path (this tip)
+## Measured Desktop path (media tip 640e53cae9)
 - Launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop (CDP :9222)
 - New Session → parent invoked computer_use_pass_screenshot then subagent (description computerUse screenshot observation)
 - Observation card: data-computer-use-observation=observed · label "Screenshot observation" · body "Pass fixture desktop observation." · data-computer-use-screenshot 1×1 PNG 90 bytes (Host Pass fixture)
@@ -19,7 +19,7 @@ Blockers: none for SC-002 after Desktop observation + parent handoff frames
 
 ## Distinct frames (not duplicate blobs)
 - 01-computer-use-observation.png — expanded turn-process showing Screenshot observation card + Pass fixture body (measured)
-- 02-computer-use-parent-handoff.png — same session scrolled/settled with computerUse handoff badge + subagent confirmation visible (measured)
+- 02-computer-use-parent-handoff.png — same session with computerUse handoff badge + subagent confirmation visible (measured)
 - scenario-2-computer-use-walkthrough.mp4 — ffmpeg x11grab of Desktop during CDP drive (measured)
 
 sha256 (evidence == artifacts):
