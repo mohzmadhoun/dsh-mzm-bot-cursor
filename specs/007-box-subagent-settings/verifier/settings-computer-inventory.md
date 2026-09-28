@@ -1,6 +1,6 @@
 # T004 — Client `settings.section` + Host settings Remotes inventory (Setup)
 
-**Status:** Inventory complete (Setup; no Computer section UI; no Electron Main product SoT)
+**Status:** Inventory complete (Setup). US3 T024–T025 land Client `ui-settings-computer` over Host Remotes; no Electron Main product SoT.
 **Owners:** DH Electron / Client (author) · DH Runtime (Host settings SoT / Remotes) · DH Verifier (SC-003 later) · PO (scope)
 **Linear:** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · tasks gate [MOH-354](https://linear.app/momadhoun/issue/MOH-354) — no invented child ids until `taskstoissues`
 **Acceptance slice:** Setup T004 — inventory for [contracts/settings.md](../contracts/settings.md) / research R4 / data-model `ComputerSettingsProjection`
