@@ -29,6 +29,12 @@ import type { IpcMainInvokeEvent } from 'electron'
  * or memory-injection channel — Host owns the durable Memory catalog and inject path
  * (research R7 / T010–T011; `specs/005-memory-productization/contracts/`); Client mutates
  * via authenticated Host HTTP/WS only.
+ * There is no connector-catalog, connector-install, connector-auth, mcp-tool-call,
+ * event-routine-create, event-routine-fire, webhook-delivery, permission-deny, trust-rule,
+ * credential-value, credential-set, or secret-payload channel — Host owns the durable Connector catalog,
+ * event-routine wake, trust deny path, and credential store
+ * (research R6 / R9 / T013–T014; `specs/006-connectors-mcp-events-trust/contracts/`);
+ * Client mutates via authenticated Host HTTP/WS only.
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',

@@ -19,6 +19,12 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * Memory-catalog / memory-write / memory-list / memory-browse / memory-recall / memory-injection
  * payloads are also not members and must not be added — Host owns the durable Memory catalog
  * (research R7 / T010; `specs/005-memory-productization/contracts/`).
+ * Connector-catalog / connector-install / connector-auth / mcp-tool-call,
+ * event-routine-create / event-routine-fire / webhook-delivery,
+ * permission-deny / trust-rule, and credential-value / credential-set / secret-payload
+ * payloads are also not members and must not be added — Host owns the durable Connector catalog,
+ * event-routine wake, trust deny path, and credential store (research R6 / R9 / T013;
+ * `specs/006-connectors-mcp-events-trust/contracts/`).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',
@@ -32,7 +38,10 @@ export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
  * There is no mailbox, bot-message, identity, persona, section, bot-delete,
  * skill-catalog, skill-attachment, skill-authoring, routine-catalog, routine-create,
  * pause-routine, resume-routine, cron-fire, last-run, memory-catalog, memory-write,
- * memory-list, memory-browse, memory-recall, or memory-injection control type on this channel.
+ * memory-list, memory-browse, memory-recall, memory-injection, connector-catalog,
+ * connector-install, connector-auth, mcp-tool-call, event-routine-create,
+ * event-routine-fire, webhook-delivery, permission-deny, trust-rule, credential-value,
+ * credential-set, or secret-payload control type on this channel.
  */
 export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
 
