@@ -54,10 +54,21 @@ export function apply(ctx: ClientContext): void {
     namespace: COMPUTER_SETTINGS_NAMESPACE,
     decode: decodeComputerSettingsProjection,
   })
+  // uSES: getSnapshot must return the same reference until the scope fact moves.
+  let projectedSource = computerScope.getSnapshot()
+  let projected: ComputerSettingsSnapshot = {
+    status: projectedSource.status,
+    value: projectedSource.value,
+    writable: projectedSource.writable,
+  }
   const computerSettings: ComputerSectionInjected['hooks']['computerSettings'] = {
     getSnapshot: (): ComputerSettingsSnapshot => {
       const snap = computerScope.getSnapshot()
-      return { status: snap.status, value: snap.value, writable: snap.writable }
+      if (snap !== projectedSource) {
+        projectedSource = snap
+        projected = { status: snap.status, value: snap.value, writable: snap.writable }
+      }
+      return projected
     },
     subscribe: listener => computerScope.subscribe(listener),
   }

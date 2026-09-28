@@ -55,7 +55,11 @@ export async function commitBoxReadiness(
     updatedAt: now.toISOString(),
   }
   authorizeComputerHostOwned(settings, hostOwned)
-  await settings.update(COMPUTER_SETTINGS_NAMESPACE, hostOwned)
+  const current = settings.get(COMPUTER_SETTINGS_NAMESPACE) as ComputerSettings | undefined
+  await settings.update(COMPUTER_SETTINGS_NAMESPACE, {
+    ...hostOwned,
+    computerUseEnabled: current?.computerUseEnabled ?? true,
+  })
   return settings.get(COMPUTER_SETTINGS_NAMESPACE) as ComputerSettings
 }
 
