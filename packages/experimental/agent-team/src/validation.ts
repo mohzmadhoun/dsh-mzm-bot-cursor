@@ -1,6 +1,7 @@
 /** Input normalization shared by Team roster and task commands. */
 
 import type { ModelSelection } from '@deepseek-ai/dsh-agent'
+import type { SessionId } from '@deepseek-ai/dsh-session'
 import { TeamError } from './error.ts'
 import type {
   AvatarColorId,
@@ -9,6 +10,7 @@ import type {
   BotPersonaProfile,
   MemoryKind,
   MemoryLayer,
+  MemoryRecord,
   SkillId,
 } from './types.ts'
 import { SkillId as toSkillId } from './types.ts'
@@ -160,6 +162,22 @@ export function requiredMemoryLayer(value: string): MemoryLayer {
     )
   }
   return layer as MemoryLayer
+}
+
+/**
+ * Whether one Host Memory catalog row is eligible for a bot context (US5 T027 / FR-006/007).
+ * Agent-layer rows match only that `botId`; user-layer rows are account-wide across bots.
+ * Transcript lines are never MemoryRecord rows — this predicate only accepts catalog fields.
+ * @param memory - durable Host row (or projection-equivalent layer/botId pair).
+ * @param botId - bot Session identity receiving list/browse or memory-recall inject.
+ * @returns true when the row belongs in that bot’s agent+user projection.
+ */
+export function memoryEligibleForBot(
+  memory: Pick<MemoryRecord, 'layer' | 'botId'>,
+  botId: SessionId,
+): boolean {
+  return memory.layer === 'user'
+    || (memory.layer === 'agent' && memory.botId === botId)
 }
 
 /**

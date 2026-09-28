@@ -584,5 +584,90 @@ for (const backend of backends) {
       await resumed.dispose()
       await second.dispose()
     })
+
+    it('US5 T027: agent isolation + user sharing survive Host restart (not transcript)', {
+      timeout: PERSISTENCE_TEST_TIMEOUT_MS,
+    }, async () => {
+      const storageRoot = mkdtempSync(join(tmpdir(), `dsh-team-layers-${backend.name.toLowerCase()}-`))
+      roots.push(storageRoot)
+      const leadId = SessionId(`${backend.name.toLowerCase()}-layers-lead`)
+      const first = await stack(backend, storageRoot, [
+        textResponse('layers create a'),
+        textResponse('layers create b'),
+      ])
+      const lead = await first.ctx.agentLoop.create(leadId, { provider: 'mock', model: 'mock' })
+      const alpha = await first.ctx.agentTeams.createBot(lead, {
+        displayName: 'Layers Alpha',
+        modelSelection: { provider: 'mock', model: 'layers-a' },
+        signal: SIGNAL,
+      })
+      const beta = await first.ctx.agentTeams.createBot(lead, {
+        displayName: 'Layers Beta',
+        modelSelection: { provider: 'mock', model: 'layers-b' },
+        signal: SIGNAL,
+      })
+      await vi.waitFor(() => { expect(first.ctx.agents.get(alpha.id)).toBeUndefined() }, { timeout: 5_000 })
+      await vi.waitFor(() => { expect(first.ctx.agents.get(beta.id)).toBeUndefined() }, { timeout: 5_000 })
+
+      const alphaAgent = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'note',
+        layer: 'agent',
+        botId: alpha.id,
+        content: 'Alpha private agent fact across restart',
+        signal: SIGNAL,
+      })
+      const betaAgent = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'log',
+        layer: 'agent',
+        botId: beta.id,
+        content: 'Beta private agent fact across restart',
+        signal: SIGNAL,
+      })
+      const userShared = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'profile',
+        layer: 'user',
+        botId: null,
+        content: 'Shared user fact across restart',
+        signal: SIGNAL,
+      })
+
+      expect(first.ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories)
+        .toEqual([alphaAgent.memory, userShared.memory])
+      expect(first.ctx.agentTeams.listMemories(lead, { botId: beta.id, signal: SIGNAL }).memories)
+        .toEqual([betaAgent.memory, userShared.memory])
+      await first.ctx.sessions.flush(lead.session)
+      await first.dispose()
+
+      const second = await stack(backend, storageRoot, [])
+      const resumed = await second.ctx.agents.resume({
+        resumeSessionId: leadId,
+        agentOptions: { provider: 'mock', model: 'mock' },
+      })
+      await vi.waitFor(() => {
+        const members = durable(resumed.agent).members
+        expect(members.some(row => row.id === alpha.id && row.phase === 'active')).toBe(true)
+        expect(members.some(row => row.id === beta.id && row.phase === 'active')).toBe(true)
+      }, { timeout: 5_000 })
+
+      const alphaAfter = second.ctx.agentTeams.listMemories(resumed.agent, {
+        botId: alpha.id,
+        signal: SIGNAL,
+      }).memories
+      const betaAfter = second.ctx.agentTeams.listMemories(resumed.agent, {
+        botId: beta.id,
+        signal: SIGNAL,
+      }).memories
+      expect(alphaAfter).toEqual([alphaAgent.memory, userShared.memory])
+      expect(betaAfter).toEqual([betaAgent.memory, userShared.memory])
+      expect(alphaAfter.some(row => row.memoryId === betaAgent.memory.memoryId)).toBe(false)
+      expect(betaAfter.some(row => row.memoryId === alphaAgent.memory.memoryId)).toBe(false)
+      expect(alphaAfter.some(row => row.memoryId === userShared.memory.memoryId)).toBe(true)
+      expect(betaAfter.some(row => row.memoryId === userShared.memory.memoryId)).toBe(true)
+      // Pass is Host catalog projection — not chat transcript substitution.
+      expect([...alphaAfter, ...betaAfter].every(row => row.memoryId.startsWith('memory-'))).toBe(true)
+
+      await resumed.dispose()
+      await second.dispose()
+    })
   })
 }
