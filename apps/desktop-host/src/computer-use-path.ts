@@ -249,11 +249,35 @@ export function installComputerUsePath(ctx: Context, options: ComputerUsePathOpt
       if (!isPassComputerUseProvider(options.getProviderName())) return
       const parent = carrierKeyOf(this) as { session?: { id?: string } } | undefined
       const parentBotId = typeof parent?.session?.id === 'string' ? parent.session.id : ''
+      // Pass providers may emit the observation tool during `provider.start`,
+      // before `subagent/start` — adopt any staged observation for this child.
+      let adopted: ComputerUseObservation | undefined
+      for (let i = runs.length - 1; i >= 0; i -= 1) {
+        const staged = runAt(i)
+        if (staged === undefined) continue
+        if (staged.childId !== info.id) continue
+        if (staged.observation === undefined) continue
+        if (staged.handoff !== undefined) continue
+        if (!staged.runId.startsWith('observation:')) continue
+        adopted = staged.observation
+        runs.splice(i, 1)
+        // Rebuild indexes after splice.
+        byChild.clear()
+        byRunId.clear()
+        for (let j = 0; j < runs.length; j += 1) {
+          const entry = runs[j]
+          if (entry === undefined) continue
+          byRunId.set(entry.runId, j)
+          if (entry.childId.length > 0) byChild.set(entry.childId, j)
+        }
+        break
+      }
       upsert({
         runId: info.runId,
         parentBotId,
         childId: info.id,
         capabilityClass: COMPUTER_USE_CAPABILITY,
+        ...adopted === undefined ? {} : { observation: adopted },
         interactiveBrowser: false,
       }, undefined)
     })
