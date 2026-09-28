@@ -56,7 +56,7 @@ class SandboxedShell extends ShellExecutor {
   resolve(request: ShellExecRequest): ShellExecSpec {
     return request as ShellExecSpec
   }
-  run(): Promise<ShellRunResult> {
+  run(_spec: ShellExecSpec): Promise<ShellRunResult> {
     this.runs += 1
     return Promise.resolve({
       exitCode: 0,
@@ -69,7 +69,7 @@ class SandboxedShell extends ShellExecutor {
       sandbox: { mode: 'workspace-write', denied: false },
     })
   }
-  start(): Promise<ShellProcess> {
+  start(_spec: ShellExecSpec): Promise<ShellProcess> {
     return Promise.reject(new Error('unused'))
   }
 }
