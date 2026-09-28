@@ -1,8 +1,8 @@
 Verdict: Pass
-Stamp: 2026-09-28 · tip 67b58cfdc4 · dump-inspection (Host vitest exportable artifacts)
+Stamp: 2026-09-28 · tip PLACEHOLDER · dump-inspection (Host vitest exportable artifacts)
 Linear: MOH-328 · Epic MOH-281
 SC-004: Pass — evidence: evidence/scenario-4/{p6-t030-secrets-absent-vitest.log,dump-inspection.txt}
 FR-007: Pass — fixture-token-not-for-dumps absent from describeConnectorCredential + agentTeams/view JSON
 FR-008: Pass — in-app Host credential seam; chat-paste not primary
 FR-014/015: N/A for dump-only Pass (auth GUI covered by Scenario 1 evidence when shown)
-Blockers: none — T029 may deepen raw session-log export paths; current Host dump surfaces Pass SC-004
+Blockers: none — T029 landed on master (#219); Host dump surfaces Pass SC-004
