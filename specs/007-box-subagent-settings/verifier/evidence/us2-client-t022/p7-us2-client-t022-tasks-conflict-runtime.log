@@ -1,0 +1,23 @@
+  base   100644 7698cfcd19205e38fb9baa8a85774293313fc39e specs/007-box-subagent-settings/tasks.md
+  our    100644 a594464ea5c04eb804d1d3f8993f26495064a718 specs/007-box-subagent-settings/tasks.md
+  their  100644 c573dabe3200ce791484898945ff8b51adf12155 specs/007-box-subagent-settings/tasks.md
+@@ -118,9 +118,15 @@
+
+ ### Implementation for User Story 2
+
++<<<<<<< .our
+ - [ ] T020 [US2] Host computerUse Pass provider: register Cua Driver MCP/native **or** Host Pass fixture on `ctx.computerUse` such that one observation path can emit a durable user-visible screenshot (or equivalent GUI artifact) — `packages/computer-use/computer-use/` + chosen provider under `packages/experimental/computer-use-cua-driver-{mcp,native}/` **or** Host fixture home from T009 — must `register()` (PO + Architect; FR-003) — **Owner: DH Runtime**
+ - [ ] T021 [US2] Host computerUse-class subagent path: parent bot delegates via `dsh-subagent` + `dsh-subagent-spawn-in-process` (+ `dsh-tool-subagent`) producing `ComputerUseRun` with `observation` (≥1 screenshot/equiv.) + `handoff` parent-visible; `interactiveBrowser` not required true — `packages/subagent/**` + `apps/desktop-host/` (FR-003/015) — **Owner: DH Runtime**
+ - [x] T022 [P] [US2] Client projects user-visible screenshot/GUI observation artifact + parent handoff/result indicator via Host HTTP/WS under `packages/experimental/client-ui-agent-team/src/client/` (or inventory-named conversation/subagent UI); locale-owned copy; no Main IPC SoT — **Owner: DH Client / Web**
++=======
++- [x] T020 [US2] Host computerUse Pass provider: register Cua Driver MCP/native **or** Host Pass fixture on `ctx.computerUse` such that one observation path can emit a durable user-visible screenshot (or equivalent GUI artifact) — `packages/computer-use/computer-use/` + chosen provider under `packages/experimental/computer-use-cua-driver-{mcp,native}/` **or** Host fixture home from T009 — must `register()` (PO + Architect; FR-003) — **Owner: DH Runtime**
++- [x] T021 [US2] Host computerUse-class subagent path: parent bot delegates via `dsh-subagent` + `dsh-subagent-spawn-in-process` (+ `dsh-tool-subagent`) producing `ComputerUseRun` with `observation` (≥1 screenshot/equiv.) + `handoff` parent-visible; `interactiveBrowser` not required true — `packages/subagent/**` + `apps/desktop-host/` (FR-003/015) — **Owner: DH Runtime**
++- [ ] T022 [P] [US2] Client projects user-visible screenshot/GUI observation artifact + parent handoff/result indicator via Host HTTP/WS under `packages/experimental/client-ui-agent-team/src/client/` (or inventory-named conversation/subagent UI); locale-owned copy; no Main IPC SoT — **Owner: DH Client / Web**
++>>>>>>> .their
+ - [ ] T023 [US2] Add Verifier Scenario 2 recipe in `specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md` covering SC-002 (screenshot-only minimum + parent handoff; interactive browser not required) with FR-013/014 evidence under `specs/007-box-subagent-settings/verifier/evidence/computer-use/` — **Owner: DH Verifier**
+
+ **Checkpoint**: US2 computerUse-class path independently testable on Desktop.
+merged
+  result 100644 ab61bb1cd1a9572e80fc5bcdbf3379740df55021 specs/007-box-subagent-settings/verifier/computer-use-pass-provider.md
+  our    100644 1efffb1a51d3f1b9cc39c756e138f7baf808c567 specs/007-box-subagent-settings/verifier/computer-use-pass-provider.md
+@@ -3,7 +3,7 @@

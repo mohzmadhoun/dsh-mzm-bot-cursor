@@ -1,0 +1,4 @@
+$ tsx scripts/verify-client-ui-i18n.ts
+verify-client-ui-i18n: 1 hard-coded UI string(s):
+  packages/client/ui-tool/src/client/tool/toolviews/computer-use-observation-row.tsx:92:13 JSX text: "bytes)"
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,23 @@
+  base   100644 7698cfcd19205e38fb9baa8a85774293313fc39e specs/007-box-subagent-settings/tasks.md
+  our    100644 a594464ea5c04eb804d1d3f8993f26495064a718 specs/007-box-subagent-settings/tasks.md
+  their  100644 428c66774ab9fb5179e1b0a735abbe149e799222 specs/007-box-subagent-settings/tasks.md
+@@ -120,8 +120,13 @@
+
+ - [ ] T020 [US2] Host computerUse Pass provider: register Cua Driver MCP/native **or** Host Pass fixture on `ctx.computerUse` such that one observation path can emit a durable user-visible screenshot (or equivalent GUI artifact) — `packages/computer-use/computer-use/` + chosen provider under `packages/experimental/computer-use-cua-driver-{mcp,native}/` **or** Host fixture home from T009 — must `register()` (PO + Architect; FR-003) — **Owner: DH Runtime**
+ - [ ] T021 [US2] Host computerUse-class subagent path: parent bot delegates via `dsh-subagent` + `dsh-subagent-spawn-in-process` (+ `dsh-tool-subagent`) producing `ComputerUseRun` with `observation` (≥1 screenshot/equiv.) + `handoff` parent-visible; `interactiveBrowser` not required true — `packages/subagent/**` + `apps/desktop-host/` (FR-003/015) — **Owner: DH Runtime**
++<<<<<<< .our
+ - [x] T022 [P] [US2] Client projects user-visible screenshot/GUI observation artifact + parent handoff/result indicator via Host HTTP/WS under `packages/experimental/client-ui-agent-team/src/client/` (or inventory-named conversation/subagent UI); locale-owned copy; no Main IPC SoT — **Owner: DH Client / Web**
+ - [ ] T023 [US2] Add Verifier Scenario 2 recipe in `specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md` covering SC-002 (screenshot-only minimum + parent handoff; interactive browser not required) with FR-013/014 evidence under `specs/007-box-subagent-settings/verifier/evidence/computer-use/` — **Owner: DH Verifier**
++=======
++- [ ] T022 [P] [US2] Client projects user-visible screenshot/GUI observation artifact + parent handoff/result indicator via Host HTTP/WS under `packages/experimental/client-ui-agent-team/src/client/` (or inventory-named conversation/subagent UI); locale-owned copy; no Main IPC SoT — **Owner: DH Client / Web**
++- [x] T023 [US2] Add Verifier Scenario 2 recipe in `specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md` covering SC-002 (screenshot-only minimum + parent handoff; interactive browser not required) with FR-013/014 evidence under `specs/007-box-subagent-settings/verifier/evidence/computer-use/` — **Owner: DH Verifier**
++>>>>>>> .their
+
+ **Checkpoint**: US2 computerUse-class path independently testable on Desktop.
+
+merged
+  result 100644 c44b6e20b6c66cb12973c78b580190b695e4a67a specs/007-box-subagent-settings/verifier/README.md
+  our    100644 4312d1f1ba2e7f5c9cb6361d54a314f6aa949c7b specs/007-box-subagent-settings/verifier/README.md
+@@ -101,7 +101,7 @@
+ | Scenario | Quickstart | Recipe path (when landed) | Evidence | Primary owners | Acceptance | FR-013/014 |
+ |----------|------------|---------------------------|----------|----------------|------------|------------|

@@ -1,0 +1,38 @@
+# P7 US2 T022 Client computerUse projection — Verifier stamp
+
+**Verdict:** FAIL-with-rebase
+**PR:** https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/254
+**Tip:** d5fabcc287c1dbd1205aae2a603ab6c502e6272d (`cursor/p7-us2-client-dc28`)
+**Linear:** MOH-378 (In Progress — Verifier did not Pass; do not mark Done)
+**Date:** 2026-09-28
+**SC-002:** NOT claimed (Client projection alone ≠ Scenario 2 / SC-002 Pass)
+
+## Gate
+
+FAIL-with-rebase: `specs/007-box-subagent-settings/tasks.md` is **CONFLICTING** when this Client tip is merged after either open US2 sibling onto master:
+
+- after `cursor/p7-us2-runtime-dc28` (#251) — content conflict on T020/T021/T022 checkboxes
+- after `cursor/p7-us2-verifier-dc28` (#252) — content conflict on T022/T023 checkboxes
+
+vs `origin/master` alone the PR is currently MERGEABLE (not the fail trigger).
+
+Do **not** merge until Client rebases and preserves all sibling `[x]` rows (T020–T023 as landed).
+
+Measured: `git merge-tree` emits `<<<<<<<` conflict markers on `tasks.md` for Client∩Runtime and Client∩Verifier — see `p7-us2-client-t022-tasks-conflict-*.log`.
+
+## Acceptance criteria (product surface @ tip — measured separately; not a Pass stamp)
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| Locale-owned copy | FAIL (measured) | `computerUse.*` keys exist zh+en in ui-conversation locales and rows call `t(...)`, but `verify-client-ui-i18n` rejects hard-coded JSX text `bytes)` at `computer-use-observation-row.tsx:92` — see `p7-us2-client-t022-i18n.log` |
+| Host HTTP/WS only | PASS (measured) | Models derive from Host-session Tool blocks / attachment refs over HTTP/WS; apply registers Client toolviews only; comments exclude Main SoT |
+| No Main SoT | PASS (measured) | Diff has zero Electron Main / ipc / host-protocol files; no `ipcMain`/`ipcRenderer`/`contextBridge` in product files |
+| No Host mounts / Settings Computer | PASS (measured) | Diff touches only Client packages + tasks.md checkbox; no `apps/desktop-host/` / Settings Computer section |
+| Focused vitest | PASS (measured) | 3 files / 16 tests green — see `p7-us2-client-t022-vitest.log` |
+
+## Blockers for DH Lead / Client
+
+1. Rebase `cursor/p7-us2-client-dc28` after Runtime (#251) and/or Verifier (#252) land (or rebase onto the surviving sibling stack) so `tasks.md` auto-merges with T020/T021/T022/T023 checkboxes all correct.
+2. Fix locale ownership: route the `bytes)` dimension caption through the conversation dictionary (or an already-localized formatter) so `verify-client-ui-i18n` is clean.
+3. Re-request Verifier after rebase tip is published; do not treat Linear Done as Verifier Pass.
+4. Product SC-002 Desktop Pass still waits on Host T020/T021 + Verifier Scenario 2 (T023) + FR-013/014 evidence under `verifier/evidence/computer-use/` — Client T022 alone is projection, not SC Pass.
