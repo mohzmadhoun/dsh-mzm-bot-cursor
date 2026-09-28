@@ -1,0 +1,5 @@
+T033 / FR-009 — no product rewrite of specs/001–006 on SC-006 evidence tip
+UTC: 2026-09-28T20:02:41Z
+SHA: 952e55c05fbeaf33be5237defdfb0cb32d472779
+git diff --name-only origin/master...HEAD -- specs/001-006:
+(empty = Pass)

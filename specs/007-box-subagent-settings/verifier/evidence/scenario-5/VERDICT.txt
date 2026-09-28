@@ -1,8 +1,46 @@
-# SC-006 composite VERDICT — placeholder
-
-Verdict: Not claimed
-Stamp: 2026-09-28 · recipe-only (T030) — no composite Desktop evidence run on this tip
+Verdict: Pass
+Stamp: 2026-09-28 · tip 9af3a0ff06c2c1ecb9da4bd6b5fd82adbdc8baa0 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
+Checkout under test (master base): 952e55c05fbeaf33be5237defdfb0cb32d472779
 Linear: MOH-386 · Epic MOH-350 · P-MOH-2
-SC-006: Not claimed — fill this file only after ordered Desktop composite replay (Scenarios 1–4 + T015 + T032 bus) per scenario-5-full-replay.md
-Blockers: Composite Desktop evidence run required before product Pass
-Scope lock: T030 delivers the recipe + this placeholder only
+Branch: cursor/p7-polish-sc006-evidence-15d6 (PO opens PR + independent Verifier re-gate; author ≠ gate)
+Method: time-boxed composite per scenario-5-full-replay.md (cite US1–US3 Pass + fresh Desktop smoke + T032 + SC-005)
+
+## Gate rows
+- Foundational Pass (T015): Pass — measured: specs/007-box-subagent-settings/verifier/README.md Foundational Pass checklist — recorded (Pass @ 47cd9dd45f; still holds on master tip 952e55c05fbe)
+- T032 bus: Pass — measured: evidence/scenario-5/vitest-electron-bus.log (Test Files 1 passed; Tests 3 passed) + host-protocol.ts / ipc.ts exclusion comments only (no shell-exec/box-ready/computer-use-control/computer-screenshot/computer-settings-mutate channels)
+
+## Per-scenario rows (product)
+- Scenario 1 / SC-001: Pass — measured cite evidence/shell-box/VERDICT.txt + 01-shell-box-ready.png · 02-shell-box-success.png · scenario-1-shell-box-walkthrough.mp4 (master)
+- Scenario 2 / SC-002: Pass — measured cite evidence/computer-use/VERDICT.txt + 01-computer-use-observation.png · 02-computer-use-parent-handoff.png · scenario-2-computer-use-walkthrough.mp4 (master)
+- Scenario 3 / SC-003 · SC-004: Pass — measured cite evidence/settings/VERDICT.txt + 01-settings-computer-section.png · 02-settings-shell-readiness.png · scenario-3-settings-walkthrough.mp4 (master); SC-004: chrome alone ≠ SC-001/SC-002
+- Scenario 4 / SC-005: Pass — measured evidence/non-goals/VERDICT.txt + measured-checks.txt; Out of Scope not required for Pass
+
+## Fresh Desktop smoke (this tip — SO 11+12)
+- Launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop (CDP :9222)
+- measured: Settings → Computer live with data-settings-computer-row=shell data-box-readiness=ready · data-box-local=true · data-settings-computer-row=computer-use data-computer-use-enabled=true
+- measured: New Session / Into the Unknown composer live (Shell/box surface reachable)
+- Artifacts (committed under evidence/scenario-5/ AND /opt/cursor/artifacts/):
+  - 00-desktop-smoke-sc006.png (Settings → Computer Shell Ready + Computer use On)
+  - 00-desktop-smoke-sc006-home.png
+  - 00-desktop-smoke-sc006-session.png
+  - 00-desktop-smoke-sc006-settings-computer.png
+  - scenario-5-sc006-desktop-smoke.mp4
+  - smoke-panel-state.json · replay-pointer.log · vitest-electron-bus.log · non-goals-spotcheck.log
+
+## Path A locks
+- Host SoT; Electron Main lifecycle-only (T032 green)
+- Shell Pass ≠ not_ready/starting (smoke readiness=ready; SC-001 success cited from shell-box/)
+- computerUse Pass = screenshot-only + handoff (cited SC-002; interactive browser not required)
+- Settings chrome ≠ SC-001/SC-002 (SC-004)
+
+## FR claim tags
+- FR-012 ordered path: measured (this composite)
+- FR-013 Desktop visual: measured (cited US1–US3 media + fresh smoke)
+- FR-014 committed + artifact mirrors: measured
+- FR-015 LLM wording: not scored
+
+## Explicit non-claims
+- Not claimed via Electron Main bus / Client-only SoT / interactive-browser required / PTC-as-Shell / chrome alone = Done
+
+Blockers: none for product SC-006 after time-boxed composite
+Scope lock: leave Linear Done to PO after independent Pass + merge; author ≠ independent gate

@@ -9,10 +9,10 @@
 
 | Artifact | Content | Status |
 |----------|---------|--------|
-| `measured-checks.txt` | Command output / notes for absence spot-checks in [non-goals.md](../../non-goals.md) | Placeholder (T028/T029) |
-| `p7-t032-electron-bus.log` | `no-electron-box-shell-computer-bus.spec.ts` rerun (T032) | Placeholder (T032 owns) |
-| `p7-t033-no-rewrite-001-006.log` | Diff/name check — no product edits under `specs/001`–`006` (T033) | Placeholder (T033) |
-| `VERDICT.txt` | Filled stamp when SC-005 / non-goals Pass is claimed | Placeholder |
+| `measured-checks.txt` | Command output / notes for absence spot-checks in [non-goals.md](../../non-goals.md) | **Filled** (SC-006 composite) |
+| `p7-t032-electron-bus.log` | `no-electron-box-shell-computer-bus.spec.ts` rerun (T032) | **Filled** (3/3 Pass) |
+| `p7-t033-no-rewrite-001-006.log` | Diff/name check — no product edits under `specs/001`–`006` (T033) | **Filled** (empty) |
+| `VERDICT.txt` | Filled stamp when SC-005 / non-goals Pass is claimed | **Pass** |
 
 FR-013/014 desktop screenshot is **optional** for this docs/absence scenario. Do **not** Fail Pass solely because user machines, voice/draft-first/group/learn-from-demo/billing/skill pack/pixel Grok, Verifier-as-feature, interactive-browser Pass gate, PTC-as-Shell, full catalog, Electron box/Shell/computerUse bus, or rewrite of `specs/001`–`006` are absent.
 
