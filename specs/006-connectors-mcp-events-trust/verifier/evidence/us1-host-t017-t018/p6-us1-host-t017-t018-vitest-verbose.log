@@ -1,0 +1,16 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ✓ |thread-safe| packages/experimental/agent-team/tests/connector-catalog.spec.ts > P6 T007-T012 Host connector + event routine foundation > T007/T009/T012: listConnectorCatalog + installConnector persist Host journal rows 114ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/connector-catalog.spec.ts > P6 T007-T012 Host connector + event routine foundation > T010/T011: authenticateConnector stores secret in credentials and binds MCP fixture tools 60ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/connector-catalog.spec.ts > P6 T007-T012 Host connector + event routine foundation > T008/T012: createRoutine event path is additive; cron still due; event not cron-due 63ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/connector-catalog.spec.ts > P6 US1 T017-T018 Host connector install auth tool success > T017: install settles installed; broken fixture settles failed; available≠installed 61ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/connector-catalog.spec.ts > P6 US1 T017-T018 Host connector install auth tool success > T018: auth→ready via credentials; MCP bind; invokeConnectorTool outcome=success 65ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  11:26:31
+   Duration  2.15s (transform 1.34s, setup 211ms, import 1.47s, tests 365ms, environment 0ms)

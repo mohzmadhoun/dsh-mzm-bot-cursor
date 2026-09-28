@@ -1,0 +1,59 @@
+T017–T018 Host connector install / auth / tool success — DH Verifier
+=====================================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p6-us1-host-connector-fe1d @ 3e7f334b6f (#210 opening)
+Evidence branch: cursor/p6-us1-host-t017-t018-verify-7dc1
+Linear: MOH-281 epic · MOH-315 (T017) · MOH-316 (T018) — leave In Progress (PO closes after evidence merge)
+GUI SO 11+12: NOT REQUIRED on this Host-only gate (Client T019–T020 separate)
+
+Acceptance (T017–T018 / Host product — not SC-001 / Scenario 1 desktop)
+-----------------------------------------------------------------------
+[x] T017 installConnector from thin catalog → durable ConnectorRecord
+    installState=installed (Pass fixture).
+[x] T017 broken fixture → installState=failed with clear error
+    (PASS_BROKEN_INSTALL_ERROR); failed ≠ Pass.
+[x] T017 available≠installed: listConnectorCatalog ≠ empty listConnectors
+    until install mutation.
+[x] T018 authenticateConnector → authState=ready via Host credentials
+    (storeConnectorSecret); secret absent from remoteView / describe.
+[x] T018 MCP bind after ready (mcp__verifier_fixture__ping on ctx.tools).
+[x] T018 invokeConnectorTool (+ Remote) returns outcome=success structured
+    ConnectorToolCall; no llmReply / FR-016 LLM wording not scored.
+[x] Architect Path A: Host journal SoT + dsh-mcp-client bind + credential
+    seam + @Remote HTTP/WS; zero apps/desktop Main bus delta in tip.
+[x] Focused vitest green (connector-catalog.spec.ts).
+
+Evidence (measured)
+-------------------
+Commands @ 3e7f334b6f91639990d7b41171c508080f4249f1:
+  pnpm exec vitest run packages/experimental/agent-team/tests/connector-catalog.spec.ts
+  → 5 passed (1 file)
+  pnpm exec vitest run … --reporter=verbose
+  → T017 + T018 cases both pass (plus foundation T007–T012 regressions)
+
+Logs: p6-us1-host-t017-t018-vitest.log · p6-us1-host-t017-t018-vitest-verbose.log
+(also under /opt/cursor/artifacts/)
+
+Diff scope (product tip #210 @ 3e7f334b6f):
+  packages/experimental/agent-team/{src,tests,README*}
+  client-ui-agent-team test fixtures only (TeamView.connectors / triggerKind)
+  specs/006…/tasks.md checkbox T017–T018
+  Zero apps/desktop / Electron Main paths.
+
+Claims
+------
+- Durable installed|failed settle + available≠installed: **measured**
+- Auth→ready via credentials; secret off projection: **measured**
+- invokeConnectorTool outcome=success (local + Remote): **measured**
+- Path A Host SoT / mcp-client / credentials / Remotes / no Main bus: **measured**
+- Focused vitest green: **measured**
+- Desktop Scenario 1 / SC-001 / FR-014/015 SO 11+12: **not run** (Host-only scope; Client T019–T020 separate)
+
+Scope lock
+----------
+Does NOT stamp SC-001 / SC-007 product Done or Scenario 1 desktop Pass.
+Does NOT gate Client connector UI (T019–T020) or recipe product stamp (T021 recipe already on master).
+Does NOT merge #210.
+Next: Client US1 T019–T020 → Scenario 1 desktop FR-014/015 SO 11+12 under evidence/scenario-1/.
+Leave MOH-315 / MOH-316 In Progress until PO merges evidence + product.
