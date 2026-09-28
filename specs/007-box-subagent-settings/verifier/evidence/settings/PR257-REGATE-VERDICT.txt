@@ -1,0 +1,51 @@
+PR #257 re-gate @ 619e75b0cd — VERDICT: FAIL
+Date: 2026-09-28
+Role: DH Verifier
+Scope: Client US3 T024–T025 after rebase onto #256 (master @ 2d2e8a275e)
+SC-003 desktop: NOT claimed
+
+CHECKLIST
+---------
+MERGEABLE: PASS (measured) — gh mergeable=MERGEABLE; mergeStateStatus=UNSTABLE (CI noise / queued)
+Tip OID: PASS (measured) — headRefOid == 619e75b0cd8823c9967cb98bc1bd98d27fe0280d
+Rebase onto #256: PASS (measured) — origin/master (== #256 squash 2d2e8a275e) is ancestor of tip
+
+T024 [x]: PASS (measured) — checkbox + packages/client/ui-settings-computer + web-app bundle row
+T025 [x]: PASS (measured) — Shell + Computer use rows; Remotes via settingsScope
+T026 [x]: PASS (measured) — inherited from master/#256; computer-settings-projection.md present; Host tests green
+T027 [x]: FAIL (measured) — checkbox [x] but scenario-3 recipe ABSENT on tip
+  - no specs/007-box-subagent-settings/verifier/scenario-3-settings.md
+  - no scenario-3-settings-computer.md on tip
+  - sibling PR #258 open + CONFLICTING @ 53429fab23
+
+tasks.md integrity: FAIL (measured) — tip truncates file 269→141 lines; deletes Phase 6 Polish
+  (T028–T035), Dependencies, Implementation Strategy, Traceability after marking T024–T027
+
+Path A Computer settings: PASS (measured)
+  - Client: settingsScope.bind(namespace=computer) → Remotes; inject=['slots','locale','settingsScope']
+  - Bundle: dsh.client row ui-settings-computer in packages/bundle/web-app/
+  - Host SoT: apps/desktop-host computer settings; no Main SoT in Client package
+
+i18n: PASS (measured)
+  - locales.ts en/zh; nav=Computer / Shell / Computer use
+  - pnpm run verify-client-ui-i18n → EXIT 0 (711 files)
+
+Shell read-only: PASS (measured)
+  - Client: shell row has no switch (components.client.spec asserts null)
+  - Host: readiness mutate rejects /read-only over Remotes/ (computer-settings-projection.spec)
+  - Only computerUseEnabled is Client-writable
+
+Automated proof (measured):
+  - ui-settings-computer vitest: 15/15 PASS
+  - Host projection + box-readiness: 9/9 PASS
+  - Log: /opt/cursor/artifacts/pr257-regate-vitest.log
+
+SC-003 desktop: NOT claimed
+  - evidence/settings/ has .gitkeep only; no screenshots/recording/VERDICT product Pass
+
+OVERALL: FAIL
+Blockers for DH Lead / DH Client:
+  1. Restore truncated tasks.md Phase 6+ (T028–T035 and trailing sections) from master; only flip T024–T025 (and keep T026 from #256). Do NOT mark T027 [x] until recipe lands (#258).
+  2. T027 recipe remains on CONFLICTING #258 — not on this tip.
+  3. Do not merge #257 until tasks.md restored.
+  4. CI mergeStateStatus=UNSTABLE — many instant FAILURE jobs (likely fork auth); real node24 static/coverage still queued at gate time; not used as sole FAIL reason.
