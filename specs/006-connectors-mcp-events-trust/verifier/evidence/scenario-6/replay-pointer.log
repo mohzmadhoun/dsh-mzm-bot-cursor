@@ -1,0 +1,12 @@
+FOUNDATIONAL_GATE: Pass — README foundational Pass (T016) + vitest-electron-bus.log (3 passed) + vitest-foundations.log (11 passed)
+T037_BUS: Pass — apps/desktop/tests/no-electron-connectors-events-trust-bus.spec.ts
+SCENARIO_1: Pass — evidence/scenario-1/VERDICT.txt (+ VERDICT-T031.txt US5/SC-007)
+SCENARIO_2: Pass — evidence/scenario-2/VERDICT.txt
+SCENARIO_3: Pass — evidence/scenario-3/VERDICT.txt
+SCENARIO_4: Pass — evidence/scenario-4/VERDICT.txt
+SCENARIO_5_NON_GOALS: Pass — verifier/non-goals.md + evidence/non-goals/ + non-goals-spotcheck.log
+DESKTOP_SMOKE: Pass — 00-desktop-smoke-sc006.png · 01-connectors-events-sc006.png · panel-state-sc006.json
+UTC: 2026-09-28T14:39:09Z
+SHA: 48341cda044e7223eb5737286a2c70c363543ae7
+BRANCH: cursor/p6-sc006-full-replay-fe1d
+MODE: time-boxed composite (cite Scenario 1–5 Pass on master + fresh Desktop smoke + T037 bus + non-goals spotcheck)

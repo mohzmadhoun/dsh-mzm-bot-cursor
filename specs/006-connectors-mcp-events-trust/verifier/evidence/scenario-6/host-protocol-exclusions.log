@@ -1,0 +1,6 @@
+23: * event-routine-create / event-routine-fire / webhook-delivery,
+24: * permission-deny / trust-rule, and credential-value / credential-set / secret-payload
+26: * event-routine wake, trust deny path, and credential store (research R6 / R9 / T013;
+41: * memory-list, memory-browse, memory-recall, memory-injection, connector-catalog,
+42: * connector-install, connector-auth, mcp-tool-call, event-routine-create,
+43: * event-routine-fire, webhook-delivery, permission-deny, trust-rule, credential-value,
