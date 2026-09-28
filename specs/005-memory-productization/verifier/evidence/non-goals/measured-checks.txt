@@ -1,0 +1,17 @@
+T031/T032/T034/T036/T037 polish docs — measured notes
+=======================================================
+Stamp: 2026-09-28 · branch cursor/p5-polish-docs-fe1d
+Recipe: specs/005-memory-productization/verifier/non-goals.md
+
+T031: non-goals.md recipe created (SC-006 / SC-008…010)
+T032: evidence placeholders under scenario-2/3/4/5/non-goals (+ scenario-1 pre-existing)
+T034: quickstart + verifier README Scenario→recipe map re-validated
+T036: no product edits under specs/001–004 in this PR (see p5-t036-no-rewrite-001-004.log)
+T037: Pass-path language spot-check clean (see p5-t037-pass-path-language.log)
+
+Deferred to Verifier:
+  T033 scenario-5-full-replay.md body + SC-007 stamp
+  T035 no-electron-memory-bus.spec.ts recheck after story work
+  Full SC-006 VERDICT.txt after T035 bus log lands
+
+GUI screenshot: not required (docs/absence)

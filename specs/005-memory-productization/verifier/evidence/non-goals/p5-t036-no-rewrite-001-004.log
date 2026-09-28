@@ -1,0 +1,13 @@
+=== T036 no-rewrite-001-004 ===
+Working-tree product edits under specs/001–004:
+(empty = Pass)
+
+=== T037 Pass-path language ===
+forbidden-affirmation exit=0 (0 = Pass)
+specs/005-memory-productization/verifier/README.md:7:**PO / Architect lock:** Host Memory catalog SoT (research R1; prefer Agent Teams / Host journal) — see [research.md](../research.md) / [plan.md](../plan.md)
+specs/005-memory-productization/verifier/README.md:43:| 7 | **Transcript ≠ memory** | T012 | P5 Pass path is Host catalog write/list/recall + Host inject — not transcript dump; Client-only persistence is not SoT | **measured:** [transcript-not-memory.md](./transcript-not-memory.md); merge [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176) | Pass |
+specs/005-memory-productization/verifier/README.md:96:**Seam honesty (T037):** Memory Pass is Host Memory catalog write/list/recall + Host inject — **not** “transcript dump,” **not** “Electron Main store,” **not** “Client-only SoT.” See [transcript-not-memory.md](./transcript-not-memory.md) · [non-goals.md](./non-goals.md).
+specs/005-memory-productization/verifier/README.md:139:rg -n 'Host Memory catalog SoT|Seam honesty \(T037\)' \
+apps/desktop-host/src/index.ts:81:  // P5 Memory Pass: Host Memory catalog SoT on Agent Teams Lead journal `team/memory` (T006–T008) —
+apps/desktop-host/src/index.ts:82:  // not transcript dump, not Electron Main store, not Client-only SoT (research R1/R6/R7; T037).
+Stamp: 2026-09-28 · branch cursor/p5-polish-docs-fe1d

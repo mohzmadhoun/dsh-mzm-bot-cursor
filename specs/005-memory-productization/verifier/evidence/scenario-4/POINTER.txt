@@ -1,0 +1,3 @@
+Canonical SC-006 evidence lives under ../non-goals/
+See ../non-goals/README.md (and VERDICT.txt when stamped)
+Do not put write/recall/layer media in this directory.
