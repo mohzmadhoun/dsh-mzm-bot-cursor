@@ -7,13 +7,13 @@
 **Architect Path A:** Host Connector catalog SoT + `dsh-mcp-client`; B1 webhook→Routine wake; additive `triggerKind`/`eventTrigger`; deny = user-deny or standing never; in-app primary / vault optional; no Electron Main bus — see [research.md](../research.md) / [plan.md](../plan.md) / [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md)
 **Setup inventories:** [host-connector-inventory.md](./host-connector-inventory.md) (T002) · [event-harness-inventory.md](./event-harness-inventory.md) (T003) · [credentials-trust-inventory.md](./credentials-trust-inventory.md) (T004) · [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md) (T005) · [credential-ux-in-app.md](./credential-ux-in-app.md) (T031)
 **Evidence:** [evidence/](./evidence/) — Scenario 1 under [evidence/scenario-1/](./evidence/scenario-1/) (T021 · US5 T032); Scenario 2 under [evidence/scenario-2/](./evidence/scenario-2/) (T025); Scenario 3 under [evidence/scenario-3/](./evidence/scenario-3/) (T028); Scenario 4 dump under [evidence/scenario-4/](./evidence/scenario-4/) (T030); Scenario 5 non-goals under [evidence/non-goals/](./evidence/non-goals/) (T033/T034); Scenario 6 full replay under [evidence/scenario-6/](./evidence/scenario-6/) (T034/T035); US5 credential-UX deep checks in [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) (auth-surface evidence reuses `evidence/scenario-1/`)
-**Linear:** **Blocked** — workspace free-issue limit; **no invented epic/issue ids**; **no `taskstoissues` in this PR**. Track T001–T040 via PR only until capacity returns (project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot).
+**Linear:** **Live** under epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) — capacity restored; T001–T040 track as children of MOH-281. **Do not invent issue ids** beyond the epic. Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
 ## T001 — Design tree confirm (Setup)
 
 **Verdict:** **Pass** (design artifacts only)
 **Stamp:** 2026-09-28 · tip `origin/master` @ `ff149f38d1` (analyze #203 landed)
-**Linear:** Blocked — PR-only tracking
+**Linear:** Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) (live; no invented child ids in this README)
 
 | Artifact | Path | Present |
 |----------|------|---------|
@@ -38,7 +38,7 @@
 
 **Verdict:** **Pass** (foundations only)
 **Stamp:** 2026-09-28 · branch `cursor/p6-foundation-host-fe1d` (T007–T012 Host + T015 B1 doc; T013–T014 Electron on master via #206)
-**Linear:** Blocked — PR-only tracking (project `P-MOH-2`)
+**Linear:** Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) (live; project `P-MOH-2`)
 
 | # | Gate | Tasks | Bar | Evidence | Result |
 |---|------|-------|-----|----------|--------|
@@ -115,7 +115,9 @@ Foundational Pass (T016) must hold before Scenario evidence counts toward phase 
 6. Credentials: in-app primary via Host credential seam; vault optional; secrets absent from session dumps (R5).
 7. No Electron Main connector/event/trust/credential-value bus — lifecycle IPC only; data plane = authenticated Host HTTP/WS (R6 / R9).
 8. FR-014/015 desktop visual evidence required for all GUI scenarios; commit under `verifier/evidence/` + PR embeds (SO 11+12).
-9. Linear / `taskstoissues` blocked — no invented issue ids; PR-only tracking until capacity.
+9. Linear live under epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) — do not invent issue ids (T040).
+10. No product rewrite of `specs/001`–`005` in P6 implement PRs (T038).
+11. P6 Pass is **not** Electron Main store, Client-only SoT, live Slack/GitHub required, fixed named connector, or mandatory vault (T039).
 
 ## Fan-out policy
 
@@ -124,6 +126,69 @@ Foundational Pass (T016) must hold before Scenario evidence counts toward phase 
 - Scenario 6 requires Scenarios 1–5 (or equivalent) plus foundational Pass.
 - Quickstart non-goals MUST NOT appear in Pass criteria ([quickstart.md](../quickstart.md) Scenario 5 · [non-goals.md](./non-goals.md)).
 - Do **not** rewrite `specs/001`–`005` in P6 implement PRs (T038).
+
+## T038 — No rewrite of `specs/001`–`005`
+
+**Rule:** Phase 6 implement / Verifier PRs for `specs/006-connectors-mcp-events-trust` MUST NOT product-edit:
+
+- `specs/001-multi-model-bots/**`
+- `specs/002-identity-personas/**`
+- `specs/003-skills-ux/**`
+- `specs/004-routines-cron/**`
+- `specs/005-memory-productization/**`
+
+Prior-phase trees stay frozen unless a separate, explicitly scoped phase PR owns the change. Spec Kit feature work for Connectors / MCP + event routines + trust lives only under `specs/006-connectors-mcp-events-trust/`.
+
+**Spot-check (per implement PR tip vs merge-base):**
+
+```sh
+git diff --name-only origin/master...HEAD -- \
+  specs/001-multi-model-bots specs/002-identity-personas \
+  specs/003-skills-ux specs/004-routines-cron specs/005-memory-productization
+# Expect empty output for P6 Connectors implement PRs.
+```
+
+**Historical scan (merged Phase 6 subjects on `origin/master`):** for each `git log --format=%H --grep='Phase 6' origin/master` commit, `git diff-tree --name-only` against the five prior-spec roots — **empty** on tip used for this polish stamp (no product edits to `specs/001`–`005` in Phase 6 implement history).
+
+**Claim:** Documented here (T038). Spot-check empty on this polish branch tip.
+
+## T039 — Pass-path language (no forbidden SoT / Pass wording)
+
+**Rule:** Product and Verifier docs MUST NOT document P6 Pass as any of:
+
+1. “Electron Main store” / Main bus as durable Connector / event / trust / credential SoT
+2. “Client-only SoT” / Client-local persistence alone as durable Connector catalog or secret store
+3. “live Slack/GitHub required” / live-family Pass as the only event or connector bar
+4. “fixed named connector” / one marketing connector name as the Pass fixture
+5. “mandatory vault” / 1Password-class vault required when in-app Host credential auth completes the fixture
+
+Affirmative Pass path: **Host Connector catalog** SoT + `dsh-mcp-client` bind; Pass connector = any one thin-catalog / Verifier fixture; event Pass = webhook harness / Verifier fixture (B1 wake); credentials in-app primary via Host credential seam (vault optional); deny via user-deny or standing never; data plane = authenticated Host HTTP/WS (no Electron Main bus).
+
+**Spot-check:**
+
+```sh
+# Fail if product/Verifier paths affirm P6 Pass *as* those forbidden bars
+! rg -n -i 'documents P6 Pass as|Pass as ("?Electron Main store"?|"?Client-only SoT"?|"?live Slack/GitHub required"?|"?fixed named connector"?|"?mandatory vault"?)|P6 Pass (is|=) (Electron Main store|Client-only SoT|live Slack/GitHub required|fixed named connector|mandatory vault)' \
+  apps/desktop-host \
+  packages/experimental/client-ui-agent-team/src/client \
+  specs/006-connectors-mcp-events-trust/verifier/README.md \
+  --glob '!**/node_modules/**' --glob '!**/lib/**'
+# Affirm Host SoT + vault-optional / any-one fixture locks
+rg -n 'Host Connector catalog SoT|vault optional|any one thin-catalog|Pass-path language \(T039\)' \
+  specs/006-connectors-mcp-events-trust/verifier/README.md
+```
+
+**Claim:** Documented here (T039). Spot-check clean on `apps/desktop-host/`, `packages/experimental/client-ui-agent-team/src/client/`, and this README — no product path documents P6 Pass as the forbidden bars; Client auth copy already states vault not required / Host credential store.
+
+## T040 — Linear tracking (capacity restored)
+
+**Rule:** Linear workspace capacity is **restored**. Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) tracks Phase 6 **T001–T040** under project **DeepSeek Harness - Cursor** (`P-MOH-2`) only — never GrokBot.
+
+**Do not invent issue ids** in Spec / Verifier docs beyond the known epic **MOH-281**. Child issue ids live on the Linear epic; this README names the epic only.
+
+**Supersedes:** earlier Setup notes that said Linear / `taskstoissues` was blocked for free-issue limit / PR-only tracking.
+
+**Claim:** Documented here (T040). Header + this section state current truth.
 
 ## Rerun Setup (idempotent)
 
@@ -154,8 +219,10 @@ rg -n 'Scenario 1–6 owners map' specs/006-connectors-mcp-events-trust/verifier
 rg -n 'T036 map re-validation stamp' specs/006-connectors-mcp-events-trust/verifier/README.md
 rg -n 'Scenario → recipe map \(T036\)' specs/006-connectors-mcp-events-trust/quickstart.md
 rg -n 'standing orders 11\+12' specs/006-connectors-mcp-events-trust/verifier/README.md
-rg -n 'Linear.*Blocked' specs/006-connectors-mcp-events-trust/verifier/README.md
+rg -n 'T038 — No rewrite' specs/006-connectors-mcp-events-trust/verifier/README.md
+rg -n 'Pass-path language \(T039\)' specs/006-connectors-mcp-events-trust/verifier/README.md
+rg -n 'MOH-281' specs/006-connectors-mcp-events-trust/verifier/README.md
 rg -n 'Architect Path A' specs/006-connectors-mcp-events-trust/verifier/connector-event-trust-seam-locks.md
 ```
 
-**PO / DH Lead:** Polish T033–T036 complete on this branch (non-goals recipe, evidence layout, SC-006 full-replay recipe, quickstart↔README map). Do **not** mark product SC-006 Done until Scenario 6 composite stamp lands. Next polish: T037 bus reconfirm · T038 no-rewrite · T039 Pass-path language · T040 Linear note. Linear remains blocked — leave tracking on the PR.
+**PO / DH Lead:** Polish T033–T040 complete (non-goals recipe, evidence layout, SC-006 full-replay recipe, quickstart↔README map, T037 bus reconfirm on master, T038 no-rewrite, T039 Pass-path language, T040 Linear). Do **not** mark product SC-006 Done until Scenario 6 composite stamp lands. Linear is **live** under [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) — do not invent issue ids.

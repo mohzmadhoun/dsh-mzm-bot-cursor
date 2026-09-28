@@ -8,7 +8,7 @@
 
 **Organization**: Shared Host Connector catalog + additive event-Routine foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority**: US1 Connector install→auth→tool → US2 Event routine fire → US3 Denied permission → US4 Secrets absent → US5 Credential UX (P2).
 
-**Linear**: **Blocked** — workspace free-issue limit; **no invented epic/issue ids**; **no `taskstoissues` in this PR**. Track via PR only until capacity returns (project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot).
+**Linear**: **Live** under epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) — capacity restored; T001–T040 track as children of MOH-281. **Do not invent issue ids** beyond the epic. Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
 **Branch**: `cursor/p6-tasks-fe1d` (from `origin/master` @ plan merge #201)
 
@@ -183,9 +183,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T035 Add Verifier Scenario 6 full replay recipe `specs/006-connectors-mcp-events-trust/verifier/scenario-6-full-replay.md` covering SC-006 (Scenarios 1–5 + foundational stamp) with mandatory desktop visual evidence for GUI slices
 - [x] T036 [P] Re-validate quickstart Scenario → recipe map in `specs/006-connectors-mcp-events-trust/quickstart.md` and `specs/006-connectors-mcp-events-trust/verifier/README.md` (owners + evidence paths)
 - [x] T037 [P] Confirm `apps/desktop/tests/no-electron-connectors-events-trust-bus.spec.ts` + `apps/desktop/src/host-protocol.ts` exclusions still green after story work
-- [ ] T038 [P] Confirm no product edits to `specs/001-multi-model-bots/**`, `specs/002-identity-personas/**`, `specs/003-skills-ux/**`, `specs/004-routines-cron/**`, or `specs/005-memory-productization/**` in this feature’s implement PRs — document check in `specs/006-connectors-mcp-events-trust/verifier/README.md`
-- [ ] T039 Polish: ensure no product code path documents P6 Pass as “Electron Main store,” “Client-only SoT,” “live Slack/GitHub required,” “fixed named connector,” or “mandatory vault” in `apps/desktop-host/`, `packages/experimental/client-ui-agent-team/src/client/`, or `specs/006-connectors-mcp-events-trust/verifier/README.md`
-- [ ] T040 [P] Note Linear/`taskstoissues` remains blocked; track T001–T040 via PR only until capacity — document in `specs/006-connectors-mcp-events-trust/verifier/README.md` (no invented issue ids)
+- [x] T038 [P] Confirm no product edits to `specs/001-multi-model-bots/**`, `specs/002-identity-personas/**`, `specs/003-skills-ux/**`, `specs/004-routines-cron/**`, or `specs/005-memory-productization/**` in this feature’s implement PRs — document check in `specs/006-connectors-mcp-events-trust/verifier/README.md`
+- [x] T039 Polish: ensure no product code path documents P6 Pass as “Electron Main store,” “Client-only SoT,” “live Slack/GitHub required,” “fixed named connector,” or “mandatory vault” in `apps/desktop-host/`, `packages/experimental/client-ui-agent-team/src/client/`, or `specs/006-connectors-mcp-events-trust/verifier/README.md`
+- [x] T040 [P] Note Linear capacity restored; epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) tracks T001–T040 — document in `specs/006-connectors-mcp-events-trust/verifier/README.md` (no invented issue ids)
 
 ---
 
@@ -278,5 +278,5 @@ Task: "Verifier scenario-1-connector.md + evidence path"
 - Clarify locks (webhook harness Pass; vault optional; any-one connector) non-negotiable
 - Standing orders **11** + **12** non-negotiable on GUI recipes
 - Do not rewrite specs/001–005
-- **No Linear `taskstoissues`** until workspace capacity returns — do not invent ticket numbers
+- Linear **live** under epic MOH-281 (T001–T040); **do not invent issue ids** beyond the epic
 - Analyze follows this tasks PR; implement only after Verifier Pass on analyze (when gated)
