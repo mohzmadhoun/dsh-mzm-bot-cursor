@@ -33,6 +33,26 @@ export interface ComputerSettings {
   computerUseEnabled: boolean
 }
 
+/**
+ * Host-owned Shell row fields (FR-004 / PO read-only readiness).
+ * Client Remotes may read these via `settings.describe`; writes are rejected.
+ */
+export type ComputerHostOwnedFields = Pick<ComputerSettings, 'boxId' | 'readiness' | 'local' | 'updatedAt'>
+
+/** Client-mutable Computer use row field (FR-004 enablement). */
+export type ComputerUseMutableFields = Pick<ComputerSettings, 'computerUseEnabled'>
+
+/**
+ * Client Settings → Computer row projection over the Host `computer` namespace.
+ * Maps data-model `ComputerSettingsProjection` observables onto Host SoT fields.
+ */
+export interface ComputerSettingsRowsProjection {
+  /** Shell row — Host readiness SoT; display read-only (PO). */
+  shell: ComputerHostOwnedFields
+  /** Computer use row — Client may mutate `computerUseEnabled` via Remotes. */
+  computerUse: ComputerUseMutableFields
+}
+
 /** Schema for the `computer` settings namespace (Host SoT; Remotes project it). */
 export const COMPUTER_SETTINGS_SCHEMA: z<ComputerSettings> = z.object({
   boxId: z.string().default(DESKTOP_LOCAL_BOX_ID),
@@ -41,6 +61,12 @@ export const COMPUTER_SETTINGS_SCHEMA: z<ComputerSettings> = z.object({
   updatedAt: z.string().default('1970-01-01T00:00:00.000Z'),
   computerUseEnabled: z.boolean().default(true),
 })
+
+/** Per-scope Host authority for Shell fields (rejects Client spoof writes). */
+const hostOwnedAuthority = new WeakMap<object, ComputerHostOwnedFields>()
+
+/** Live `computer` scope keyed by the settings provider instance. */
+const computerScopeByProvider = new WeakMap<object, SettingsScope<ComputerSettings>>()
 
 /** Composition / first-boot defaults before the Host probe commits. */
 export function defaultComputerSettings(now = new Date()): ComputerSettings {
@@ -54,9 +80,97 @@ export function defaultComputerSettings(now = new Date()): ComputerSettings {
 }
 
 /**
+ * Project Host `computer` settings onto Client Shell + Computer use row fields.
+ * @param value - resolved Host Computer settings document.
+ * @returns row-shaped projection for Settings → Computer (FR-004 / FR-016 Host half).
+ */
+export function projectComputerSettingsRows(value: ComputerSettings): ComputerSettingsRowsProjection {
+  return {
+    shell: {
+      boxId: value.boxId,
+      readiness: value.readiness,
+      local: value.local,
+      updatedAt: value.updatedAt,
+    },
+    computerUse: {
+      computerUseEnabled: value.computerUseEnabled,
+    },
+  }
+}
+
+/**
+ * Snapshot Host-owned Shell fields from a Computer settings value.
+ * @param value - full or partial Computer settings.
+ * @returns Host-owned Shell fields only.
+ */
+export function pickComputerHostOwned(value: ComputerHostOwnedFields): ComputerHostOwnedFields {
+  return {
+    boxId: value.boxId,
+    readiness: value.readiness,
+    local: value.local,
+    updatedAt: value.updatedAt,
+  }
+}
+
+/**
+ * Resolve the live Host `computer` settings scope when registered on `ctx.settings`.
+ * @param ctx - Desktop Host context.
+ * @returns the owner scope, or `undefined` when settings / namespace is absent.
+ */
+export function getComputerSettingsScope(ctx: Context): SettingsScope<ComputerSettings> | undefined {
+  const settings = ctx.get('settings')
+  if (settings === undefined) return undefined
+  return computerScopeByProvider.get(settings)
+}
+
+/**
+ * Authorize the next Host write of Shell SoT fields (probe / recovery).
+ * Must run immediately before `scope.update` that changes Host-owned keys.
+ * @param scope - registered `computer` settings scope.
+ * @param fields - Host-owned Shell fields being committed.
+ */
+export function authorizeComputerHostOwned(
+  scope: SettingsScope<ComputerSettings>,
+  fields: ComputerHostOwnedFields,
+): void {
+  const slot = hostOwnedAuthority.get(scope)
+  if (slot === undefined) {
+    hostOwnedAuthority.set(scope, pickComputerHostOwned(fields))
+    return
+  }
+  slot.boxId = fields.boxId
+  slot.readiness = fields.readiness
+  slot.local = fields.local
+  slot.updatedAt = fields.updatedAt
+}
+
+/**
+ * Refuse resolved values whose Host-owned Shell fields diverge from Host authority.
+ * @param value - schema-valid resolved Computer settings.
+ * @param authority - last Host-authorized Shell fields.
+ */
+function assertComputerHostOwnedMatch(
+  value: ComputerSettings,
+  authority: ComputerHostOwnedFields,
+): void {
+  if (
+    value.boxId !== authority.boxId
+    || value.readiness !== authority.readiness
+    || value.local !== authority.local
+    || value.updatedAt !== authority.updatedAt
+  ) {
+    throw new TypeError(
+      'computer settings: Host-owned Shell fields (boxId/readiness/local/updatedAt) are read-only over Remotes; mutate computerUseEnabled only',
+    )
+  }
+}
+
+/**
  * Register the Computer settings namespace when a settings provider is present.
  * Without settings, Desktop Host keeps an in-memory fallback for the probe only —
- * Client projection requires the file provider on the Desktop profile (T012).
+ * Client projection requires the file provider on the Desktop profile (T012/T026).
+ * Host-owned Shell fields are locked after registration; Client Remotes may only
+ * mutate `computerUseEnabled`.
  * @param ctx - Desktop Host context.
  * @param entry - composition base for the namespace.
  * @returns the live scope when settings is mounted; otherwise `undefined`.
@@ -67,8 +181,19 @@ export function registerComputerSettings(
 ): SettingsScope<ComputerSettings> | undefined {
   const settings = ctx.get('settings')
   if (settings === undefined) return undefined
-  return settings.register(COMPUTER_SETTINGS_NAMESPACE, COMPUTER_SETTINGS_SCHEMA, {
+  const authority = pickComputerHostOwned(entry)
+  const scope = settings.register(COMPUTER_SETTINGS_NAMESPACE, COMPUTER_SETTINGS_SCHEMA, {
     base: entry,
     applies: 'live',
+    validate: value => assertComputerHostOwnedMatch(value, authority),
   })
+  // Lock to the resolved document (base + stored user) so reboot preserves Host SoT.
+  const resolvedOwned = pickComputerHostOwned(scope.get())
+  authority.boxId = resolvedOwned.boxId
+  authority.readiness = resolvedOwned.readiness
+  authority.local = resolvedOwned.local
+  authority.updatedAt = resolvedOwned.updatedAt
+  hostOwnedAuthority.set(scope, authority)
+  computerScopeByProvider.set(settings, scope)
+  return scope
 }

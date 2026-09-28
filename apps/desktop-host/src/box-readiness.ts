@@ -10,7 +10,10 @@ import type { SettingsScope } from '@deepseek-ai/dsh-settings'
 import type {} from '@deepseek-ai/dsh-shell'
 import type {} from '@deepseek-ai/dsh-sandbox'
 import type { BoxReadiness, ComputerSettings } from './computer-settings.ts'
-import { DESKTOP_LOCAL_BOX_ID } from './computer-settings.ts'
+import {
+  authorizeComputerHostOwned,
+  DESKTOP_LOCAL_BOX_ID,
+} from './computer-settings.ts'
 
 /**
  * Classify Host local Shell/box readiness from currently mounted services.
@@ -30,6 +33,8 @@ export function classifyBoxReadiness(ctx: Context): Exclude<BoxReadiness, 'start
 /**
  * Commit one Host readiness projection into the Computer settings SoT.
  * Merges so Client-owned `computerUseEnabled` survives Host probe writes.
+ * Authorizes Host-owned Shell fields before the write so Remotes cannot spoof
+ * readiness while Host probes remain valid (T026 / FR-004 Shell read-only).
  * @param scope - registered `computer` settings scope.
  * @param readiness - next Host readiness value.
  * @param now - wall clock for `updatedAt`.
@@ -39,12 +44,14 @@ export async function commitBoxReadiness(
   readiness: BoxReadiness,
   now = new Date(),
 ): Promise<ComputerSettings> {
-  await scope.update({
+  const hostOwned = {
     boxId: DESKTOP_LOCAL_BOX_ID,
     readiness,
-    local: true,
+    local: true as const,
     updatedAt: now.toISOString(),
-  })
+  }
+  authorizeComputerHostOwned(scope, hostOwned)
+  await scope.update(hostOwned)
   return scope.get()
 }
 

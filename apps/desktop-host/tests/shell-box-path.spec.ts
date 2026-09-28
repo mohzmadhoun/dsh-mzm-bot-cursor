@@ -14,6 +14,7 @@ import {
   COMPUTER_SETTINGS_NAMESPACE,
   DESKTOP_LOCAL_BOX_ID,
   defaultComputerSettings,
+  getComputerSettingsScope,
   registerComputerSettings,
   type BoxReadiness,
 } from '../src/computer-settings.ts'
@@ -252,7 +253,7 @@ describe('desktop-computer mounts shell-box gate', () => {
     expect(ready.isError).toBe(false)
     expect(shell.runs).toBe(1)
 
-    await ctx.settings.update(COMPUTER_SETTINGS_NAMESPACE, { readiness: 'starting' })
+    await commitBoxReadiness(getComputerSettingsScope(ctx)!, 'starting')
     const blocked = await ctx.tools.execute({
       name: 'bash',
       callId: ToolCallId('composed-starting'),
