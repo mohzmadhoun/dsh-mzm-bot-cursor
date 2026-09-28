@@ -19,6 +19,9 @@
     { "path": "../../session/session-persistence" },
     { "path": "../../session/session-projection" },
     { "path": "../../runtime-diagnostics/invariants" },
-    { "path": "../../skill/skill-filesystem" }
+    { "path": "../../skill/skill-filesystem" },
+    { "path": "../../core/tools" },
+    { "path": "../../credentials/credentials" },
+    { "path": "../../mcp/mcp-client" }
   ]
 }

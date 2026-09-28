@@ -7,9 +7,11 @@ not invent a parallel store.
 Named sidebar section catalog rows append as `team/section` (T031); Unassigned
 has no catalog event (clarify lock 4).
 Host Routine catalog rows append as `team/routine` (P4 T007) — Architect Option 3
-SoT; not `dsh-schedule` session reminders.
+SoT; not `dsh-schedule` session reminders. P6 additive `triggerKind`/`eventTrigger`.
 Host Memory catalog rows append as `team/memory` (P5 T007) — Host Memory catalog
 SoT; not Electron Main, Client-only, or transcript.
+Host Connector catalog rows append as `team/connector` (P6 T009) — Architect Path A
+SoT; secrets stay in the credential seam, not this journal payload.
 */
 
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -24,6 +26,7 @@ type MutableTeamEventType =
   | 'team/section'
   | 'team/routine'
   | 'team/memory'
+  | 'team/connector'
   | 'team/message/queued'
   | 'team/message/delivered'
 

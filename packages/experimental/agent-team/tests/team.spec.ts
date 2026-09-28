@@ -1771,6 +1771,7 @@ describe('Team Remote API', () => {
       skills: [],
       routines: [],
       memories: [],
+      connectors: [],
     })
 
     const createdResult = await ctx.agentTeams.remoteCreateTask(lead, {
@@ -2645,6 +2646,7 @@ describe('Team Remote API', () => {
       botId: alpha.id,
       intent: 'Inbox sweep',
       identity: 'Inbox sweep',
+      triggerKind: 'cron',
       scheduleExpr: '@hourly',
       scheduleLabel: 'Every hour',
       status: 'active',

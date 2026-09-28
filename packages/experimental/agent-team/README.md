@@ -142,6 +142,7 @@ The [Agent Teams Agent Note](../../../.agents/notes/implemented/feature/2026-08-
 | [`src/persona-bind.ts`](src/persona-bind.ts) | Scoped `deployment:persona-prefix` bind from durable Host persona |
 | [`src/skill-bind.ts`](src/skill-bind.ts) | Scoped `agent-teams:skill-instructions` bind from durable Host `skillAttachments` + catalog bodies |
 | [`src/memory-bind.ts`](src/memory-bind.ts) | Scoped `agent-teams:memory-recall` bind from durable Host Memory catalog rows |
+| [`src/connector-bind.ts`](src/connector-bind.ts) | Thin Host connector catalog + Pass MCP fixture bind (`dsh-mcp-client`) + value-free credential describe |
 | [`src/activity.ts`](src/activity.ts) | One-shot change waiters and disposal release |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | Shared admission cutoff and bounded settlement |
 | [`src/invariant.ts`](src/invariant.ts) | Invariant companion that replays candidate events before append |

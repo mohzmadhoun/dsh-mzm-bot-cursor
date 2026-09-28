@@ -9655,6 +9655,217 @@
       }
     },
     {
+      "key": "event:team/connector",
+      "kind": "event",
+      "event": "team/connector",
+      "surface": false,
+      "digest": "e19bad4c9c0e79096cba7ade2b6d4dd86b7081a0b05adc501cb1e0fd3bc2eb9f",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 20,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "connector",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 18,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "authState",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "catalogId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "connectorId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "credentialKey",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "displayName",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "error",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "installState",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "serverName",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "transport",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "authenticating"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          },
+          {
+            "kind": "literal",
+            "value": "none"
+          },
+          {
+            "kind": "literal",
+            "value": "ready"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "available"
+          },
+          {
+            "kind": "literal",
+            "value": "installed"
+          },
+          {
+            "kind": "literal",
+            "value": "installing"
+          },
+          {
+            "kind": "union",
+            "types": [
+              16,
+              17
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "stdio"
+          },
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/connector"
+          }
+        ]
+      }
+    },
+    {
       "key": "event:team/member",
       "kind": "event",
       "event": "team/member",
@@ -10654,7 +10865,7 @@
       "kind": "event",
       "event": "team/routine",
       "surface": false,
-      "digest": "2a9151020dfe7e5872665d3c4df6abdcb098c82803367efe52590e408f1a8a7e",
+      "digest": "1505c8194dac217074e43c373afe865b13d674f00fb2058bd0f32aae4a6c5363",
       "schema": {
         "root": 0,
         "nodes": [
@@ -10668,7 +10879,7 @@
               },
               {
                 "name": "ignorable",
-                "type": 11,
+                "type": 15,
                 "optional": true
               },
               {
@@ -10683,7 +10894,7 @@
               },
               {
                 "name": "type",
-                "type": 12,
+                "type": 16,
                 "optional": false
               }
             ],
@@ -10704,7 +10915,7 @@
               },
               {
                 "name": "version",
-                "type": 10,
+                "type": 14,
                 "optional": false
               }
             ],
@@ -10724,13 +10935,18 @@
                 "optional": false
               },
               {
+                "name": "eventTrigger",
+                "type": 5,
+                "optional": true
+              },
+              {
                 "name": "intent",
                 "type": 3,
                 "optional": false
               },
               {
                 "name": "lastRunAt",
-                "type": 5,
+                "type": 6,
                 "optional": false
               },
               {
@@ -10745,8 +10961,13 @@
               },
               {
                 "name": "status",
-                "type": 7,
+                "type": 8,
                 "optional": false
+              },
+              {
+                "name": "triggerKind",
+                "type": 11,
+                "optional": true
               },
               {
                 "name": "updatedAt",
@@ -10765,10 +10986,14 @@
             "type": "number"
           },
           {
+            "kind": "literal",
+            "value": "webhook_harness"
+          },
+          {
             "kind": "union",
             "types": [
               4,
-              6
+              7
             ]
           },
           {
@@ -10778,8 +11003,8 @@
           {
             "kind": "union",
             "types": [
-              8,
-              9
+              9,
+              10
             ]
           },
           {
@@ -10789,6 +11014,21 @@
           {
             "kind": "literal",
             "value": "paused"
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "cron"
+          },
+          {
+            "kind": "literal",
+            "value": "event"
           },
           {
             "kind": "literal",
@@ -14537,7 +14777,7 @@
         "packages/experimental/agent-team/src/types.ts#MemoryRecord"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:169"
+        "packages/experimental/agent-team/src/types.ts:298"
       ]
     },
     {
@@ -15688,7 +15928,7 @@
         "event:team/message/delivered.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:999"
+        "packages/experimental/agent-team/src/types.ts:1218"
       ]
     },
     {
@@ -16051,7 +16291,7 @@
         "event:team/message/queued.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:997"
+        "packages/experimental/agent-team/src/types.ts:1216"
       ]
     },
     {
@@ -18280,6 +18520,20 @@
       ]
     },
     {
+      "digest": "12136401bae0866e06990ddfd9ea529eac10ebf7b7905085fe6ebf6fa856e238",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "ready"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "12a0cfa619ac4a5fc6c3e8e359c8dae15769edc61497a575935c78d5842f8e42",
       "schema": {
         "root": 0,
@@ -18566,6 +18820,191 @@
         ]
       },
       "names": [],
+      "sources": []
+    },
+    {
+      "digest": "1505c8194dac217074e43c373afe865b13d674f00fb2058bd0f32aae4a6c5363",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 15,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 16,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "routine",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 14,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "eventTrigger",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "intent",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "triggerKind",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "updatedAt",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "webhook_harness"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              7
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "cron"
+          },
+          {
+            "kind": "literal",
+            "value": "event"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/routine"
+          }
+        ]
+      },
+      "names": [
+        "event:team/routine"
+      ],
       "sources": []
     },
     {
@@ -20774,7 +21213,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSource"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:429"
+        "packages/experimental/agent-team/src/types.ts:563"
       ]
     },
     {
@@ -24349,162 +24788,6 @@
       ]
     },
     {
-      "digest": "2a9151020dfe7e5872665d3c4df6abdcb098c82803367efe52590e408f1a8a7e",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "data",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "ignorable",
-                "type": 11,
-                "optional": true
-              },
-              {
-                "name": "seq",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "time",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "type",
-                "type": 12,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "routine",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 10,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "botId",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "createdAt",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "intent",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "lastRunAt",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "routineId",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "scheduleExpr",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "status",
-                "type": 7,
-                "optional": false
-              },
-              {
-                "name": "updatedAt",
-                "type": 4,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "union",
-            "types": [
-              4,
-              6
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "union",
-            "types": [
-              8,
-              9
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "paused"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "literal",
-            "value": "team/routine"
-          }
-        ]
-      },
-      "names": [
-        "event:team/routine"
-      ],
-      "sources": []
-    },
-    {
       "digest": "2ab12a0e345658f9342816d773fe610f049982bcad82631f43b9205abe43e5ee",
       "schema": {
         "root": 0,
@@ -24625,6 +24908,20 @@
           {
             "kind": "literal",
             "value": "tool/ptc-dispatch-start"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "2c0045232776cf32ff6b3e41ab9b0a3525b05938d65727e41f5cadcf733746bc",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "stdio"
           }
         ]
       },
@@ -25063,7 +25360,7 @@
         "event:team/section.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:985"
+        "packages/experimental/agent-team/src/types.ts:1199"
       ]
     },
     {
@@ -26869,6 +27166,33 @@
       ]
     },
     {
+      "digest": "31221b0e19173de409500f1e03a5bba9ade5dac5a345e19bc49fdc9e4106b94d",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "cron"
+          },
+          {
+            "kind": "literal",
+            "value": "event"
+          }
+        ]
+      },
+      "names": [
+        "event:team/routine.data.routine.triggerKind"
+      ],
+      "sources": []
+    },
+    {
       "digest": "314765bdff29c7862fb6ce820f1773563ba3094a680d163ea21180a2591b8578",
       "schema": {
         "root": 0,
@@ -28269,7 +28593,7 @@
         "packages/experimental/agent-team/src/types.ts#MemoryKind"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:159"
+        "packages/experimental/agent-team/src/types.ts:288"
       ]
     },
     {
@@ -29170,7 +29494,7 @@
         "packages/experimental/agent-team/src/types.ts#MemoryLayer"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:162"
+        "packages/experimental/agent-team/src/types.ts:291"
       ]
     },
     {
@@ -29891,125 +30215,6 @@
         "event:tool/call"
       ],
       "sources": []
-    },
-    {
-      "digest": "3bbba9c4f09621bc67298ab42aa0528633235971c01e507d5851df82ccca1e8b",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "routine",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "teamId",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "version",
-                "type": 9,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "botId",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "createdAt",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "intent",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "lastRunAt",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "routineId",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "scheduleExpr",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "status",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "updatedAt",
-                "type": 3,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "union",
-            "types": [
-              3,
-              5
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "union",
-            "types": [
-              7,
-              8
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "paused"
-          },
-          {
-            "kind": "literal",
-            "value": 2
-          }
-        ]
-      },
-      "names": [
-        "event:team/routine.data"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:990"
-      ]
     },
     {
       "digest": "3bc287e765d58dc3a22672a0495a6cfd561220dd38fbaecef80aa95b96caed79",
@@ -31186,100 +31391,6 @@
       ],
       "sources": [
         "packages/interaction/user-approval/src/types.ts:44"
-      ]
-    },
-    {
-      "digest": "463c064144afe0f5b233272fad2106da13b49b680496d2d8dcc9ac9c0cbe55a5",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "botId",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "createdAt",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "intent",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "lastRunAt",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "routineId",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "scheduleExpr",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "status",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "updatedAt",
-                "type": 2,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "union",
-            "types": [
-              2,
-              4
-            ]
-          },
-          {
-            "kind": "primitive",
-            "type": "null"
-          },
-          {
-            "kind": "union",
-            "types": [
-              6,
-              7
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "active"
-          },
-          {
-            "kind": "literal",
-            "value": "paused"
-          }
-        ]
-      },
-      "names": [
-        "packages/experimental/agent-team/src/types.ts#RoutineRecord"
-      ],
-      "sources": [
-        "packages/experimental/agent-team/src/types.ts:108"
       ]
     },
     {
@@ -32521,6 +32632,20 @@
       "sources": []
     },
     {
+      "digest": "489f2fc0b52e68a13fc4c9b3674f29cab6d9c1ea27d7a4482bdf53663828d625",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "installing"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "48e5c9861f16ac07e78cb7b5ae9dabdf7bb85c58baed5a51b4ad275050ea58e3",
       "schema": {
         "root": 0,
@@ -32702,6 +32827,20 @@
           {
             "kind": "literal",
             "value": "blue"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "49a144e55392c5bfef9edd5da9f90b1c1208662b5ebf81aa078ae65a63386581",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "authenticating"
           }
         ]
       },
@@ -33197,7 +33336,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:250"
+        "packages/experimental/agent-team/src/types.ts:379"
       ]
     },
     {
@@ -33240,7 +33379,7 @@
         "packages/experimental/agent-team/src/types.ts#SkillAttachment"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:207"
+        "packages/experimental/agent-team/src/types.ts:336"
       ]
     },
     {
@@ -34053,6 +34192,7 @@
         "packages/attachment/attachment/src/brand.ts#AttachmentId",
         "packages/compaction/compaction/src/brand.ts#CompactionId",
         "packages/core/session/src/types.ts#SessionId",
+        "packages/experimental/agent-team/src/types.ts#ConnectorId",
         "packages/experimental/agent-team/src/types.ts#MemoryId",
         "packages/experimental/agent-team/src/types.ts#RoutineId",
         "packages/experimental/agent-team/src/types.ts#SidebarSectionId",
@@ -34082,8 +34222,9 @@
         "packages/attachment/attachment/src/brand.ts:6",
         "packages/compaction/compaction/src/brand.ts:4",
         "packages/core/session/src/types.ts:19",
-        "packages/experimental/agent-team/src/types.ts:147",
+        "packages/experimental/agent-team/src/types.ts:180",
         "packages/experimental/agent-team/src/types.ts:21",
+        "packages/experimental/agent-team/src/types.ts:276",
         "packages/experimental/agent-team/src/types.ts:33",
         "packages/experimental/agent-team/src/types.ts:52",
         "packages/experimental/agent-team/src/types.ts:77",
@@ -35721,7 +35862,7 @@
         "event:team/member.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:978"
+        "packages/experimental/agent-team/src/types.ts:1192"
       ]
     },
     {
@@ -35968,7 +36109,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:337"
+        "packages/experimental/agent-team/src/types.ts:466"
       ]
     },
     {
@@ -36673,6 +36814,155 @@
       ]
     },
     {
+      "digest": "5878425e4d3ac000b0f672e955113c9e65c6fb544be677f0b20deaebd01d4b3e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "authState",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "catalogId",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "connectorId",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "credentialKey",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "displayName",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "error",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "installState",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "serverName",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "transport",
+                "type": 13,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 8,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "authenticating"
+          },
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          },
+          {
+            "kind": "literal",
+            "value": "none"
+          },
+          {
+            "kind": "literal",
+            "value": "ready"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              6,
+              10,
+              11,
+              12
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "available"
+          },
+          {
+            "kind": "literal",
+            "value": "installing"
+          },
+          {
+            "kind": "literal",
+            "value": "installed"
+          },
+          {
+            "kind": "union",
+            "types": [
+              14,
+              15
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "stdio"
+          },
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#ConnectorRecord"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:208"
+      ]
+    },
+    {
       "digest": "587bb11da730e06aa52b62c087d217d6f8f22459b25f31cb9e1e1baf17944e5e",
       "schema": {
         "root": 0,
@@ -37049,7 +37339,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:420"
+        "packages/experimental/agent-team/src/types.ts:554"
       ]
     },
     {
@@ -37216,8 +37506,8 @@
       },
       "names": [
         "SessionEventEnvelope[39].sourceEventSeqs",
-        "SessionEventEnvelope[55].sourceEventSeqs",
-        "SessionEventEnvelope[58].sourceEventSeqs",
+        "SessionEventEnvelope[56].sourceEventSeqs",
+        "SessionEventEnvelope[59].sourceEventSeqs",
         "event:assistant/attempt.data.stream[0][0].dt",
         "event:assistant/attempt.data.stream[0][1].dt",
         "event:assistant/attempt.data.stream[0][2].dt",
@@ -40445,7 +40735,7 @@
         "packages/experimental/agent-team/src/types.ts#AvatarMarker"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:242"
+        "packages/experimental/agent-team/src/types.ts:371"
       ]
     },
     {
@@ -42539,6 +42829,154 @@
       ]
     },
     {
+      "digest": "7ced02b60496aaf4b9cdd02e217e85aedc2f8a7e871a40d22fa5fc4826500717",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "routine",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 13,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "eventTrigger",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "intent",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "triggerKind",
+                "type": 10,
+                "optional": true
+              },
+              {
+                "name": "updatedAt",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "webhook_harness"
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              6
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "union",
+            "types": [
+              11,
+              12
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "cron"
+          },
+          {
+            "kind": "literal",
+            "value": "event"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/routine.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:1204"
+      ]
+    },
+    {
       "digest": "7d226b9fd95b4ba213d4237c22e930a91c3c769c95ca7f92977b9d625ba13438",
       "schema": {
         "root": 0,
@@ -43116,6 +43554,45 @@
       ],
       "sources": [
         "packages/goal/goal/src/domain.ts:47"
+      ]
+    },
+    {
+      "digest": "80ff0c98b1ca855cbe043030113c9bdf1cb015d282875da78fd2e157d2500885",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "available"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "installed"
+          },
+          {
+            "kind": "literal",
+            "value": "installing"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#ConnectorInstallState"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:192"
       ]
     },
     {
@@ -44430,6 +44907,20 @@
           {
             "kind": "literal",
             "value": "provisioning"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "87dc229bfe7d080df9b74739cba9b366738075770cd35cf737e12444116a45f2",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "team/connector"
           }
         ]
       },
@@ -46752,8 +47243,8 @@
       },
       "names": [
         "SessionEventEnvelope[39]",
-        "SessionEventEnvelope[55]",
-        "SessionEventEnvelope[58]"
+        "SessionEventEnvelope[56]",
+        "SessionEventEnvelope[59]"
       ],
       "sources": []
     },
@@ -49111,7 +49602,130 @@
         "event:team/task.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:980"
+        "packages/experimental/agent-team/src/types.ts:1194"
+      ]
+    },
+    {
+      "digest": "a4e863c65b97638da1de493b93fc8bab2480df76c0321b353b21f2a0b5af2f49",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "eventTrigger",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "intent",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "lastRunAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "routineId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "scheduleExpr",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "triggerKind",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "updatedAt",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "webhook_harness"
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              5
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "union",
+            "types": [
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "active"
+          },
+          {
+            "kind": "literal",
+            "value": "paused"
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "cron"
+          },
+          {
+            "kind": "literal",
+            "value": "event"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#RoutineRecord"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:122"
       ]
     },
     {
@@ -51719,7 +52333,7 @@
         "packages/experimental/agent-team/src/types.ts#SidebarSectionSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:366"
+        "packages/experimental/agent-team/src/types.ts:495"
       ]
     },
     {
@@ -51934,7 +52548,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskStatus"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:334"
+        "packages/experimental/agent-team/src/types.ts:463"
       ]
     },
     {
@@ -53962,6 +54576,20 @@
       "sources": []
     },
     {
+      "digest": "bb255cf4e27587607f3f67cf0e69523219aceec218ab01a86d60d188d9a7e11a",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "installed"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "bb72d86bc9ef0b3908bfa57ef98ccccae24d67d945c9f6869ca3cb8577889e75",
       "schema": {
         "root": 0,
@@ -54369,6 +54997,20 @@
       "sources": []
     },
     {
+      "digest": "bfd6652fc7c5a21a85b04bafb572e3b02d2d76f209272e5f4971db5a45ca2f0d",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "available"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "c0ea97bc89dfc46fa94eab956f5c3ee6af2f964aa7db6327cb18b451f207bef7",
       "schema": {
         "root": 0,
@@ -54756,6 +55398,20 @@
           {
             "kind": "literal",
             "value": "square"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "c2c832b19ef4e20f934814662f7c3f0ca939a52a12774bda41742247282cfa83",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "event"
           }
         ]
       },
@@ -57124,7 +57780,7 @@
         "event:team/memory.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:995"
+        "packages/experimental/agent-team/src/types.ts:1209"
       ]
     },
     {
@@ -59067,6 +59723,20 @@
       ]
     },
     {
+      "digest": "da2d19e1ee4eb30c3f92cef1f96cb9e6cb4a227ad80ad0e8ee7795c4ada3de92",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "none"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "dacf3d5f3e4ff619c1320e64a48dec5e7ecd7870bece65fbd449a0e63adfa521",
       "schema": {
         "root": 0,
@@ -59198,6 +59868,35 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "dc597143b43896d54dd7231beffb9b6e18523501aee69eb49b7a1d78a5d880ef",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "stdio"
+          },
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#ConnectorTransport"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:198"
+      ]
     },
     {
       "digest": "dd2780e7e07684332f7a9ab047237798d260e7eaffb1321cb38eca695d184c3d",
@@ -59399,6 +60098,20 @@
       "names": [
         "event:agent/inbox/spliced.data.inserted[0].source[15].references"
       ],
+      "sources": []
+    },
+    {
+      "digest": "df88ac99bfe187093a65b013d381f00bc090e3c338f28a8ee5b48a31e57fe958",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "cron"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -60651,6 +61364,217 @@
       "sources": []
     },
     {
+      "digest": "e19bad4c9c0e79096cba7ade2b6d4dd86b7081a0b05adc501cb1e0fd3bc2eb9f",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 20,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "connector",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 18,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "authState",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "catalogId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "connectorId",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "credentialKey",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "displayName",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "error",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "installState",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "serverName",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "transport",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "authenticating"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          },
+          {
+            "kind": "literal",
+            "value": "none"
+          },
+          {
+            "kind": "literal",
+            "value": "ready"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "available"
+          },
+          {
+            "kind": "literal",
+            "value": "installed"
+          },
+          {
+            "kind": "literal",
+            "value": "installing"
+          },
+          {
+            "kind": "union",
+            "types": [
+              16,
+              17
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "stdio"
+          },
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/connector"
+          }
+        ]
+      },
+      "names": [
+        "event:team/connector"
+      ],
+      "sources": []
+    },
+    {
       "digest": "e1d0e52dcd1855ffb803efc18f8f7b776c48d1c25757e8a75c0281fa298c02e1",
       "schema": {
         "root": 0,
@@ -61083,11 +62007,12 @@
         "SessionEventEnvelope[52]",
         "SessionEventEnvelope[53]",
         "SessionEventEnvelope[54]",
-        "SessionEventEnvelope[56]",
+        "SessionEventEnvelope[55]",
         "SessionEventEnvelope[57]",
-        "SessionEventEnvelope[59]",
+        "SessionEventEnvelope[58]",
         "SessionEventEnvelope[5]",
         "SessionEventEnvelope[60]",
+        "SessionEventEnvelope[61]",
         "SessionEventEnvelope[7]",
         "SessionEventEnvelope[8]",
         "SessionEventEnvelope[9]"
@@ -61975,6 +62900,50 @@
       "sources": []
     },
     {
+      "digest": "e9c77fb7fdfd02075f6b4f836728315606da4dc5132fdef91dfa3f1e32191c90",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "authenticating"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          },
+          {
+            "kind": "literal",
+            "value": "none"
+          },
+          {
+            "kind": "literal",
+            "value": "ready"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#ConnectorAuthState"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:195"
+      ]
+    },
+    {
       "digest": "e9f01bc311604c323255f5cfcec5b2b83b5eea0521f98a71785df64f4d9854f9",
       "schema": {
         "root": 0,
@@ -62328,6 +63297,180 @@
       "sources": []
     },
     {
+      "digest": "ea1c7d88dc7527b97d653953159418e33f89d93fbede02aba9eeb551f64b4000",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "connector",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 17,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "authState",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "catalogId",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "connectorId",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "credentialKey",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "displayName",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "error",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "installState",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "serverName",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "transport",
+                "type": 14,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 9,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "authenticating"
+          },
+          {
+            "kind": "literal",
+            "value": "failed"
+          },
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          },
+          {
+            "kind": "literal",
+            "value": "none"
+          },
+          {
+            "kind": "literal",
+            "value": "ready"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              11,
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "available"
+          },
+          {
+            "kind": "literal",
+            "value": "installed"
+          },
+          {
+            "kind": "literal",
+            "value": "installing"
+          },
+          {
+            "kind": "union",
+            "types": [
+              15,
+              16
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "stdio"
+          },
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/connector.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:1214"
+      ]
+    },
+    {
       "digest": "eaa71be0fbf0f702df8ea6c11d0aa2f9782263d45a10d0fb14eda662f4bfe04c",
       "schema": {
         "root": 0,
@@ -62355,6 +63498,20 @@
       "sources": [
         "packages/core/session/src/types.ts:195"
       ]
+    },
+    {
+      "digest": "eb580926a34fbfc98386e76339ce4f055d18648019c663f90cdfe0bfec26c68f",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "streamable-http"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "ebb768d85ec87fb68e42fc14fd7d8535b5ac11791b14d04c6770180f0a719bf8",
@@ -62462,6 +63619,20 @@
       "names": [
         "event:tool/ptc-dispatch-start"
       ],
+      "sources": []
+    },
+    {
+      "digest": "ecce2fa306ffb5d00a7de6fc558395ba88c542e195dda174496fdbb5c9809f28",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "needs_auth"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -62741,6 +63912,24 @@
       ],
       "sources": [
         "packages/llm/llm/src/types.ts:432"
+      ]
+    },
+    {
+      "digest": "f245ab2152b90dae1605b7bf9148bb42a965bb80ff4d7eb16b590eac1a9d8cec",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "webhook_harness"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#RoutineEventTrigger"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:113"
       ]
     },
     {

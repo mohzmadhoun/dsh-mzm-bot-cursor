@@ -24,12 +24,29 @@ import {
   type PersonaBindRef,
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
-import { projectMailboxHandoffs, projectMemory, projectMemories, projectRoutine, projectRoutines, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
+import {
+  projectConnector,
+  projectConnectors,
+  projectMailboxHandoffs,
+  projectMemory,
+  projectMemories,
+  projectRoutine,
+  projectRoutines,
+  projectSidebarSections,
+  projectSkillCatalog,
+  teamProjectionDefinition,
+} from './projection.ts'
 import {
   bindTeammateMemoryRecall,
   composeMemoryRecall,
   type MemoryBindRef,
 } from './memory-bind.ts'
+import {
+  bindPassConnectorMcpTools,
+  describeConnectorCredential as describeConnectorCredentialRecord,
+  PASS_CONNECTOR_CATALOG,
+  storeConnectorSecret,
+} from './connector-bind.ts'
 import {
   bindTeammateSkillInstructions,
   composeSkillInstructions,
@@ -38,8 +55,18 @@ import {
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { SidebarSectionId, MemoryId, RoutineId, TeamId, TeamTaskId } from './types.ts'
+import {
+  ConnectorId,
+  SidebarSectionId,
+  MemoryId,
+  RoutineId,
+  TeamId,
+  TeamTaskId,
+} from './types.ts'
 import type {
+  AuthenticateConnectorInput,
+  AuthenticateConnectorRequest,
+  AuthenticateConnectorResult,
   Config,
   CreateBotInput,
   CreateBotMutationResult,
@@ -60,10 +87,19 @@ import type {
   AttachSkillResult,
   BotIdentityMutationResult,
   BotPersonaProfile,
+  ConnectorRecord,
   DeleteBotInput,
   DeleteBotRequest,
   DeleteBotResult,
+  DescribeConnectorCredentialInput,
+  DescribeConnectorCredentialRequest,
+  DescribeConnectorCredentialResult,
   HostMailboxMessage,
+  InstallConnectorInput,
+  InstallConnectorRequest,
+  InstallConnectorResult,
+  ListConnectorCatalogResult,
+  ListConnectorsResult,
   ListMemoriesInput,
   ListMemoriesRequest,
   ListMemoriesResult,
@@ -113,14 +149,19 @@ import type {
   WriteMemoryResult,
 } from './types.ts'
 import {
+  findConnectorCatalogEntry,
   normalizeAvatarMarker,
   normalizePersonaProfile,
+  requiredConnectorCatalogId,
+  requiredConnectorSecret,
   requiredDisplayName,
+  requiredEventTrigger,
   requiredMemoryContent,
   requiredMemoryKind,
   requiredMemoryLayer,
   requiredModelSelection,
   requiredRoutineIntent,
+  requiredRoutineTriggerKind,
   requiredScheduleExpr,
   requiredSectionName,
   requiredSkillDisplayName,
@@ -132,7 +173,16 @@ import {
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
-export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId, MemoryId, RoutineId } from './types.ts'
+export {
+  ConnectorId,
+  TeamId,
+  TeamMessageId,
+  TeamTaskId,
+  SidebarSectionId,
+  SkillId,
+  MemoryId,
+  RoutineId,
+} from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
 export {
@@ -140,6 +190,8 @@ export {
   readHostMailboxMessage,
 } from './host-mailbox-message.ts'
 export {
+  projectConnector,
+  projectConnectors,
   projectMailboxHandoffs,
   projectMemories,
   projectMemory,
@@ -148,6 +200,18 @@ export {
   projectSidebarSections,
   projectSkillCatalog,
 } from './projection.ts'
+export {
+  bindPassConnectorMcpTools,
+  CONNECTOR_CREDENTIAL_SCOPE,
+  connectorCredentialKey,
+  describeConnectorCredential,
+  PASS_CONNECTOR_CATALOG,
+  PASS_FIXTURE_CATALOG_ID,
+  PASS_FIXTURE_SERVER_NAME,
+  PASS_FIXTURE_TOOL_RAW_NAME,
+  passFixturePublicToolName,
+  storeConnectorSecret,
+} from './connector-bind.ts'
 import {
   isRoutineEligibleForWake,
   isRoutineDue,
@@ -234,6 +298,8 @@ export class TeamService extends TypertRemoteService {
   private readonly userSkillRegistrations = new Map<string, () => void>()
   /** In-flight Host Routine fires keyed by routineId (dedupe concurrent ticker ticks). */
   private readonly inFlightFires = new Map<RoutineId, Promise<void>>()
+  /** Disposers for Pass MCP fixture tools bound after connector auth ready (P6 T010). */
+  private readonly mcpBindDisposers = new Map<ConnectorId, () => void>()
 
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'agentTeams')
@@ -665,7 +731,20 @@ export class TeamService extends TypertRemoteService {
     }
     request.signal.throwIfAborted()
     const intent = requiredRoutineIntent(request.intent)
-    const scheduleExpr = requiredScheduleExpr(request.scheduleExpr)
+    const triggerKind = requiredRoutineTriggerKind(request.triggerKind)
+    let scheduleExpr = ''
+    let eventTrigger: RoutineRecord['eventTrigger']
+    if (triggerKind === 'cron') {
+      if (request.scheduleExpr === undefined) {
+        throw new TeamError(
+          'scheduleExpr is required when triggerKind is cron',
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
+      scheduleExpr = requiredScheduleExpr(request.scheduleExpr)
+    } else {
+      eventTrigger = requiredEventTrigger(request.eventTrigger)
+    }
     const root = membership.root
     const routine = await this.journal.transact(root.id, async () => {
       request.signal.throwIfAborted()
@@ -678,11 +757,13 @@ export class TeamService extends TypertRemoteService {
         )
       }
       const now = Date.now()
-      const row = {
+      const row: RoutineRecord = {
         routineId: RoutineId(`routine-${randomUUID()}`),
         botId: request.botId,
         intent,
         scheduleExpr,
+        triggerKind,
+        ...eventTrigger === undefined ? {} : { eventTrigger },
         status: 'active' as const,
         lastRunAt: null,
         createdAt: now,
@@ -802,6 +883,194 @@ export class TeamService extends TypertRemoteService {
     return {
       memories: projectMemories(this.journal.state(membership.root), request.botId),
     }
+  }
+
+
+  /**
+   * List thin Host connector catalog definitions (P6 T009 / T012 / FR-017).
+   * @param caller - exact live Team member.
+   * @param signal - cancellation.
+   * @returns installable catalog entries.
+   */
+  listConnectorCatalog(caller: Agent, signal: AbortSignal): ListConnectorCatalogResult {
+    this.roster.membership(caller)
+    signal.throwIfAborted()
+    return { catalog: PASS_CONNECTOR_CATALOG }
+  }
+
+  /**
+   * Project durable Host connectors (P6 T009 / T012).
+   * @param caller - exact live Team member.
+   * @param signal - cancellation.
+   * @returns Connector projections without secret values.
+   */
+  listConnectors(caller: Agent, signal: AbortSignal): ListConnectorsResult {
+    const membership = this.roster.membership(caller)
+    signal.throwIfAborted()
+    return {
+      connectors: projectConnectors(this.journal.state(membership.root)),
+    }
+  }
+
+  /**
+   * Lead-authorized Host Connector install (P6 T009 / T012).
+   * @param caller - exact live Lead Agent.
+   * @param request - catalog id and cancellation.
+   * @returns Host-owned Connector projection after install.
+   */
+  async installConnector(
+    caller: Agent,
+    request: InstallConnectorRequest,
+  ): Promise<InstallConnectorResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can install a connector', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const catalogId = requiredConnectorCatalogId(request.catalogId)
+    const entry = findConnectorCatalogEntry(PASS_CONNECTOR_CATALOG, catalogId)
+    if (entry === undefined) {
+      throw new TeamError(
+        `connector catalog entry "${catalogId}" not found`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const root = membership.root
+    const connector = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const state = this.journal.state(root)
+      const duplicate = state.connectors.find(
+        row => row.catalogId === entry.catalogId && row.installState !== 'failed',
+      )
+      if (duplicate !== undefined) {
+        throw new TeamError(
+          `connector catalog entry "${catalogId}" is already installed`,
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
+      const now = Date.now()
+      const row: ConnectorRecord = {
+        connectorId: ConnectorId(`connector-${randomUUID()}`),
+        catalogId: entry.catalogId,
+        serverName: entry.serverName,
+        displayName: entry.displayName,
+        installState: 'installed',
+        authState: entry.authMode === 'none' ? 'none' : 'needs_auth',
+        transport: entry.transport,
+        createdAt: now,
+        updatedAt: now,
+      }
+      await this.journal.appendAndFlush(root, 'team/connector', {
+        version: 2,
+        teamId: TeamId(root.id),
+        connector: row,
+      })
+      return row
+    })
+    return { connector: projectConnector(connector) }
+  }
+
+  /**
+   * Lead-authorized Host Connector authenticate (P6 T011 / T012).
+   * Stores secret in Host credentials only; binds Pass MCP fixture tools when ready.
+   * @param caller - exact live Lead Agent.
+   * @param request - connector id, secret, and cancellation.
+   * @returns Host-owned Connector projection after auth ready.
+   */
+  async authenticateConnector(
+    caller: Agent,
+    request: AuthenticateConnectorRequest,
+  ): Promise<AuthenticateConnectorResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can authenticate a connector', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const connectorId = ConnectorId(String(request.connectorId).trim())
+    if (connectorId.length === 0) {
+      throw new TeamError('connectorId must be non-empty', 'TEAM_INVALID_ARGUMENT')
+    }
+    const secret = requiredConnectorSecret(request.secret)
+    const root = membership.root
+    const connector = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const current = this.journal.state(root).connectors.find(row => row.connectorId === connectorId)
+      if (current === undefined) {
+        throw new TeamError(
+          `connector "${connectorId}" not found`,
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
+      if (current.installState !== 'installed') {
+        throw new TeamError(
+          `connector "${connectorId}" must be installed before auth`,
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
+      const key = await storeConnectorSecret(this.ctx, connectorId, secret)
+      const row: ConnectorRecord = {
+        ...current,
+        authState: 'ready',
+        credentialKey: String(key),
+        updatedAt: Date.now(),
+      }
+      await this.journal.appendAndFlush(root, 'team/connector', {
+        version: 2,
+        teamId: TeamId(root.id),
+        connector: row,
+      })
+      return row
+    })
+    this.bindConnectorMcpTools(connector)
+    return { connector: projectConnector(connector) }
+  }
+
+  /**
+   * Describe one connector credential without returning the secret (P6 T011 / FR-007).
+   * @param caller - exact live Team member.
+   * @param request - connector id and cancellation.
+   * @returns configured/writable facts only.
+   */
+  async describeConnectorCredential(
+    caller: Agent,
+    request: DescribeConnectorCredentialRequest,
+  ): Promise<DescribeConnectorCredentialResult> {
+    this.roster.membership(caller)
+    request.signal.throwIfAborted()
+    const connectorId = ConnectorId(String(request.connectorId).trim())
+    if (connectorId.length === 0) {
+      throw new TeamError('connectorId must be non-empty', 'TEAM_INVALID_ARGUMENT')
+    }
+    const membership = this.roster.membership(caller)
+    const current = this.journal.state(membership.root).connectors
+      .find(row => row.connectorId === connectorId)
+    if (current === undefined) {
+      throw new TeamError(
+        `connector "${connectorId}" not found`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const info = await describeConnectorCredentialRecord(this.ctx, connectorId)
+    return {
+      connectorId,
+      credentialKey: String(info.credentialKey),
+      configured: info.configured,
+      writable: info.writable,
+      ...info.kind === undefined ? {} : { kind: info.kind },
+    }
+  }
+
+  /**
+   * Bind or re-bind Pass MCP fixture tools for a ready connector (P6 T010).
+   * @param connector - durable row at auth ready.
+   */
+  private bindConnectorMcpTools(connector: ConnectorRecord): void {
+    const prior = this.mcpBindDisposers.get(connector.connectorId)
+    prior?.()
+    this.mcpBindDisposers.delete(connector.connectorId)
+    if (connector.authState !== 'ready' || connector.installState !== 'installed') return
+    const dispose = bindPassConnectorMcpTools(this.ctx, connector)
+    this.mcpBindDisposers.set(connector.connectorId, dispose)
   }
 
   /**
@@ -1291,6 +1560,7 @@ export class TeamService extends TypertRemoteService {
       skills: await this.listSkillCatalog(signal),
       routines: projectRoutines(state),
       memories: projectMemories(state),
+      connectors: projectConnectors(state),
     }
   }
 
@@ -1591,6 +1861,64 @@ export class TeamService extends TypertRemoteService {
   ): Promise<BotIdentityMutationResult<ListMemoriesResult>> {
     return this.botIdentityMutationResult(
       Promise.resolve(this.listMemories(agent, { ...request, signal })),
+    )
+  }
+
+  /** List thin Host connector catalog through Host HTTP/WS (P6 T009 / T012). */
+  @Remote('listConnectorCatalog')
+  remoteListConnectorCatalog(
+    agent: Agent,
+    _request: Record<string, never>,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<ListConnectorCatalogResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.listConnectorCatalog(agent, signal)),
+    )
+  }
+
+  /** List durable Host connectors through Host HTTP/WS (P6 T009 / T012). */
+  @Remote('listConnectors')
+  remoteListConnectors(
+    agent: Agent,
+    _request: Record<string, never>,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<ListConnectorsResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.listConnectors(agent, signal)),
+    )
+  }
+
+  /** Install one Host Connector through Host HTTP/WS (P6 T009 / T012). */
+  @Remote('installConnector')
+  remoteInstallConnector(
+    agent: Agent,
+    request: InstallConnectorInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<InstallConnectorResult>> {
+    return this.botIdentityMutationResult(this.installConnector(agent, { ...request, signal }))
+  }
+
+  /** Authenticate one Host Connector; secret stays in credentials (P6 T011 / T012). */
+  @Remote('authenticateConnector')
+  remoteAuthenticateConnector(
+    agent: Agent,
+    request: AuthenticateConnectorInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<AuthenticateConnectorResult>> {
+    return this.botIdentityMutationResult(
+      this.authenticateConnector(agent, { ...request, signal }),
+    )
+  }
+
+  /** Describe connector credential without secret values (P6 T011 / FR-007). */
+  @Remote('describeConnectorCredential')
+  remoteDescribeConnectorCredential(
+    agent: Agent,
+    request: DescribeConnectorCredentialInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<DescribeConnectorCredentialResult>> {
+    return this.botIdentityMutationResult(
+      this.describeConnectorCredential(agent, { ...request, signal }),
     )
   }
 
@@ -1902,6 +2230,8 @@ export class TeamService extends TypertRemoteService {
     await this.lifecycle.settle(this.mailbox.pendingDispatches(), failures)
     await this.lifecycle.settle([...this.inFlightFires.values()], failures)
     this.inFlightFires.clear()
+    for (const dispose of this.mcpBindDisposers.values()) dispose()
+    this.mcpBindDisposers.clear()
     for (const [root, childIds] of this.roster.liveChildrenByRoot()) {
       try {
         await this.roster.stopTeammates(root, childIds)
