@@ -1,7 +1,7 @@
 T027 Client deny UI + Scenario 3 (SC-003) — DH Verifier
 =======================================================
 Verdict: Pass
-Stamp: 2026-09-28 · tip origin/cursor/p6-us3-client-deny-verify-70bf @ 057e0e9491
+Stamp: 2026-09-28 · tip origin/cursor/p6-us3-client-deny-verify-70bf @ bd9b86c084
   (+ evidence commit on this branch; base Client tip d02d11fe30 + unbound-$on boot fix)
   · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
   · launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop

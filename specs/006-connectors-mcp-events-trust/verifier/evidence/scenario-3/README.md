@@ -13,7 +13,7 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `03-standing-never.png` | Standing `never` on (Path B) | T028 / FR-006 | **Present** |
 | `scenario-3-trust-deny-walkthrough.mp4` | Short recording Steps A–C (Path B) | T028 | **Present** |
 | `panel-state.json` · `p6-t027-scenario3-cdp.log` | CDP hard-assert provenance | Verifier | **Present** |
-| `VERDICT.txt` | Product SC Pass stamp | Verifier | **Pass** @ tip `057e0e9491` |
+| `VERDICT.txt` | Product SC Pass stamp | Verifier | **Pass** @ tip `bd9b86c084` |
 
 ## Standing orders 11 + 12 (mandatory for GUI Pass)
 
@@ -31,4 +31,4 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `03-standing-never.png` | `p6-t028-03-standing-never.png` |
 | `scenario-3-trust-deny-walkthrough.mp4` | `p6-t028-scenario-3-trust-deny-walkthrough.mp4` |
 
-**Status:** Desktop Pass stamped — Path B standing never · tip `057e0e9491` (Client `d02d11fe30` + `$on` bind fix). See [VERDICT.txt](./VERDICT.txt).
+**Status:** Desktop Pass stamped — Path B standing never · tip `bd9b86c084` (Client `d02d11fe30` + `$on` bind fix). See [VERDICT.txt](./VERDICT.txt).
