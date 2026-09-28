@@ -17,7 +17,7 @@
 2. Denied action MUST NOT be treated as successfully permitted/executed.
 3. Denial MUST remain distinguishable from successful tool call.
 4. Retry-with-allow after deny is complementary UX — not required for Pass.
-5. Prefer composing `dsh-user-approval` (Architect confirms Desktop answerer).
+5. Compose `dsh-user-approval`: Pass = **user-deny** via Client answerer on **Host HTTP** path **or** standing `never` / block (either OK).
 
 ## Verifier
 

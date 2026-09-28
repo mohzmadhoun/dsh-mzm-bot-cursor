@@ -4,7 +4,7 @@
 **Date**: 2026-09-28
 **Source**: [spec.md](./spec.md) · [research.md](./research.md) · clarify locks PR #200 · Bot / Routine from `specs/001`–`005`
 
-Logical entities for plan/tasks. Persistence stays **Host-owned** (Connector catalog + extended Routine catalog + credential store). Exact package homes await Architect (research Options A–E). Extends P1–P5 Bot / Routine — does **not** replace model assignment, persona, skills, cron-only semantics, or memory entities. Does **not** use Electron Main or Client local store as SoT.
+Logical entities for plan/tasks. Persistence stays **Host-owned** (Connector catalog + extended Routine catalog + credential store). **Architect Path A locked:** Agent Teams journal + `dsh-mcp-client` bind; B1 webhook ingress → Routine wake; additive `triggerKind` + `eventTrigger`. Extends P1–P5 Bot / Routine — does **not** replace model assignment, persona, skills, cron-only semantics, or memory entities. Does **not** use Electron Main or Client local store as SoT.
 
 ---
 
@@ -74,7 +74,7 @@ Extends P4 cron `RoutineRecord` with event triggers. Cron rows remain valid.
 | `lastRunAt` | Timestamp \| `null` | Updated on fire commit |
 | `createdAt` / `updatedAt` | Timestamp | Required |
 
-**Relationships:** Belongs to one Bot. Listed in that bot’s routines pane; event vs cron distinguishable. Stored in Host catalog (prefer Agent Teams `team/routine` extension — Architect confirm). Fire = Host wake applying intent (P4 shape).
+**Relationships:** Belongs to one Bot. Listed in that bot’s routines pane; event vs cron distinguishable. Stored in Host catalog (**Agent Teams `team/routine` extension** — Architect Path A). Fire = Host wake applying intent on **existing bot** (P4 shape; B1 webhook ingress).
 
 **Validation:** Event create with empty intent rejected. Live Slack/GitHub/… not required for Pass. While paused, matching events MUST NOT record fire.
 

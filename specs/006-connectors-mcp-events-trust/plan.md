@@ -8,13 +8,13 @@
 
 **Clarify locks (do not reopen):** (1) Event Pass = **webhook harness / Verifier fixture** — named live Slack/GitHub/Linear/email **not** required. (2) **Vault UX optional** — 1Password-class **not** a mandatory Pass gate when in-app auth completes the Pass connector. (3) Pass connector = **any one** from thin managed catalog / Verifier fixture — **not** a fixed named connector.
 
-**Architect:** Seam Options below are Spec-recommended defaults for planning. **DH Architect must confirm or replace** before tasks (open questions at end of [research.md](./research.md) and in Completion Report). Do **not** invent a locked Option id until Architect answers.
+**Architect / Path A lock (do not reopen):** Host Connector catalog SoT + `dsh-mcp-client` bind; event fire = **B1** adapt `dsh-webhook` ingress → Routine wake on **existing bot** with intent (Host harness for Verifier); `RoutineRecord` additive `triggerKind` + `eventTrigger` (cron rows unchanged; no rewrite `specs/004`); trust deny Pass = user-deny via `dsh-user-approval` **or** standing `never` (either OK); Desktop Client answerer on Host HTTP path; Pass fixture = thin Verifier fixture under `agent-team` or desktop test fixture with **in-app** auth; `host-protocol` forbids connector/event/trust/credential payloads on Node IPC (mirror memory/routine). See [research.md](./research.md) Architect answers.
 
-**Note**: Filled by `/speckit-plan`. Do **not** create `tasks.md` in this command. Do **not** rewrite FRs in `specs/001`–`005`. No product code. No `MzM-Docs/` living edits in this PR.
+**Note**: Filled by `/speckit-plan` + Architect seam stamp. Do **not** create `tasks.md` in this command. Do **not** rewrite FRs in `specs/001`–`005`. No product code. No `MzM-Docs/` living edits in this PR.
 
 ## Summary
 
-Ship Phase 6 connectors/events/trust on durable **Host-owned** seams: users **install → authenticate → successfully call** one connector tool from a thin catalog/fixture; create one **event-triggered** routine (webhook harness / Verifier fixture) that **fires E2E** with last-run visibility and pause suppress; prove one **denied-permission** path; keep connector secrets **out of session dumps**; credential UX stays **in-app primary** (vault only if Pass connector cannot complete in-app). Client mutates/lists via **authenticated Host HTTP/WS**. Electron Main stays lifecycle-only (no connector / event / trust SoT bus). Prefer extending P4 Host Routine catalog for event triggers and composing existing `dsh-mcp-client`, `dsh-webhook` (or Host harness sibling), `dsh-credentials` / `dsh-authorization`, and `dsh-user-approval` — exact package homes **Architect-owned**. Out: Box/Shell (P7); full Grok connector catalog; named live event families as Pass; mandatory vault when in-app suffices; rewrite of `specs/001`–`005`.
+Ship Phase 6 connectors/events/trust on durable **Host-owned** seams: users **install → authenticate → successfully call** one connector tool from a thin catalog/fixture; create one **event-triggered** routine (webhook harness / Verifier fixture) that **fires E2E** with last-run visibility and pause suppress; prove one **denied-permission** path; keep connector secrets **out of session dumps**; credential UX stays **in-app primary** (vault only if Pass connector cannot complete in-app). Client mutates/lists via **authenticated Host HTTP/WS**. Electron Main stays lifecycle-only (no connector / event / trust SoT bus). **Locked homes:** extend P4 Host Routine catalog + Agent Teams journal for connector install state; compose `dsh-mcp-client`, adapted `dsh-webhook` ingress (B1 → Routine wake, not new-Session Pass), `dsh-credentials` / `dsh-authorization`, and `dsh-user-approval`. Out: Box/Shell (P7); full Grok connector catalog; named live event families as Pass; mandatory vault when in-app suffices; rewrite of `specs/001`–`005`.
 
 ## Technical Context
 
@@ -54,14 +54,14 @@ Ship Phase 6 connectors/events/trust on durable **Host-owned** seams: users **in
 | II. Spec-Driven Delivery | PASS | Artifacts under `specs/006-connectors-mcp-events-trust/`; Linear after tasks **when capacity**; clarify locks encoded |
 | III. Product Over Theater | PASS | Prioritizes one real install→auth→tool, one harness event fire, one deny, secrets-absent; defers vault/live families/full catalog |
 | IV. Verify Against Spec | PASS | SC-001…008 + contracts + FR-014/015 desktop evidence; Verifier gates Done |
-| V. Simplicity & Seam Honesty | PASS | Prefer existing mcp/webhook/credentials/approval seams + Host catalogs; Client projects; no Electron Main bus; Architect confirms homes |
+| V. Simplicity & Seam Honesty | PASS | Path A: Host catalogs + mcp-client / webhook B1 / credentials / user-approval; Client projects; no Electron Main bus |
 | Stack & Seam Constraints | PASS | DSH + Electron dual-process + Spec Kit; Linear deferred honestly |
 
-**Post-design re-check:** PASS — design honors clarify locks; package/home Options flagged for Architect. Complexity Tracking empty.
+**Post-design re-check:** PASS — clarify locks + Architect Path A locked. Complexity Tracking empty.
 
-### Topology one-liner (Spec recommendation → Architect confirm)
+### Topology one-liner (Architect Path A — locked)
 
-Bundled-Node **Desktop Host child** + shipped authenticated **Host HTTP/WS** data plane + Node IPC **lifecycle-only** + `dsh-app://`. Forbidden on Main↔Host IPC: connector-catalog / install / auth / tool-call control, event-routine create/fire, webhook delivery payloads, permission-deny control, credential values (extend `apps/desktop/src/host-protocol.ts` exclusion list like identity + skills + routines + memory).
+Bundled-Node **Desktop Host child** + shipped authenticated **Host HTTP/WS** data plane + Node IPC **lifecycle-only** + `dsh-app://`. Forbidden on Main↔Host IPC (extend `apps/desktop/src/host-protocol.ts` like identity + skills + routines + memory): connector-catalog, connector-install, connector-auth, mcp-tool-call control, event-routine-create, event-routine-fire, webhook-delivery, permission-deny / trust-rule control, credential **values** (and credential-set / secret payloads).
 
 ## Project Structure
 
@@ -71,7 +71,7 @@ Bundled-Node **Desktop Host child** + shipped authenticated **Host HTTP/WS** dat
 specs/006-connectors-mcp-events-trust/
 ├── spec.md              # Clarified feature spec (PR #200)
 ├── plan.md              # This file
-├── research.md          # Phase 0 (clarify locks + Spec-recommended Options)
+├── research.md          # Phase 0 (clarify locks + Architect Path A)
 ├── data-model.md        # Phase 1 — Connector / EventRoutine / Trust / Credential
 ├── quickstart.md        # Phase 1 validation guide
 ├── contracts/           # Phase 1 interface contracts
@@ -88,26 +88,26 @@ specs/006-connectors-mcp-events-trust/
 ### Source Code (repository root) — touch targets for later implement
 
 ```text
-apps/desktop/                          # Thin Electron shell; lifecycle IPC only; NO connector/event/trust SoT
+apps/desktop/                          # Thin Electron shell; lifecycle IPC only; NO connector/event/trust/credential-value bus
 apps/desktop-host/                     # Desktop Host child; catalogs + Remotes + harness + credential bind
-packages/experimental/agent-team/      # Prefer extend Host journal (P2–P5) for event Routine rows + connector install state if Architect agrees
+packages/experimental/agent-team/      # Extend Host journal (P2–P5): event Routine rows + Connector catalog; Verifier fixture home OK
 packages/mcp/mcp-client/               # MCP tool registration on ctx.tools (Pass tool call substrate)
 packages/mcp/mcp-resources/            # Shared MCP resource discovery (as needed)
-packages/webhook/webhook/              # Host webhookRuntime candidate for harness dispatch (Architect: wake vs new-Session)
+packages/webhook/webhook/              # B1: adapt ingress → Routine wake (existing bot + intent); not new-Session Pass
 packages/webhook/webhook-github/       # NOT required for Pass (live family deferred)
 packages/credentials/credentials/      # Credential seam (secrets out of config / dumps)
 packages/credentials/credentials-local/# Local durable credential store
 packages/credentials/authorization/    # Human auth flows when needed
-packages/interaction/user-approval/    # One-shot ask/deny for trust path (deny Pass)
+packages/interaction/user-approval/    # User-deny OR standing never for trust Pass; Client answerer via Host HTTP
 # Web/client UI — connector surface, event-routine create, approval card, auth UX (Host RPC); locale-owned copy
-# Optional Verifier fixture MCP server / webhook harness under apps/desktop-host or specs/.../verifier/
+# Verifier fixture MCP + webhook harness: agent-team and/or apps/desktop test fixture (in-app auth)
 ```
 
-**Structure Decision:** Extend Desktop dual-process layout. **Host-owned** connector + event-routine + trust/credential seams; Client projects over HTTP/WS. Prefer Agent Teams journal for durable product rows when Architect agrees (P2–P5 pattern). Exact package/file paths finalized in tasks after Architect answers open questions.
+**Structure Decision:** Extend Desktop dual-process layout. **Host-owned** connector + event-routine + trust/credential seams; Client projects over HTTP/WS. **Locked:** Agent Teams journal for durable product rows (P2–P5 pattern); B1 webhook ingress → Routine wake; fixture under agent-team or desktop test fixture. Exact file paths finalized in tasks within these seams.
 
 ## Phase 0 — Research
 
-See [research.md](./research.md). Clarify Session 2026-09-28 locks honored. Spec-recommended Options **A–E** await Architect confirmation.
+See [research.md](./research.md). Clarify Session 2026-09-28 locks honored. **Architect Path A locked** (Options A + B1 + additive RoutineRecord + either deny path + fixture + host-protocol exclusions).
 
 ## Phase 1 — Design
 
@@ -128,13 +128,19 @@ See [research.md](./research.md). Clarify Session 2026-09-28 locks honored. Spec
 | Secrets absent + credential UX | Store secrets in credential seam; never session-dump plaintext; in-app primary | Auth surface without renderer durable secrets; vault only if needed | [secrets.md](./contracts/secrets.md) |
 | Non-goals + absence | No P7 / full catalog / live-family Pass; no Main bus; no 001–005 rewrite | Absence checks | [non-goals.md](./contracts/non-goals.md) |
 
-### Locks honored (clarify 2026-09-28)
+### Locks honored (clarify 2026-09-28 + Architect Path A)
 
 | Lock | Plan treatment |
 |------|----------------|
-| Event Pass = webhook harness / Verifier fixture | R3 + event-routine; FR-018 / SC-002 |
+| Event Pass = webhook harness / Verifier fixture | R3 B1 + event-routine; FR-018 / SC-002 |
 | Vault UX optional | R5 + secrets; FR-009 / SC-007 |
 | Any thin-catalog / fixture connector | R1–R2 + connector; FR-017 / SC-001 |
+| Host catalog + mcp-client bind (Option A) | R1 Architect lock |
+| B1 webhook ingress → Routine wake | R3 Architect lock |
+| Additive `triggerKind` + `eventTrigger` | R3 / data-model; no `specs/004` rewrite |
+| Deny = user-deny **or** standing never | R4; Client answerer on Host HTTP |
+| Pass fixture + in-app auth | R2 / R5 |
+| host-protocol exclusions | R6 / R9 |
 | SO 11+12 GUI evidence | R7; FR-014/015 |
 | Cron additive (no P4 rewrite) | R3; SC-008 |
 | No Linear ids invented | research R8; Next (held) |
@@ -145,4 +151,4 @@ See [research.md](./research.md). Clarify Session 2026-09-28 locks honored. Spec
 
 ## Next (held)
 
-After **Architect confirms** open questions + **Verifier Pass** on this plan PR: `/speckit-tasks` → analyze → `taskstoissues` **when Linear capacity exists** → implement. Until then track via PR only. Living gate / plan file updates remain DH Lead / PO-owned (not this PR).
+After **Verifier Pass** on this plan PR: `/speckit-tasks` → analyze → `taskstoissues` **when Linear capacity exists** → implement. Architect Path A is locked — do not reopen. Until Linear capacity, track via PR only. Living gate / plan file updates remain DH Lead / PO-owned (not this PR).

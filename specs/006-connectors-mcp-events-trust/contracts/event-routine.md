@@ -17,7 +17,7 @@
 
 1. Empty intent rejected with clear user-visible reason.
 2. Pass event family = **webhook harness / Verifier fixture** only; live Slack/GitHub/Linear/email **not** required.
-3. Fire = Host wake applying intent to the bot (P4 fire shape); LLM wording not scored.
+3. Fire = Host wake applying intent to the **existing** bot (P4 fire shape; Architect B1 — adapt `dsh-webhook` ingress → Routine wake, not new-Session Pass); LLM wording not scored.
 4. Manual “Run now” alone is **insufficient** for Pass — harness delivery required.
 5. Paused interval: matching events MUST NOT record fire.
 6. Cron routines from P4 remain usable (SC-008); do not rewrite `specs/004`.
