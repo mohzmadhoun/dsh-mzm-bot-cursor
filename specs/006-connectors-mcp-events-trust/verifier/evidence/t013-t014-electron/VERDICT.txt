@@ -1,0 +1,66 @@
+DH Verifier — P6 T013–T014 Electron thin-shell gate
+====================================================
+
+Verdict: PASS
+Subject tip (measured): 8da5633887f13ee8dd05a44ad1dab9ac158f6467
+  Phase 6 - T013-T014 - forbid Electron connector event trust bus
+Branch under test: cursor/p6-foundation-electron-fe1d
+Upcoming PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/206
+Verify stamp branch: cursor/p6-t013-t014-verify-e81f
+Do not merge this stamp as product work; PO owns PR #206 merge.
+
+Acceptance criteria (tasks.md T013–T014 / research R6·R9)
+---------------------------------------------------------
+[x] T013 host-protocol exclusions forbid connector / event / trust / credential-value
+    IPC payload names on Node IPC (docs on CHILD + CONTROL; not members of arrays)
+[x] T014 no-electron-connectors-events-trust-bus.spec.ts exists and is green
+[x] Guard catches a planted bus (mutation: dsh-desktop:connector-catalog → 3/3 fail)
+[x] No Host Connector/event/trust/credential-value SoT in Electron Main sources
+
+Evidence — measured
+-------------------
+1) R9 vocabulary present in host-protocol.ts + ipc.ts exclusion prose; absent from
+   DESKTOP_HOST_CHILD_EVENT_TYPES / DESKTOP_HOST_CONTROL_TYPES member arrays:
+   connector-catalog, connector-install, connector-auth, mcp-tool-call,
+   event-routine-create, event-routine-fire, webhook-delivery,
+   permission-deny, trust-rule,
+   credential-value, credential-set, secret-payload
+   → R9 missing in host-protocol: NONE; R9 missing in ipc.ts: NONE
+
+2) Lifecycle enums only (node --import tsx/esm dump):
+   CHILD = ready | fatal | shutdown-complete | update-tasks
+   CTRL  = shutdown | update-tasks
+   DESKTOP_IPC = boot | boot-failed | directory-pick | updates-* | native-theme-set |
+                 windows-appearance | windows-menu
+   (no connector/event/trust/credential-value channels)
+
+3) Main/preload product API scan (rg ConnectorRecord|installConnector|eventRoutine|
+   trustRule|credentialValue|ConnectorCatalog|webhookDelivery|permissionDeny|mcpToolCall
+   under apps/desktop/src): no matches
+
+4) ipcMain handlers in main.ts remain chrome/lifecycle only (boot, bootFailed,
+   nativeThemeSet, updates*, windows*) — measured; Map in host-process.ts is
+   update-task query bookkeeping only, not a connector store — measured
+
+5) Vitest green:
+   pnpm exec vitest run apps/desktop/tests/no-electron-connectors-events-trust-bus.spec.ts
+   → Test Files 1 passed · Tests 3 passed
+   log: vitest-bus-guard.log / vitest-bus-guard-rerun.log
+   also: /opt/cursor/artifacts/p6-t013-t014-bus-guard.log
+
+6) Mutation proof (temporary plant then restore):
+   Inserted DESKTOP_IPC.connectorCatalog = 'dsh-desktop:connector-catalog'
+   → Test Files 1 failed · Tests 3 failed
+   log: vitest-mutation-plant-bus-fail.log
+   also: /opt/cursor/artifacts/p6-t013-t014-mutation-fail.log
+   ipc.ts restored; subsequent vitest 3/3 green — measured
+
+Not gated here
+--------------
+- T007–T012 Host ConnectorRecord / catalog / MCP / credentials / Host HTTP SoT
+- T015 B1 webhook harness doc
+- T016 foundational README stamp
+- US1–US5 product SC / GUI evidence
+
+Blockers for DH Lead: none for T013–T014
+Merge: do not merge (Verifier gate only; product PR is #206)
