@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine' | 'pauseRoutine' | 'resumeRoutine'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine' | 'pauseRoutine' | 'resumeRoutine' | 'writeMemory' | 'listMemories'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -371,6 +371,42 @@ async function bench(options: {
           },
         })
     },
+    writeMemory: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/writeMemory', args })
+      return Promise.resolve(options.remoteFailure === 'writeMemory'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              memory: {
+                memoryId: 'memory-1',
+                kind: 'profile' as const,
+                layer: 'agent' as const,
+                botId: CHILD,
+                content: 'Timezone: UTC',
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          },
+        })
+    },
+    listMemories: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/listMemories', args })
+      return Promise.resolve(options.remoteFailure === 'listMemories'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              memories: [],
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -517,6 +553,15 @@ describe('ui-team browser plugin', () => {
     expect((await actions.resumeRoutine(SESSION, {
       routineId: 'routine-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
     })).ok).toBe(true)
+    expect((await actions.writeMemory(SESSION, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: CHILD,
+      content: 'Timezone: UTC',
+    })).ok).toBe(true)
+    expect((await actions.listMemories(SESSION, {
+      botId: CHILD,
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -541,6 +586,8 @@ describe('ui-team browser plugin', () => {
       'agentTeams/createRoutine',
       'agentTeams/pauseRoutine',
       'agentTeams/resumeRoutine',
+      'agentTeams/writeMemory',
+      'agentTeams/listMemories',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',

@@ -19,6 +19,11 @@ import type {
   DeleteBotInput,
   DeleteBotResult,
   HostMailboxMessage,
+  ListMemoriesInput,
+  ListMemoriesResult,
+  MemoryKind,
+  MemoryLayer,
+  MemoryProjection,
   PauseRoutineInput,
   PauseRoutineResult,
   RenameBotInput,
@@ -48,6 +53,8 @@ import type {
   UpdatePersonaResult,
   UpsertUserSkillInput,
   UpsertUserSkillResult,
+  WriteMemoryInput,
+  WriteMemoryResult,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type { RemoteResult } from '@deepseek-ai/dsh-api-remotes/client'
 import {
@@ -105,6 +112,12 @@ export type TeamPauseRoutineActionResult = RemoteResult<BotIdentityMutationResul
 /** Generated Remote result whose business value preserves Team resumeRoutine rejections. */
 export type TeamResumeRoutineActionResult = RemoteResult<BotIdentityMutationResult<ResumeRoutineResult>>
 
+/** Generated Remote result whose business value preserves Team writeMemory rejections. */
+export type TeamWriteMemoryActionResult = RemoteResult<BotIdentityMutationResult<WriteMemoryResult>>
+
+/** Generated Remote result whose business value preserves Team listMemories rejections. */
+export type TeamListMemoriesActionResult = RemoteResult<BotIdentityMutationResult<ListMemoriesResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -121,6 +134,8 @@ export interface TeamActionInjected {
   createRoutine: (sessionId: SessionId, input: CreateRoutineInput) => Promise<TeamCreateRoutineActionResult>
   pauseRoutine: (sessionId: SessionId, input: PauseRoutineInput) => Promise<TeamPauseRoutineActionResult>
   resumeRoutine: (sessionId: SessionId, input: ResumeRoutineInput) => Promise<TeamResumeRoutineActionResult>
+  writeMemory: (sessionId: SessionId, input: WriteMemoryInput) => Promise<TeamWriteMemoryActionResult>
+  listMemories: (sessionId: SessionId, input: ListMemoriesInput) => Promise<TeamListMemoriesActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -213,6 +228,16 @@ interface CreateRoutineDraft {
   scheduleExpr: string
 }
 
+/**
+ * Draft fields for Host writeMemory profile kind (P5 FR-001 / T015).
+ * Content MUST be non-empty after trim; layer is agent | user (FR-017 orthogonal).
+ * T015 ships profile only — log/note kinds land on the shared surface in later US tasks.
+ */
+interface WriteMemoryDraft {
+  content: string
+  layer: MemoryLayer | ''
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
@@ -222,6 +247,7 @@ const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
 const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
 const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = { intent: '', scheduleExpr: '' }
+const EMPTY_WRITE_MEMORY_DRAFT: WriteMemoryDraft = { content: '', layer: '' }
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
@@ -232,6 +258,12 @@ const ATTACH_SKILL_NONE = ''
 /** Select sentinel for routine schedule — never a product scheduleExpr. */
 const ROUTINE_SCHEDULE_NONE = ''
 
+/** Select sentinel for memory layer — never a Host MemoryLayer value. */
+const MEMORY_LAYER_NONE = ''
+
+/** US1 profile kind fixed for T015 write surface (log/note added by later tasks). */
+const MEMORY_WRITE_KIND: MemoryKind = 'profile'
+
 /** Product-supported schedule presets for Host createRoutine (P4 T008 / FR-001). */
 const ROUTINE_SCHEDULE_PRESETS = [
   { value: '@every 5m', label: 'routineSchedule.every5m' },
@@ -239,9 +271,62 @@ const ROUTINE_SCHEDULE_PRESETS = [
   { value: '@daily', label: 'routineSchedule.daily' },
 ] as const satisfies readonly { readonly value: string; readonly label: TeamKey }[]
 
+/** Product layer choices for Host writeMemory (FR-017 — orthogonal to kind). */
+const MEMORY_LAYER_OPTIONS = [
+  { value: 'agent', label: 'memoryLayer.agent' },
+  { value: 'user', label: 'memoryLayer.user' },
+] as const satisfies readonly { readonly value: MemoryLayer; readonly label: TeamKey }[]
+
 /** Stable Client key for session-active run indication on one bot×skill pair (FR-004). */
 function skillSessionActiveKey(botId: SessionId, skillId: SkillId): string {
   return `${botId}\0${skillId}`
+}
+
+/**
+ * Host listMemories filter mirrored for Client display from `TeamView.memories`.
+ * Agent-layer rows for this bot plus all account-wide user rows (P5 T007–T008).
+ * @param memories - Host Memory projections from `agentTeams/view` or `listMemories`.
+ * @param botId - Bot Session whose agent-layer rows are in scope.
+ * @returns memories visible in that bot’s memory surface.
+ */
+function memoriesForBot(
+  memories: readonly MemoryProjection[],
+  botId: SessionId,
+): MemoryProjection[] {
+  return memories.filter(memory => (
+    memory.layer === 'user'
+    || (memory.layer === 'agent' && memory.botId === botId)
+  ))
+}
+
+/** Locale key for one Host Memory kind label. */
+function memoryKindKey(kind: MemoryKind): TeamKey {
+  switch (kind) {
+    case 'profile':
+      return 'memoryKind.profile'
+    case 'log':
+      return 'memoryKind.log'
+    case 'note':
+      return 'memoryKind.note'
+    default: {
+      const _exhaustive: never = kind
+      return _exhaustive
+    }
+  }
+}
+
+/** Locale key for one Host Memory layer label. */
+function memoryLayerKey(layer: MemoryLayer): TeamKey {
+  switch (layer) {
+    case 'agent':
+      return 'memoryLayer.agent'
+    case 'user':
+      return 'memoryLayer.user'
+    default: {
+      const _exhaustive: never = layer
+      return _exhaustive
+    }
+  }
 }
 
 /** Fixed Host avatar shape presets mirrored for the Client picker (FR-005). */
@@ -450,8 +535,8 @@ function memberLabel(
 export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
   createSection, renameSection, assignSection, attachSkill, upsertUserSkill,
-  createRoutine, pauseRoutine, resumeRoutine, createTask, updateTask,
-  openTeammate, openModelsSettings, t,
+  createRoutine, pauseRoutine, resumeRoutine, writeMemory, listMemories,
+  createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -484,6 +569,9 @@ export function TeamAction({
   /** Bot whose Host createRoutine editor is open (US1 / T017). */
   const [creatingRoutineBotId, setCreatingRoutineBotId] = useState<SessionId | null>(null)
   const [createRoutineDraft, setCreateRoutineDraft] = useState<CreateRoutineDraft>(EMPTY_CREATE_ROUTINE_DRAFT)
+  /** Bot whose Host writeMemory (profile) editor is open (P5 US1 / T015). */
+  const [writingMemoryBotId, setWritingMemoryBotId] = useState<SessionId | null>(null)
+  const [writeMemoryDraft, setWriteMemoryDraft] = useState<WriteMemoryDraft>(EMPTY_WRITE_MEMORY_DRAFT)
   /**
    * Session-local instructional bodies from successful upserts (edit prefill).
    * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
@@ -550,6 +638,8 @@ export function TeamAction({
     setSkillAuthorDraft(EMPTY_SKILL_AUTHOR_DRAFT)
     setCreatingRoutineBotId(null)
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+    setWritingMemoryBotId(null)
+    setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
     setAuthoredBodies(new Map())
     setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
@@ -993,6 +1083,53 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
 
+  const settleWriteMemory = useCallback(async (
+    botId: SessionId,
+    operation: () => Promise<TeamWriteMemoryActionResult>,
+  ): Promise<WriteMemoryResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`write-memory:${botId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        // Transport / Host-unavailable: keep prior Host memories in the loaded view.
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        // Team rejection: Host did not write; pane still shows prior memories.
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const written = result.value.value
+      // Browse/return via Host listMemories Remote (same catalog as view.memories).
+      const listed = await listMemories(requestedSession, { botId })
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!listed.ok) {
+        reportFailure(listed.error)
+        return undefined
+      }
+      if (!listed.value.ok) {
+        reportFailure(listed.value.error)
+        return undefined
+      }
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return written
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`write-memory:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, listMemories, refresh, reportFailure, sessionId])
+
   const settleRoutineStatus = useCallback(async (
     routineId: RoutineId,
     operation: () => Promise<TeamPauseRoutineActionResult | TeamResumeRoutineActionResult>,
@@ -1091,6 +1228,7 @@ export function TeamAction({
     setAssigningBotId(null)
     setAttachingBotId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
   }
 
   const submitPersona = async (member: TeamRosterMember): Promise<void> => {
@@ -1114,6 +1252,7 @@ export function TeamAction({
     setAssigningBotId(null)
     setAttachingBotId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
   }
 
   const submitRename = async (member: TeamRosterMember): Promise<void> => {
@@ -1141,6 +1280,7 @@ export function TeamAction({
     setAssigningBotId(null)
     setAttachingBotId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
   }
 
   const submitAvatar = async (member: TeamRosterMember): Promise<void> => {
@@ -1165,6 +1305,7 @@ export function TeamAction({
     setAssigningBotId(null)
     setAttachingBotId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
   }
 
   /** Cancel / dismiss confirm → idle with profile unchanged (data-model cancelled → idle). */
@@ -1219,6 +1360,7 @@ export function TeamAction({
     setEditingSectionId(null)
     setAttachingBotId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
   }
 
   const submitAssignSection = async (
@@ -1243,6 +1385,7 @@ export function TeamAction({
     setAssigningBotId(null)
     setEditingSectionId(null)
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
   }
 
@@ -1262,6 +1405,8 @@ export function TeamAction({
   const startCreateRoutine = (member: TeamRosterMember): void => {
     setCreatingRoutineBotId(member.id)
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+    setWritingMemoryBotId(null)
+    setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
     setAttachingBotId(null)
     setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
     setEditingRename(null)
@@ -1289,7 +1434,45 @@ export function TeamAction({
     }))
     if (saved === undefined) return
     setCreatingRoutineBotId(null)
+    setWritingMemoryBotId(null)
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+  }
+
+  const startWriteMemory = (member: TeamRosterMember): void => {
+    setWritingMemoryBotId(member.id)
+    setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
+    setCreatingRoutineBotId(null)
+    setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
+    setAttachingBotId(null)
+    setAttachSkillDraft(EMPTY_ATTACH_SKILL_DRAFT)
+    setEditingRename(null)
+    setEditingAvatar(null)
+    setEditingPersona(null)
+    setPendingDelete(null)
+    setAssigningBotId(null)
+    setEditingSectionId(null)
+  }
+
+  /**
+   * Host writeMemory profile fact in bot context (P5 FR-001 / SC-001 / T015).
+   * Empty content rejects Client-side; layer choice is orthogonal (FR-017).
+   * Agent layer requires this botId; user layer omits botId (account-wide).
+   * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
+   */
+  const submitWriteMemory = async (member: TeamRosterMember): Promise<void> => {
+    const content = writeMemoryDraft.content.trim()
+    const layer = writeMemoryDraft.layer
+    /* v8 ignore next -- WriteMemoryForm disables Save while content or layer is empty. */
+    if (content === '' || layer === '') return
+    const saved = await settleWriteMemory(member.id, () => writeMemory(sessionId, {
+      kind: MEMORY_WRITE_KIND,
+      layer,
+      content,
+      ...layer === 'agent' ? { botId: member.id } : { botId: null },
+    }))
+    if (saved === undefined) return
+    setWritingMemoryBotId(null)
+    setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
   }
 
   /**
@@ -1440,16 +1623,22 @@ export function TeamAction({
     const assignPending = pendingTasks.has(`assign-section:${member.id}`)
     const attachPending = pendingTasks.has(`attach-skill:${member.id}`)
     const createRoutinePending = pendingTasks.has(`create-routine:${member.id}`)
+    const writeMemoryPending = pendingTasks.has(`write-memory:${member.id}`)
     const confirmPending = pendingDelete === member.id
     const assignOpen = assigningBotId === member.id
     const attachOpen = attachingBotId === member.id
     const createRoutineOpen = creatingRoutineBotId === member.id
+    const writeMemoryOpen = writingMemoryBotId === member.id
     const attachments = member.skillAttachments ?? []
     const botRoutines = view === null
       ? []
       : view.routines.filter((routine: RoutineProjection) => routine.botId === member.id)
+    const botMemories = view === null
+      ? []
+      : memoriesForBot(view.memories ?? [], member.id)
     const identityBusy = personaPending || renamePending || avatarPending
       || deletePending || assignPending || attachPending || createRoutinePending
+      || writeMemoryPending
       || botRoutines.some(routine => pendingTasks.has(`routine-status:${routine.routineId}`))
     const catalogById = view === null
       ? new Map<SkillId, SkillCatalogSummary>()
@@ -1586,6 +1775,7 @@ export function TeamAction({
             )}
             {canEditIdentity && !attachOpen
               && !createRoutineOpen
+              && !writeMemoryOpen
               && editingRename !== member.id
               && editingAvatar !== member.id
               && editingPersona !== member.id
@@ -1700,12 +1890,14 @@ export function TeamAction({
                 onSave={() => { void submitCreateRoutine(member) }}
                 onCancel={() => {
                   setCreatingRoutineBotId(null)
+                  setWritingMemoryBotId(null)
                   setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
                 }}
                 t={t}
               />
             )}
             {canEditIdentity && !createRoutineOpen
+              && !writeMemoryOpen
               && !attachOpen
               && editingRename !== member.id
               && editingAvatar !== member.id
@@ -1720,6 +1912,77 @@ export function TeamAction({
                 onClick={() => { startCreateRoutine(member) }}
               >
                 <IconPlusOutline16 size={13} /> {t('createRoutine')}
+              </button>
+            )}
+          </div>
+        )}
+        {member.role === 'teammate' && (
+          <div
+            className={css.botMemories}
+            data-team-bot-memories={member.id}
+          >
+            <div className={css.botMemoriesHeader}>
+              <span className={css.botMemoriesLabel}>{t('botMemories')}</span>
+            </div>
+            <p className={css.hint}>{t('botMemoriesHint')}</p>
+            {botMemories.length === 0
+              ? <div className={css.notice} data-team-bot-memories-empty={member.id}>{t('botMemoriesEmpty')}</div>
+              : (
+                <ul className={css.botMemoriesList} data-team-bot-memories-list={member.id}>
+                  {botMemories.map((memory: MemoryProjection) => (
+                    <li
+                      key={memory.memoryId}
+                      className={css.botMemoryRow}
+                      data-team-memory-row={memory.memoryId}
+                      data-team-memory-kind={memory.kind}
+                      data-team-memory-layer={memory.layer}
+                    >
+                      <span
+                        className={css.botMemoryKind}
+                        data-team-memory-kind-label={memory.kind}
+                      >
+                        {t(memoryKindKey(memory.kind))}
+                      </span>
+                      <span
+                        className={css.botMemoryLayer}
+                        data-team-memory-layer-label={memory.layer}
+                      >
+                        {t(memoryLayerKey(memory.layer))}
+                      </span>
+                      <span data-team-memory-content={memory.memoryId}>{memory.content}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            {canEditIdentity && writeMemoryOpen && (
+              <WriteMemoryForm
+                draft={writeMemoryDraft}
+                setDraft={setWriteMemoryDraft}
+                pending={writeMemoryPending}
+                onSave={() => { void submitWriteMemory(member) }}
+                onCancel={() => {
+                  setWritingMemoryBotId(null)
+                  setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
+                }}
+                t={t}
+              />
+            )}
+            {canEditIdentity && !writeMemoryOpen
+              && !createRoutineOpen
+              && !attachOpen
+              && editingRename !== member.id
+              && editingAvatar !== member.id
+              && editingPersona !== member.id
+              && !confirmPending
+              && !assignOpen && (
+              <button
+                type="button"
+                className={css.personaButton}
+                disabled={identityBusy}
+                data-team-write-memory={member.id}
+                onClick={() => { startWriteMemory(member) }}
+              >
+                <IconPlusOutline16 size={13} /> {t('writeMemory')}
               </button>
             )}
           </div>
@@ -1787,7 +2050,8 @@ export function TeamAction({
           && !confirmPending
           && !assignOpen
           && !attachOpen
-          && !createRoutineOpen && (
+          && !createRoutineOpen
+          && !writeMemoryOpen && (
           <div className={css.identityActions}>
             <button
               type="button"
@@ -2651,6 +2915,78 @@ function CreateRoutineForm({
         {ROUTINE_SCHEDULE_PRESETS.map(preset => (
           <option key={preset.value} value={preset.value}>
             {t(preset.label)}
+          </option>
+        ))}
+      </select>
+      <div className={css.formActions}>
+        <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+
+interface WriteMemoryFormProps {
+  draft: WriteMemoryDraft
+  setDraft: (draft: WriteMemoryDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+/**
+ * Host writeMemory profile editor in bot context (P5 FR-001 / SC-001 / T015).
+ * Empty content or missing layer show a clear reject and block Save.
+ * Kind is fixed to profile for US1; layer choice is orthogonal (FR-017).
+ */
+function WriteMemoryForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: WriteMemoryFormProps) {
+  const ready = draft.content.trim() !== '' && draft.layer !== ''
+  return (
+    <div
+      className={css.form}
+      data-team-write-memory-editor=""
+    >
+      <p className={css.hint}>{t('writeMemoryHint')}</p>
+      {!ready && (
+        <div
+          className={css.error}
+          role="alert"
+          data-team-write-memory-reject=""
+        >
+          {t('memoryWriteReject')}
+        </div>
+      )}
+      <textarea
+        aria-label={t('memoryContent')}
+        data-team-memory-content-input=""
+        value={draft.content}
+        placeholder={t('memoryContentPlaceholder')}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+          setDraft({ ...draft, content: event.target.value })
+        }}
+      />
+      <select
+        aria-label={t('memoryLayer')}
+        data-team-memory-layer-select=""
+        value={draft.layer === '' ? MEMORY_LAYER_NONE : draft.layer}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+          const value = event.target.value
+          setDraft({
+            ...draft,
+            layer: value === MEMORY_LAYER_NONE ? '' : value as MemoryLayer,
+          })
+        }}
+      >
+        <option value={MEMORY_LAYER_NONE}>{t('memoryLayerPlaceholder')}</option>
+        {MEMORY_LAYER_OPTIONS.map(option => (
+          <option key={option.value} value={option.value}>
+            {t(option.label)}
           </option>
         ))}
       </select>

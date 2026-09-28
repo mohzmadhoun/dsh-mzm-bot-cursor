@@ -90,7 +90,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 1
 
 - [x] T014 [US1] Host `createMemory` (or equivalent) for `kind=profile` validates non-empty `content` after trim; rejects empty with clear user-visible/error reason; persists `MemoryRecord` on Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-001 — bot-tool write **not** required (FR-015)
-- [ ] T015 [P] [US1] Client memory write surface (profile kind + layer choice per product UI) under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) calling Host HTTP/WS only (no Main IPC mutations)
+- [x] T015 [P] [US1] Client memory write surface (profile kind + layer choice per product UI) under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) calling Host HTTP/WS only (no Main IPC mutations)
 - [ ] T016 [US1] Add Verifier Scenario 1 recipe in `specs/005-memory-productization/verifier/scenario-1-write-kinds.md` covering SC-001 (profile write + empty reject + leave/return) and **requiring** FR-011/012 desktop evidence under `specs/005-memory-productization/verifier/evidence/scenario-1/` (unit/jsdom alone fails); note SC-009 bot-tool absence must not fail Pass
 
 **Checkpoint**: US1 profile write works independently with Verifier recipe + evidence path.

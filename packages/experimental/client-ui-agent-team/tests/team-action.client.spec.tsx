@@ -17,9 +17,11 @@ import {
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
   type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
-  type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
+  type TeamListMemoriesActionResult, type TeamRenameBotActionResult,
+  type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
   type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
+  type TeamWriteMemoryActionResult,
 } from '../src/client/TeamAction.tsx'
 import { zh } from '../src/client/locales.ts'
 
@@ -290,6 +292,32 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
             createdAt: 1,
             updatedAt: 3,
           },
+        },
+      },
+    }),
+    writeMemory: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          memory: {
+            memoryId: 'memory-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+            kind: 'profile' as const,
+            layer: 'agent' as const,
+            botId: 'worker-id' as SessionId,
+            content: 'Timezone: UTC',
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        },
+      },
+    }),
+    listMemories: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          memories: [],
         },
       },
     }),
@@ -3116,6 +3144,167 @@ describe('TeamAction', () => {
     expect(await screen.findByText('pauseRoutine offline (gateway/internal)')).toBeTruthy()
     expect(document.querySelector(`[data-team-routine="${routineId}"]`)
       ?.getAttribute('data-team-routine-status')).toBe('active')
+  })
+
+
+  it('writes a non-empty profile memory via Host writeMemory and lists it (T015 / US1)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const createdMemory = {
+      memoryId: 'memory-profile-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Timezone: America/New_York',
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, memories: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, memories: [createdMemory] },
+      })
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memory: createdMemory } },
+    }))
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memories: [createdMemory] } },
+    }))
+    render(<TeamAction {...props(actions({ load, writeMemory, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.botMemoriesEmpty)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    expect(screen.getByText(zh.writeMemoryHint)).toBeTruthy()
+    expect(screen.getByText(zh.memoryWriteReject)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Timezone: America/New_York' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'agent' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(writeMemory).toHaveBeenCalledWith(SESSION, {
+        kind: 'profile',
+        layer: 'agent',
+        content: 'Timezone: America/New_York',
+        botId: workerId,
+      })
+    })
+    await waitFor(() => {
+      expect(listMemories).toHaveBeenCalledWith(SESSION, { botId: workerId })
+    })
+    expect(await screen.findByText('Timezone: America/New_York')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="profile"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer="agent"]')).toBeTruthy()
+    expect(screen.queryByText(zh.botMemoriesEmpty)).toBeNull()
+  })
+
+  it('writes a user-layer profile memory without botId (T015 / FR-017)', async () => {
+    const createdMemory = {
+      memoryId: 'memory-user-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Prefers concise answers',
+      createdAt: 11,
+      updatedAt: 11,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, memories: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, memories: [createdMemory] },
+      })
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memory: createdMemory } },
+    }))
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memories: [createdMemory] } },
+    }))
+    render(<TeamAction {...props(actions({ load, writeMemory, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    await screen.findByText(zh.botMemoriesEmpty)
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Prefers concise answers' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'user' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(writeMemory).toHaveBeenCalledWith(SESSION, {
+        kind: 'profile',
+        layer: 'user',
+        content: 'Prefers concise answers',
+        botId: null,
+      })
+    })
+    expect(await screen.findByText('Prefers concise answers')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer="user"]')).toBeTruthy()
+  })
+
+  it('shows Host writeMemory rejection without inventing a listed memory (T015)', async () => {
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: false,
+        error: { code: 'team-rejected', message: 'content must be non-empty' },
+      },
+    }))
+    const listMemories = vi.fn()
+    render(<TeamAction {...props(actions({ writeMemory, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    await screen.findByText(zh.botMemoriesEmpty)
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Will fail on Host' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'agent' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('content must be non-empty (team-rejected)')).toBeTruthy()
+    expect(listMemories).not.toHaveBeenCalled()
+    expect(screen.getByText(zh.botMemoriesEmpty)).toBeTruthy()
+  })
+
+  it('keeps prior memories and shows failure when writeMemory transport is unavailable (T015)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const existing = {
+      memoryId: 'memory-existing' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Keep me',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, memories: [existing] },
+    })
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve(
+      remoteFailure('writeMemory offline'),
+    ))
+    render(<TeamAction {...props(actions({ load, writeMemory }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Keep me')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Another' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'user' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    expect(await screen.findByText('writeMemory offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByText('Keep me')).toBeTruthy()
   })
 
 })

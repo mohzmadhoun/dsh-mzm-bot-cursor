@@ -71,6 +71,10 @@ Each teammate card exposes a **Bot skills** surface driven by Host `skillAttachm
 
 Each teammate card exposes a **Bot routines** surface projected from Host `TeamView.routines` for that `botId` only (SC-006). **New routine** opens intent + product-supported schedule fields and calls Host Remote `agentTeams/createRoutine` over authenticated HTTP/WS — not Electron Main IPC. Empty intent or schedule show a clear Client reject; Host rejections leave the list unchanged. Confirm is optional (SC-007); identity may derive from intent (no separate display-name field). Success reloads the Team view so the active routine appears on that bot. **Pause** / **Resume** on a listed row call Host Remotes `agentTeams/pauseRoutine` / `agentTeams/resumeRoutine` with that `routineId`; the pane status updates from the refreshed Host projection (`active` ↔ `paused`). Transport or Team rejection leaves the prior status visible. Electron Main does not own the routine catalog or pause flags.
 
+### Write a profile memory fact
+
+Each teammate card exposes a **Bot memory** surface projected from Host `TeamView.memories` (agent-layer rows for that bot plus account-wide user rows — same filter as Host `listMemories`). **Write profile memory** opens content + Agent/User layer fields and calls Host Remote `agentTeams/writeMemory` with `kind=profile` over authenticated HTTP/WS — not Electron Main IPC. Empty content shows a clear Client reject and does not call Host; Host rejections leave the list unchanged. Success calls Host `agentTeams/listMemories` then reloads the Team view so the saved profile fact appears with distinguishable kind and layer labels. Electron Main does not own memory records.
+
 ### List Host routines on a bot pane
 
 The same **Bot routines** pane is the US2 info-pane list: each Host `RoutineProjection` row shows intent-derived identity, schedule label, active/paused status, and last-run (or not-run-yet). Rows come only from Host `TeamView.routines` (same Host catalog projection as `listRoutinesByBot`); the session Schedule / `ui-schedule` header catalog is not the Pass surface. Closing and reopening the panel reloads Host state so listed routines remain without re-create. Electron Main does not invent routine rows.
@@ -102,7 +106,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host writeMemory profile + listMemories memory pane, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
