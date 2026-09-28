@@ -1,27 +1,31 @@
-T019 Scenario 1 log write (SC-002) — DH Verifier
-================================================
-Verdict: Pass (SC-002 log write + empty reject + leave/return; SC-001 retained)
-Stamp: 2026-09-28 · tip origin/master @ b067738146 (#183 Client T018 on tip)
+T022 Scenario 1 note write (SC-003) — DH Verifier
+=================================================
+Verdict: Pass (SC-003 note write + empty reject + leave/return + kinds distinguishable;
+         SC-001 + SC-002 retained)
+Stamp: 2026-09-28 · tip origin/master @ 7050dc5a41 (#187 Client T021 on tip)
   · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
   · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
-  · unblock: gen-persistence-catalog added team/memory to KNOWN_SESSION_EVENT_TYPES
-Branch: cursor/p5-t019-scenario1-log-fe1d
-Linear: MOH-256 (T019) · Epic MOH-228 — left In Progress (PO closes after merge)
+  · runtime: rebuilt client-ui-agent-team tsdown bundle so kind=note is in lib/client.js
+Branch: cursor/p5-t022-scenario1-note-fe1d
+Linear: MOH-259 (T022) · Epic MOH-228 — left In Progress (PO closes after merge)
 Recipe: specs/005-memory-productization/verifier/scenario-1-write-kinds.md
 
-Acceptance (T019 / SC-002)
+Acceptance (T022 / SC-003)
 --------------------------
-[x] Step D — Write non-empty log fact (fixture
-    "Logged standup: shipped Host writeMemory kind=log validation", layer=agent)
-    listed as kind=log on data-team-bot-memories —
-    evidence/scenario-1/04-log-listed.png
-[x] Step E — Empty content rejected with clear user-visible reason while kind=log;
-    Save disabled; no new listed log row —
-    evidence/scenario-1/05-log-reject-empty.png
-[x] Step F — Same Host-projected log fact after leave/return
-    (no Desktop restart); memoryId=memory-850d8aa0-98bc-4227-abe6-46b95e83e74c —
-    evidence/scenario-1/06-log-after-leave-return.png
+[x] Step G — Write non-empty note fact (fixture
+    "Remember to stamp SC-003 after note write", layer=agent)
+    listed as kind=note on data-team-bot-memories —
+    evidence/scenario-1/07-note-listed.png
+[x] Step H — Empty content rejected with clear user-visible reason while kind=note;
+    Save disabled; no new listed note row —
+    evidence/scenario-1/08-note-reject-empty.png
+[x] Step I — Same Host-projected note fact after leave/return
+    (no Desktop restart); memoryId=memory-7d66e260-8bea-42c0-ac9f-92647402704c —
+    evidence/scenario-1/09-note-after-leave-return.png
+[x] Kinds distinguishable — profile + log + note all present on list
+    (kindsPresent=["profile","log","note"]) after note write and after leave/return
 [x] SC-001 retained — prior T016 profile evidence 01–03 still present
+[x] SC-002 retained — prior T019 log evidence 04–06 still present
 [x] SC-009 — bot-tool write absence did not fail Pass (UI write path only)
 [x] FR-011 (SO 11) — real Desktop screenshots + walkthrough recording
 [x] FR-012 (SO 12) — media committed under verifier/evidence/scenario-1/
@@ -29,46 +33,49 @@ Acceptance (T019 / SC-002)
 
 Provenance (measured)
 ---------------------
-Desktop CDP hard-assert @ tip b067738146 (DISPLAY=:1, port 9222):
+Desktop CDP hard-assert @ tip 7050dc5a41 (DISPLAY=:1, port 9222):
   botId=4ec8ec63-6eab-4125-b0b8-0f3b87f79793
+  kindOptions=["","profile","log","note"]
   rejectText="Choose a kind and layer, and enter non-empty content. Empty saves are rejected and do not appear in the memory list."
-  saveDisabled=true · kindSelected=log · rowsBefore=1
-  created memoryId=memory-850d8aa0-98bc-4227-abe6-46b95e83e74c
-    kind=log layer=agent
-    content="Logged standup: shipped Host writeMemory kind=log validation"
+  saveDisabled=true · kindSelected=note · rowsBefore=2
+  created memoryId=memory-7d66e260-8bea-42c0-ac9f-92647402704c
+    kind=note layer=agent
+    content="Remember to stamp SC-003 after note write"
   leave: memoriesVisibleAfterClose=0
-  leaveReturn: stillListed=true (same memoryId + content + kind=log)
-Supporting: panel-state-log.json · p5-t019-scenario1-log-cdp.log
-Walkthrough: scenario-1-log-write-walkthrough.mp4
-Optional setup frame: 00-agent-team-open-log.png
+  leaveReturn: stillListed=true (same memoryId + content + kind=note)
+  kindsPresent after write/return: profile, log, note
+Supporting: panel-state-note.json · p5-t022-scenario1-note-cdp.log
+Walkthrough: scenario-1-note-write-walkthrough.mp4
+Optional setup frame: 00-agent-team-open-note.png
 
 SO11 artifact mirrors (for PR embeds)
 -------------------------------------
-  /opt/cursor/artifacts/p5-t019-04-log-listed.png
-  /opt/cursor/artifacts/p5-t019-05-log-reject-empty.png
-  /opt/cursor/artifacts/p5-t019-06-log-after-leave-return.png
-  /opt/cursor/artifacts/p5-t019-scenario1-log-write-walkthrough.mp4
-  /opt/cursor/artifacts/p5-t019-00-agent-team-open.png
+  /opt/cursor/artifacts/p5-t022-07-note-listed.png
+  /opt/cursor/artifacts/p5-t022-08-note-reject-empty.png
+  /opt/cursor/artifacts/p5-t022-09-note-after-leave-return.png
+  /opt/cursor/artifacts/p5-t022-scenario1-note-write-walkthrough.mp4
+  /opt/cursor/artifacts/p5-t022-00-agent-team-open.png
 
 SO12 recommended PR body embeds
 -------------------------------
-  <img src="/opt/cursor/artifacts/p5-t019-04-log-listed.png" alt="SC-002 log listed after write" />
-  <img src="/opt/cursor/artifacts/p5-t019-05-log-reject-empty.png" alt="SC-002 empty log write rejected" />
-  <img src="/opt/cursor/artifacts/p5-t019-06-log-after-leave-return.png" alt="SC-002 log after leave/return" />
-  <video src="/opt/cursor/artifacts/p5-t019-scenario1-log-write-walkthrough.mp4" controls></video>
+  <img src="/opt/cursor/artifacts/p5-t022-07-note-listed.png" alt="SC-003 note listed after write; profile+log+note distinguishable" />
+  <img src="/opt/cursor/artifacts/p5-t022-08-note-reject-empty.png" alt="SC-003 empty note write rejected" />
+  <img src="/opt/cursor/artifacts/p5-t022-09-note-after-leave-return.png" alt="SC-003 note after leave/return" />
+  <video src="/opt/cursor/artifacts/p5-t022-scenario1-note-write-walkthrough.mp4" controls></video>
 
 Claims
 ------
-- SC-002 write + reject + leave/return: **measured** (Desktop frames 04–06 + CDP)
+- SC-003 write + reject + leave/return + kinds distinguishable: **measured** (Desktop frames 07–09 + CDP)
 - SC-001 retained: **measured** (prior T016 evidence on branch)
+- SC-002 retained: **measured** (prior T019 evidence on branch)
 - SC-009 bot-tool optional: **measured** (Pass via UI write only)
 - FR-011 desktop visual: **measured**
 - FR-012 commit under scenario-1/: **measured** (this PR)
 - FR-012 PR HTML embeds: **inferred** until product-owner assistant updates PR body
-- team/memory KNOWN_SESSION_EVENT_TYPES regen: **measured** (Desktop observe unblock)
 
 Scope lock
 ----------
-Does NOT close MOH-256 — leave In Progress until PO merges this stamp PR.
+Does NOT close MOH-259 — leave In Progress until PO merges this stamp PR.
 Does NOT mark Linear Done. Does NOT merge.
-Does NOT claim SC-003 (note) — that lands T022.
+Scenario 1 write path (profile + log + note) complete for US1–US3.
+Does NOT claim SC-004 recall-after-restart — that lands T026.

@@ -1,0 +1,52 @@
+{
+  "tip": "7050dc5a41",
+  "display": ":1",
+  "cdp": "9222",
+  "fixture": {
+    "kind": "note",
+    "content": "Remember to stamp SC-003 after note write",
+    "layer": "agent"
+  },
+  "botId": "4ec8ec63-6eab-4125-b0b8-0f3b87f79793",
+  "steps": {
+    "reject": {
+      "rejectText": "Choose a kind and layer, and enter non-empty content. Empty saves are rejected and do not appear in the memory list.",
+      "saveDisabled": true,
+      "rowsBefore": 2,
+      "kindSelected": "note",
+      "kindOptions": [
+        "",
+        "profile",
+        "log",
+        "note"
+      ]
+    },
+    "write": {
+      "listed": true,
+      "memoryId": "memory-7d66e260-8bea-42c0-ac9f-92647402704c",
+      "listedText": "Note\nAgent (this bot)\nRemember to stamp SC-003 after note write",
+      "kind": "note",
+      "kindsPresent": [
+        "profile",
+        "log",
+        "note"
+      ]
+    },
+    "leave": {
+      "memoriesVisibleAfterClose": 0
+    },
+    "leaveReturn": {
+      "stillListed": true,
+      "returnText": "Note\nAgent (this bot)\nRemember to stamp SC-003 after note write",
+      "memoryId": "memory-7d66e260-8bea-42c0-ac9f-92647402704c",
+      "kindsPresent": [
+        "profile",
+        "log",
+        "note"
+      ]
+    }
+  },
+  "pass": true,
+  "sc003": "note write + empty reject + leave/return + kinds distinguishable",
+  "sc009": "bot-tool write absence did not fail Pass (UI write path only)"
+}
