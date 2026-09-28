@@ -695,3 +695,62 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.botMemories {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 8px;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.botMemoriesHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.botMemoriesLabel {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.botMemoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.botMemoryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+}
+
+.botMemoryMeta {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+}
+
+.botMemoryKind {
+  display: inline-flex;
+  align-items: center;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.botMemoryLayer {
+  display: inline-flex;
+  align-items: center;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+}

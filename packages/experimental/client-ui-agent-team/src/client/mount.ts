@@ -7,6 +7,7 @@ import type {
   CreateRoutineInput,
   CreateSectionInput,
   DeleteBotInput,
+  ListMemoriesInput,
   PauseRoutineInput,
   RenameBotInput,
   RenameSectionInput,
@@ -16,6 +17,7 @@ import type {
   TeamView,
   UpdatePersonaInput,
   UpsertUserSkillInput,
+  WriteMemoryInput,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type {} from '@deepseek-ai/dsh-experimental-agent-team/remote'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
@@ -36,16 +38,18 @@ import {
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
   type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
   type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
-  type TeamPauseRoutineActionResult, type TeamRenameBotActionResult,
+  type TeamListMemoriesActionResult, type TeamPauseRoutineActionResult,
+  type TeamRenameBotActionResult,
   type TeamRenameSectionActionResult, type TeamResumeRoutineActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
   type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
+  type TeamWriteMemoryActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, sections, skills, bot routines pane, bot-create, identity editors, task-board copy. */
+    /** Agent Teams roster, sections, skills, bot routines pane, bot memory write, bot-create, identity editors, task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -79,6 +83,23 @@ function registerUi(ctx: ClientContext): void {
       request: ResumeRoutineInput,
       signal?: AbortSignal,
     ) => Promise<TeamResumeRoutineActionResult>
+  }
+
+  /**
+   * Host memory Remotes (P5 T008) are on the generated contribution; keep the
+   * cast explicit so Client compile stays aligned if regenerating lags.
+   */
+  const memoryRemotes = ctx.remote.agentTeams as typeof ctx.remote.agentTeams & {
+    writeMemory: (
+      agentId: SessionId,
+      request: WriteMemoryInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamWriteMemoryActionResult>
+    listMemories: (
+      agentId: SessionId,
+      request: ListMemoriesInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamListMemoriesActionResult>
   }
 
   const actions: TeamActionInjected = {
@@ -123,6 +144,12 @@ function registerUi(ctx: ClientContext): void {
     },
     async resumeRoutine(sessionId, input: ResumeRoutineInput): Promise<TeamResumeRoutineActionResult> {
       return await routineLifecycle.resumeRoutine(leadSessionId(sessionId), input)
+    },
+    async writeMemory(sessionId, input: WriteMemoryInput): Promise<TeamWriteMemoryActionResult> {
+      return await memoryRemotes.writeMemory(leadSessionId(sessionId), input)
+    },
+    async listMemories(sessionId, input: ListMemoriesInput): Promise<TeamListMemoriesActionResult> {
+      return await memoryRemotes.listMemories(leadSessionId(sessionId), input)
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)
