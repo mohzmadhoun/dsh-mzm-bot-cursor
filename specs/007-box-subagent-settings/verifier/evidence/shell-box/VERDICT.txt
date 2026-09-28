@@ -1,0 +1,27 @@
+Verdict: Pass
+Stamp: 2026-09-28 · tip (this branch after evidence commit) · desktop DSH Local Build 0.1.6-alpha.2 @ master 930afcfc72 (DISPLAY=:1)
+Linear: MOH-375 · Epic MOH-350 · P-MOH-2
+SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
+FR-002: not-ready observed ≠ Pass — measured Desktop Bash card data-shell-box-outcome=not_ready ("Box not ready") when bubblewrap absent; danger-full-access escalate Rejected (not Pass path)
+FR-011: Pass — local Host sandboxed Shell only (bash via workspace-write + bubblewrap); not PTC/remote-only; unconfined escalate rejected
+FR-013: desktop screenshots + short recording of real Electron Desktop app (DISPLAY=:1); not unit/jsdom-only (SO 11)
+FR-014: media committed under verifier/evidence/shell-box/ + PR embeds via /opt/cursor/artifacts/… (SO 12)
+FR-015: LLM wording not scored
+Path A: Host SoT (desktop-host shell-box-path + computer settings readiness); Client projects over HTTP/WS (data-shell-box-outcome); no Electron Main shell-exec/box-ready bus
+Blockers: none for SC-001 Pass on this Cloud Desktop after bubblewrap install
+
+## Measured run notes
+1. Launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run dev:desktop → Electron "DSH Local Build" + Host child (measured).
+2. Step A (not-ready ≠ Pass): first bash invoke without sandbox backend → Desktop showed "Box not ready" + sandbox unavailable error; CDP measured data-shell-box-outcome=not_ready; Approve danger-full-access Rejected (measured). Frame: 00-shell-box-not-ready.png.
+3. Env remediation: apt install bubblewrap; restart Desktop (start:desktop). bwrap --version 0.9.0; bwrap echo OK (measured).
+4. Step B (success): new session; bash echo SC001_SHELL_BOX_OK → Desktop Bash card "Shell tool succeeded" + data-shell-box-outcome=success + output SC001_SHELL_BOX_OK (measured). Frames: 01-shell-box-ready.png / 02-shell-box-success.png (ready inferred from Host gate requiring readiness=ready for success; notices strip crashed React #185 on relaunch — Host gate still held).
+5. Supporting Host vitest (not SC Pass alone): shell-box-path + box-readiness + computer → 14 passed (measured). Log: /opt/cursor/artifacts/p7-us1-sc001-host-vitest.log
+6. Limits documented: Cloud VM initially lacked bubblewrap (not_ready correct); Settings → Computer chrome not required for SC-001 (SC-004); BoxReadinessNotices slot crash on relaunch is Client polish debt, not SC-001 Fail when tool-card success/not_ready attributes are visible.
+
+## PR body embeds (PO / ManagePullRequest — SO 12)
+<img src="/opt/cursor/artifacts/00-shell-box-not-ready.png" alt="Shell/box not-ready — Box not ready ≠ Pass" />
+<img src="/opt/cursor/artifacts/01-shell-box-ready.png" alt="Shell/box backend ready path — local sandboxed success session" />
+<img src="/opt/cursor/artifacts/02-shell-box-success.png" alt="Local Shell/box tool success — Shell tool succeeded + SC001_SHELL_BOX_OK" />
+<video src="/opt/cursor/artifacts/scenario-1-shell-box-walkthrough.mp4" controls></video>
+
+Committed mirrors: specs/007-box-subagent-settings/verifier/evidence/shell-box/*

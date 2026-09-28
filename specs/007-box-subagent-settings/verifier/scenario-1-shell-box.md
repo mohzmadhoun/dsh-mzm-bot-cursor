@@ -1,6 +1,6 @@
 # Scenario 1 — Local Shell / box tool success
 
-**Status:** Recipe delivered (T019). Product SC-001 **not** stamped — desktop FR-013/014 evidence placeholders only until Runtime/Client US1 product lands.
+**Status:** Product SC-001 **Pass** stamped 2026-09-28 — real Desktop FR-013/014 evidence committed under [evidence/shell-box/](./evidence/shell-box/) (see `VERDICT.txt`).
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host sandboxed Shell + box readiness SoT) · DH Client (tool success / not-ready projection over Host HTTP/WS)
 **Linear:** [MOH-375](https://linear.app/momadhoun/issue/MOH-375/t019-us1-verifier-scenario-1-shellbox-recipe) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) · project `P-MOH-2` only
 **Acceptance slice:** T019 — Verifier Scenario 1 recipe covering SC-001 (one local Shell/box tool success; FR-011 local only; not-ready ≠ Pass) with mandatory FR-013/014 (standing orders **11** + **12**) desktop evidence under `verifier/evidence/shell-box/`
@@ -16,7 +16,7 @@
 | SC coverage | SC-001 one local Shell/box tool success · FR-011 local only · FR-002 not-ready ≠ Pass · FR-015 LLM wording not scored |
 | FR-013 (SO 11) | Desktop screenshot(s) and/or short screen recording of the **real Desktop app** under `verifier/evidence/shell-box/` — unit/jsdom alone **fails** |
 | FR-014 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
-| Product SC stamp | **Deferred** — fill `evidence/shell-box/VERDICT.txt` only after Desktop FR-013/014 media lands |
+| Product SC stamp | **Pass** — `evidence/shell-box/VERDICT.txt` filled; Desktop media committed (SO 11+12) |
 
 ---
 
@@ -28,9 +28,9 @@
 | BoxBackend readiness SoT (T007) | SC-001 gating / not-ready | **measured:** `apps/desktop-host/src/box-readiness.ts` · foundational [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243)/[#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) |
 | Sandboxed Shell mount (T008) | SC-001 Host half | **measured:** Desktop Host `ctx.shell` + sandbox-local composition · same foundational stamp |
 | Electron no-bus (T013/T014) | Seam honesty | **measured:** [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) |
-| US1 Host success path (T016) | SC-001 Host half | **inferred:** may still be in flight — recipe must be satisfied when landed |
-| US1 Host not-ready path (T017) | FR-002 / not-ready ≠ Pass | **inferred:** may still be in flight |
-| US1 Client projection (T018) | SC-001 desktop success / not-ready UI | **inferred:** may still be in flight |
+| US1 Host success path (T016) | SC-001 Host half | **measured:** merged #246 · tip `origin/master` @ `930afcfc72` |
+| US1 Host not-ready path (T017) | FR-002 / not-ready ≠ Pass | **measured:** merged #246 · tip `origin/master` @ `930afcfc72` |
+| US1 Client projection (T018) | SC-001 desktop success / not-ready UI | **measured:** merged #248 · tip `origin/master` @ `930afcfc72` |
 
 **Desktop prerequisites** (full Scenario 1 Pass): buildable Desktop (`apps/desktop`, `apps/desktop-host`) with ≥1 bot from prior phases; Host sandboxed Shell mounted with `BoxBackend.readiness` projection; Client tool/card surface projecting Host HTTP/WS outcomes; `DISPLAY` when Cloud Agent (`DISPLAY=:1`, `DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop`).
 
@@ -173,22 +173,24 @@ Also copy/publish walkthrough copies under `/opt/cursor/artifacts/` when running
 
 ---
 
-## Pass stamp template (fill when evidence lands — do not claim now)
+## Pass stamp (filled — product SC-001)
+
+Filled stamp lives at [evidence/shell-box/VERDICT.txt](./evidence/shell-box/VERDICT.txt). Summary:
 
 ```text
 Verdict: Pass
-Stamp: YYYY-MM-DD · tip <sha> · desktop <build> (DISPLAY=:1)
+Stamp: 2026-09-28 · tip <this evidence branch> · desktop DSH Local Build (DISPLAY=:1)
 Linear: MOH-375 · Epic MOH-350 · P-MOH-2
-SC-001: Pass — evidence: evidence/shell-box/{01-shell-box-ready,02-shell-box-success}.*
-FR-002: not-ready / starting observed ≠ Pass (optional 00-shell-box-not-ready.*)
-FR-011: Pass — local Host sandboxed Shell only (not PTC/remote-only)
+SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
+FR-002: not-ready observed ≠ Pass (00-shell-box-not-ready.png; data-shell-box-outcome=not_ready)
+FR-011: Pass — local Host sandboxed Shell only (bubblewrap; danger-full-access rejected)
 FR-013: desktop screenshots/recording present; not unit/jsdom-only (SO 11)
 FR-014: media committed under verifier/evidence/shell-box/ + PR embeds via /opt/cursor/artifacts/… (SO 12)
 FR-015: LLM wording not scored
-Blockers: none
+Blockers: none (Cloud VM required apt install bubblewrap before ready path)
 ```
 
-**Rule:** Do not mark SC-001 Done in Linear / Spec without a filled stamp that includes FR-013/014 desktop evidence once Runtime/Client US1 Desktop path exists. Host vitest alone may advance readiness/Shell confidence but does **not** close US1 / Scenario 1. Leave [MOH-375](https://linear.app/momadhoun/issue/MOH-375/t019-us1-verifier-scenario-1-shellbox-recipe) **In Progress** for product SC until PO merges GUI evidence + SO12 embeds — Verifier does **not** mark product SC Done on recipe-only delivery.
+**Rule:** Product SC-001 Done requires this filled stamp + FR-013/014 desktop evidence. Host vitest alone does **not** close US1 / Scenario 1. PO merges GUI evidence PR with SO12 embeds; Verifier does **not** ManagePullRequest.
 
 ---
 
@@ -222,12 +224,14 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T019).** Product SC-001 Pass **not** stamped. Foundations hold on master via [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) / T015. Full Scenario 1 Done waits on US1 Host/Client Desktop path (T016–T018) plus Verifier FR-013/014 desktop evidence using Steps A–B above. Placeholders under [evidence/shell-box/](./evidence/shell-box/) require SO 11+12 media before GUI Pass.
+**Product SC-001 Pass stamped** with Desktop FR-013/014 media under [evidence/shell-box/](./evidence/shell-box/). Foundations + US1 Host/Client on `origin/master` @ `930afcfc72` (#245/#246/#248/#249). Cloud Desktop needed `bubblewrap` before `ready` (without it, not-ready correctly ≠ Pass). Embed SO12 paths in the GUI PR body (Verifier cannot ManagePullRequest).
 
-**Rerun (idempotent — recipe presence):**
+**Rerun (idempotent — evidence present):**
 
 ```sh
 test -f specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md
-test -d specs/007-box-subagent-settings/verifier/evidence/shell-box
-rg -n 'FR-013|FR-014|SC-001|not-ready|SO 11' specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md
+test -f specs/007-box-subagent-settings/verifier/evidence/shell-box/VERDICT.txt
+test -f specs/007-box-subagent-settings/verifier/evidence/shell-box/00-shell-box-not-ready.png
+test -f specs/007-box-subagent-settings/verifier/evidence/shell-box/02-shell-box-success.png
+rg -n 'Verdict: Pass|SC-001: Pass' specs/007-box-subagent-settings/verifier/evidence/shell-box/VERDICT.txt
 ```
