@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, discover Host skill catalog summaries, make skills available to attach, attach skills onto a specific bot’s skills surface with run/active indication, install and authenticate Host connectors from the thin catalog with in-app credential UX and tool-success visibility, create Host cron routines on a bot via `agentTeams/createRoutine`, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
+This package adds an Agent Teams action to the Web conversation header, where a user can inspect the current roster, Host mailbox 1:1 handoffs, create a Host-owned Bot with a model/provider assignment, edit Bot persona (job / voice / anti-jobs), organize bots into named sidebar sections with Unassigned/default, discover Host skill catalog summaries, make skills available to attach, attach skills onto a specific bot’s skills surface with run/active indication, install and authenticate Host connectors from the thin catalog with in-app credential UX and tool-success visibility, create Host cron or event routines on a bot via `agentTeams/createRoutine`, manage the shared task board, and navigate into a teammate's conversation. It reads authoritative Team state through the generated `ctx.remote.agentTeams` contribution and keeps ordinary child-history navigation on the stable addressed-subagent path. Choose it through the published experimental Agent Teams Web profile. The browser projection does not extend the stable API Proxy, store Team state, or register model-facing input.
 
 ## Table of Contents
 
@@ -67,9 +67,9 @@ Opening the panel loads `TeamView.skills` from Host `agentTeams/view` (managed t
 
 Each teammate card exposes a **Bot skills** surface driven by Host `skillAttachments` on that member (global catalog alone is not enough). **Attach skill** calls Host `agentTeams/attachSkill` with a catalog skill that is available-to-attach; the attachment appears only on that bot. **Run** is a dedicated control that marks the attached skill session-active on that bot’s surface (clarify lock 4 / FR-004) — Pass does not require matching LLM reply text. When Host is unavailable or rejects attach, the panel shows a clear failure and leaves prior attachments unchanged. Electron Main does not own attachment records.
 
-### Create a cron routine on a bot
+### Create a cron or event routine on a bot
 
-Each teammate card exposes a **Bot routines** surface projected from Host `TeamView.routines` for that `botId` only (SC-006). **New routine** opens intent + product-supported schedule fields and calls Host Remote `agentTeams/createRoutine` over authenticated HTTP/WS — not Electron Main IPC. Empty intent or schedule show a clear Client reject; Host rejections leave the list unchanged. Confirm is optional (SC-007); identity may derive from intent (no separate display-name field). Success reloads the Team view so the active routine appears on that bot. **Pause** / **Resume** on a listed row call Host Remotes `agentTeams/pauseRoutine` / `agentTeams/resumeRoutine` with that `routineId`; the pane status updates from the refreshed Host projection (`active` ↔ `paused`). Transport or Team rejection leaves the prior status visible. Electron Main does not own the routine catalog or pause flags.
+Each teammate card exposes a **Bot routines** surface projected from Host `TeamView.routines` for that `botId` only (SC-006). **New routine** opens trigger kind (cron or event), intent, and either a product-supported schedule (cron) or Pass event family `webhook_harness` (event), then calls Host Remote `agentTeams/createRoutine` over authenticated HTTP/WS — not Electron Main IPC. Empty intent (and empty schedule for cron) show a clear Client reject; Host rejections leave the list unchanged. Confirm is optional (SC-007); identity may derive from intent (no separate display-name field). Success reloads the Team view so the active routine appears on that bot. Pane rows label **cron vs event** from Host `triggerKind` (`data-team-routine-trigger-kind`) plus schedule / event-family label. **Pause** / **Resume** on a listed row call Host Remotes `agentTeams/pauseRoutine` / `agentTeams/resumeRoutine` with that `routineId` for both trigger kinds; the pane status updates from the refreshed Host projection (`active` ↔ `paused`). Transport or Team rejection leaves the prior status visible. Electron Main does not own the routine catalog or pause flags.
 
 ### Write profile, log, and note memory facts
 
@@ -89,11 +89,11 @@ Opening the panel loads the Host thin connector catalog via `agentTeams/listConn
 
 ### List Host routines on a bot pane
 
-The same **Bot routines** pane is the US2 info-pane list: each Host `RoutineProjection` row shows intent-derived identity, schedule label, active/paused status, and last-run (or not-run-yet). Rows come only from Host `TeamView.routines` (same Host catalog projection as `listRoutinesByBot`); the session Schedule / `ui-schedule` header catalog is not the Pass surface. Closing and reopening the panel reloads Host state so listed routines remain without re-create. Electron Main does not invent routine rows.
+The same **Bot routines** pane is the US2 info-pane list: each Host `RoutineProjection` row shows intent-derived identity, **trigger kind** (cron vs event), schedule or event-family label, active/paused status, and last-run (or not-run-yet). Rows come only from Host `TeamView.routines` (same Host catalog projection as `listRoutinesByBot`); the session Schedule / `ui-schedule` header catalog is not the Pass surface. Closing and reopening the panel reloads Host state so listed routines remain without re-create. Electron Main does not invent routine rows.
 
-### Observe last-run / fire indicator after Host cron fire
+### Observe last-run / fire indicator after Host fire
 
-Each routine row projects Host `RoutineProjection.lastRunAt` as a last-run / fire indicator (`data-team-routine-fire-indicator`: `never` before the first fire, `fired` with the Host timestamp after cron fire commit). Refreshing the Agent Team panel reloads Host projection so a newly committed fire becomes visible without inventing a Client fire clock. Electron Main does not own fire timestamps or a routines bus.
+Each routine row projects Host `RoutineProjection.lastRunAt` as a last-run / fire indicator (`data-team-routine-fire-indicator`: `never` before the first fire, `fired` with the Host timestamp after cron or event-harness fire commit). Refreshing the Agent Team panel reloads Host projection so a newly committed fire becomes visible without inventing a Client fire clock. Electron Main does not own fire timestamps or a routines bus.
 
 ### Observe Host mailbox handoffs
 
@@ -118,7 +118,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host connector catalog/install/auth/tool-success, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host writeMemory profile|log|note + listMemories browse/recall + layer filter/labels memory pane + optional inject indicator, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host connector catalog/install/auth/tool-success, Host createRoutine (cron|event) + pause/resume + last-run/fire-indicator routines pane, Host writeMemory profile|log|note + listMemories browse/recall + layer filter/labels memory pane + optional inject indicator, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |

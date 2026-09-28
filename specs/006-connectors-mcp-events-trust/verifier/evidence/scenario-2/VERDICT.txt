@@ -1,0 +1,82 @@
+T024 Client event-routine UI / Scenario 2 (SC-002 · SC-008) — DH Verifier
+=========================================================================
+Verdict: Pass
+Stamp: 2026-09-28 · tip cursor/p6-us2-client-event-fe1d @ b516a61720
+  · rebases PR #212 tip a294bc770f onto origin/master (Host #213 + T025 recipe)
+  · Desktop DISPLAY=:1 CDP 9222 · Host inspect 9230 · DSH Local Build (Electron)
+  · launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+  · client-ui-agent-team lib/client.js rebundled (tsdown) after rebase
+Product tip under test: 7d6ae2f75a (rebased T024 Client) — Host APIs from #213 @ b516a61720
+Linear: Epic MOH-281 · T024 Client US2 · recipe MOH-323 / T025
+Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-2-event-routine.md
+
+Acceptance (T024 / SC-002 · SC-008)
+----------------------------------
+[x] Step A Create event routine (triggerKind=event + webhook_harness) — measured Desktop
+    evidence/scenario-2/01-event-routine-created.png
+    routineId=routine-fcfa77db-c9b1-41c9-a8ec-cd4d42ab640b
+    label=Event (webhook) · scheduleLabel=Webhook harness · fire=never pre-fire
+[x] FR-004 empty intent reject — measured (Save disabled + data-team-create-routine-reject)
+    evidence/scenario-2/00-create-form.png
+[x] Step B Event vs cron distinguishable — measured
+    Event (webhook) / Webhook harness vs Cron (schedule) / Every 5m on same bot
+[x] Step C Harness delivery fire + last-run — measured
+    Host deliverWebhookHarness (B1 / FR-018; not manual Run now)
+    evidence/scenario-2/02-harness-fired-last-run.png
+    lastRunAt=1790597964860 → UI Last run 2026-09-28T12:19:24.860Z · fire=fired
+[x] Step D Pause suppresses matching fire — measured
+    evidence/scenario-2/03-paused-no-fire.png
+    status=paused · second harness delivery fired=[] · lastRunAt unchanged
+[x] Step E / SC-008 cron still usable — measured
+    evidence/scenario-2/04-cron-still-usable.png (same frame as 01)
+[x] Locale-owned copy — measured (locales.ts; UI English from t())
+[x] No Main IPC event SoT — measured (Host HTTP/WS create/pause + Host harness deliver)
+[x] FR-014 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-015 (SO 12) — media committed under verifier/evidence/scenario-2/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths (PO)
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip 7d6ae2f75a (DISPLAY=:1, port 9222):
+  create: event + webhook_harness · empty intent rejected
+  pane: Event (webhook) vs Cron (schedule) distinguishable
+  fire: Host inspect :9230 deliverWebhookHarness → lastRunAt set + UI fired
+  pause: status=paused · harness fired=[] · lastRun unchanged
+panel-state.json · p6-t024-scenario2-cdp.log
+Walkthrough: scenario-2-event-routine-walkthrough.mp4 (~50s)
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p6-t024-00-create-form.png
+  /opt/cursor/artifacts/p6-t024-01-event-routine-created.png
+  /opt/cursor/artifacts/p6-t024-02-harness-fired-last-run.png
+  /opt/cursor/artifacts/p6-t024-03-paused-no-fire.png
+  /opt/cursor/artifacts/p6-t024-04-cron-still-usable.png
+  /opt/cursor/artifacts/p6-t024-scenario-2-event-routine-walkthrough.mp4
+  (recipe aliases also mirrored as p6-t025-01/02/03 + p6-t025-scenario-2-…mp4)
+
+SO12 recommended PR body embeds (PR #212)
+-----------------------------------------
+  <img src="/opt/cursor/artifacts/p6-t024-00-create-form.png" alt="SC-002 event create form webhook harness" />
+  <img src="/opt/cursor/artifacts/p6-t024-01-event-routine-created.png" alt="SC-002 event vs cron pane labeling" />
+  <img src="/opt/cursor/artifacts/p6-t024-02-harness-fired-last-run.png" alt="SC-002 harness fire last-run visible" />
+  <img src="/opt/cursor/artifacts/p6-t024-03-paused-no-fire.png" alt="SC-002 pause suppresses harness fire" />
+  <img src="/opt/cursor/artifacts/p6-t024-04-cron-still-usable.png" alt="SC-008 cron still usable beside event" />
+  <video src="/opt/cursor/artifacts/p6-t024-scenario-2-event-routine-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-002 create + labeling + harness fire + last-run + pause suppress: **measured**
+- SC-008 cron additive beside event: **measured**
+- FR-004 empty intent reject: **measured**
+- FR-018 webhook harness / Verifier fixture (Host deliverWebhookHarness): **measured**
+- FR-014 desktop visual: **measured**
+- FR-015 commit under scenario-2/: **measured** (this stamp)
+- FR-015 PR HTML embeds: **inferred** until product-owner assistant updates PR #212 body
+- PR #212 rebase onto master+Host: **measured** (MERGEABLE after republish; tip includes Host #213 + evidence)
+
+Scope lock
+----------
+Does NOT merge. Leave Linear In Progress until PO merges GUI evidence + SO12 embeds.
+Verifier does not mark Linear Done. Epic MOH-281 US2 Client T024 Scenario 2 Pass stamped.
+Blockers: none for Pass stamp; PO must embed SO12 /opt/cursor/artifacts paths in PR #212 body.

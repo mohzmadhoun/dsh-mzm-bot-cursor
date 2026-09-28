@@ -1,0 +1,60 @@
+{
+  "tip": "0a70a7bdca",
+  "sha": "0a70a7bdcaa062f41e81987bfcbb89da8201791d",
+  "utc": "2026-09-28T12:19:04.097Z",
+  "display": ":1",
+  "cdp": "9222",
+  "hostInspect": "9230",
+  "steps": {
+    "emptyIntentReject": {
+      "saveDisabled": true,
+      "rejectVisible": true
+    },
+    "createEvent": {
+      "routineId": "routine-fcfa77db-c9b1-41c9-a8ec-cd4d42ab640b",
+      "triggerKindLabel": "Event (webhook)",
+      "scheduleText": "Webhook harness",
+      "fireIndicator": "never",
+      "eventTrigger": "webhook_harness"
+    },
+    "cronBeside": {
+      "routineId": "routine-45d89ed6-b9b1-4871-9629-adb1a2ba5778",
+      "triggerKindLabel": "Cron (schedule)"
+    },
+    "harnessFire": {
+      "deliveryId": "verifier-t024-1790597964860",
+      "receivedAt": 1790597964860,
+      "fired": [
+        {
+          "routineId": "routine-fcfa77db-c9b1-41c9-a8ec-cd4d42ab640b",
+          "botId": "da6ec6d3-dcc1-44e7-bf6c-07a69489cf32",
+          "status": "active",
+          "lastRunAt": 1790597964860,
+          "triggerKind": "event",
+          "eventTrigger": "webhook_harness",
+          "intent": "Handle webhook harness T024 SC-002"
+        }
+      ]
+    },
+    "lastRunVisible": {
+      "fireAfter": "fired",
+      "lastRunAfter": "1790597964860",
+      "lastRunBefore": "never"
+    },
+    "pauseSuppress": {
+      "statusPaused": "paused",
+      "lastRunAtPause": "1790597964860",
+      "suppressed": {
+        "deliveryId": "verifier-t024-paused-1790597969860",
+        "receivedAt": 1790597969860,
+        "fired": []
+      }
+    }
+  },
+  "pass": true,
+  "targetBotId": "da6ec6d3-dcc1-44e7-bf6c-07a69489cf32",
+  "sc002": "create + event/cron labeling + harness fire + last-run + pause suppress",
+  "sc008": "cron still usable beside event",
+  "fr004": "empty intent rejected",
+  "fr018": "webhook harness / Verifier fixture via Host deliverWebhookHarness"
+}
