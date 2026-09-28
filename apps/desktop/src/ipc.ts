@@ -25,6 +25,10 @@ import type { IpcMainInvokeEvent } from 'electron'
  * or last-run channel — Host owns the durable Routine catalog, timers, and fire path
  * (research R7 / T010–T011; `specs/004-routines-cron/contracts/`); Client mutates via
  * authenticated Host HTTP/WS only.
+ * There is no memory-catalog, memory-write, memory-list, memory-browse, memory-recall,
+ * or memory-injection channel — Host owns the durable Memory catalog and inject path
+ * (research R7 / T010–T011; `specs/005-memory-productization/contracts/`); Client mutates
+ * via authenticated Host HTTP/WS only.
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
