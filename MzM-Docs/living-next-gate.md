@@ -21,33 +21,41 @@
 
 **P5 (Memory productization)** — **Done.** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) Done. Specs under `specs/005-memory-productization/`. T001–T037 complete (MOH-262 Duplicate canceled); polish close merged as [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`.
 
-**P6 (Connectors / MCP + event routines + trust)** — **Done.** Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay merged as [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`.
+**P6 (Connectors / MCP + event routines + trust)** — **Done** on `master`. Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay Pass [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. Prior living hold [MOH-349](https://linear.app/momadhoun/issue/MOH-349/p6-living-next-gate-p7-hold) Done.
+
+**P7 (Computer / box + subagent parity + settings chrome)** — **Current / Kicked / specify in progress.** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress on DeepSeek Harness - Cursor (`P-MOH-2`). Specify child [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) In Progress → new `specs/007-…` (do **not** rewrite `specs/001`–`006`).
 
 ## Next gate
 
-**P7 kick — Computer / box + subagent parity + settings chrome** — **held until PO opens the P7 epic** on **DeepSeek Harness - Cursor** (`P-MOH-2`). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7.
+**Spec Kit specify in progress** — [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) under epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7.
 
-- Lead does **not** invent or duplicate a P7 Linear epic — PO opens when ready.
-- After PO opens epic (+ specify issue if kicked): **DH Spec** `/speckit-specify` for P7 only → new `specs/007-…` tree. Do **not** rewrite `specs/001`–`006`.
+- **DH Spec Go** — `/speckit-specify` for P7 only → new `specs/007-…` tree.
+- After specify: continue Spec Kit order (clarify → plan → tasks → analyze) under PO orchestration before implement fan-out.
 - **Scope lock (plan In):** Box/Shell backends; computerUse-class subagents; settings/chrome polish toward Grok-easy.
 - **Out:** Treating “Verifier” as a P7 feature — Verifier already gates every phase. Inventory items listed as program Out until a later named phase amends the plan (voice, draft-first send-on-behalf, group channels, user machines, learn-from-demo, billing chrome, full skill pack, pixel Grok).
 - **Exit (Verifier-provable):** one local Shell/box tool path proven; one computerUse-class subagent path proven; settings rows required for those daily paths present (chrome polish ≠ Verifier substitute).
-- Do **not** start Spec Kit or implement until PO opens the epic.
+- **SO 11+12** — GUI recipes need desktop screenshots/recordings committed under `verifier/evidence/` + PR embeds.
+- Lead does **not** invent a second P7 epic or child T### ids. This living update is docs only — **no product code**.
 
-## Phase 7 hold (await PO epic)
+## Phase 7 active (specify)
 
-1. **PO** — Open P7 epic (and specify child when kicking) on **DeepSeek Harness - Cursor** only; ship/no-ship on kick timing.
-2. **DH Lead** — This living gate; report Status / Next gate / Owners. No feature code; no epic create.
-3. **DH Spec / Verifier / Architect / Runtime / Electron** — **Idle** until PO opens P7 epic and authorize specify (or later gates).
+1. **DH Spec** — **Go** on specify (MOH-351) → `specs/007-…`.
+2. **DH Lead** — This living gate; Status / Next gate / Owners; no feature code; epic MOH-350 bound.
+3. **PO** — Orchestration; ship/no-ship on later gates; no second epic.
+4. **DH Runtime / Electron / Architect / Verifier** — **Idle** until after specify→analyze (or as later gates unlock).
 
-## Owners / held
+## Owners / next
 
 | Role | Action |
 |------|--------|
-| **PO Assistant** | Open P7 epic when ready; orchestration; no pre-load of Spec Kit |
-| **DH Lead** | This living gate; **no** P7 epic invent; no feature code |
-| **DH Spec / Verifier / Architect / Runtime / Electron** | Idle until PO opens P7 epic |
+| **DH Spec** | **Go** — Spec Kit specify (MOH-351) → `specs/007-…` |
+| **DH Lead** | This living gate; epic MOH-350; no feature code |
+| **PO Assistant** | Orchestration under MOH-350; no second epic invent |
+| **DH Architect** | Idle until after specify→analyze |
+| **DH Runtime** | Idle until after specify→analyze |
+| **DH Electron** | Idle until after specify→analyze |
+| **DH Verifier** | Idle until after specify→analyze |
 
 ## Blockers
 
-None for P6 close. Hard gate for next work: **PO opens P7 epic** before specify/implement.
+None. P7 epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) and specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) are open In Progress. Hard gate before implement: finish Spec Kit specify→analyze.
