@@ -1,0 +1,20 @@
+commit ffa507ac85c1556586be92cd8c7d6d7b8a462a5b
+Author: Cursor Agent <cursoragent@cursor.com>
+Date:   Mon Sep 28 13:12:51 2026 +0000
+
+    Phase 6 - T029 - Host secrets absent from dumps
+
+    Prove connector auth secrets live only in the Host credential seam
+    (FR-007/008): Path A tests assert describe/view/session-log/exportable
+    dump plaintext omit the secret; chat-paste is not the primary auth path.
+
+    Co-Authored-By: Composer <composer@cursor.com>
+
+ packages/experimental/agent-team/README.md         |   2 +-
+ packages/experimental/agent-team/README.zh.md      |   2 +-
+ .../experimental/agent-team/src/connector-bind.ts  |   7 +-
+ packages/experimental/agent-team/src/index.ts      |   9 +-
+ .../tests/connector-secrets-dump.spec.ts           | 208 +++++++++++++++++++++
+ specs/006-connectors-mcp-events-trust/tasks.md     |   2 +-
+ .../verifier/credentials-trust-inventory.md        |   4 +-
+ 7 files changed, 224 insertions(+), 10 deletions(-)

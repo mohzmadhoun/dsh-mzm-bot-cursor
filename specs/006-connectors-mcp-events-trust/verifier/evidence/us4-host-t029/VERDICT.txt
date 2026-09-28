@@ -1,0 +1,66 @@
+T029 Host secrets absent from dumps — DH Verifier
+=================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p6-us4-host-secrets-fe1d @ ffa507ac85
+Linear: Epic MOH-281 (P6) — leave In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T029 / Host product — not SC-004 Scenario stamp alone)
+------------------------------------------------------------------
+[x] Connector secret values stored only in Host credential seam (`ctx.credentials`
+    via `storeConnectorSecret` / `authenticateConnector`).
+[x] Secret absent from describeConnectorCredential (value-free facts only).
+[x] Secret absent from credentials.listRecords projection JSON.
+[x] Secret absent from agentTeams.remoteView / listConnectors.
+[x] Secret absent from Lead journal team/connector session-log events
+    (credentialKey address only on ready rows).
+[x] Secret absent from exportable session-log dump plaintext
+    (header + events JSONL serialization).
+[x] Chat-paste is NOT primary auth path — Host authenticateConnector Remote;
+    no user/message carries secret; empty secret rejected without auth-ready.
+[x] Path A vitest connector-secrets-dump.spec.ts green; tasks.md T029 [x];
+    T030 unchecked on this Host tip (Verifier Scenario 4 recipe is separate).
+
+Evidence (measured)
+-------------------
+Commands @ ffa507ac85:
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/connector-secrets-dump.spec.ts
+  → 2 passed (1 file)
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/connector-secrets-dump.spec.ts \
+    --reporter=verbose
+  → stores secret only in credentials; session dump / describe / view omit plaintext
+  → rejects empty secret without writing credentials or journal auth-ready
+
+Logs (committed + /opt/cursor/artifacts/p6-us4-host-t029/):
+  p6-t029-secrets-dump-vitest.log
+  p6-t029-secrets-dump-vitest-verbose.log
+  p6-t029-diff-scope.log
+  dump-inspection.txt
+
+Probe secret `US4_PLAINTEXT_MUST_NOT_APPEAR_IN_DUMPS_9f3c2a1b` absent from
+describe / list / view / journal / exportable dump (**measured**).
+
+Diff scope (ffa507ac85 tip commit): 7 files under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/006-connectors-mcp-events-trust/{tasks.md,verifier/credentials-trust-inventory.md}
+  Zero Client UI / Electron Main credential-value bus in this Host slice.
+
+Claims
+------
+- Secret in credential seam only: **measured**
+- Absent from describe/view/list/journal/exportable dump: **measured**
+- Chat-paste not primary: **measured**
+- tasks.md T029 [x], T030 [ ]: **measured**
+- SC-004 product Scenario stamp (T030): **not gated here** (Host T029 only)
+
+Scope lock
+----------
+Does NOT stamp SC-004 Scenario 4 Done (T030 Verifier recipe owns that stamp).
+Does NOT gate Client credential UX (T031–T032 / US5).
+Does NOT merge the Host PR.
+Does NOT mark Linear Done.
+Next: T030 Scenario 4 recipe evidence (may reuse these Host dump assertions).

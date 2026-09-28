@@ -1,0 +1,49 @@
+# Host T029 dump-inspection summary
+# Tip: ffa507ac85c1556586be92cd8c7d6d7b8a462a5b (cursor/p6-us4-host-secrets-fe1d)
+# Probe secret: US4_PLAINTEXT_MUST_NOT_APPEAR_IN_DUMPS_9f3c2a1b
+# Stamp: see VERDICT.txt
+
+Surfaces asserted by packages/experimental/agent-team/tests/connector-secrets-dump.spec.ts
+(measured via vitest @ tip ffa507ac85):
+
+1. Credential seam SoT
+   - authenticateConnector → storeConnectorSecret → ctx.credentials.readRecord(key)
+   - stored equals { kind: 'api-key', key: SECRET }
+   - Result: PASS — secret value present only in credentials
+
+2. describeConnectorCredential
+   - returns connectorId / credentialKey / configured / kind
+   - JSON.stringify(described) must NOT contain SECRET
+   - Result: PASS — value-free describe
+
+3. credentials.listRecords
+   - lists key + kind only
+   - JSON.stringify(listed) must NOT contain SECRET
+   - Result: PASS
+
+4. agentTeams.remoteView
+   - connectors[].credentialConfigured === true
+   - JSON.stringify(view) must NOT contain SECRET
+   - Result: PASS
+
+5. agentTeams.listConnectors
+   - JSON.stringify(connectors) must NOT contain SECRET
+   - Result: PASS
+
+6. Lead journal / session-log (team/connector events)
+   - storedEvents(lead) team/connector rows omit SECRET
+   - ready row carries credentialKey address only
+   - Result: PASS
+
+7. Exportable session-log dump plaintext
+   - serialize header + events JSONL (session-log-export equivalent)
+   - dump contains 'team/connector'; dump must NOT contain SECRET
+   - Result: PASS
+
+8. Chat-paste not primary (FR-008)
+   - Primary path = Host authenticateConnector Remote (credential seam)
+   - No user/message on Lead log carries SECRET after auth
+   - Empty secret rejected without writing credentials / auth-ready
+   - Result: PASS
+
+Vitest: 2 passed / 2 (see p6-t029-secrets-dump-vitest-verbose.log)
