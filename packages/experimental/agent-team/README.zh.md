@@ -141,6 +141,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | [`src/projection.ts`](src/projection.ts) | 解码并校验 Team 事件的严格回放投影；`projectSkillCatalog` 映射 Host 技能摘要供 Desktop 发现；成员快照上的 `skillAttachments` 投影给 Client bot overview |
 | [`src/persona-bind.ts`](src/persona-bind.ts) | 从持久 Host persona 绑定作用域内 `deployment:persona-prefix` |
 | [`src/skill-bind.ts`](src/skill-bind.ts) | 从持久 Host `skillAttachments` + catalog 正文绑定作用域内 `agent-teams:skill-instructions` |
+| [`src/memory-bind.ts`](src/memory-bind.ts) | 从持久 Host Memory 目录行绑定作用域内 `agent-teams:memory-recall` |
 | [`src/activity.ts`](src/activity.ts) | 一次性变更等待者与 dispose（资源释放）时的等待解除 |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | 共享准入截止与有界结算 |
 | [`src/invariant.ts`](src/invariant.ts) | 在 append 前回放候选事件的不变式伴生插件 |
