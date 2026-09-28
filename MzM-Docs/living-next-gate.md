@@ -23,16 +23,17 @@
 
 **P6 (Connectors / MCP + event routines + trust)** — **Done** on `master`. Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay Pass [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. Prior living hold [MOH-349](https://linear.app/momadhoun/issue/MOH-349/p6-living-next-gate-p7-hold) Done.
 
-**P7 (Computer / box + subagent parity + settings chrome)** — **Current / implement · US1 T016–T019 in progress.** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress on DeepSeek Harness - Cursor (`P-MOH-2`). Specify–analyze Done (#228→#236 @ `6fa18cfcfe`). **Setup T001–T006 Done** — parent [MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-inventories-verifier-recipe-home) Done; PRs [#237](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/237)–[#241](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/241) @ `c202083e91`. **Foundational T007–T015 Done** — T007–T012 [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) @ `742b8bf3f6`; T013–T014 [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) @ `47cd9dd45f`; **T015 stamp Pass** [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) @ `fbe2ec21d8` **unlocked US**. Specs under `specs/007-box-subagent-settings/`. Linear T001–T035 children via `taskstoissues` only (do **not** invent MOH-* ids).
+**P7 (Computer / box + subagent parity + settings chrome)** — **Current / implement · US2 T020–T023 in progress.** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress on DeepSeek Harness - Cursor (`P-MOH-2`). Specify–analyze Done (#228→#236 @ `6fa18cfcfe`). **Setup T001–T006 Done** — parent [MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-inventories-verifier-recipe-home) Done; PRs [#237](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/237)–[#241](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/241) @ `c202083e91`. **Foundational T007–T015 Done** — T007–T012 [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) @ `742b8bf3f6`; T013–T014 [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) @ `47cd9dd45f`; **T015 stamp Pass** [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) @ `fbe2ec21d8` **unlocked US**. **US1 SC-001 Done** — T016–T019 + desktop evidence [#246](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/246)–[#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3`. Specs under `specs/007-box-subagent-settings/`. Linear T001–T035 children via `taskstoissues` only (do **not** invent MOH-* ids).
 
 ## Next gate
 
-**Implement — US1 T016–T019 in progress** under epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7. Tasks: `specs/007-box-subagent-settings/tasks.md`.
+**Implement — US2 T020–T023 in progress** under epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7. Tasks: `specs/007-box-subagent-settings/tasks.md`.
 
 - **Setup Done** — T001–T006 inventories + Verifier recipe home + seam locks on `master` @ `c202083e91` ([MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-inventories-verifier-recipe-home) Done; PRs #237–#241).
 - **Foundational Done** — T007–T015 on `master`. T007–T012 [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) @ `742b8bf3f6`; T013–T014 [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) @ `47cd9dd45f`; T015 checklist stamp Pass [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) @ `fbe2ec21d8` (Verifier README foundational Pass; [MOH-371](https://linear.app/momadhoun/issue/MOH-371)).
-- **US1 now** — T016–T019 (local Shell/box success + not-ready paths + Client projection + Scenario 1 recipe). **T015 unlocked US**; US1 is the active product slice.
-- **No US2+ fan-out** until US1 checkpoint holds (or owners explicitly parallelize after Foundational per tasks.md — Lead gate stays US1-only until PO says otherwise).
+- **US1 Done** — T016–T019 + **SC-001 Pass** desktop evidence [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3` (SO 11+12 under `verifier/evidence/shell-box/`). **US2 unlocked.**
+- **US2 now** — T020–T023 (computerUse Pass provider + subagent path + Client projection + Scenario 2 recipe). Active product slice.
+- **No US3 fan-out** until US2 SC-002 Pass holds (or owners explicitly parallelize after Foundational per tasks.md — Lead gate stays US2-only until PO says otherwise).
 - **Scope lock (plan In):** Box/Shell backends; computerUse-class subagents; settings/chrome polish toward Grok-easy.
 - **Clarify + plan + tasks + analyze locks:** Global Settings → **Computer**; rows **Shell** + **Computer use**; computerUse Pass = screenshot-only (or equiv.) + parent handoff; Box readiness = clear not-ready/starting ≠ ready; Path A seams; evidence slices `verifier/evidence/shell-box/`, `computer-use/`, `settings/`.
 - **Out:** Treating “Verifier” as a P7 feature — Verifier already gates every phase. Inventory items listed as program Out until a later named phase amends the plan (voice, draft-first send-on-behalf, group channels, user machines, learn-from-demo, billing chrome, full skill pack, pixel Grok).
@@ -40,16 +41,16 @@
 - **SO 11+12** — GUI recipes need desktop screenshots/recordings committed under `verifier/evidence/` + PR embeds.
 - Lead does **not** invent a second P7 epic or child T### / MOH-* ids. This living update is docs only — **no product code**.
 
-## Phase 7 active (implement · US1)
+## Phase 7 active (implement · US2)
 
-1. **DH Runtime** — **Go** on US1 T016–T017 (Shell/box success path; not-ready/starting/failed projection).
-2. **DH Client / Web** — **Go** on US1 T018 (Client projects Shell/box success + not-ready via Host HTTP/WS; locale-owned copy).
-3. **DH Verifier** — **Go** on US1 T019 (Scenario 1 recipe + `verifier/evidence/shell-box/` SO 11+12).
+1. **DH Runtime** — **Go** on US2 T020–T021 (computerUse Pass provider; computerUse-class subagent screenshot + parent handoff).
+2. **DH Client / Web** — **Go** on US2 T022 (Client projects screenshot/GUI observation + parent handoff via Host HTTP/WS; locale-owned copy).
+3. **DH Verifier** — **Go** on US2 T023 (Scenario 2 recipe + `verifier/evidence/computer-use/` SO 11+12).
 4. **DH Lead** — This living gate; Status / Next gate / Owners; no feature code; epic MOH-350 bound.
-5. **PO** — Orchestration under MOH-350; ship/no-ship on later gates; no second epic; spawn US1 owners.
-6. **DH Architect** — Idle unless Path A seam question.
-7. **DH Electron** — Idle unless US1 needs Shell protocol clarification (Foundational T013–T014 already on master).
-8. **US2–US3** — **Held** at this living gate (Foundational unlocked them; Lead keeps focus on US1 T016–T019).
+5. **PO** — Orchestration under MOH-350; ship/no-ship on later gates; no second epic; spawn US2 owners.
+6. **DH Architect** — Idle unless Path A / computerUse provider pick needs clarification.
+7. **DH Electron** — Idle unless US2 needs Shell protocol clarification (Foundational T013–T014 already on master).
+8. **US3** — **Held** at this living gate until US2 SC-002 Pass.
 
 ### Setup (T001–T006) — **Done**
 
@@ -78,33 +79,44 @@ Parent [MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-i
 | T014 no-Electron bus guard | DH Electron | Done — [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) @ `47cd9dd45f` |
 | T015 Foundational checklist stamp | DH Spec / DH Verifier | Done — Pass [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) @ `fbe2ec21d8` — **unlocked US** |
 
-**T015 Pass on master unlocks US1–US3.** Active living gate = **US1 only**.
+**T015 Pass on master unlocks US1–US3.** Active living gate = **US2 only**.
 
-### US1 (T016–T019) — **in progress**
+### US1 (T016–T019) — **Done · SC-001 Pass**
 
 | Task | Owner | Outcome |
 |------|-------|---------|
-| T016 Host Shell/box success path | **DH Runtime** | `ready` → local sandboxed Shell success + session-logged outcome |
-| T017 Host not-ready / starting / failed path | **DH Runtime** | Not-ready ≠ SC-001 Pass; distinguishable projection |
-| T018 Client Shell/box indicators | **DH Client / Web** | Host HTTP/WS tool card / conversation surface; locale-owned |
-| T019 Scenario 1 Verifier recipe | **DH Verifier** | `scenario-1-shell-box.md` + evidence under `verifier/evidence/shell-box/` (SO 11+12) |
+| T016 Host Shell/box success path | DH Runtime | Done — [#246](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/246) |
+| T017 Host not-ready / starting / failed path | DH Runtime | Done — [#246](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/246) |
+| T018 Client Shell/box indicators | DH Client / Web | Done — [#248](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/248) |
+| T019 Scenario 1 Verifier recipe | DH Verifier | Done — [#249](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/249); **SC-001 Pass** evidence [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3` |
 
-**Checkpoint:** US1 Shell/box path works independently with Verifier recipe + desktop evidence.
+**Checkpoint:** US1 Shell/box path works independently with Verifier recipe + desktop evidence — **held**. SC-001 Pass unlocked US2.
+
+### US2 (T020–T023) — **in progress**
+
+| Task | Owner | Outcome |
+|------|-------|---------|
+| T020 Host computerUse Pass provider | **DH Runtime** | Cua Driver MCP/native **or** Host Pass fixture on `ctx.computerUse`; ≥1 durable screenshot/equiv. |
+| T021 Host computerUse-class subagent path | **DH Runtime** | Parent delegates via subagent → `ComputerUseRun` observation + parent-visible handoff |
+| T022 Client screenshot + handoff projection | **DH Client / Web** | Host HTTP/WS conversation/subagent UI; locale-owned; no Main IPC SoT |
+| T023 Scenario 2 Verifier recipe | **DH Verifier** | `scenario-2-computer-use.md` + evidence under `verifier/evidence/computer-use/` (SO 11+12) |
+
+**Checkpoint:** US2 computerUse-class path independently testable on Desktop with Verifier recipe + desktop evidence.
 
 ## Owners / next
 
 | Role | Action |
 |------|--------|
-| **DH Runtime** | **Go** — US1 T016–T017 |
-| **DH Client / Web** | **Go** — US1 T018 |
-| **DH Verifier** | **Go** — US1 T019 Scenario 1 + shell-box evidence |
-| **DH Spec** | Idle unless US1 acceptance wording needs Spec Kit touch |
+| **DH Runtime** | **Go** — US2 T020–T021 |
+| **DH Client / Web** | **Go** — US2 T022 |
+| **DH Verifier** | **Go** — US2 T023 Scenario 2 + computer-use evidence |
+| **DH Spec** | Idle unless US2 acceptance wording needs Spec Kit touch |
 | **DH Electron** | Idle (Foundational T013–T014 Done) |
 | **DH Lead** | This living gate; epic MOH-350; no feature code |
-| **PO Assistant** | Orchestration under MOH-350; spawn US1; no second epic invent; no US2+ until US1 checkpoint |
-| **DH Architect** | Idle unless Path A seam clarification |
-| **US2–US3 owners** | Idle at this living gate |
+| **PO Assistant** | Orchestration under MOH-350; spawn US2; no second epic invent; no US3 until US2 SC-002 Pass |
+| **DH Architect** | Idle unless Path A / provider pick clarification |
+| **US3 owners** | Idle at this living gate |
 
 ## Blockers
 
-None for US1 start. P7 epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress; Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-inventories-verifier-recipe-home) **Done**; Foundational T007–T015 **Done** — T015 Pass [#245](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/245) @ `fbe2ec21d8` **unlocked US**. Active slice: **US1 T016–T019**.
+None for US2 start. P7 epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress; Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356/p7-setup-t001-t006-inventories-verifier-recipe-home) **Done**; Foundational T007–T015 **Done**; **US1 SC-001 Done** [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3` **unlocked US2**. Active slice: **US2 T020–T023**. US3 held.
