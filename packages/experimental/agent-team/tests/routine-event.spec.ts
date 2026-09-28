@@ -77,11 +77,15 @@ describe('routine-event match helpers', () => {
     }
     const paused = { ...active, routineId: RoutineId('r-paused'), status: 'paused' as const }
     const cron = {
-      ...active,
       routineId: RoutineId('r-cron'),
-      triggerKind: 'cron' as const,
+      botId: SessionId('bot-a'),
+      intent: 'Handle delivery',
       scheduleExpr: '@every 5m',
-      eventTrigger: undefined,
+      triggerKind: 'cron' as const,
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
     }
     expect(isRoutineWebhookHarnessMatch(active)).toBe(true)
     expect(isRoutineWebhookHarnessMatch(paused)).toBe(false)
