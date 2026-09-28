@@ -139,7 +139,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T023 [US4] Host list/browse projection returns durable `MemoryProjection` rows across Host child restart with kinds distinguishable (`packages/experimental/agent-team/src/projection.ts` + Remote / Desktop Host) per FR-004/005 — MUST NOT treat transcript dump as Pass
 - [x] T024 [US4] Implement Host `MemoryRecallInject` bind: assemble ≥1 curated `MemoryRecord` into subsequent bot-turn context/instructions (scoped section sibling to persona/skill binds) via `packages/experimental/agent-team/src/` + `packages/preset/persona/src/` and/or `packages/core/system-prompt/src/` — reconstructable from session log (FR-016; research R5); LLM wording not scored (FR-014)
-- [ ] T025 [P] [US4] Client browse/recall memory surface under `packages/experimental/client-ui-agent-team/src/client/` projecting Host list after restart; optional inject/application indicator when present
+- [x] T025 [P] [US4] Client browse/recall memory surface under `packages/experimental/client-ui-agent-team/src/client/` projecting Host list after restart; optional inject/application indicator when present
 - [ ] T026 [US4] Add Verifier Scenario 2 recipe in `specs/005-memory-productization/verifier/scenario-2-recall.md` covering SC-004 (surface return of three kinds + model-visible inject path; no LLM scoring) with FR-011/012 evidence under `specs/005-memory-productization/verifier/evidence/scenario-2/`
 
 **Checkpoint**: US4 surface + model-visible recall independently testable.

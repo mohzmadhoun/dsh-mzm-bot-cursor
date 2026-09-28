@@ -21,6 +21,7 @@ import type {
   HostMailboxMessage,
   ListMemoriesInput,
   ListMemoriesResult,
+  MemoryId,
   MemoryKind,
   MemoryLayer,
   MemoryProjection,
@@ -310,6 +311,58 @@ function memoriesForBot(
     memory.layer === 'user'
     || (memory.layer === 'agent' && memory.botId === botId)
   ))
+}
+
+
+/**
+ * Optional Host memory-recall inject/apply stamp (P5 US4 / data-model `MemoryRecallInject`).
+ * Host T024 MAY project these on `TeamView`; Client shows an indicator only when present.
+ */
+interface MemoryRecallInjectProjection {
+  readonly memoryIds: readonly MemoryId[]
+  readonly botId: SessionId
+  readonly assembledAt: number
+}
+
+/** TeamView extended with optional Host inject stamps (wire field when Host exposes it). */
+type TeamViewWithOptionalInject = TeamView & {
+  readonly memoryRecallInjects?: readonly MemoryRecallInjectProjection[]
+}
+
+/**
+ * Read optional Host memory-recall inject stamps from a Team view.
+ * Absent / empty ⇒ no Client inject indicator (optional when present — FR-016 / SC-004).
+ * @param view - Host `agentTeams/view` projection.
+ * @returns inject stamps Host exposed, or empty.
+ */
+function memoryRecallInjectsFromView(view: TeamView): readonly MemoryRecallInjectProjection[] {
+  return (view as TeamViewWithOptionalInject).memoryRecallInjects ?? []
+}
+
+/**
+ * Inject stamp for one bot when Host exposed it on the Team view.
+ * @param view - Host Team view (may omit inject field).
+ * @param botId - teammate whose inject stamp is requested.
+ * @returns that bot’s inject stamp, or null when Host did not expose one.
+ */
+function memoryRecallInjectForBot(
+  view: TeamView,
+  botId: SessionId,
+): MemoryRecallInjectProjection | null {
+  return memoryRecallInjectsFromView(view).find(stamp => stamp.botId === botId) ?? null
+}
+
+/**
+ * Locale copy for an optional Host inject/apply indicator (P5 US4 T025).
+ * @param assembledAt - Host inject assembly timestamp ms.
+ * @param t - locale lookup.
+ * @returns inject-applied copy for the memory recall surface.
+ */
+function memoryInjectAppliedLabel(
+  assembledAt: number,
+  t: TeamActionProps['t'],
+): string {
+  return t('memoryInjectApplied', { time: new Date(assembledAt).toISOString() })
 }
 
 /** Locale key for one Host Memory kind label. */
@@ -1143,6 +1196,41 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, listMemories, refresh, reportFailure, sessionId])
 
+  /**
+   * Browse / recall Host listMemories for one bot after restart (P5 US4 T025 / FR-005 / SC-004).
+   * Calls authenticated Host HTTP/WS only — never Electron Main IPC or transcript dump.
+   * Reloads Team view so kinds remain distinguishable on the recall surface.
+   */
+  const settleBrowseMemories = useCallback(async (botId: SessionId): Promise<boolean> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`browse-memory:${botId}`))
+    try {
+      const listed = await listMemories(requestedSession, { botId })
+      if (sessionRef.current !== requestedSession) return false
+      if (!listed.ok) {
+        reportFailure(listed.error)
+        return false
+      }
+      if (!listed.value.ok) {
+        reportFailure(listed.value.error)
+        return false
+      }
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return false
+      return true
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`browse-memory:${botId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, listMemories, refresh, reportFailure, sessionId])
+
   const settleRoutineStatus = useCallback(async (
     routineId: RoutineId,
     operation: () => Promise<TeamPauseRoutineActionResult | TeamResumeRoutineActionResult>,
@@ -1490,6 +1578,14 @@ export function TeamAction({
   }
 
   /**
+   * Host listMemories browse / recall for one bot after restart (P5 US4 T025 / FR-005).
+   * Projects Host catalog rows with kinds distinguishable; never transcript dump.
+   */
+  const submitBrowseMemories = async (member: TeamRosterMember): Promise<void> => {
+    await settleBrowseMemories(member.id)
+  }
+
+  /**
    * Host pauseRoutine for one listed active routine (P4 FR-003 / SC-002 / T023).
    * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
    */
@@ -1638,6 +1734,7 @@ export function TeamAction({
     const attachPending = pendingTasks.has(`attach-skill:${member.id}`)
     const createRoutinePending = pendingTasks.has(`create-routine:${member.id}`)
     const writeMemoryPending = pendingTasks.has(`write-memory:${member.id}`)
+    const browseMemoryPending = pendingTasks.has(`browse-memory:${member.id}`)
     const confirmPending = pendingDelete === member.id
     const assignOpen = assigningBotId === member.id
     const attachOpen = attachingBotId === member.id
@@ -1650,9 +1747,10 @@ export function TeamAction({
     const botMemories = view === null
       ? []
       : memoriesForBot(view.memories ?? [], member.id)
+    const memoryInject = view === null ? null : memoryRecallInjectForBot(view, member.id)
     const identityBusy = personaPending || renamePending || avatarPending
       || deletePending || assignPending || attachPending || createRoutinePending
-      || writeMemoryPending
+      || writeMemoryPending || browseMemoryPending
       || botRoutines.some(routine => pendingTasks.has(`routine-status:${routine.routineId}`))
     const catalogById = view === null
       ? new Map<SkillId, SkillCatalogSummary>()
@@ -1934,11 +2032,26 @@ export function TeamAction({
           <div
             className={css.botMemories}
             data-team-bot-memories={member.id}
+            data-team-memory-recall-surface={member.id}
           >
             <div className={css.botMemoriesHeader}>
               <span className={css.botMemoriesLabel}>{t('botMemories')}</span>
             </div>
-            <p className={css.hint}>{t('botMemoriesHint')}</p>
+            <p className={css.hint} data-team-bot-memories-hint="">{t('botMemoriesHint')}</p>
+            <p className={css.hint} data-team-memory-browse-hint="">{t('browseMemoriesHint')}</p>
+            {memoryInject !== null && (
+              <div
+                className={css.memoryInjectIndicator}
+                data-team-memory-inject-indicator="applied"
+                data-team-memory-inject-bot={member.id}
+                data-team-memory-inject-at={String(memoryInject.assembledAt)}
+                data-team-memory-inject-ids={memoryInject.memoryIds.join(',')}
+                title={t('memoryInjectHint')}
+              >
+                <StateDot state="done" size={8} />
+                <span>{memoryInjectAppliedLabel(memoryInject.assembledAt, t)}</span>
+              </div>
+            )}
             {botMemories.length === 0
               ? <div className={css.notice} data-team-bot-memories-empty={member.id}>{t('botMemoriesEmpty')}</div>
               : (
@@ -1989,15 +2102,27 @@ export function TeamAction({
               && editingPersona !== member.id
               && !confirmPending
               && !assignOpen && (
-              <button
-                type="button"
-                className={css.personaButton}
-                disabled={identityBusy}
-                data-team-write-memory={member.id}
-                onClick={() => { startWriteMemory(member) }}
-              >
-                <IconPlusOutline16 size={13} /> {t('writeMemory')}
-              </button>
+              <div className={css.botMemoryActions}>
+                <button
+                  type="button"
+                  className={css.personaButton}
+                  disabled={identityBusy}
+                  data-team-browse-memories={member.id}
+                  data-team-recall-memories={member.id}
+                  onClick={() => { void submitBrowseMemories(member) }}
+                >
+                  <IconRefreshOutline14 /> {browseMemoryPending ? t('loading') : t('browseMemories')}
+                </button>
+                <button
+                  type="button"
+                  className={css.personaButton}
+                  disabled={identityBusy}
+                  data-team-write-memory={member.id}
+                  onClick={() => { startWriteMemory(member) }}
+                >
+                  <IconPlusOutline16 size={13} /> {t('writeMemory')}
+                </button>
+              </div>
             )}
           </div>
         )}
