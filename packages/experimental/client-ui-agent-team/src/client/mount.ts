@@ -189,51 +189,39 @@ function registerUi(ctx: ClientContext): void {
     }))
     for (const listener of pendingListeners) listener(rows)
   }
-  const remoteEvents = ctx.remote as typeof ctx.remote & {
-    $on?: (
-      event: 'approval/request',
-      listener: (request: {
-        readonly toolName?: string
-        readonly reason?: string
-        readonly signal?: AbortSignal
-      }, next: () => Promise<'rejected' | 'allowed-once' | 'cancelled' | 'unavailable'>) =>
-      Promise<'rejected' | 'allowed-once' | 'cancelled' | 'unavailable'>,
-    ) => () => void
-  }
-  const onApprovalRequest = remoteEvents.$on
-  if (typeof onApprovalRequest === 'function') {
-    ctx.effect(() => onApprovalRequest('approval/request', function (request, next) {
-      const toolName = String(request.toolName ?? '')
-      // Team deny card owns connector MCP tool prompts; other asks fall through.
-      if (!toolName.startsWith('mcp__')) return next()
-      const requestId = `team-approval:${toolName}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`
-      return new Promise<'rejected' | 'allowed-once' | Awaited<ReturnType<typeof next>>>((resolve, reject) => {
-        const parked: ParkedApproval = {
-          requestId,
-          toolName,
-          ...request.reason === undefined ? {} : { reason: String(request.reason) },
-          resolve: (outcome) => {
-            parkedApprovals.delete(requestId)
-            publishPending()
-            resolve(outcome)
-          },
+  // Call `ctx.remote.$on` as a method (keep receiver) — extracting unbound `$on`
+  // throws TypeError: Cannot read properties of undefined (reading 'events').
+  ctx.effect(() => ctx.remote.$on('approval/request', function (request, next) {
+    const toolName = String(request.toolName ?? '')
+    // Team deny card owns connector MCP tool prompts; other asks fall through.
+    if (!toolName.startsWith('mcp__')) return next()
+    const requestId = `team-approval:${toolName}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`
+    return new Promise<'rejected' | 'allowed-once' | Awaited<ReturnType<typeof next>>>((resolve, reject) => {
+      const parked: ParkedApproval = {
+        requestId,
+        toolName,
+        ...request.reason === undefined ? {} : { reason: String(request.reason) },
+        resolve: (outcome) => {
+          parkedApprovals.delete(requestId)
+          publishPending()
+          resolve(outcome)
+        },
+      }
+      parkedApprovals.set(requestId, parked)
+      publishPending()
+      const signal = request.signal as AbortSignal | undefined
+      if (signal !== undefined) {
+        const onAbort = (): void => {
+          if (!parkedApprovals.has(requestId)) return
+          parkedApprovals.delete(requestId)
+          publishPending()
+          void next().then(resolve, reject)
         }
-        parkedApprovals.set(requestId, parked)
-        publishPending()
-        const signal = request.signal as AbortSignal | undefined
-        if (signal !== undefined) {
-          const onAbort = (): void => {
-            if (!parkedApprovals.has(requestId)) return
-            parkedApprovals.delete(requestId)
-            publishPending()
-            void next().then(resolve, reject)
-          }
-          if (signal.aborted) onAbort()
-          else signal.addEventListener('abort', onAbort, { once: true })
-        }
-      })
-    }), 'client-ui-agent-team: trust-deny answerer')
-  }
+        if (signal.aborted) onAbort()
+        else signal.addEventListener('abort', onAbort, { once: true })
+      }
+    })
+  }), 'client-ui-agent-team: trust-deny answerer')
 
   const actions: TeamActionInjected = {
     async load(sessionId): Promise<TeamActionResult<TeamView>> {
