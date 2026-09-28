@@ -1,0 +1,12 @@
+page dsh-app://app/ What is triage in bug reports — DSH Local Build
+Step catalog open PASS fixture=true
+Step A install PASS connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2 auth=needs_auth
+Step B auth ready PASS toolsBound=true
+file:///tmp/p6-us1-client-t019-t020-scenario1-cdp.mjs:233
+  throw new Error(`FAIL: tool outcome not success; got ${outcome}`)
+        ^
+
+Error: FAIL: tool outcome not success; got null
+    at file:///tmp/p6-us1-client-t019-t020-scenario1-cdp.mjs:233:9
+
+Node.js v24.21.0
