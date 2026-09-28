@@ -10,8 +10,8 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 |----------|---------|--------------|--------|
 | `00-catalog-open.png` | Connector catalog open (verifier-fixture) | T019 / T031 | **measured** Desktop Pass |
 | `01-connector-installed.png` | Durable installed row | T019 / T031 | **measured** Desktop Pass |
-| `02a-auth-surface.png` | In-app credential form + vault-not-required marker | T031 / SC-007 | **measured** Desktop Pass @ `b8609fad91` |
-| `02-auth-ready.png` | In-app auth ready + tools bound | T020 / T031 / SC-007 | **measured** Desktop Pass @ `b8609fad91` |
+| `02a-auth-surface.png` | In-app credential form + vault-not-required marker | T031 / T032 / SC-007 | **measured** Desktop Pass @ `b8609fad91` |
+| `02-auth-ready.png` | In-app auth ready + tools bound | T020 / T031 / T032 / SC-007 | **measured** Desktop Pass @ `b8609fad91` |
 | `03-tool-success.png` | User-visible successful connector tool outcome | T020 / SC-001 | **measured** Desktop Pass (`Tool call succeeded`) |
 | `scenario-1-connector-walkthrough.mp4` | Short recording covering Steps A–C (US1) | T021 | **measured** Desktop |
 | `p6-t031-us5-credential-ux-walkthrough.mp4` | US5 auth-surface → ready walkthrough | T031 | **measured** Desktop Pass |

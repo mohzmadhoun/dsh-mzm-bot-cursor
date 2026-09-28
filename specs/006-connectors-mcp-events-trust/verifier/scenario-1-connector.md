@@ -18,7 +18,7 @@
 | FR-015 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
 | Product SC stamp | **Deferred** — fill `evidence/scenario-1/VERDICT.txt` only after Desktop FR-014/015 media lands |
 
-**T032 note:** Credential-UX / SC-007 deep checks may extend this recipe later. In-app auth success without vault is already required here (Step B / SC-007).
+**US5 / T032:** Deep SC-007 credential-UX checks (FR-008/009, auth-surface FR-014/015) live in the split recipe [scenario-5-credential-ux.md](./scenario-5-credential-ux.md). In-app auth success without vault remains required here (Step B / SC-007); US5 Independent Test Done uses the split recipe + evidence under [evidence/scenario-1/](./evidence/scenario-1/).
 
 ---
 
@@ -220,7 +220,7 @@ Blockers: none
 - Event-triggered routines (Scenario 2 / US2)
 - Denied permission path (Scenario 3 / US3)
 - Session-dump secrets inspection (Scenario 4 / US4)
-- Full credential-UX / vault-optional deep stamp (T032 may extend this recipe)
+- Full credential-UX / vault-optional deep stamp ([scenario-5-credential-ux.md](./scenario-5-credential-ux.md) / T032)
 - Full multi-family live connector catalog (P7 / non-goal)
 - Electron Main connector / credential-value bus (forbidden; T013/T014)
 - Product SC-001…SC-008 Done stamps on this docs-only delivery
@@ -239,7 +239,8 @@ Blockers: none
 | [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md) | Architect Path A locks |
 | This file | T021 rerunnable Scenario 1 connector recipe |
 | T017–T020 | Host Desktop install/auth + Client catalog/auth/tool UI |
-| T032 | Optional SC-007 credential-UX extension of this recipe |
+| [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) | T032 US5 SC-007 deep checks (auth-surface evidence under evidence/scenario-1/) |
+| T032 | US5 credential-UX / SC-007 split recipe |
 | T034 | Broader evidence directory packaging |
 
 ## Evidence for PO / DH Lead
