@@ -30,9 +30,28 @@
 
 **Cross-links:** Inventories T002–T004 above · seam locks T005 · this README T006.
 
-## Foundational Pass gate (T016 — later)
+## Foundational Pass gate (T016)
 
 **Rule:** Product success criteria **SC-001…SC-008** MUST NOT be marked Done without a recorded foundational Pass (Host `ConnectorRecord` + additive event `RoutineRecord` + catalog/MCP/credential bind + Host projection/mutations + Electron exclusion docs + no-Electron-connectors-events-trust-bus guard + B1 harness doc). Product SC evidence stays under Scenario recipes; T016 stamps this README when T007–T015 land.
+
+### Foundational Pass checklist — recorded
+
+**Verdict:** **Pass** (foundations only)
+**Stamp:** 2026-09-28 · branch `cursor/p6-foundation-host-fe1d` (T007–T012 Host + T015 B1 doc; T013–T014 Electron on master via #206)
+**Linear:** Blocked — PR-only tracking (project `P-MOH-2`)
+
+| # | Gate | Tasks | Bar | Evidence | Result |
+|---|------|-------|-----|----------|--------|
+| 1 | **Types + validation** | T007 | `ConnectorRecord` / `ConnectorCatalogEntry` branded ids + install/auth/transport vocab | `packages/experimental/agent-team/src/{types,validation}.ts` | Pass |
+| 2 | **Additive routines** | T008 | `triggerKind`/`eventTrigger`; cron rows unchanged; cron due skips event | `routine-cron.ts` + focused vitest | Pass |
+| 3 | **Host connector catalog** | T009 | Thin catalog + journal `team/connector` install/list — not Electron Main | `TeamService` + `connector-bind.ts`; [vitest-connector-event.log](./evidence/foundation-host/vitest-connector-event.log) | Pass |
+| 4 | **MCP fixture bind** | T010 | Ready auth registers `ctx.tools` via `dsh-mcp-client` (`verifier-fixture` / `mcp__verifier_fixture__ping`) | `bindPassConnectorMcpTools`; same vitest log | Pass |
+| 5 | **Credential seam** | T011 | Secrets in Host `ctx.credentials`; describe value-free (FR-007) | `describeConnectorCredential` / `storeConnectorSecret`; same vitest log | Pass |
+| 6 | **Host HTTP/WS Remotes** | T012 | Catalog/install/auth/describe + event `createRoutine` Remotes; `TeamView.connectors` | `index.ts` / `client.ts` / `projection.ts`; [vitest-team-routines.log](./evidence/foundation-host/vitest-team-routines.log) | Pass |
+| 7 | **Electron thin shell** | T013–T014 | Forbidden IPC + `no-electron-connectors-events-trust-bus` | master #206 | Pass |
+| 8 | **B1 harness doc** | T015 | Webhook ingress → match event routines → existing-bot wake (not new-Session) | [webhook-harness-b1.md](./webhook-harness-b1.md) | Pass |
+
+**Scope lock:** This Pass does **not** mark SC-001…SC-008 Done. Scenario recipes and product US1–US5 implementation remain open. US fan-out may begin after this stamp lands on master.
 
 Setup T001–T006 does **not** claim foundational Pass.
 

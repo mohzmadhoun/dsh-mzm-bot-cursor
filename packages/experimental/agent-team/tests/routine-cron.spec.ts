@@ -47,6 +47,7 @@ describe('routine-cron scheduleExpr stub', () => {
       botId: SessionId('bot-a'),
       intent: 'Ping',
       scheduleExpr: '@every 5m',
+      triggerKind: 'cron' as const,
       status: 'active' as const,
       lastRunAt: null,
       createdAt: 1,
@@ -65,18 +66,27 @@ describe('routine-cron scheduleExpr stub', () => {
       botId: SessionId('bot-a'),
       intent: 'Sweep inbox',
       scheduleExpr: '@every 5m',
+      triggerKind: 'cron' as const,
       status: 'active' as const,
       lastRunAt: null,
       createdAt,
       updatedAt: createdAt,
     }
     const paused = { ...active, routineId: RoutineId('r-paused'), status: 'paused' as const }
+    const eventRow = {
+      ...active,
+      routineId: RoutineId('r-event'),
+      triggerKind: 'event' as const,
+      scheduleExpr: '',
+      eventTrigger: 'webhook_harness' as const,
+    }
     const beforeDue = createdAt + MIN_EVERY_INTERVAL_MS - 1
     const atDue = createdAt + MIN_EVERY_INTERVAL_MS
     expect(isRoutineDue(active, beforeDue)).toBe(false)
     expect(isRoutineDue(active, atDue)).toBe(true)
     expect(isRoutineDue(paused, atDue)).toBe(false)
-    expect(routinesDueForWake([active, paused], atDue)).toEqual([active])
+    expect(isRoutineDue(eventRow, atDue)).toBe(false)
+    expect(routinesDueForWake([active, paused, eventRow], atDue)).toEqual([active])
 
     const afterFire = {
       ...active,

@@ -163,6 +163,9 @@ export function routinesEligibleForWake(
  */
 export function isRoutineDue(routine: RoutineRecord, nowMs: number): boolean {
   if (!isRoutineEligibleForWake(routine)) return false
+  // Event routines wake via webhook harness match (P6 B1) — never the cron ticker.
+  // Absent triggerKind (P4 logs) means cron.
+  if ((routine.triggerKind ?? 'cron') !== 'cron') return false
   if (!Number.isFinite(nowMs)) {
     throw new TeamError('isRoutineDue nowMs must be a finite number', 'TEAM_INVALID_ARGUMENT')
   }

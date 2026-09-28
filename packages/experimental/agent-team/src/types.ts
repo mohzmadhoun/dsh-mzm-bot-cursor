@@ -97,13 +97,27 @@ export function RoutineId(id: string): RoutineId {
   return id as RoutineId
 }
 
-/** Durable Host routine lifecycle for cron wake eligibility. */
+/** Durable Host routine lifecycle for cron / event wake eligibility. */
 export type RoutineStatus = 'active' | 'paused'
+
+/**
+ * Host Routine trigger discriminant (P6 additive — P4 rows are `cron`).
+ * Cron rows remain valid without rewrite of `specs/004` (SC-008 / research R3).
+ */
+export type RoutineTriggerKind = 'cron' | 'event'
+
+/**
+ * Pass event-family id for `triggerKind=event` (FR-018).
+ * Live Slack/GitHub/… adapters are optional beyond Pass — not required here.
+ */
+export type RoutineEventTrigger = 'webhook_harness'
 
 /**
  * Host-owned durable Routine catalog row (data-model `RoutineRecord`).
  * Persists on the Lead Session `team/routine` journal path — not Electron Main,
  * not Client local store, not `dsh-schedule` session reminders (research R1/R2).
+ * P6 adds `triggerKind` + `eventTrigger` additively; absent `triggerKind` on
+ * older logs means `cron` (P4).
  */
 export interface RoutineRecord {
   /** Immutable Host routine id. */
@@ -112,8 +126,22 @@ export interface RoutineRecord {
   readonly botId: SessionId
   /** Non-empty wake intent; identity MAY derive from this (no separate displayName required). */
   readonly intent: string
-  /** Product-supported schedule expression (5-field cron and/or `@every` / `@hourly` / `@daily`). */
+  /**
+   * Product-supported schedule expression when `triggerKind=cron`
+   * (5-field cron and/or `@every` / `@hourly` / `@daily`).
+   * Empty string when `triggerKind=event` (schedule absent/ignored).
+   */
   readonly scheduleExpr: string
+  /**
+   * Trigger discriminant. Older P4 rows may omit this on disk; projection
+   * normalizes absent → `cron`. New Host writes always set it.
+   */
+  readonly triggerKind?: RoutineTriggerKind
+  /**
+   * Event family when `triggerKind=event`. Pass: `webhook_harness`.
+   * Absent on cron rows.
+   */
+  readonly eventTrigger?: RoutineEventTrigger
   /** Wake eligibility; default `active` on create. */
   readonly status: RoutineStatus
   /** Epoch ms of last committed fire, or null until first fire. */
@@ -127,6 +155,7 @@ export interface RoutineRecord {
 /**
  * Client-readable Routine projection derived only from Host (data-model `RoutineProjection`).
  * Never invent rows from Electron Main or `ui-schedule` session reminders.
+ * Event vs cron MUST be distinguishable for the pane (P6 US2).
  */
 export interface RoutineProjection {
   readonly routineId: RoutineId
@@ -134,11 +163,111 @@ export interface RoutineProjection {
   /** Intent text (or intent-derived identity for the pane). */
   readonly identity: string
   readonly intent: string
+  readonly triggerKind: RoutineTriggerKind
+  /** Schedule expression for cron; empty string for event rows. */
   readonly scheduleExpr: string
-  /** Human-readable schedule label for the pane. */
+  /** Human-readable schedule or event-family label for the pane. */
   readonly scheduleLabel: string
+  /** Present when `triggerKind=event`. */
+  readonly eventTrigger?: RoutineEventTrigger
   readonly status: RoutineStatus
   readonly lastRunAt: number | null
+  readonly createdAt: number
+  readonly updatedAt: number
+}
+
+/** Opaque Host Connector catalog identity (P6 Architect Path A SoT). */
+export type ConnectorId = Branded<'ConnectorId'>
+
+/**
+ * Brand a validated Host connector id.
+ * @param id - Host connector identity.
+ * @returns the same string branded as a Connector identity.
+ */
+export function ConnectorId(id: string): ConnectorId {
+  return id as ConnectorId
+}
+
+/** Durable Host connector install lifecycle (data-model `installState`). */
+export type ConnectorInstallState = 'available' | 'installing' | 'installed' | 'failed'
+
+/** Durable Host connector auth lifecycle (data-model `authState`). */
+export type ConnectorAuthState = 'none' | 'needs_auth' | 'authenticating' | 'ready' | 'failed'
+
+/** MCP transport subset for installed connectors (data-model `transport`). */
+export type ConnectorTransport = 'stdio' | 'streamable-http'
+
+/** Thin-catalog / Verifier fixture auth mode hint (data-model `authMode`). */
+export type ConnectorAuthMode = 'in_app' | 'oauth' | 'none'
+
+/**
+ * Host-owned durable Connector catalog row (data-model `ConnectorRecord`).
+ * Persists on the Lead Session `team/connector` journal path — not Electron Main,
+ * not Client local store (research R1 / Architect Path A).
+ */
+export interface ConnectorRecord {
+  /** Immutable Host connector id. */
+  readonly connectorId: ConnectorId
+  /** Thin-catalog entry id (unique in product scope with serverName). */
+  readonly catalogId: string
+  /** MCP `serverName` namespace for `mcp__<serverName>__<tool>` tools. */
+  readonly serverName: string
+  /** User-visible label. */
+  readonly displayName: string
+  /** Install lifecycle; `failed` ≠ Pass. */
+  readonly installState: ConnectorInstallState
+  /** Auth lifecycle; tool-call Pass needs `ready`. */
+  readonly authState: ConnectorAuthState
+  /** Transport when installed; required once install reaches installed/failed settlement. */
+  readonly transport: ConnectorTransport
+  /**
+   * Host credential store address for connector secrets (`scope/id`).
+   * Never carries the secret value — describe APIs stay value-free (FR-007).
+   */
+  readonly credentialKey?: string
+  /** Clear install/auth failure reason when state is `failed`. */
+  readonly error?: string
+  /** Epoch ms when the connector row was created. */
+  readonly createdAt: number
+  /** Epoch ms of the latest durable mutation. */
+  readonly updatedAt: number
+}
+
+/**
+ * Thin managed / Verifier fixture catalog entry (data-model `ConnectorCatalogEntry`).
+ * Not necessarily installed — Host lists these for install UX (FR-017 any-one Pass).
+ */
+export interface ConnectorCatalogEntry {
+  /** Stable catalog key. */
+  readonly catalogId: string
+  /** User-visible label. */
+  readonly displayName: string
+  /** MCP serverName used after install. */
+  readonly serverName: string
+  /** Default transport for install. */
+  readonly transport: ConnectorTransport
+  /** True when this entry is a Verifier / thin Pass fixture. */
+  readonly fixture: boolean
+  /** Informational auth mode; in-app preferred for Pass. */
+  readonly authMode: ConnectorAuthMode
+}
+
+/**
+ * Client-readable Connector projection derived only from Host.
+ * Never invent rows from Electron Main or Client local store.
+ * Secret values are never projected (FR-007).
+ */
+export interface ConnectorProjection {
+  readonly connectorId: ConnectorId
+  readonly catalogId: string
+  readonly serverName: string
+  readonly displayName: string
+  readonly installState: ConnectorInstallState
+  readonly authState: ConnectorAuthState
+  readonly transport: ConnectorTransport
+  /** Whether a Host credential record is configured (never the value). */
+  readonly credentialConfigured: boolean
+  readonly error?: string
   readonly createdAt: number
   readonly updatedAt: number
 }
@@ -414,6 +543,11 @@ export interface TeamView {
    * Empty until write; never Electron Main, Client-only, or transcript rows.
    */
   readonly memories: readonly MemoryProjection[]
+  /**
+   * Host Connector catalog projections (P6 Architect Path A SoT).
+   * Empty until install; never Electron Main or Client-only rows.
+   */
+  readonly connectors: readonly ConnectorProjection[]
 }
 
 /** One peer message retained until its target Session records it. */
@@ -727,16 +861,23 @@ export interface UpsertUserSkillResult {
 }
 
 /**
- * Host create-routine input (P4 FR-001 / T015–T016).
- * Non-empty `intent` and product-supported `scheduleExpr` required; empty / invalid reject without writing.
- * Scoped by `botId` (SC-006). No confirm token and no separate `displayName` —
- * pane identity derives from `intent` (SC-007 / FR-001).
+ * Host create-routine input (P4 FR-001 / T015–T016; P6 additive event — T008 / T012).
+ * Non-empty `intent` required. When `triggerKind` is omitted or `cron`, product-supported
+ * `scheduleExpr` is required. When `triggerKind=event`, `eventTrigger` is required
+ * (Pass: `webhook_harness`) and `scheduleExpr` is ignored.
+ * Empty / invalid reject without writing. Scoped by `botId` (SC-006).
+ * No confirm token and no separate `displayName` — pane identity derives from `intent`.
  * Electron Main must not invent routine records — Host owns the durable write (research R1).
  */
 export interface CreateRoutineInput {
   readonly botId: SessionId
   readonly intent: string
-  readonly scheduleExpr: string
+  /** Required when `triggerKind` is omitted or `cron`. */
+  readonly scheduleExpr?: string
+  /** Defaults to `cron` when omitted (P4 path). */
+  readonly triggerKind?: RoutineTriggerKind
+  /** Required when `triggerKind=event` (Pass: `webhook_harness`). */
+  readonly eventTrigger?: RoutineEventTrigger
 }
 
 /** Lead-authorized Host routine create, including cancellation. */
@@ -850,6 +991,78 @@ export interface ListMemoriesRequest extends ListMemoriesInput {
 /** Host Memory projections for browse / recall surface. */
 export interface ListMemoriesResult {
   readonly memories: readonly MemoryProjection[]
+}
+
+/**
+ * Host install-connector input (P6 T009 / T012 / US1 T017).
+ * `catalogId` must name a thin-catalog / Verifier fixture entry.
+ * Electron Main must not invent connector records — Host owns the durable write (research R1).
+ */
+export interface InstallConnectorInput {
+  readonly catalogId: string
+}
+
+/** Lead-authorized Host connector install, including cancellation. */
+export interface InstallConnectorRequest extends InstallConnectorInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Connector after a successful install (`installState=installed`). */
+export interface InstallConnectorResult {
+  readonly connector: ConnectorProjection
+}
+
+/**
+ * Host authenticate-connector input (P6 T011 / T012 / US1 T018).
+ * Stores the secret in the Host credential seam only — never on the journal or dump path.
+ * Chat-paste MUST NOT be the primary product auth path (FR-008).
+ */
+export interface AuthenticateConnectorInput {
+  readonly connectorId: ConnectorId
+  /** Non-empty secret / API token for in-app Pass fixture auth. */
+  readonly secret: string
+}
+
+/** Lead-authorized Host connector auth, including cancellation. */
+export interface AuthenticateConnectorRequest extends AuthenticateConnectorInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Connector after auth reaches `authState=ready`. */
+export interface AuthenticateConnectorResult {
+  readonly connector: ConnectorProjection
+}
+
+/** Host list thin connector catalog (installable definitions). */
+export interface ListConnectorCatalogResult {
+  readonly catalog: readonly ConnectorCatalogEntry[]
+}
+
+/** Host list durable connector rows. */
+export interface ListConnectorsResult {
+  readonly connectors: readonly ConnectorProjection[]
+}
+
+/**
+ * Host describe-connector-credential input (P6 T011).
+ * Returns configured/writable facts only — never the secret value (FR-007).
+ */
+export interface DescribeConnectorCredentialInput {
+  readonly connectorId: ConnectorId
+}
+
+/** Lead-authorized Host connector credential describe, including cancellation. */
+export interface DescribeConnectorCredentialRequest extends DescribeConnectorCredentialInput {
+  readonly signal: AbortSignal
+}
+
+/** Value-free credential presence for one connector. */
+export interface DescribeConnectorCredentialResult {
+  readonly connectorId: ConnectorId
+  readonly credentialKey: string
+  readonly configured: boolean
+  readonly writable: boolean
+  readonly kind?: 'api-key' | 'grant'
 }
 
 /**
@@ -994,6 +1207,11 @@ declare module '@deepseek-ai/dsh-session/types' {
      * Not chat transcript; Electron Main must not invent parallel rows (research R1/R6/R7).
      */
     'team/memory': { version: 2; teamId: TeamId; memory: MemoryRecord }
+    /**
+     * Host Connector catalog row (P6 Architect Path A SoT), Lead Session only.
+     * Not Electron Main; secrets stay in the credential seam, not this payload (research R1/R5).
+     */
+    'team/connector': { version: 2; teamId: TeamId; connector: ConnectorRecord }
     /** Durable mailbox enqueue, stored before delivery is attempted. */
     'team/message/queued': { version: 2; teamId: TeamId; message: TeamMessageSnapshot }
     /** Durable acknowledgement that the target Session recorded the message. */

@@ -52,6 +52,7 @@ function pending(state: TeamState): TeamMessageSnapshot[] {
 function isEmptyState(state: TeamState): boolean {
   return state.members.length === 0 && state.sections.length === 0 && state.routines.length === 0
     && state.memories.length === 0
+    && state.connectors.length === 0
     && state.tasks.length === 0
     && state.messages.length === 0 && state.delivered.length === 0
 }
@@ -178,6 +179,7 @@ describe('Agent Teams projection events', () => {
       botId: CHILD,
       intent: 'Ping status',
       scheduleExpr: '@every 5m',
+      triggerKind: 'cron',
       status: 'paused',
       lastRunAt: null,
       createdAt: 10,
@@ -683,6 +685,7 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
       botId: CHILD,
       intent: 'Ping status',
       scheduleExpr: '@every 5m',
+      triggerKind: 'cron' as const,
       status: 'active' as const,
       lastRunAt: null,
       createdAt: 10,
@@ -693,6 +696,7 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
       botId: SessionId('child-b'),
       intent: 'Nightly digest',
       scheduleExpr: '@daily',
+      triggerKind: 'cron' as const,
       status: 'paused' as const,
       lastRunAt: 99,
       createdAt: 20,
@@ -714,6 +718,7 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
       sections: [],
       routines: [active, paused],
       memories: [],
+      connectors: [],
       tasks: [],
       nextTaskNumber: 1,
       messages: [],
@@ -762,6 +767,7 @@ describe('projectMemory / projectMemories (P5 T007–T008 / US5 T027)', () => {
       sections: [],
       routines: [],
       memories: [agentA, agentB, user],
+      connectors: [],
       tasks: [],
       nextTaskNumber: 1,
       messages: [],

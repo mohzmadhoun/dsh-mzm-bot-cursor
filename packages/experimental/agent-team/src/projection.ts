@@ -15,8 +15,11 @@ Bot.`sectionId`. Unassigned/default is null/absent sectionId — no catalog row
 (T031–T033 / FR-006 / clarify lock 4).
 Host Routine catalog rows persist as `team/routine` (P4 Architect Option 3 SoT) —
 not `dsh-schedule` session reminders; Electron Main must not invent parallel rows.
+P6 extends RoutineRecord additively with `triggerKind` + `eventTrigger` (absent → cron).
 Host Memory catalog rows persist as `team/memory` (P5 Host Memory catalog SoT) —
 not chat transcript; Electron Main must not invent parallel rows (research R1/R6/R7).
+Host Connector catalog rows persist as `team/connector` (P6 Architect Path A SoT) —
+not Electron Main; secrets stay in the credential seam (research R1/R5).
 */
 
 import { z } from 'zod'
@@ -30,11 +33,15 @@ import { memoryEligibleForBot } from './validation.ts'
 import type {
   AvatarMarker,
   BotPersonaProfile,
+  ConnectorProjection,
+  ConnectorRecord,
   HostMailboxMessage,
   MemoryProjection,
   MemoryRecord,
+  RoutineEventTrigger,
   RoutineProjection,
   RoutineRecord,
+  RoutineTriggerKind,
   SidebarSectionSnapshot,
   SidebarSectionView,
   SkillCatalogSummary,
@@ -45,6 +52,7 @@ import type {
   TeamTaskSnapshot,
 } from './types.ts'
 import {
+  ConnectorId as toConnectorId,
   MemoryId as toMemoryId,
   RoutineId as toRoutineId,
   SidebarSectionId as toSidebarSectionId,
@@ -205,12 +213,41 @@ const routineRecordSchema = z.object({
   routineId: routineIdSchema,
   botId: sessionIdSchema,
   intent: z.string().min(1),
-  scheduleExpr: z.string().min(1),
+  scheduleExpr: z.string(),
+  triggerKind: z.enum(['cron', 'event']).optional(),
+  eventTrigger: z.enum(['webhook_harness']).optional(),
   status: z.enum(['active', 'paused']),
   lastRunAt: z.union([z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER), z.null()]),
   createdAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
   updatedAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
-}).strict() as z.ZodType<RoutineRecord>
+}).strict().transform((row): RoutineRecord => {
+  const triggerKind: RoutineTriggerKind = row.triggerKind ?? 'cron'
+  if (triggerKind === 'cron' && row.scheduleExpr.trim().length === 0) {
+    throw new Error(`routine "${row.routineId}" cron scheduleExpr must be non-empty`)
+  }
+  if (triggerKind === 'event') {
+    if (row.eventTrigger !== 'webhook_harness') {
+      throw new Error(`routine "${row.routineId}" event rows require eventTrigger=webhook_harness`)
+    }
+    return {
+      ...row,
+      triggerKind,
+      scheduleExpr: '',
+      eventTrigger: row.eventTrigger,
+    }
+  }
+  return {
+    routineId: row.routineId,
+    botId: row.botId,
+    intent: row.intent,
+    scheduleExpr: row.scheduleExpr,
+    triggerKind,
+    status: row.status,
+    lastRunAt: row.lastRunAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }
+})
 
 const teamRoutineEventSchema = z.object({
   version: z.literal(2),
@@ -236,16 +273,40 @@ const teamMemoryEventSchema = z.object({
   memory: memoryRecordSchema,
 }).strict() as z.ZodType<SessionEventMap['team/memory']>
 
+const connectorIdSchema = z.string().min(1).transform(value => toConnectorId(value))
+
+const connectorRecordSchema = z.object({
+  connectorId: connectorIdSchema,
+  catalogId: z.string().min(1),
+  serverName: z.string().min(1),
+  displayName: z.string().min(1),
+  installState: z.enum(['available', 'installing', 'installed', 'failed']),
+  authState: z.enum(['none', 'needs_auth', 'authenticating', 'ready', 'failed']),
+  transport: z.enum(['stdio', 'streamable-http']),
+  credentialKey: z.string().min(1).optional(),
+  error: z.string().min(1).optional(),
+  createdAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  updatedAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+}).strict() as z.ZodType<ConnectorRecord>
+
+const teamConnectorEventSchema = z.object({
+  version: z.literal(2),
+  teamId: teamIdSchema,
+  connector: connectorRecordSchema,
+}).strict() as z.ZodType<SessionEventMap['team/connector']>
+
 /** Current Team state selected by durable Team identity. */
 export interface TeamState {
   readonly id: TeamId
   readonly members: TeamMemberSnapshot[]
   /** Named sidebar section catalog only — Unassigned has no row (clarify lock 4). */
   readonly sections: SidebarSectionSnapshot[]
-  /** Host Routine catalog (P4 Architect Option 3 SoT). */
+  /** Host Routine catalog (P4 Architect Option 3 SoT; P6 additive event fields). */
   readonly routines: RoutineRecord[]
   /** Host Memory catalog (P5 Host Memory catalog SoT). */
   readonly memories: MemoryRecord[]
+  /** Host Connector catalog (P6 Architect Path A SoT). */
+  readonly connectors: ConnectorRecord[]
   readonly tasks: TeamTaskSnapshot[]
   readonly messages: TeamMessageSnapshot[]
   readonly delivered: TeamMessageId[]
@@ -264,6 +325,7 @@ export function emptyTeamState(rootId: SessionId): TeamProjectionState {
     sections: [],
     routines: [],
     memories: [],
+    connectors: [],
     tasks: [],
     messages: [],
     delivered: [],
@@ -288,6 +350,7 @@ const teamProjectionEntrySchema = z.object({
   sections: z.array(sidebarSectionSnapshotSchema),
   routines: z.array(routineRecordSchema),
   memories: z.array(memoryRecordSchema),
+  connectors: z.array(connectorRecordSchema),
   tasks: z.array(teamTaskSnapshotSchema),
   messages: z.array(teamMessageSnapshotSchema),
   delivered: z.array(teamMessageIdSchema),
@@ -302,6 +365,7 @@ export type TeamEventType =
   | 'team/section'
   | 'team/routine'
   | 'team/memory'
+  | 'team/connector'
   | 'team/message/queued'
   | 'team/message/delivered'
 
@@ -319,6 +383,7 @@ export function isTeamEvent(event: SessionEvent): event is TeamSessionEvent {
     || event.type === 'team/section'
     || event.type === 'team/routine'
     || event.type === 'team/memory'
+    || event.type === 'team/connector'
     || event.type === 'team/message/queued'
     || event.type === 'team/message/delivered'
 }
@@ -345,6 +410,8 @@ function parseCurrentTeamEvent(event: TeamSessionEvent): TeamSessionEvent {
       return { ...event, data: parsePersisted(event.type, teamRoutineEventSchema, event.data) }
     case 'team/memory':
       return { ...event, data: parsePersisted(event.type, teamMemoryEventSchema, event.data) }
+    case 'team/connector':
+      return { ...event, data: parsePersisted(event.type, teamConnectorEventSchema, event.data) }
     case 'team/message/queued':
       return { ...event, data: parsePersisted(event.type, teamMessageQueuedEventSchema, event.data) }
     case 'team/message/delivered':
@@ -455,8 +522,12 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       if (routine.intent.trim().length === 0) {
         throw new Error(`routine "${routine.routineId}" intent must be non-empty`)
       }
-      if (routine.scheduleExpr.trim().length === 0) {
+      const triggerKind = routine.triggerKind ?? 'cron'
+      if (triggerKind === 'cron' && routine.scheduleExpr.trim().length === 0) {
         throw new Error(`routine "${routine.routineId}" scheduleExpr must be non-empty`)
+      }
+      if (triggerKind === 'event' && routine.eventTrigger !== 'webhook_harness') {
+        throw new Error(`routine "${routine.routineId}" event rows require eventTrigger=webhook_harness`)
       }
       if (routine.status !== 'active' && routine.status !== 'paused') {
         throw new Error(`routine "${routine.routineId}" status must be active or paused`)
@@ -487,6 +558,22 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       const index = state.memories.findIndex(candidate => candidate.memoryId === memory.memoryId)
       if (index < 0) state.memories.push(memory)
       else state.memories[index] = memory
+      break
+    }
+    case 'team/connector': {
+      const connector = event.data.connector
+      if (connector.catalogId.trim().length === 0) {
+        throw new Error(`connector "${connector.connectorId}" catalogId must be non-empty`)
+      }
+      if (connector.serverName.trim().length === 0) {
+        throw new Error(`connector "${connector.connectorId}" serverName must be non-empty`)
+      }
+      if (connector.displayName.trim().length === 0) {
+        throw new Error(`connector "${connector.connectorId}" displayName must be non-empty`)
+      }
+      const index = state.connectors.findIndex(candidate => candidate.connectorId === connector.connectorId)
+      if (index < 0) state.connectors.push(connector)
+      else state.connectors[index] = connector
       break
     }
     case 'team/message/queued': {
@@ -574,8 +661,8 @@ function sameSkillAttachments(
 /** Host-only Team projection selected by the projected Session identity. */
 export const teamProjectionDefinition = {
   key: 'agentTeam',
-  // Bumped when Host Memory catalog joined TeamState (P5 T007).
-  stateVersion: 6,
+  // Bumped when Host Connector catalog joined TeamState (P6 T009).
+  stateVersion: 7,
   stateSchema: teamProjectionEntrySchema,
   init: header => emptyTeamState(header.id),
   apply: (state, event) => {
@@ -628,23 +715,40 @@ export function projectRoutines(
 
 /**
  * Map one durable {@link RoutineRecord} to a Client pane {@link RoutineProjection}.
- * Identity derives from intent; scheduleLabel is human-readable; status and lastRunAt pass through.
+ * Identity derives from intent; scheduleLabel is human-readable (cron) or event-family
+ * label (P6); status and lastRunAt pass through.
  * @param routine - Host catalog row.
- * @returns pane-ready projection (US2 T019 / FR-002).
+ * @returns pane-ready projection (US2 T019 / FR-002; P6 event distinguishable).
  */
 export function projectRoutine(routine: RoutineRecord): RoutineProjection {
+  const triggerKind = routine.triggerKind ?? 'cron'
+  const eventTrigger = routine.eventTrigger
   return {
     routineId: routine.routineId,
     botId: routine.botId,
     identity: routine.intent,
     intent: routine.intent,
+    triggerKind,
     scheduleExpr: routine.scheduleExpr,
-    scheduleLabel: describeScheduleExpr(routine.scheduleExpr),
+    scheduleLabel: triggerKind === 'event'
+      ? describeEventTrigger(eventTrigger)
+      : describeScheduleExpr(routine.scheduleExpr),
+    ...eventTrigger === undefined ? {} : { eventTrigger },
     status: routine.status,
     lastRunAt: routine.lastRunAt,
     createdAt: routine.createdAt,
     updatedAt: routine.updatedAt,
   }
+}
+
+/**
+ * Human-readable event-family label for Client pane projection.
+ * @param trigger - Pass event trigger id, when present.
+ * @returns pane label.
+ */
+function describeEventTrigger(trigger: RoutineEventTrigger | undefined): string {
+  if (trigger === 'webhook_harness') return 'Webhook harness'
+  return 'Event'
 }
 
 /**
@@ -681,6 +785,40 @@ export function projectMemory(memory: MemoryRecord): MemoryProjection {
     content: memory.content,
     createdAt: memory.createdAt,
     updatedAt: memory.updatedAt,
+  }
+}
+
+/**
+ * Project Host Connector catalog rows for Client install/auth surfaces (P6 T009 / T012).
+ * Host journal SoT only — never invent rows from Electron Main or Client local store.
+ * Secret values are never projected (`credentialConfigured` is boolean only).
+ * @param state - projected Team state.
+ * @returns Client {@link ConnectorProjection} rows in catalog order.
+ */
+export function projectConnectors(state: TeamState): readonly ConnectorProjection[] {
+  return state.connectors.map(projectConnector)
+}
+
+/**
+ * Map one durable {@link ConnectorRecord} to a Client {@link ConnectorProjection}.
+ * @param connector - Host catalog row.
+ * @returns install/auth-ready projection without secret values.
+ */
+export function projectConnector(connector: ConnectorRecord): ConnectorProjection {
+  return {
+    connectorId: connector.connectorId,
+    catalogId: connector.catalogId,
+    serverName: connector.serverName,
+    displayName: connector.displayName,
+    installState: connector.installState,
+    authState: connector.authState,
+    transport: connector.transport,
+    credentialConfigured: connector.credentialKey !== undefined
+      && connector.credentialKey.trim().length > 0
+      && connector.authState === 'ready',
+    ...connector.error === undefined ? {} : { error: connector.error },
+    createdAt: connector.createdAt,
+    updatedAt: connector.updatedAt,
   }
 }
 

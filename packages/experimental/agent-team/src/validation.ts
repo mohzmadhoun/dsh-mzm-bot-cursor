@@ -8,9 +8,15 @@ import type {
   AvatarMarker,
   AvatarShapeId,
   BotPersonaProfile,
+  ConnectorAuthState,
+  ConnectorCatalogEntry,
+  ConnectorInstallState,
+  ConnectorTransport,
   MemoryKind,
   MemoryLayer,
   MemoryRecord,
+  RoutineEventTrigger,
+  RoutineTriggerKind,
   SkillId,
 } from './types.ts'
 import { SkillId as toSkillId } from './types.ts'
@@ -21,6 +27,15 @@ const PERSONA_ANTI_JOB_MAX_ITEMS = 64
 const MEMORY_CONTENT_MAX = 100_000
 const MEMORY_KINDS: ReadonlySet<string> = new Set(['profile', 'log', 'note'])
 const MEMORY_LAYERS: ReadonlySet<string> = new Set(['agent', 'user'])
+const ROUTINE_TRIGGER_KINDS: ReadonlySet<string> = new Set(['cron', 'event'])
+const ROUTINE_EVENT_TRIGGERS: ReadonlySet<string> = new Set(['webhook_harness'])
+const CONNECTOR_INSTALL_STATES: ReadonlySet<string> = new Set([
+  'available', 'installing', 'installed', 'failed',
+])
+const CONNECTOR_AUTH_STATES: ReadonlySet<string> = new Set([
+  'none', 'needs_auth', 'authenticating', 'ready', 'failed',
+])
+const CONNECTOR_TRANSPORTS: ReadonlySet<string> = new Set(['stdio', 'streamable-http'])
 
 /** Fixed preset shape ids accepted by Host `setAvatar` (FR-005 / clarify lock 3). */
 export const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
@@ -113,6 +128,137 @@ export function requiredRoutineIntent(value: string): string {
  */
 export function requiredScheduleExpr(value: string): string {
   return parseScheduleExpr(value).expr
+}
+
+/**
+ * Normalize Host routine triggerKind (P6 T008). Defaults to `cron` when omitted.
+ * @param value - raw trigger kind, or undefined for P4 cron path.
+ * @returns validated `cron` | `event`.
+ */
+export function requiredRoutineTriggerKind(value: string | undefined): RoutineTriggerKind {
+  if (value === undefined) return 'cron'
+  if (typeof value !== 'string') {
+    throw new TeamError('triggerKind must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const kind = value.trim()
+  if (!ROUTINE_TRIGGER_KINDS.has(kind)) {
+    throw new TeamError(
+      'triggerKind must be one of: cron, event',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return kind as RoutineTriggerKind
+}
+
+/**
+ * Normalize Host eventTrigger for event routines (P6 T008 / FR-018).
+ * Pass family is `webhook_harness` only.
+ * @param value - raw event trigger candidate.
+ * @returns validated Pass event family id.
+ */
+export function requiredEventTrigger(value: string | undefined): RoutineEventTrigger {
+  if (value === undefined || typeof value !== 'string' || value.trim().length === 0) {
+    throw new TeamError(
+      'eventTrigger is required when triggerKind is event',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  const trigger = value.trim()
+  if (!ROUTINE_EVENT_TRIGGERS.has(trigger)) {
+    throw new TeamError(
+      'eventTrigger must be one of: webhook_harness',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return trigger as RoutineEventTrigger
+}
+
+/**
+ * Normalize Host connector catalog id (P6 T007 / T009).
+ * @param value - raw catalog id.
+ * @returns trimmed non-empty catalog id.
+ */
+export function requiredConnectorCatalogId(value: string): string {
+  return requiredText(value, 'catalogId', 200)
+}
+
+/**
+ * Normalize Host connector installState vocabulary (P6 T007).
+ * @param value - raw install state.
+ * @returns validated install state.
+ */
+export function requiredConnectorInstallState(value: string): ConnectorInstallState {
+  if (typeof value !== 'string') {
+    throw new TeamError('installState must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const state = value.trim()
+  if (!CONNECTOR_INSTALL_STATES.has(state)) {
+    throw new TeamError(
+      'installState must be one of: available, installing, installed, failed',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return state as ConnectorInstallState
+}
+
+/**
+ * Normalize Host connector authState vocabulary (P6 T007).
+ * @param value - raw auth state.
+ * @returns validated auth state.
+ */
+export function requiredConnectorAuthState(value: string): ConnectorAuthState {
+  if (typeof value !== 'string') {
+    throw new TeamError('authState must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const state = value.trim()
+  if (!CONNECTOR_AUTH_STATES.has(state)) {
+    throw new TeamError(
+      'authState must be one of: none, needs_auth, authenticating, ready, failed',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return state as ConnectorAuthState
+}
+
+/**
+ * Normalize Host connector transport vocabulary (P6 T007).
+ * @param value - raw transport.
+ * @returns validated transport.
+ */
+export function requiredConnectorTransport(value: string): ConnectorTransport {
+  if (typeof value !== 'string') {
+    throw new TeamError('transport must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const transport = value.trim()
+  if (!CONNECTOR_TRANSPORTS.has(transport)) {
+    throw new TeamError(
+      'transport must be one of: stdio, streamable-http',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return transport as ConnectorTransport
+}
+
+/**
+ * Normalize in-app connector auth secret (P6 T011). Empty rejects without writing.
+ * @param value - raw secret from Host auth Remote.
+ * @returns trimmed non-empty secret (Host credential store only — never journaled).
+ */
+export function requiredConnectorSecret(value: string): string {
+  return requiredText(value, 'secret', 100_000)
+}
+
+/**
+ * Look up one thin-catalog entry by catalogId.
+ * @param catalog - Host thin catalog definitions.
+ * @param catalogId - already-normalized catalog id.
+ * @returns the entry, or undefined when absent.
+ */
+export function findConnectorCatalogEntry(
+  catalog: readonly ConnectorCatalogEntry[],
+  catalogId: string,
+): ConnectorCatalogEntry | undefined {
+  return catalog.find(entry => entry.catalogId === catalogId)
 }
 
 /**

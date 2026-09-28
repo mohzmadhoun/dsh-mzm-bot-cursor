@@ -142,6 +142,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 | [`src/persona-bind.ts`](src/persona-bind.ts) | 从持久 Host persona 绑定作用域内 `deployment:persona-prefix` |
 | [`src/skill-bind.ts`](src/skill-bind.ts) | 从持久 Host `skillAttachments` + catalog 正文绑定作用域内 `agent-teams:skill-instructions` |
 | [`src/memory-bind.ts`](src/memory-bind.ts) | 从持久 Host Memory 目录行绑定作用域内 `agent-teams:memory-recall` |
+| [`src/connector-bind.ts`](src/connector-bind.ts) | 精简 Host 连接器目录 + Pass MCP fixture 绑定（`dsh-mcp-client`）+ 无密钥值的凭据描述 |
 | [`src/activity.ts`](src/activity.ts) | 一次性变更等待者与 dispose（资源释放）时的等待解除 |
 | [`src/lifecycle.ts`](src/lifecycle.ts) | 共享准入截止与有界结算 |
 | [`src/invariant.ts`](src/invariant.ts) | 在 append 前回放候选事件的不变式伴生插件 |
