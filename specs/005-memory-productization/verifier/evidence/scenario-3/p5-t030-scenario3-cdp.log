@@ -1,0 +1,132 @@
+page dsh-app://app/ What is triage in bug reports — DSH Local Build
+bots already present count=2
+botA=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32 botB=9a171790-cc8f-485a-bed5-fead0c35931f
+writeMemory bot=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32 kind=note layer=agent: OK
+Step 1 agent isolation PASS
+writeMemory bot=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32 kind=profile layer=user: OK
+Step 2 user sharing PASS
+writeMemory bot=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32 kind=note layer=user: OK
+Step 3 SC-010 orthogonality PASS
+quitDesktop pids=[664239,664322,664355,664358,664362,664408]
+startDesktop launcher_pid=666285
+CDP ready after 10000ms
+Step 4 cold restart PASS
+Step 5 post-restart SC-005 PASS
+{
+  "tip": "e19bb8f7d6",
+  "display": ":1",
+  "cdp": "9222",
+  "fixtures": {
+    "agentA": {
+      "kind": "note",
+      "layer": "agent",
+      "content": "SC-005 agent-scoped note exclusive to bot A — must not appear as B agent memory"
+    },
+    "userShared": {
+      "kind": "profile",
+      "layer": "user",
+      "content": "SC-005 user-scoped profile shared across bots after save and restart"
+    },
+    "orthoUserNote": {
+      "kind": "note",
+      "layer": "user",
+      "content": "SC-010 orthogonality: kind=note on layer=user (not kind-locked)"
+    }
+  },
+  "steps": {
+    "agentIsolation": {
+      "agentOnA": true,
+      "agentLeakToB": false,
+      "rowsA": [
+        {
+          "kind": "note",
+          "layer": "agent",
+          "content": "SC-005 agent-scoped note exclusive to bot A — must not appear as B agent memory"
+        }
+      ],
+      "rowsB": []
+    },
+    "userSharing": {
+      "userOnA": true,
+      "userOnB": true,
+      "rowsA": [
+        {
+          "kind": "note",
+          "layer": "agent",
+          "content": "SC-005 agent-scoped note exclusive to bot A — must not appear as B agent memory"
+        },
+        {
+          "kind": "profile",
+          "layer": "user",
+          "content": "SC-005 user-scoped profile shared across bots after save and restart"
+        }
+      ],
+      "rowsB": [
+        {
+          "kind": "profile",
+          "layer": "user",
+          "content": "SC-005 user-scoped profile shared across bots after save and restart"
+        }
+      ]
+    },
+    "orthogonality": {
+      "noteOnUser": true,
+      "noteOnAgent": true,
+      "profileOnUser": true,
+      "noKindLayerLock": true
+    },
+    "restart": {
+      "quit": true,
+      "relaunched": true
+    },
+    "postRestart": {
+      "postAgentOnA": true,
+      "postAgentLeak": false,
+      "postUserA": true,
+      "postUserB": true,
+      "postOrthoNoteUser": true,
+      "rowsA": [
+        {
+          "kind": "note",
+          "layer": "agent",
+          "content": "SC-005 agent-scoped note exclusive to bot A — must not appear as B agent memory"
+        },
+        {
+          "kind": "profile",
+          "layer": "user",
+          "content": "SC-005 user-scoped profile shared across bots after save and restart"
+        },
+        {
+          "kind": "note",
+          "layer": "user",
+          "content": "SC-010 orthogonality: kind=note on layer=user (not kind-locked)"
+        }
+      ],
+      "rowsB": [
+        {
+          "kind": "profile",
+          "layer": "user",
+          "content": "SC-005 user-scoped profile shared across bots after save and restart"
+        },
+        {
+          "kind": "note",
+          "layer": "user",
+          "content": "SC-010 orthogonality: kind=note on layer=user (not kind-locked)"
+        }
+      ]
+    }
+  },
+  "pass": true,
+  "botA": "da6ec6d3-dcc1-44e7-bf6c-07a69489cf32",
+  "botB": "9a171790-cc8f-485a-bed5-fead0c35931f",
+  "postRestartBots": {
+    "postA": "da6ec6d3-dcc1-44e7-bf6c-07a69489cf32",
+    "postB": "9a171790-cc8f-485a-bed5-fead0c35931f",
+    "postIds": [
+      "da6ec6d3-dcc1-44e7-bf6c-07a69489cf32",
+      "9a171790-cc8f-485a-bed5-fead0c35931f"
+    ]
+  },
+  "sc005": "agent isolation + user sharing after save + after cold restart",
+  "sc010": "kinds×layers orthogonal (note on agent + note on user + profile on user; no kind→layer lock)"
+}

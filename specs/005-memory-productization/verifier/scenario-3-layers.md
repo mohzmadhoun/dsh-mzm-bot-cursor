@@ -1,25 +1,46 @@
 # Scenario 3 — Agent vs user memory layers
 
-**Status:** Host layer enforcement (T027) + orthogonality Host/Client check (T029) documented; full SC-005 / SC-010 Desktop Pass stamp is **T030**
-**Owners:** DH Runtime (Host catalog isolation) · DH Client/Web (layer-distinguishable UI — T028 on tip) · DH Verifier (this recipe + SC stamp — T030)
-**Linear:** [MOH-265](https://linear.app/momadhoun/issue/MOH-265) (T027) · Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228)
-**Acceptance slice:** T027 Host `layer=agent` keyed by `botId` + `layer=user` account-wide · T029 orthogonality check (FR-017 / SC-010) · T030 completes Desktop SC-005 / SC-010 with FR-011/012 evidence
+**Status:** Recipe + SC-005 / SC-010 Pass stamped — see [evidence/scenario-3/VERDICT.txt](./evidence/scenario-3/VERDICT.txt)
+**Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host catalog isolation) · DH Client/Web (layer-distinguishable UI)
+**Linear:** [MOH-268](https://linear.app/momadhoun/issue/MOH-268) (T030) · Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228)
+**Acceptance slice:** T030 — Scenario 3 / SC-005 (agent isolation + user sharing after save + restart/recall) **and** SC-010 (kinds × layers orthogonal; no kind→layer lock) with mandatory FR-011/012 (standing orders **11** + **12**) desktop evidence
 **Quickstart:** [../quickstart.md](../quickstart.md) Scenario 3
 **Contract:** [../contracts/layers.md](../contracts/layers.md)
 **ADR:** `MzM-Docs/adr/agent-vs-user-memory-layers.md`
 **Architect locks:** Host Memory catalog SoT; agent isolation + user sharing; kinds × layers orthogonal; transcript ≠ either layer; no Electron Main memory bus
 
-## Measurable Done
+## Measurable Done (this recipe — T030 / SC-005 / SC-010)
+
+| Check | Pass bar |
+|-------|----------|
+| Recipe present | This file documents Steps 1–5 with Pass/Fail and evidence tags |
+| SC coverage | SC-005 — agent isolation + user sharing after save **and** after cold restart/recall; SC-010 — no kind→layer lock required for Pass |
+| FR-011 (SO 11) | Desktop screenshot(s) and/or short screen recording of the **real Desktop app** under `verifier/evidence/scenario-3/` — unit/jsdom alone **fails** |
+| FR-012 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
+| Product SC stamp | **measured:** `evidence/scenario-3/VERDICT.txt` Pass for SC-005 + SC-010 |
+
+Supporting Host/Client halves (not alone Done):
 
 | Check | Owner task | Pass bar | Status |
 |-------|------------|----------|--------|
-| Host agent isolation | T027 | Bot B `listMemories(botId=B)` MUST NOT include A’s agent-layer rows as B’s | **measured:** Host vitest `US5 T027` (team + persistence) |
-| Host user sharing | T027 | Same user-layer row available in A and B contexts after save **and** after Host restart | **measured:** same |
-| Transcript ≠ layer | T027 | Pass path uses Host catalog `memory-*` ids — not chat transcript substitution | **measured:** same |
-| Orthogonality (Host) | T029 | Host allows any kind on either layer; **no** kind→layer lock tables as Pass requirements | **measured:** see Orthogonality check below |
-| Orthogonality (Client) | T029 / T028 | Client write/browse does not require kind→layer locks for Pass | **measured:** `TeamAction` write draft picks kind and layer independently (FR-017); browse filter is layer-only — no kind→layer lock table |
-| SC-005 Desktop | T030 | Agent isolation + user sharing after save + restart/recall with FR-011/012 evidence | Open — T030 |
-| SC-010 Desktop | T030 | No kind→layer lock required for Pass; evidence under `evidence/scenario-3/` | Open — T030 |
+| Host agent isolation | T027 | Bot B `listMemories(botId=B)` MUST NOT include A’s agent-layer rows as B’s | **measured:** Host vitest `US5 T027` |
+| Host user sharing | T027 | Same user-layer row available in A and B after save **and** Host restart | **measured:** same |
+| Orthogonality (Host) | T029 | Host allows any kind on either layer; **no** kind→layer lock tables as Pass | **measured:** see Orthogonality check |
+| Orthogonality (Client) | T029 / T028 | Client write/browse does not require kind→layer locks for Pass | **measured:** independent kind + layer selects |
+
+---
+
+## Scope and prerequisites
+
+| Layer | Required for | Status at recipe authoring |
+|-------|--------------|----------------------------|
+| Foundational Pass (T013) | Any product SC | **measured:** stamped in [README.md](./README.md#foundational-pass-checklist--recorded) |
+| Host layers (T027) | Agent isolation + user sharing | **measured:** [#193](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/193) |
+| Client layer UI (T028) | Layer select + browse filter/labels | **measured:** [#192](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/192) |
+| Orthogonality doc (T029) | FR-017 / SC-010 Host+Client check | **measured:** section below |
+| Scenario 2 restart awareness (T026) | Cold restart / recall path familiarity | **measured:** [evidence/scenario-2/](./evidence/scenario-2/) |
+
+**Desktop prerequisites:** buildable Desktop (`apps/desktop`, `apps/desktop-host`) with **≥2** teammate bots; Agent Team Bot memory surface (`data-team-bot-memories`) + write (`data-team-write-memory` / `data-team-memory-kind-select` / `data-team-memory-layer-select`) + browse (`data-team-browse-memories`); Host Memory catalog on Desktop Host; `DISPLAY` when Cloud Agent (`DISPLAY=:1`, `DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop`). Rebuild Client UI bundle when tip advances past T028 (`pnpm --filter @deepseek-ai/dsh-experimental-client-ui-agent-team run bundle`) and Host agent-team when tip advances past T027 before claiming SC-005 / SC-010.
 
 ---
 
@@ -44,32 +65,136 @@
 
 ---
 
-## Host-only rehearsal (T027 — supporting; not alone SC-005 Done)
+## Fixtures (deterministic strings)
 
-```sh
-pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'US5 T027'
-pnpm exec vitest run packages/experimental/agent-team/tests/persistence.spec.ts -t 'US5 T027'
-pnpm exec vitest run packages/experimental/agent-team/tests/projection-events.spec.ts -t 'US5 T027'
-pnpm exec vitest run packages/experimental/agent-team/tests/memory-bind.spec.ts -t 'isolates agent-layer'
-```
-
-Expect: agent isolation + user sharing + restart survival + `memoryEligibleForBot` unit + inject compose isolation. Does **not** stamp SC-005 / SC-010 Done without T030 Desktop evidence.
+| Role | Kind | Layer | Content |
+|------|------|-------|---------|
+| Agent exclusive (bot A) | `note` | `agent` | `SC-005 agent-scoped note exclusive to bot A — must not appear as B agent memory` |
+| User shared | `profile` | `user` | `SC-005 user-scoped profile shared across bots after save and restart` |
+| Orthogonality (SC-010) | `note` | `user` | `SC-010 orthogonality: kind=note on layer=user (not kind-locked)` |
 
 ---
 
-## Desktop steps (T030 — outline; FR-011/012 required)
+## Step 1 — Agent-scoped fact on bot A (isolation)
 
-**Prerequisites:** ≥2 bots; Host T027 on tip; Client layer-distinguishable UI (T028); Scenario 1/2 foundations as needed.
+**User / Verifier path (desktop):**
 
-1. Save an **agent-scoped** fact on bot A → open bot B agent memory → A’s agent fact is **not** listed as B’s.
-2. Save a **user-scoped** fact → available in both A and B contexts.
-3. Restart/reload Desktop → isolation and sharing still hold.
-4. Optionally write different kinds on either layer (SC-010).
-5. Capture desktop visual evidence → `verifier/evidence/scenario-3/` (commit + PR embed).
+1. Launch the real Desktop app: `DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop`.
+2. Open **Agent Team**; ensure **≥2** teammate bots (create via **New bot** with distinct provider/model if needed).
+3. On bot A, **Write memory** → kind=`note`, layer=`agent`, fixture content → Save.
+4. Confirm bot A lists the agent-layer note; open bot B memory → A’s agent fact is **not** listed.
 
-**Expected:** SC-005, SC-010.
+| Observation | Pass | Fail |
+|-------------|------|------|
+| Isolation | Agent fact on A only | A’s agent content listed on B |
+| SoT | Host catalog projection (`data-team-memory-layer=agent`) | Client-only invent; transcript dump |
 
-Evidence directory and Pass stamp: **T030**.
+**Claim tags:** desktop UI → **measured**.
+
+---
+
+## Step 2 — User-scoped fact shared across bots
+
+**User / Verifier path (desktop):**
+
+1. On bot A (or either bot), **Write memory** → kind=`profile`, layer=`user`, fixture content → Save.
+2. **Browse / recall** on A and B as needed.
+3. Confirm the same user-layer profile appears in **both** bot A and bot B contexts.
+
+| Observation | Pass | Fail |
+|-------------|------|------|
+| Sharing | User fact on A and B | Missing on one bot; agent-only leakage presented as user |
+| Path | Host `listMemories` / `view.memories` | Electron Main IPC catalog |
+
+**Claim tags:** desktop UI → **measured**.
+
+---
+
+## Step 3 — Orthogonality sample (SC-010)
+
+**User / Verifier path (desktop):**
+
+1. Write kind=`note` on layer=`user` (fixture) while agent-layer note already exists — proves note is not agent-locked.
+2. Confirm kind and layer selects remain independently choosable (selecting kind does not remove agent/user layer options).
+
+| Observation | Pass | Fail |
+|-------------|------|------|
+| Orthogonality | note×agent + note×user + profile×user coexist; no lock table | Pass requires fixed kind→layer map |
+
+**Claim tags:** desktop UI → **measured** (with T029 Host/Client check).
+
+---
+
+## Step 4 — Cold restart Desktop
+
+**User / Verifier path (desktop):**
+
+1. Fully quit the Desktop Electron app (Main + Host child).
+2. Relaunch with the same user-data / Host home (`pnpm run start:desktop`).
+3. Wait until `dsh-app://app/` is interactive again; reopen **Agent Team**.
+
+| Observation | Pass | Fail |
+|-------------|------|------|
+| Restart | Cold relaunch completed | Leave/return only presented as restart |
+| Evidence | Process quit + relaunch recorded in CDP/driver log | Soft reload only |
+
+**Claim tags:** desktop restart → **measured**.
+
+---
+
+## Step 5 — Post-restart isolation + sharing (SC-005 Done half)
+
+**User / Verifier path (desktop):**
+
+1. **Browse / recall** on bots A and B.
+2. Confirm agent isolation still holds (A’s agent note on A only).
+3. Confirm user sharing still holds (user profile + user note on both).
+4. Capture FR-011/012 evidence (see Evidence section).
+
+| Observation | Pass | Fail |
+|-------------|------|------|
+| Post-restart SC-005 | Isolation + sharing after cold restart | Leakage; missing user rows; empty catalog |
+| Evidence | Desktop screenshot/recording filed + committed + PR-embedded | Unit/jsdom-only claim |
+
+**Claim tags:** desktop UI → **measured** (required for SC-005 / SC-010 Done).
+
+---
+
+## Evidence (FR-011 / FR-012 / SO 11+12)
+
+Directory: [`evidence/scenario-3/`](./evidence/scenario-3/)
+
+| Artifact | Content |
+|----------|---------|
+| `01-agent-on-a.png` | Bot A after agent-scoped note save |
+| `02-agent-absent-on-b.png` | Bot B — A’s agent fact absent |
+| `03-user-shared-both.png` | User-scoped profile on A and B |
+| `04-orthogonality-kinds-layers.png` | note×agent + note×user + profile×user |
+| `05-post-restart-agent-team.png` | Agent Team after cold restart |
+| `06-post-restart-isolation-and-share.png` | Isolation + sharing after restart |
+| `07-post-restart-layer-filter.png` | Layer filter after restart |
+| Optional `00-agent-team-open.png` | Agent Team open |
+| Optional `scenario-3-layers-walkthrough.mp4` | Short recording of the scripted path |
+| `panel-state.json` · `p5-t030-scenario3-cdp.log` | CDP hard-assert state + driver log |
+| `p5-t030-host-t027-vitest.log` | Host T027 supporting vitest |
+| `VERDICT.txt` | Pass stamp |
+
+**Standing order 12 (FR-012):** Artifacts MUST be **committed** under `specs/005-memory-productization/verifier/evidence/scenario-3/` **and** embedded in the GUI PR body via HTML `<img>` / `<video controls>` using absolute `/opt/cursor/artifacts/…` paths.
+
+### VERDICT template (filled — see evidence file)
+
+```
+T030 Scenario 3 layers (SC-005 + SC-010) — DH Verifier
+=======================================================
+Verdict: Pass (SC-005 agent isolation + user sharing after save + cold restart;
+         SC-010 kinds×layers orthogonal — no kind→layer lock)
+Stamp: 2026-09-28 · tip origin/master @ d3229a120c (#192 Client T028 on tip;
+  #193 Host T027 on tip)
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+Branch: cursor/p5-t030-scenario3-layers-fe1d
+Linear: MOH-268 (T030) · Epic MOH-228 — left In Progress (PO closes after merge)
+```
 
 ---
 
@@ -79,18 +204,22 @@ Evidence directory and Pass stamp: **T030**.
 - Grok chrome for layer UX
 - Requiring all six kind×layer combinations on Desktop for Pass
 - Scenario 5 full replay (T033)
-- Marking SC-005 / SC-010 Done before T030 Desktop stamp
+- Scoring LLM reply wording
+- Marking Linear Done / merging (PO)
 
 ---
 
 ## Rerun (idempotent)
 
 ```sh
-# Host (T027 / T029 Host half)
+# Host (T027 / T029 Host half) — supporting
 pnpm exec vitest run packages/experimental/agent-team/tests/team.spec.ts -t 'US5 T027'
 pnpm exec vitest run packages/experimental/agent-team/tests/persistence.spec.ts -t 'US5 T027'
+pnpm exec vitest run packages/experimental/agent-team/tests/memory-bind.spec.ts -t 'isolates agent-layer'
 
 # Desktop (required for SC-005 / SC-010 Done — T030)
+pnpm --filter @deepseek-ai/dsh-experimental-client-ui-agent-team run bundle
+# agent-team: pnpm exec tsdown (in packages/experimental/agent-team)
 DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
-# then: agent save on A → check B → user save → both contexts → restart → evidence/scenario-3/
+# then CDP driver: ≥2 bots → agent on A → check B → user shared → ortho sample → quit → relaunch → browse
 ```

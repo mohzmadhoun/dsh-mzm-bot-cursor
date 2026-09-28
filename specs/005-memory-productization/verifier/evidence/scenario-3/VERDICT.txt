@@ -1,0 +1,81 @@
+T030 Scenario 3 layers (SC-005 + SC-010) — DH Verifier
+=======================================================
+Verdict: Pass (SC-005 agent isolation + user sharing after save + cold restart;
+         SC-010 kinds×layers orthogonal — no kind→layer lock required for Pass)
+Stamp: 2026-09-28 · tip origin/master @ d3229a120c (#192 Client T028 on tip;
+  #193 Host T027 on tip)
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+  · runtime: rebuilt client-ui-agent-team + agent-team tsdown bundles on tip
+Branch: cursor/p5-t030-scenario3-layers-fe1d
+Linear: MOH-268 (T030) · Epic MOH-228 — left In Progress (PO closes after merge)
+Recipe: specs/005-memory-productization/verifier/scenario-3-layers.md
+
+Acceptance (T030 / SC-005 / SC-010)
+----------------------------------
+[x] Step 1 — Agent-scoped note on bot A; absent on bot B
+    evidence/scenario-3/01-agent-on-a.png · 02-agent-absent-on-b.png
+[x] Step 2 — User-scoped profile shared across A and B after save
+    evidence/scenario-3/03-user-shared-both.png
+[x] Step 3 — SC-010 orthogonality (note×agent + note×user + profile×user;
+    kind select does not lock layer options)
+    evidence/scenario-3/04-orthogonality-kinds-layers.png
+[x] Step 4 — Desktop cold restart (quit Main+Host + relaunch) completed
+[x] Step 5 — Post-restart isolation + sharing still hold
+    evidence/scenario-3/05-post-restart-agent-team.png
+    · 06-post-restart-isolation-and-share.png · 07-post-restart-layer-filter.png
+[x] FR-011 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-012 (SO 12) — media committed under verifier/evidence/scenario-3/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip d3229a120c (DISPLAY=:1, port 9222):
+  botA=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32
+  botB=9a171790-cc8f-485a-bed5-fead0c35931f
+  agentIsolation: agentOnA=true agentLeakToB=false
+  userSharing: userOnA=true userOnB=true
+  orthogonality: noteOnAgent + noteOnUser + profileOnUser; noKindLayerLock=true
+  cold restart: quit pids + relaunch CDP ready ~10s
+  postRestart: postAgentOnA=true postAgentLeak=false
+               postUserA=true postUserB=true postOrthoNoteUser=true
+Supporting: panel-state.json · p5-t030-scenario3-cdp.log
+Host T027:  p5-t030-host-t027-vitest.log (3 passed)
+Walkthrough: scenario-3-layers-walkthrough.mp4
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p5-t030-01-agent-on-a.png
+  /opt/cursor/artifacts/p5-t030-02-agent-absent-on-b.png
+  /opt/cursor/artifacts/p5-t030-03-user-shared-both.png
+  /opt/cursor/artifacts/p5-t030-04-orthogonality-kinds-layers.png
+  /opt/cursor/artifacts/p5-t030-06-post-restart-isolation-and-share.png
+  /opt/cursor/artifacts/p5-t030-scenario3-layers-walkthrough.mp4
+  /opt/cursor/artifacts/p5-t030-00-agent-team-open.png
+  /opt/cursor/artifacts/p5-t030-05-post-restart-agent-team.png
+  /opt/cursor/artifacts/p5-t030-07-post-restart-layer-filter.png
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p5-t030-01-agent-on-a.png" alt="SC-005 agent-scoped note on bot A" />
+  <img src="/opt/cursor/artifacts/p5-t030-02-agent-absent-on-b.png" alt="SC-005 agent fact absent on bot B" />
+  <img src="/opt/cursor/artifacts/p5-t030-03-user-shared-both.png" alt="SC-005 user-scoped profile shared A+B" />
+  <img src="/opt/cursor/artifacts/p5-t030-04-orthogonality-kinds-layers.png" alt="SC-010 kinds×layers orthogonal" />
+  <img src="/opt/cursor/artifacts/p5-t030-06-post-restart-isolation-and-share.png" alt="SC-005 post-restart isolation + sharing" />
+  <video src="/opt/cursor/artifacts/p5-t030-scenario3-layers-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-005 agent isolation (A agent not on B): **measured** (Desktop frames 01–02 + CDP)
+- SC-005 user sharing after save: **measured** (frame 03 + CDP)
+- SC-005 after cold restart: **measured** (frames 05–07 + CDP)
+- SC-010 kinds×layers orthogonal: **measured** (frame 04 + T029 Host/Client check + CDP)
+- FR-011 desktop visual: **measured**
+- FR-012 commit under scenario-3/: **measured** (this PR)
+- FR-012 PR HTML embeds: **inferred** until product-owner assistant updates PR body
+
+Scope lock
+----------
+Does NOT close MOH-268 — leave In Progress until PO merges this stamp PR.
+Does NOT mark Linear Done. Does NOT merge.
+Does NOT claim Scenario 4 non-goals (T031) or Scenario 5 full replay (T033).
