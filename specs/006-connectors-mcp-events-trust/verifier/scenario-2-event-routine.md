@@ -1,6 +1,6 @@
 # Scenario 2 — Event-triggered routine E2E
 
-**Status:** Recipe drafted — product SC Pass **not** stamped (FR-014/015 evidence pending US2 Host/Client Desktop path + Desktop run)
+**Status:** Recipe + product SC Pass stamped 2026-09-28 — Client T024 Desktop SO11/12 evidence under `verifier/evidence/scenario-2/` (tip `7d6ae2f75a`; Host #213 on master)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host event create / webhook-harness wake / pause suppress) · DH Client (event-routine create + pane labeling + last-run / pause-resume)
 **Linear:** [MOH-323](https://linear.app/momadhoun/issue/MOH-323/t025-us2-verifier-scenario-2-event-routine-recipe) · Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-events-trust)
 **Acceptance slice:** T025 — Verifier Scenario 2 recipe covering SC-002 (create + harness fire + last-run + pause suppress) and SC-008 (cron still usable) with mandatory FR-014/015 (standing orders **11** + **12**) desktop evidence under `verifier/evidence/scenario-2/`

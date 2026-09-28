@@ -1,0 +1,10 @@
+page dsh-app://app/ What is triage in bug reports — DSH Local Build
+tip 0a70a7bdca sha 0a70a7bdcaa062f41e81987bfcbb89da8201791d utc 2026-09-28T12:19:04.097Z display :1 cdp 9222 host-inspect 9230
+targetBotId=da6ec6d3-dcc1-44e7-bf6c-07a69489cf32
+Step FR-004 empty intent reject PASS
+Step A create event PASS routineId=routine-fcfa77db-c9b1-41c9-a8ec-cd4d42ab640b
+Step B/E cron beside event PASS cronLabel=Cron (schedule)
+harness fire result {"deliveryId":"verifier-t024-1790597964860","receivedAt":1790597964860,"fired":[{"routineId":"routine-fcfa77db-c9b1-41c9-a8ec-cd4d42ab640b","botId":"da6ec6d3-dcc1-44e7-bf6c-07a69489cf32","status":"active","lastRunAt":1790597964860,"triggerKind":"event","eventTrigger":"webhook_harness","intent":"Handle webhook harness T024 SC-002"}]}
+Step C harness fire + last-run PASS lastRunAt=1790597964860
+harness pause suppress result {"deliveryId":"verifier-t024-paused-1790597969860","receivedAt":1790597969860,"fired":[]}
+Step D pause suppress PASS
