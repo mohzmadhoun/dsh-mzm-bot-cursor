@@ -14,7 +14,6 @@ import * as desktopComputer from '../src/computer.ts'
 import {
   COMPUTER_SETTINGS_NAMESPACE,
   defaultComputerSettings,
-  getComputerSettingsScope,
   projectComputerSettingsRows,
   registerComputerSettings,
 } from '../src/computer-settings.ts'
@@ -73,12 +72,12 @@ describe('computer settings Client row projection (T026)', () => {
   it('maps Host computer SoT onto Shell + Computer use row fields', async () => {
     ctx = new Context()
     await ctx.plugin(MemorySettings)
-    const scope = registerComputerSettings(
+    registerComputerSettings(
       ctx,
       defaultComputerSettings(new Date('2026-09-28T12:00:00.000Z')),
-    )!
-    await commitBoxReadiness(scope, 'ready', new Date('2026-09-28T12:00:01.000Z'))
-    expect(projectComputerSettingsRows(scope.get())).toEqual({
+    )
+    await commitBoxReadiness(ctx, 'ready', new Date('2026-09-28T12:00:01.000Z'))
+    expect(projectComputerSettingsRows(ctx.settings.get(COMPUTER_SETTINGS_NAMESPACE)!)).toEqual({
       shell: {
         boxId: 'desktop-local',
         readiness: 'ready',
@@ -93,7 +92,7 @@ describe('computer settings Client row projection (T026)', () => {
     ctx = new Context()
     await ctx.plugin(MemorySettings)
     const scope = registerComputerSettings(ctx)!
-    await commitBoxReadiness(scope, 'ready')
+    await commitBoxReadiness(ctx, 'ready')
     await scope.update({ computerUseEnabled: false })
     expect(scope.get()).toMatchObject({ readiness: 'ready', computerUseEnabled: false })
     await expect(scope.update({ readiness: 'failed' })).rejects.toThrow(/read-only over Remotes/)
@@ -139,7 +138,7 @@ describe('computer settings Client row projection (T026)', () => {
       ),
     ).rejects.toMatchObject({ code: 'settings/rejected' })
 
-    expect(getComputerSettingsScope(ctx)!.get()).toMatchObject({
+    expect(ctx.settings.get(COMPUTER_SETTINGS_NAMESPACE)).toMatchObject({
       readiness: 'ready',
       computerUseEnabled: false,
     })

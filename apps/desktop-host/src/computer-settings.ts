@@ -16,6 +16,9 @@ export const COMPUTER_SETTINGS_NAMESPACE = 'computer'
 /** Singleton Host box id for Pass local sandboxed Shell world. */
 export const DESKTOP_LOCAL_BOX_ID = 'desktop-local'
 
+/** Cross-module Host authority slot on the settings provider (survives Vite dupes). */
+const HOST_OWNED_AUTH = Symbol.for('dsh.desktop-host.computer-host-owned')
+
 /** Host-projected box/computer backend readiness (data-model BoxBackend.readiness). */
 export type BoxReadiness = 'not_ready' | 'starting' | 'ready' | 'failed'
 
@@ -62,12 +65,6 @@ export const COMPUTER_SETTINGS_SCHEMA: z<ComputerSettings> = z.object({
   computerUseEnabled: z.boolean().default(true),
 })
 
-/** Per-scope Host authority for Shell fields (rejects Client spoof writes). */
-const hostOwnedAuthority = new WeakMap<object, ComputerHostOwnedFields>()
-
-/** Live `computer` scope keyed by the settings provider instance. */
-const computerScopeByProvider = new WeakMap<object, SettingsScope<ComputerSettings>>()
-
 /** Composition / first-boot defaults before the Host probe commits. */
 export function defaultComputerSettings(now = new Date()): ComputerSettings {
   return {
@@ -112,30 +109,30 @@ export function pickComputerHostOwned(value: ComputerHostOwnedFields): ComputerH
   }
 }
 
+type HostOwnedCarrier = { [HOST_OWNED_AUTH]?: ComputerHostOwnedFields }
+
 /**
- * Resolve the live Host `computer` settings scope when registered on `ctx.settings`.
- * @param ctx - Desktop Host context.
- * @returns the owner scope, or `undefined` when settings / namespace is absent.
+ * Read Host-owned Shell authority from the settings provider.
+ * @param settings - mounted settings provider.
+ * @returns authority slot when registered.
  */
-export function getComputerSettingsScope(ctx: Context): SettingsScope<ComputerSettings> | undefined {
-  const settings = ctx.get('settings')
-  if (settings === undefined) return undefined
-  return computerScopeByProvider.get(settings)
+function hostOwnedSlot(settings: object): ComputerHostOwnedFields | undefined {
+  return (settings as HostOwnedCarrier)[HOST_OWNED_AUTH]
 }
 
 /**
  * Authorize the next Host write of Shell SoT fields (probe / recovery).
- * Must run immediately before `scope.update` that changes Host-owned keys.
- * @param scope - registered `computer` settings scope.
+ * Must run immediately before a settings write that changes Host-owned keys.
+ * @param settings - mounted settings provider carrying Host authority.
  * @param fields - Host-owned Shell fields being committed.
  */
 export function authorizeComputerHostOwned(
-  scope: SettingsScope<ComputerSettings>,
+  settings: object,
   fields: ComputerHostOwnedFields,
 ): void {
-  const slot = hostOwnedAuthority.get(scope)
+  const slot = hostOwnedSlot(settings)
   if (slot === undefined) {
-    hostOwnedAuthority.set(scope, pickComputerHostOwned(fields))
+    ;(settings as HostOwnedCarrier)[HOST_OWNED_AUTH] = pickComputerHostOwned(fields)
     return
   }
   slot.boxId = fields.boxId
@@ -182,10 +179,15 @@ export function registerComputerSettings(
   const settings = ctx.get('settings')
   if (settings === undefined) return undefined
   const authority = pickComputerHostOwned(entry)
+  ;(settings as HostOwnedCarrier)[HOST_OWNED_AUTH] = authority
   const scope = settings.register(COMPUTER_SETTINGS_NAMESPACE, COMPUTER_SETTINGS_SCHEMA, {
     base: entry,
     applies: 'live',
-    validate: value => assertComputerHostOwnedMatch(value, authority),
+    validate: (value) => {
+      const live = hostOwnedSlot(settings)
+      if (live === undefined) return
+      assertComputerHostOwnedMatch(value, live)
+    },
   })
   // Lock to the resolved document (base + stored user) so reboot preserves Host SoT.
   const resolvedOwned = pickComputerHostOwned(scope.get())
@@ -193,7 +195,5 @@ export function registerComputerSettings(
   authority.readiness = resolvedOwned.readiness
   authority.local = resolvedOwned.local
   authority.updatedAt = resolvedOwned.updatedAt
-  hostOwnedAuthority.set(scope, authority)
-  computerScopeByProvider.set(settings, scope)
   return scope
 }
