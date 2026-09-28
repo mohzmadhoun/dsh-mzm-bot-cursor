@@ -99,9 +99,9 @@ Verifier recipes home: [verifier/](./verifier/) — owners + evidence map in [ve
 
 ## Scenario 5 — Full Phase 5 replay
 
-**Recipe:** `verifier/scenario-5-full-replay.md` (T033 — Verifier owns; evidence under `verifier/evidence/scenario-5/`)
+**Recipe:** [verifier/scenario-5-full-replay.md](./verifier/scenario-5-full-replay.md) (T033 — Verifier owns; evidence under `verifier/evidence/scenario-5/`)
 
-1. Re-run Scenarios 1–4 in order on the real Desktop app.
+1. Re-run Scenarios 1–4 in order on the real Desktop app (or cite stamped Scenario 1–3 Pass media + fresh smoke per recipe time-box).
 2. File Pass/Fail evidence under `verifier/evidence/` with SO 11+12 embeds for GUI slices.
 3. Record overall verdict against [spec.md](./spec.md).
 
