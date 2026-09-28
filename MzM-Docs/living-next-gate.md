@@ -23,26 +23,24 @@
 
 **P6 (Connectors / MCP + event routines + trust)** — **Done** on `master`. Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay Pass [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. Prior living hold [MOH-349](https://linear.app/momadhoun/issue/MOH-349/p6-living-next-gate-p7-hold) Done.
 
-**P7 (Computer / box + subagent parity + settings chrome)** — **Done** on `master` (product exit held; epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) stays In Progress until PO stamps Done after this living flip merges + Verifier Pass). Specs under `specs/007-box-subagent-settings/`. T001–T035 complete. **US1 SC-001** [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3`; **US2 SC-002** [#255](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/255) @ `ce02df7a09`; **US3 SC-003** [#260](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/260) @ `2042cb0e60`. Polish docs [#263](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/263) (T033–T035) + [#264](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/264) (T028–T031). **SC-006** composite Desktop Pass [#265](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/265) @ `cfb70fe177` (SO 11+12 under `verifier/evidence/scenario-5/`). Plan has no P8.
+**P7 (Computer / box + subagent parity + settings chrome)** — **Done** on `master`. Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) **Done** (PO). Living flip [#266](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/266) @ `8ac0cc65f8`. Specs under `specs/007-box-subagent-settings/`. T001–T035 complete. **US1 SC-001** [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250) @ `17d2b3efe3`; **US2 SC-002** [#255](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/255) @ `ce02df7a09`; **US3 SC-003** [#260](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/260) @ `2042cb0e60`. Polish docs [#263](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/263) (T033–T035) + [#264](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/264) (T028–T031). **SC-006** composite Desktop Pass [#265](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/265) @ `cfb70fe177` (SO 11+12 under `verifier/evidence/scenario-5/`). Plan has no P8.
 
 ## Next gate
 
 **P1–P7 complete / await PO next phase.** Program plan [mzm-bot-plan.md](./mzm-bot-plan.md) names phases through P7 only; inventory beyond P7 stays Out until a later named phase amends the plan. Do **not** invent a P8 or new product epic.
 
-- **P7 product exit held on master** — T001–T035 complete; US1–US3 + polish + SC-006 Pass evidence on `master` @ `cfb70fe177`.
-- **Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome)** — In Progress until this living flip merges + independent Verifier Pass; **PO** stamps Done (Lead does not).
+- **P7 Done** — epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) Done (PO); living [#266](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/266) @ `8ac0cc65f8`; product SC-006 [#265](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/265) @ `cfb70fe177`.
 - **Evidence cites:** SC-006 [#265](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/265) @ `cfb70fe177`; polish [#263](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/263)/[#264](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/264); US1 [#250](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/250); US2 [#255](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/255); US3 [#260](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/260).
 - **Out (unchanged):** voice, draft-first send-on-behalf, group channels, user machines, learn-from-demo, billing chrome, full skill pack, pixel Grok — until PO names a next phase.
-- Lead does **not** invent Linear ids or product code. This living update is **MzM-Docs only**.
+- Lead does **not** invent Linear ids, product code, or a P8.
 
-## Phase 7 closed (await PO stamp)
+## Phase 7 closed
 
-1. **DH Lead** — Living gate flip (this doc + plan exit); compare URL to PO; MOH-350 comment; no feature code; do not stamp epic Done.
-2. **PO** — Open living-flip PR; after merge + Verifier Pass, stamp [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) Done; name next phase if any.
-3. **DH Verifier** — Pass/Fail on this living-docs PR only (docs coherence vs master tip `cfb70fe177`).
-4. **DH Spec / Electron / Runtime / Client / Architect** — Idle at this gate unless PO opens a named next phase.
+1. **DH Lead** — Living honesty stamp (MOH-350 Done); no feature code.
+2. **PO** — Name next phase if any (or hold); open this stamp PR via ManagePullRequest.
+3. **DH Spec / Electron / Runtime / Client / Architect / Verifier** — Idle at this gate unless PO opens a named next phase.
 
-### P7 evidence rollup (master @ `cfb70fe177`)
+### P7 evidence rollup (master @ `8ac0cc65f8`)
 
 | Slice | Outcome |
 |-------|---------|
@@ -54,16 +52,17 @@
 | Polish T033–T035 | Done — [#263](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/263) |
 | Polish T028–T031 | Done — [#264](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/264) |
 | SC-006 composite | Done — [#265](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/265) @ `cfb70fe177` (`verifier/evidence/scenario-5/`) |
+| Living P7 Done flip | Done — [#266](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/266) @ `8ac0cc65f8` |
+| Epic MOH-350 | **Done** (PO) |
 
 ## Owners / next
 
 | Role | Action |
 |------|--------|
-| **DH Lead** | Living flip PR ready; MOH-350 stays In Progress until PO Done stamp |
-| **PO Assistant** | Open PR from compare URL; after Verifier Pass + merge, stamp MOH-350 Done; decide next named phase (or hold) |
-| **DH Verifier** | Independent Pass on living-docs PR |
-| **DH Spec / Electron / Runtime / Client / Architect** | Idle — no P8 in plan |
+| **DH Lead** | MOH-350 Done stamp on living gate; idle until PO names next phase |
+| **PO Assistant** | Open stamp PR; decide next named phase (or hold) |
+| **DH Spec / Electron / Runtime / Client / Architect / Verifier** | Idle — no P8 in plan |
 
 ## Blockers
 
-None for living flip. Product SC-006 Pass already on `master` @ `cfb70fe177`. **Blocker for epic Done:** this living PR must merge + Verifier Pass, then **PO** stamps [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) Done.
+None. P1–P7 complete; epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) **Done**. Awaiting PO next phase.
