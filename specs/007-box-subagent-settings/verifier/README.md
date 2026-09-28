@@ -102,7 +102,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 |----------|------------|---------------------------|----------|----------------|------------|------------|
 | **1** Local Shell/box tool success | [Scenario 1](../quickstart.md#scenario-1--local-shell--box-tool-success) | [scenario-1-shell-box.md](./scenario-1-shell-box.md) (T019) · [shell-box.md](../contracts/shell-box.md) | [evidence/shell-box/](./evidence/shell-box/) | **Runtime** + **Client** + **Verifier** | SC-001 | **Required** |
 | **2** computerUse screenshot + handoff | [Scenario 2](../quickstart.md#scenario-2--computeruse-class-path-screenshot-only) | [scenario-2-computer-use.md](./scenario-2-computer-use.md) (T023) · [computer-use.md](../contracts/computer-use.md) | [evidence/computer-use/](./evidence/computer-use/) | **Runtime** + **Client** + **Verifier** | SC-002 | **Required** |
-| **3** Settings → Computer rows | [Scenario 3](../quickstart.md#scenario-3--settings--computer-rows) | `scenario-3-settings.md` (T027) · [settings.md](../contracts/settings.md) | [evidence/settings/](./evidence/settings/) | **Client** + **Runtime** + **Verifier** | SC-003, SC-004 | **Required** |
+| **3** Settings → Computer rows | [Scenario 3](../quickstart.md#scenario-3--settings--computer-rows) | [scenario-3-settings-computer.md](./scenario-3-settings-computer.md) (T027) · [settings.md](../contracts/settings.md) | [evidence/settings/](./evidence/settings/) | **Client** + **Runtime** + **Verifier** | SC-003, SC-004 | **Required** |
 | **4** Non-goals absence | [Scenario 4](../quickstart.md#scenario-4--non-goals-absence) | `non-goals.md` (T028) · [contracts/non-goals.md](../contracts/non-goals.md) | optional notes under `evidence/` | **Runtime** + **Electron** + **Verifier** | SC-005 | Docs/absence OK |
 | **5** Full Phase 7 replay | [Scenario 5](../quickstart.md#scenario-5--full-phase-7-replay) | `scenario-5-full-replay.md` (T030) · all contracts | all three GUI slices | **Verifier** | SC-006 (+ composite of 1–4 + T015) | **Required** for GUI slices |
 
@@ -149,7 +149,7 @@ Phase 7 implement / Verifier PRs for `specs/007-box-subagent-settings` MUST NOT 
 
 - **This file (`verifier/README.md`)** — DH Verifier owns for T006 / T015 / T031 / T033 / T035 stamps.
 - Inventories T002–T004, seam locks T005 — Runtime / Client / Electron / Spec own those files under `verifier/`; do not collide with this README.
-- Evidence placeholders T029 and Scenario recipes T027/T028/T030 — Verifier-owned follow-ons; T019 Scenario 1 and T023 Scenario 2 recipes are recorded below (SC-001 product Done on master; SC-002 product still open).
+- Evidence placeholders T029 and Scenario recipes T028/T030 — Verifier-owned follow-ons; T019 Scenario 1, T023 Scenario 2, and T027 Scenario 3 recipes are recorded below (SC-001 + SC-002 product Done on master; SC-003 product still open).
 - Do **not** edit `MzM-Docs/` in this PR (Lead owns living after Verifier Pass).
 
 ## Scenario 1 recipe (T019) — Shell/box
@@ -205,3 +205,30 @@ rg -n 'SC-002|FR-003|interactive browser|FR-013|FR-014|SO 11' specs/007-box-suba
 ```
 
 **PO / DH Lead:** Recipe gate for US2 is ready. Do **not** close SC-002 / MOH-379 product Done until Desktop evidence under `evidence/computer-use/` lands per the recipe. Next product: T020–T022 Host/Client computerUse observation + handoff path.
+
+## Scenario 3 recipe (T027) — Settings → Computer
+
+**Verdict:** **Pass** (recipe/docs only — **no** product SC-003)
+**Stamp:** 2026-09-28 · branch `cursor/p7-us3-verifier-dc28` · base `origin/master` @ `ce02df7a09`
+**Linear:** [MOH-383](https://linear.app/momadhoun/issue/MOH-383/t027-us3-verifier-scenario-3-settings-recipe) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · `P-MOH-2` only
+**Artifact:** [scenario-3-settings-computer.md](./scenario-3-settings-computer.md)
+**Evidence home:** [evidence/settings/](./evidence/settings/) (`.gitkeep` placeholder — media required before SC-003 Pass)
+**Scope lock:** This stamp delivers the rerunnable Scenario 3 acceptance recipe (SC-003 both **Shell** + **Computer use** rows under Global Settings → **Computer**; Shell readiness visible; FR-013/014 SO 11+12). **SC-003 alone MUST NOT grant SC-001 or SC-002** (FR-005 / SC-004). It does **not** stamp product SC-003 Done. Unit/jsdom alone **fails** GUI Pass. Client/Runtime US3 (T024–T026) may still be in flight — they must satisfy this recipe; fill `evidence/settings/VERDICT.txt` only after real Desktop screenshots/recording are committed + PR-embedded.
+
+| Check | Status |
+|-------|--------|
+| Recipe covers SC-003 both rows + Shell readiness | Yes |
+| SC-004 / FR-005 chrome alone ≠ SC-001/SC-002 | Yes (Step C) |
+| FR-013/014 evidence under `evidence/settings/` required | Yes — filenames in recipe; media pending |
+| Product SC-003 desktop Pass | **Not claimed** |
+
+**Rerun (idempotent):**
+
+```sh
+test -f specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md
+test -d specs/007-box-subagent-settings/verifier/evidence/settings
+test -f specs/007-box-subagent-settings/verifier/evidence/settings/.gitkeep
+rg -n 'SC-003|SC-004|FR-005|Shell readiness|FR-013|FR-014|SO 11' specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md
+```
+
+**PO / DH Lead:** Recipe gate for US3 is ready. Do **not** close SC-003 / MOH-383 product Done until Desktop evidence under `evidence/settings/` lands per the recipe. Do **not** treat SC-003 chrome as SC-001/SC-002 (FR-005 / SC-004). Next product: T024–T026 Client Computer section/rows + Host projection.
