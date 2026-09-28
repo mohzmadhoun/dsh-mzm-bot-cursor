@@ -26,7 +26,7 @@ async function bench(options: {
   addressed?: boolean
   conflict?: boolean
   registrationFailure?: boolean
-  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine' | 'pauseRoutine' | 'resumeRoutine' | 'writeMemory' | 'listMemories'
+  remoteFailure?: 'view' | 'update' | 'createBot' | 'updatePersona' | 'renameBot' | 'setAvatar' | 'deleteBot' | 'createSection' | 'renameSection' | 'assignSection' | 'attachSkill' | 'upsertUserSkill' | 'createRoutine' | 'pauseRoutine' | 'resumeRoutine' | 'writeMemory' | 'listMemories' | 'listConnectorCatalog' | 'listConnectors' | 'installConnector' | 'authenticateConnector' | 'describeConnectorCredential' | 'invokeConnectorTool'
   refreshGate?: Promise<void>
 } = {}) {
   const ctx = new Context()
@@ -411,6 +411,120 @@ async function bench(options: {
           },
         })
     },
+    listConnectorCatalog: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/listConnectorCatalog', args })
+      return Promise.resolve(options.remoteFailure === 'listConnectorCatalog'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              catalog: [{
+                catalogId: 'verifier-fixture',
+                displayName: 'Verifier Fixture Connector',
+                serverName: 'verifier_fixture',
+                transport: 'stdio' as const,
+                fixture: true,
+                authMode: 'in_app' as const,
+              }],
+            },
+          },
+        })
+    },
+    listConnectors: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/listConnectors', args })
+      return Promise.resolve(options.remoteFailure === 'listConnectors'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              connectors: [{
+                connectorId: 'connector-1',
+                catalogId: 'verifier-fixture',
+                serverName: 'verifier_fixture',
+                displayName: 'Verifier Fixture Connector',
+                installState: 'installed' as const,
+                authState: 'ready' as const,
+                transport: 'stdio' as const,
+                credentialConfigured: true,
+                createdAt: 1,
+                updatedAt: 2,
+              }],
+            },
+          },
+        })
+    },
+    installConnector: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/installConnector', args })
+      return Promise.resolve(options.remoteFailure === 'installConnector'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              connector: {
+                connectorId: 'connector-1',
+                catalogId: 'verifier-fixture',
+                serverName: 'verifier_fixture',
+                displayName: 'Verifier Fixture Connector',
+                installState: 'installed' as const,
+                authState: 'needs_auth' as const,
+                transport: 'stdio' as const,
+                credentialConfigured: false,
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          },
+        })
+    },
+    authenticateConnector: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/authenticateConnector', args })
+      return Promise.resolve(options.remoteFailure === 'authenticateConnector'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              connector: {
+                connectorId: 'connector-1',
+                catalogId: 'verifier-fixture',
+                serverName: 'verifier_fixture',
+                displayName: 'Verifier Fixture Connector',
+                installState: 'installed' as const,
+                authState: 'ready' as const,
+                transport: 'stdio' as const,
+                credentialConfigured: true,
+                createdAt: 1,
+                updatedAt: 2,
+              },
+            },
+          },
+        })
+    },
+    describeConnectorCredential: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/describeConnectorCredential', args })
+      return Promise.resolve(options.remoteFailure === 'describeConnectorCredential'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              connectorId: 'connector-1',
+              credentialKey: 'agent-teams-connector/connector-1',
+              configured: true,
+              writable: true,
+              kind: 'api-key' as const,
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -566,6 +680,21 @@ describe('ui-team browser plugin', () => {
     expect((await actions.listMemories(SESSION, {
       botId: CHILD,
     })).ok).toBe(true)
+    expect((await actions.listConnectorCatalog(SESSION)).ok).toBe(true)
+    expect((await actions.listConnectors(SESSION)).ok).toBe(true)
+    expect((await actions.installConnector(SESSION, {
+      catalogId: 'verifier-fixture',
+    })).ok).toBe(true)
+    expect((await actions.authenticateConnector(SESSION, {
+      connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+      secret: 'fixture-token',
+    })).ok).toBe(true)
+    expect((await actions.describeConnectorCredential(SESSION, {
+      connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+    })).ok).toBe(true)
+    expect((await actions.invokeConnectorTool(SESSION, {
+      connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+    })).ok).toBe(true)
     expect((await actions.createTask(SESSION, {
       subject: 'Task', description: 'Description', blockedBy: [], writeScopes: [],
     })).ok).toBe(true)
@@ -592,6 +721,12 @@ describe('ui-team browser plugin', () => {
       'agentTeams/resumeRoutine',
       'agentTeams/writeMemory',
       'agentTeams/listMemories',
+      'agentTeams/listConnectorCatalog',
+      'agentTeams/listConnectors',
+      'agentTeams/installConnector',
+      'agentTeams/authenticateConnector',
+      'agentTeams/describeConnectorCredential',
+      'agentTeams/listConnectors',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -779,6 +914,27 @@ describe('ui-team browser plugin', () => {
     await expect(upsertUserSkillActions.upsertUserSkill(SESSION, {
       displayName: 'My playbook',
       instructionalBody: 'Follow this authored playbook.',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const installConnector = await bench({ remoteFailure: 'installConnector' })
+    const installConnectorActions = (installConnector.entry()!.inject as unknown as () => TeamActionInjected)()
+    await expect(installConnectorActions.installConnector(SESSION, {
+      catalogId: 'verifier-fixture',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const authenticateConnector = await bench({ remoteFailure: 'authenticateConnector' })
+    const authenticateConnectorActions = (
+      authenticateConnector.entry()!.inject as unknown as () => TeamActionInjected
+    )()
+    await expect(authenticateConnectorActions.authenticateConnector(SESSION, {
+      connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+      secret: 'token',
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

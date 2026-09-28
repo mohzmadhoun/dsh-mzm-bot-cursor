@@ -780,3 +780,96 @@
   color: var(--dsw-alias-label-secondary);
   font-size: 11px;
 }
+
+.connectorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connectorCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+}
+
+.connectorTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+}
+
+.connectorTitle span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+}
+
+.connectorInstalledBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+.connectorsInstalled {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.connectorsInstalledList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connectorInstalledRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+}
+
+.connectorToolsReady {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+.connectorToolSuccess {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+.connectorToolFailure {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 11px;
+}

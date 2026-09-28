@@ -5,10 +5,17 @@ import type {
   AssignSectionResult,
   AttachSkillInput,
   AttachSkillResult,
+  AuthenticateConnectorInput,
+  AuthenticateConnectorResult,
   AvatarColorId,
   AvatarMarker,
   AvatarShapeId,
   BotIdentityMutationResult,
+  ConnectorAuthState,
+  ConnectorCatalogEntry,
+  ConnectorId,
+  ConnectorInstallState,
+  ConnectorProjection,
   CreateBotInput,
   CreateBotMutationResult,
   CreateBotResult,
@@ -18,7 +25,13 @@ import type {
   CreateSectionResult,
   DeleteBotInput,
   DeleteBotResult,
+  DescribeConnectorCredentialInput,
+  DescribeConnectorCredentialResult,
   HostMailboxMessage,
+  InstallConnectorInput,
+  InstallConnectorResult,
+  ListConnectorCatalogResult,
+  ListConnectorsResult,
   ListMemoriesInput,
   ListMemoriesResult,
   MemoryId,
@@ -119,6 +132,48 @@ export type TeamWriteMemoryActionResult = RemoteResult<BotIdentityMutationResult
 /** Generated Remote result whose business value preserves Team listMemories rejections. */
 export type TeamListMemoriesActionResult = RemoteResult<BotIdentityMutationResult<ListMemoriesResult>>
 
+/** Generated Remote result whose business value preserves Team listConnectorCatalog rejections. */
+export type TeamListConnectorCatalogActionResult =
+  RemoteResult<BotIdentityMutationResult<ListConnectorCatalogResult>>
+
+/** Generated Remote result whose business value preserves Team listConnectors rejections. */
+export type TeamListConnectorsActionResult =
+  RemoteResult<BotIdentityMutationResult<ListConnectorsResult>>
+
+/** Generated Remote result whose business value preserves Team installConnector rejections. */
+export type TeamInstallConnectorActionResult =
+  RemoteResult<BotIdentityMutationResult<InstallConnectorResult>>
+
+/** Generated Remote result whose business value preserves Team authenticateConnector rejections. */
+export type TeamAuthenticateConnectorActionResult =
+  RemoteResult<BotIdentityMutationResult<AuthenticateConnectorResult>>
+
+/** Generated Remote result whose business value preserves Team describeConnectorCredential rejections. */
+export type TeamDescribeConnectorCredentialActionResult =
+  RemoteResult<BotIdentityMutationResult<DescribeConnectorCredentialResult>>
+
+/**
+ * Host / Client connector tool-invoke input (P6 US1 T020).
+ * Invokes one tool exposed by an authenticated connector for user-visible outcome.
+ */
+export interface InvokeConnectorToolInput {
+  readonly connectorId: ConnectorId
+}
+
+/**
+ * Observable connector tool-call outcome for the Connectors panel (data-model ConnectorToolCall).
+ * LLM reply wording is not scored (FR-016).
+ */
+export interface ConnectorToolInvokeResult {
+  readonly connectorId: ConnectorId
+  readonly toolName: string
+  readonly outcome: 'success' | 'denied' | 'error'
+}
+
+/** Generated Remote result whose business value preserves Team invokeConnectorTool rejections. */
+export type TeamInvokeConnectorToolActionResult =
+  RemoteResult<BotIdentityMutationResult<ConnectorToolInvokeResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -137,6 +192,24 @@ export interface TeamActionInjected {
   resumeRoutine: (sessionId: SessionId, input: ResumeRoutineInput) => Promise<TeamResumeRoutineActionResult>
   writeMemory: (sessionId: SessionId, input: WriteMemoryInput) => Promise<TeamWriteMemoryActionResult>
   listMemories: (sessionId: SessionId, input: ListMemoriesInput) => Promise<TeamListMemoriesActionResult>
+  listConnectorCatalog: (sessionId: SessionId) => Promise<TeamListConnectorCatalogActionResult>
+  listConnectors: (sessionId: SessionId) => Promise<TeamListConnectorsActionResult>
+  installConnector: (
+    sessionId: SessionId,
+    input: InstallConnectorInput,
+  ) => Promise<TeamInstallConnectorActionResult>
+  authenticateConnector: (
+    sessionId: SessionId,
+    input: AuthenticateConnectorInput,
+  ) => Promise<TeamAuthenticateConnectorActionResult>
+  describeConnectorCredential: (
+    sessionId: SessionId,
+    input: DescribeConnectorCredentialInput,
+  ) => Promise<TeamDescribeConnectorCredentialActionResult>
+  invokeConnectorTool: (
+    sessionId: SessionId,
+    input: InvokeConnectorToolInput,
+  ) => Promise<TeamInvokeConnectorToolActionResult>
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -245,6 +318,17 @@ interface WriteMemoryDraft {
   layer: MemoryLayer | ''
 }
 
+/** Draft secret for Host authenticateConnector in-app credential UX (P6 T020). */
+interface ConnectorAuthDraft {
+  secret: string
+}
+
+/** Last Host-projected connector tool outcome shown on the Connectors panel (T020). */
+interface ConnectorToolOutcomeView {
+  readonly toolName: string
+  readonly outcome: ConnectorToolInvokeResult['outcome']
+}
+
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
 const EMPTY_BOT_DRAFT: BotDraft = { displayName: '', provider: '', model: '' }
 const EMPTY_PERSONA_DRAFT: PersonaDraft = { job: '', voice: '', antiJobs: '' }
@@ -255,6 +339,27 @@ const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
 const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = { intent: '', scheduleExpr: '' }
 const EMPTY_WRITE_MEMORY_DRAFT: WriteMemoryDraft = { kind: '', content: '', layer: '' }
+const EMPTY_CONNECTOR_AUTH_DRAFT: ConnectorAuthDraft = { secret: '' }
+
+/** Locale key for Host connector installState labels. */
+function connectorInstallStateKey(
+  state: ConnectorInstallState,
+): `connectorInstallState.${ConnectorInstallState}` {
+  return `connectorInstallState.${state}`
+}
+
+/** Locale key for Host connector authState labels. */
+function connectorAuthStateKey(
+  state: ConnectorAuthState,
+): `connectorAuthState.${ConnectorAuthState}` {
+  return `connectorAuthState.${state}`
+}
+
+/** Public MCP tool name for Host Pass fixture / thin-catalog serverName (FR-017). */
+function connectorPublicToolName(serverName: string): string {
+  return `mcp__${serverName}__ping`
+}
+
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
@@ -632,6 +737,8 @@ export function TeamAction({
   sessionId, load, createBot, updatePersona, renameBot, setAvatar, deleteBot,
   createSection, renameSection, assignSection, attachSkill, upsertUserSkill,
   createRoutine, pauseRoutine, resumeRoutine, writeMemory, listMemories,
+  listConnectorCatalog, listConnectors, installConnector, authenticateConnector,
+  describeConnectorCredential, invokeConnectorTool,
   createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
@@ -672,6 +779,23 @@ export function TeamAction({
   const [memoryBrowseLayerFilter, setMemoryBrowseLayerFilter] = useState<MemoryBrowseLayerFilter>(
     MEMORY_BROWSE_LAYER_FILTER_ALL,
   )
+  /**
+   * Thin Host connector catalog (P6 T019). Loaded via listConnectorCatalog —
+   * not inventable from Electron Main or Client local store.
+   */
+  const [connectorCatalog, setConnectorCatalog] = useState<readonly ConnectorCatalogEntry[] | null>(null)
+  /** True when Host listConnectorCatalog failed or returned empty (not silent success). */
+  const [connectorCatalogUnavailable, setConnectorCatalogUnavailable] = useState(false)
+  /** Connector whose in-app auth editor is open (P6 T020). */
+  const [authenticatingConnectorId, setAuthenticatingConnectorId] = useState<ConnectorId | null>(null)
+  const [connectorAuthDraft, setConnectorAuthDraft] = useState<ConnectorAuthDraft>(EMPTY_CONNECTOR_AUTH_DRAFT)
+  /**
+   * Last Host RPC tool outcomes keyed by connectorId (P6 T020).
+   * Cleared on session switch; never a Client SoT for install/auth.
+   */
+  const [connectorToolOutcomes, setConnectorToolOutcomes] = useState<
+    ReadonlyMap<ConnectorId, ConnectorToolOutcomeView>
+  >(() => new Map())
   /**
    * Session-local instructional bodies from successful upserts (edit prefill).
    * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
@@ -740,6 +864,11 @@ export function TeamAction({
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
     setWritingMemoryBotId(null)
     setWriteMemoryDraft(EMPTY_WRITE_MEMORY_DRAFT)
+    setConnectorCatalog(null)
+    setConnectorCatalogUnavailable(false)
+    setAuthenticatingConnectorId(null)
+    setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
+    setConnectorToolOutcomes(new Map())
     setAuthoredBodies(new Map())
     setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
@@ -772,12 +901,32 @@ export function TeamAction({
         return changed ? next : current
       })
       clearError()
+      // Host thin connector catalog (T019) — fail loud on empty / transport failure.
+      const catalogResult = await listConnectorCatalog(requestedSession)
+      if (sessionRef.current !== requestedSession || refreshGeneration.current !== generation) {
+        return true
+      }
+      if (!catalogResult.ok) {
+        setConnectorCatalog(null)
+        setConnectorCatalogUnavailable(true)
+        reportFailure(catalogResult.error)
+      } else if (!catalogResult.value.ok) {
+        setConnectorCatalog(null)
+        setConnectorCatalogUnavailable(true)
+        reportFailure(catalogResult.value.error)
+      } else if (catalogResult.value.value.catalog.length === 0) {
+        setConnectorCatalog([])
+        setConnectorCatalogUnavailable(true)
+      } else {
+        setConnectorCatalog(catalogResult.value.value.catalog)
+        setConnectorCatalogUnavailable(false)
+      }
       return true
     } else {
       reportFailure(result.error)
       return false
     }
-  }, [clearError, load, reportFailure, sessionId])
+  }, [clearError, listConnectorCatalog, load, reportFailure, sessionId])
 
   /** Clarify lock 2 / FR-002: selecting a discovered skill makes it available to attach (no wizard). */
   const makeAvailableToAttach = useCallback((skillId: SkillId): void => {
@@ -1265,6 +1414,135 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, listMemories, refresh, reportFailure, sessionId])
 
+  const settleInstallConnector = useCallback(async (
+    catalogId: string,
+    operation: () => Promise<TeamInstallConnectorActionResult>,
+  ): Promise<InstallConnectorResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`install-connector:${catalogId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const installed = result.value.value
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return installed
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`install-connector:${catalogId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId])
+
+  const settleAuthenticateConnector = useCallback(async (
+    connectorId: ConnectorId,
+    operation: () => Promise<TeamAuthenticateConnectorActionResult>,
+  ): Promise<AuthenticateConnectorResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`auth-connector:${connectorId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const authenticated = result.value.value
+      const described = await describeConnectorCredential(requestedSession, { connectorId })
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!described.ok) {
+        reportFailure(described.error)
+        return undefined
+      }
+      if (!described.value.ok) {
+        reportFailure(described.value.error)
+        return undefined
+      }
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return authenticated
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`auth-connector:${connectorId}`)
+          return next
+        })
+      }
+    }
+  }, [
+    clearError, describeConnectorCredential, invalidateRefresh, refresh, reportFailure, sessionId,
+  ])
+
+  const settleInvokeConnectorTool = useCallback(async (
+    connectorId: ConnectorId,
+    operation: () => Promise<TeamInvokeConnectorToolActionResult>,
+  ): Promise<ConnectorToolInvokeResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`invoke-connector:${connectorId}`))
+    try {
+      const result = await operation()
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const invoked = result.value.value
+      setConnectorToolOutcomes((current) => {
+        const next = new Map(current)
+        next.set(connectorId, { toolName: invoked.toolName, outcome: invoked.outcome })
+        return next
+      })
+      const listed = await listConnectors(requestedSession)
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!listed.ok) {
+        reportFailure(listed.error)
+        return undefined
+      }
+      if (!listed.value.ok) {
+        reportFailure(listed.value.error)
+        return undefined
+      }
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return invoked
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`invoke-connector:${connectorId}`)
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, listConnectors, refresh, reportFailure, sessionId])
+
   const settleRoutineStatus = useCallback(async (
     routineId: RoutineId,
     operation: () => Promise<TeamPauseRoutineActionResult | TeamResumeRoutineActionResult>,
@@ -1617,6 +1895,45 @@ export function TeamAction({
    */
   const submitBrowseMemories = async (member: TeamRosterMember): Promise<void> => {
     await settleBrowseMemories(member.id)
+  }
+
+  /**
+   * Host installConnector for one thin-catalog / fixture entry (P6 T019 / FR-001 / FR-017).
+   * Available ≠ installed; calls authenticated Host HTTP/WS only — never Electron Main IPC.
+   */
+  const submitInstallConnector = async (catalogId: string): Promise<void> => {
+    await settleInstallConnector(catalogId, () => installConnector(sessionId, { catalogId }))
+  }
+
+  /** Open in-app connector credential editor (P6 T020 / FR-002 / FR-008). */
+  const startAuthenticateConnector = (connector: ConnectorProjection): void => {
+    setAuthenticatingConnectorId(connector.connectorId)
+    setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
+  }
+
+  /**
+   * Host authenticateConnector with in-app secret (P6 T020).
+   * Empty secret rejects Client-side; secret never lands on journal/dump path.
+   */
+  const submitAuthenticateConnector = async (connectorId: ConnectorId): Promise<void> => {
+    const secret = connectorAuthDraft.secret.trim()
+    /* v8 ignore next -- ConnectorAuthForm disables Save while secret is empty. */
+    if (secret === '') return
+    const saved = await settleAuthenticateConnector(connectorId, () => authenticateConnector(sessionId, {
+      connectorId,
+      secret,
+    }))
+    if (saved === undefined) return
+    setAuthenticatingConnectorId(null)
+    setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
+  }
+
+  /**
+   * Host RPC connector tool invoke for user-visible success (P6 T020 / FR-003 / FR-016).
+   * Requires authState=ready; outcome indicator does not score LLM wording.
+   */
+  const submitInvokeConnectorTool = async (connectorId: ConnectorId): Promise<void> => {
+    await settleInvokeConnectorTool(connectorId, () => invokeConnectorTool(sessionId, { connectorId }))
   }
 
   /**
@@ -2569,6 +2886,231 @@ export function TeamAction({
                     </>
                   )}
               </section>
+              <section data-team-connectors>
+                <div className={css.sectionTitle}>
+                  <h3>{t('connectors')}</h3>
+                </div>
+                <p className={css.hint}>{t('connectorsHint')}</p>
+                {connectorCatalogUnavailable
+                  ? (
+                    <div
+                      className={css.error}
+                      role="alert"
+                      data-team-connectors-catalog-unavailable=""
+                    >
+                      {t('connectorsCatalogUnavailable')}
+                    </div>
+                  )
+                  : connectorCatalog === null
+                    ? null
+                    : (
+                      <div className={css.connectorsList} data-team-connectors-catalog>
+                        {connectorCatalog.map((entry) => {
+                          const installedRow = (view.connectors ?? []).find(
+                            row => row.catalogId === entry.catalogId && row.installState !== 'failed',
+                          )
+                          const installPending = pendingTasks.has(`install-connector:${entry.catalogId}`)
+                          return (
+                            <article
+                              key={entry.catalogId}
+                              className={css.connectorCard}
+                              data-team-connector-catalog={entry.catalogId}
+                              data-connector-fixture={entry.fixture ? 'true' : 'false'}
+                              data-connector-installed={installedRow === undefined ? 'false' : 'true'}
+                            >
+                              <div className={css.connectorTitle}>
+                                <strong data-team-connector-catalog-name>{entry.displayName}</strong>
+                                {entry.fixture
+                                  && <span data-team-connector-fixture="">{t('connectorFixture')}</span>}
+                              </div>
+                              <div className={css.meta}>
+                                <span data-team-connector-catalog-id>{entry.catalogId}</span>
+                                <span data-team-connector-server-name>{entry.serverName}</span>
+                                <span>{t(connectorInstallStateKey(
+                                  installedRow?.installState ?? 'available',
+                                ))}
+                                </span>
+                              </div>
+                              {installedRow === undefined
+                                ? (
+                                  <button
+                                    type="button"
+                                    className={css.personaButton}
+                                    data-team-connector-install={entry.catalogId}
+                                    disabled={installPending}
+                                    onClick={() => { void submitInstallConnector(entry.catalogId) }}
+                                  >
+                                    <IconPlusOutline16 size={13} />
+                                    {installPending ? t('connectorInstalling') : t('connectorInstall')}
+                                  </button>
+                                )
+                                : (
+                                  <div
+                                    className={css.connectorInstalledBadge}
+                                    data-team-connector-installed-badge={entry.catalogId}
+                                  >
+                                    <IconCheckOutline14 /> {t('connectorInstalled')}
+                                  </div>
+                                )}
+                            </article>
+                          )
+                        })}
+                      </div>
+                    )}
+                <div className={css.connectorsInstalled} data-team-connectors-installed>
+                  <div className={css.botSkillsHeader}>
+                    <span className={css.botSkillsLabel}>{t('connectorsInstalled')}</span>
+                  </div>
+                  <p className={css.hint}>{t('connectorsInstalledHint')}</p>
+                  {(view.connectors ?? []).length === 0
+                    ? (
+                      <div className={css.notice} data-team-connectors-empty="">
+                        {t('connectorsEmptyInstalled')}
+                      </div>
+                    )
+                    : (
+                      <ul className={css.connectorsInstalledList} data-team-connectors-list>
+                        {(view.connectors ?? []).map((connector: ConnectorProjection) => {
+                          const authPending = pendingTasks.has(
+                            `auth-connector:${connector.connectorId}`,
+                          )
+                          const invokePending = pendingTasks.has(
+                            `invoke-connector:${connector.connectorId}`,
+                          )
+                          const editingAuth = authenticatingConnectorId === connector.connectorId
+                          const toolOutcome = connectorToolOutcomes.get(connector.connectorId)
+                          const toolsReady = connector.installState === 'installed'
+                            && connector.authState === 'ready'
+                          return (
+                            <li
+                              key={connector.connectorId}
+                              className={css.connectorInstalledRow}
+                              data-team-connector={connector.connectorId}
+                              data-team-connector-install-state={connector.installState}
+                              data-team-connector-auth-state={connector.authState}
+                              data-team-connector-tools-ready={toolsReady ? 'true' : 'false'}
+                              {...toolOutcome === undefined
+                                ? {}
+                                : { 'data-team-connector-tool-outcome': toolOutcome.outcome }}
+                            >
+                              <div className={css.connectorTitle}>
+                                <strong data-team-connector-display-name>
+                                  {connector.displayName}
+                                </strong>
+                                <span data-team-connector-install-label>
+                                  {t(connectorInstallStateKey(connector.installState))}
+                                </span>
+                                <span data-team-connector-auth-label>
+                                  {t(connectorAuthStateKey(connector.authState))}
+                                </span>
+                                {connector.credentialConfigured
+                                  && (
+                                    <span data-team-connector-credential-configured="">
+                                      {t('connectorCredentialConfigured')}
+                                    </span>
+                                  )}
+                              </div>
+                              <div className={css.meta}>
+                                <span data-team-connector-id>{connector.connectorId}</span>
+                                <span data-team-connector-catalog-ref>{connector.catalogId}</span>
+                                {connector.error !== undefined && connector.error.trim() !== ''
+                                  && (
+                                    <span data-team-connector-error={connector.connectorId}>
+                                      {connector.error}
+                                    </span>
+                                  )}
+                              </div>
+                              {connector.installState === 'failed'
+                                && (
+                                  <div
+                                    className={css.error}
+                                    role="alert"
+                                    data-team-connector-install-failed=""
+                                  >
+                                    {t('connectorInstallFailed')}
+                                  </div>
+                                )}
+                              {editingAuth && (
+                                <ConnectorAuthForm
+                                  draft={connectorAuthDraft}
+                                  setDraft={setConnectorAuthDraft}
+                                  pending={authPending}
+                                  onSave={() => {
+                                    void submitAuthenticateConnector(connector.connectorId)
+                                  }}
+                                  onCancel={() => {
+                                    setAuthenticatingConnectorId(null)
+                                    setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
+                                  }}
+                                  t={t}
+                                />
+                              )}
+                              {!editingAuth && connector.installState === 'installed'
+                                && (connector.authState === 'needs_auth'
+                                  || connector.authState === 'failed') && (
+                                <button
+                                  type="button"
+                                  className={css.personaButton}
+                                  data-team-connector-auth={connector.connectorId}
+                                  disabled={authPending}
+                                  onClick={() => { startAuthenticateConnector(connector) }}
+                                >
+                                  {t('connectorAuth')}
+                                </button>
+                              )}
+                              {toolsReady && (
+                                <>
+                                  <div
+                                    className={css.connectorToolsReady}
+                                    data-team-connector-tools-bound={connector.connectorId}
+                                  >
+                                    <IconCheckOutline14 /> {t('connectorToolsReady')}
+                                    <span className={css.meta}>
+                                      {connectorPublicToolName(connector.serverName)}
+                                    </span>
+                                  </div>
+                                  <p className={css.hint}>{t('connectorToolsReadyHint')}</p>
+                                  <button
+                                    type="button"
+                                    className={css.personaButton}
+                                    data-team-connector-invoke={connector.connectorId}
+                                    disabled={invokePending}
+                                    onClick={() => {
+                                      void submitInvokeConnectorTool(connector.connectorId)
+                                    }}
+                                  >
+                                    <IconPlayOutline16 size={13} /> {t('connectorInvokeTool')}
+                                  </button>
+                                </>
+                              )}
+                              {toolOutcome !== undefined && (
+                                <>
+                                  <div
+                                    className={
+                                      toolOutcome.outcome === 'success'
+                                        ? css.connectorToolSuccess
+                                        : css.connectorToolFailure
+                                    }
+                                    data-team-connector-tool-outcome-label={toolOutcome.outcome}
+                                    data-team-connector-tool-name={toolOutcome.toolName}
+                                  >
+                                    {toolOutcome.outcome === 'success'
+                                      ? <><IconCheckOutline14 /> {t('connectorToolSuccess')}</>
+                                      : toolOutcome.outcome === 'denied'
+                                        ? t('connectorToolDenied')
+                                        : t('connectorToolError')}
+                                    <span className={css.meta}>{toolOutcome.toolName}</span>
+                                  </div>
+                                  <p className={css.hint}>{t('connectorToolOutcomeHint')}</p>
+                                </>
+                              )}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                </div>
+              </section>
               <section data-team-handoffs>
                 <div className={css.sectionTitle}>
                   <h3>{t('handoffs')}</h3>
@@ -2646,6 +3188,7 @@ export function TeamAction({
                           <label>
                             {t('owner')}
                             <select
+                              aria-label={t('owner')}
                               value={task.ownerName ?? ''}
                               disabled={pendingTasks.has(task.id) || task.status === 'completed'}
                               onChange={(event: ChangeEvent<HTMLSelectElement>) => {
@@ -3354,6 +3897,58 @@ interface TaskFormProps {
   onSave: () => void
   onCancel: () => void
   t: TeamActionProps['t']
+}
+
+/**
+ * In-app Host authenticateConnector credential form (P6 T020 / FR-002 / FR-008).
+ * Secret is never shown after save; chat-paste is not the primary path.
+ */
+interface ConnectorAuthFormProps {
+  draft: ConnectorAuthDraft
+  setDraft: (draft: ConnectorAuthDraft) => void
+  pending: boolean
+  onSave: () => void
+  onCancel: () => void
+  t: TeamActionProps['t']
+}
+
+function ConnectorAuthForm({
+  draft, setDraft, pending, onSave, onCancel, t,
+}: ConnectorAuthFormProps) {
+  const ready = draft.secret.trim() !== ''
+  return (
+    <div className={css.form} data-team-connector-auth-editor>
+      <p className={css.hint}>{t('connectorAuthHint')}</p>
+      {!ready && (
+        <div className={css.notice} data-team-connector-auth-reject="">
+          {t('connectorAuthReject')}
+        </div>
+      )}
+      <input
+        type="password"
+        autoComplete="off"
+        aria-label={t('connectorAuthSecret')}
+        data-team-connector-auth-secret=""
+        placeholder={t('connectorAuthSecretPlaceholder')}
+        value={draft.secret}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          setDraft({ secret: event.target.value })
+        }}
+      />
+      <div className={css.formActions}>
+        <button
+          type="button"
+          disabled={pending || !ready}
+          data-team-connector-auth-save=""
+          onClick={onSave}
+        >
+          {t('connectorAuthSave')}
+        </button>
+        <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>
+      </div>
+    </div>
+  )
 }
 
 function TaskForm({ draft, setDraft, pending, onSave, onCancel, t }: TaskFormProps) {

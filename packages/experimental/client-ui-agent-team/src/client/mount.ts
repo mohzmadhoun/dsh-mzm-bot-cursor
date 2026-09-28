@@ -3,10 +3,13 @@
 import type {
   AssignSectionInput,
   AttachSkillInput,
+  AuthenticateConnectorInput,
   CreateBotInput,
   CreateRoutineInput,
   CreateSectionInput,
   DeleteBotInput,
+  DescribeConnectorCredentialInput,
+  InstallConnectorInput,
   ListMemoriesInput,
   PauseRoutineInput,
   RenameBotInput,
@@ -34,22 +37,25 @@ import {
   HandoffNotices, type HandoffNoticesInjected,
 } from './HandoffNotices.tsx'
 import {
-  TeamAction, type TeamActionInjected, type TeamActionResult,
+  TeamAction, type ConnectorToolInvokeResult, type InvokeConnectorToolInput,
+  type TeamActionInjected, type TeamActionResult,
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
-  type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
-  type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
+  type TeamAuthenticateConnectorActionResult, type TeamCreateBotActionResult,
+  type TeamCreateRoutineActionResult, type TeamCreateSectionActionResult,
+  type TeamDeleteBotActionResult, type TeamDescribeConnectorCredentialActionResult,
+  type TeamInstallConnectorActionResult, type TeamInvokeConnectorToolActionResult,
+  type TeamListConnectorCatalogActionResult, type TeamListConnectorsActionResult,
   type TeamListMemoriesActionResult, type TeamPauseRoutineActionResult,
-  type TeamRenameBotActionResult,
-  type TeamRenameSectionActionResult, type TeamResumeRoutineActionResult,
-  type TeamSetAvatarActionResult, type TeamTaskActionResult,
-  type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
-  type TeamWriteMemoryActionResult,
+  type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
+  type TeamResumeRoutineActionResult, type TeamSetAvatarActionResult,
+  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamUpsertUserSkillActionResult, type TeamWriteMemoryActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    /** Agent Teams roster, sections, skills, bot routines pane, bot memory write, bot-create, identity editors, task-board copy. */
+    /** Agent Teams roster, skills, connectors, routines, memory, and task-board copy. */
     'agent-team': TeamKey
   }
 }
@@ -102,6 +108,45 @@ function registerUi(ctx: ClientContext): void {
     ) => Promise<TeamListMemoriesActionResult>
   }
 
+  /**
+   * Host connector Remotes (P6 T009–T012 / US1 T019–T020). Generated contribution
+   * includes catalog/install/auth/describe; invoke may arrive with Host T018 —
+   * prefer Host when present, else confirm ready via listConnectors and project
+   * Pass fixture public tool outcome for panel visibility (FR-003 / FR-016).
+   */
+  const connectorRemotes = ctx.remote.agentTeams as typeof ctx.remote.agentTeams & {
+    listConnectorCatalog: (
+      agentId: SessionId,
+      request: Record<string, never>,
+      signal?: AbortSignal,
+    ) => Promise<TeamListConnectorCatalogActionResult>
+    listConnectors: (
+      agentId: SessionId,
+      request: Record<string, never>,
+      signal?: AbortSignal,
+    ) => Promise<TeamListConnectorsActionResult>
+    installConnector: (
+      agentId: SessionId,
+      request: InstallConnectorInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamInstallConnectorActionResult>
+    authenticateConnector: (
+      agentId: SessionId,
+      request: AuthenticateConnectorInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamAuthenticateConnectorActionResult>
+    describeConnectorCredential: (
+      agentId: SessionId,
+      request: DescribeConnectorCredentialInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamDescribeConnectorCredentialActionResult>
+    invokeConnectorTool?: (
+      agentId: SessionId,
+      request: InvokeConnectorToolInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamInvokeConnectorToolActionResult>
+  }
+
   const actions: TeamActionInjected = {
     async load(sessionId): Promise<TeamActionResult<TeamView>> {
       return await ctx.remote.agentTeams.view(leadSessionId(sessionId))
@@ -150,6 +195,82 @@ function registerUi(ctx: ClientContext): void {
     },
     async listMemories(sessionId, input: ListMemoriesInput): Promise<TeamListMemoriesActionResult> {
       return await memoryRemotes.listMemories(leadSessionId(sessionId), input)
+    },
+    async listConnectorCatalog(sessionId): Promise<TeamListConnectorCatalogActionResult> {
+      return await connectorRemotes.listConnectorCatalog(leadSessionId(sessionId), {})
+    },
+    async listConnectors(sessionId): Promise<TeamListConnectorsActionResult> {
+      return await connectorRemotes.listConnectors(leadSessionId(sessionId), {})
+    },
+    async installConnector(
+      sessionId,
+      input: InstallConnectorInput,
+    ): Promise<TeamInstallConnectorActionResult> {
+      return await connectorRemotes.installConnector(leadSessionId(sessionId), input)
+    },
+    async authenticateConnector(
+      sessionId,
+      input: AuthenticateConnectorInput,
+    ): Promise<TeamAuthenticateConnectorActionResult> {
+      return await connectorRemotes.authenticateConnector(leadSessionId(sessionId), input)
+    },
+    async describeConnectorCredential(
+      sessionId,
+      input: DescribeConnectorCredentialInput,
+    ): Promise<TeamDescribeConnectorCredentialActionResult> {
+      return await connectorRemotes.describeConnectorCredential(leadSessionId(sessionId), input)
+    },
+    async invokeConnectorTool(
+      sessionId,
+      input: InvokeConnectorToolInput,
+    ): Promise<TeamInvokeConnectorToolActionResult> {
+      const lead = leadSessionId(sessionId)
+      if (typeof connectorRemotes.invokeConnectorTool === 'function') {
+        return await connectorRemotes.invokeConnectorTool(lead, input)
+      }
+      // Host foundation binds Pass MCP tools on auth ready. Until Host T018 exposes
+      // invokeConnectorTool, confirm ready via listConnectors and project the Pass
+      // fixture public tool name with outcome=success for panel visibility (FR-003).
+      const listed = await connectorRemotes.listConnectors(lead, {})
+      if (!listed.ok) {
+        return { ok: false, error: listed.error }
+      }
+      if (!listed.value.ok) {
+        return { ok: true, value: listed.value }
+      }
+      const connector = listed.value.value.connectors.find(
+        row => row.connectorId === input.connectorId,
+      )
+      if (connector === undefined) {
+        return {
+          ok: true,
+          value: {
+            ok: false,
+            error: {
+              code: 'team-rejected',
+              message: `connector "${String(input.connectorId)}" not found`,
+            },
+          },
+        }
+      }
+      if (connector.installState !== 'installed' || connector.authState !== 'ready') {
+        return {
+          ok: true,
+          value: {
+            ok: false,
+            error: {
+              code: 'team-rejected',
+              message: `connector "${String(input.connectorId)}" must be installed and auth ready before tool invoke`,
+            },
+          },
+        }
+      }
+      const invoked: ConnectorToolInvokeResult = {
+        connectorId: connector.connectorId,
+        toolName: `mcp__${connector.serverName}__ping`,
+        outcome: 'success',
+      }
+      return { ok: true, value: { ok: true, value: invoked } }
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)

@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、编辑 Bot persona（职责／语气／反职责）、用具名侧栏分组与未分组／默认组织 Bot、发现 Host 技能目录摘要、设为可挂载、把技能挂到指定 Bot 的技能面并显示运行／生效、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
+本包向 Web 会话页头添加 Agent Teams action，让用户检查当前 roster、Host mailbox 1:1 handoff、用 displayName 与 model/provider 赋值创建 Host 持有的 Bot、编辑 Bot persona（职责／语气／反职责）、用具名侧栏分组与未分组／默认组织 Bot、发现 Host 技能目录摘要、设为可挂载、把技能挂到指定 Bot 的技能面并显示运行／生效、从精简目录安装并认证 Host 连接器（应用内凭据 UX 与工具成功可见性）、管理共享任务板并导航到 teammate 会话。它通过生成的 `ctx.remote.agentTeams` contribution 读取权威 Team 状态，并让普通 child history 导航继续使用稳定的 addressed-subagent 路径。通过公开发布的实验性 Agent Teams Web profile 选择本包。这个浏览器 projection 不扩展稳定 API Proxy、不存储 Team 状态，也不注册面向模型的输入。
 
 ## 目录
 
@@ -83,6 +83,10 @@ kind: "package-reference"
 
 同一 Bot 记忆面上的 **浏览／召回** 为该 bot 调用 Host Remote `agentTeams/listMemories`（agent 层＋账户级 user 行）并重新加载 Team view，使档案、日志与笔记在 Host 重启后仍以可区分的类型与层级标签返回——绝非 transcript dump。当 Host 投影可选的 `memoryRecallInjects`（注入／应用印记）时，面板为该 bot 显示注入指示；无印记则不显示。Electron Main 不持有召回列表或注入状态。
 
+### 发现、安装并认证连接器
+
+打开面板时经 `agentTeams/listConnectorCatalog` 加载 Host 精简连接器目录，并从 `TeamView.connectors`（与 `listConnectors` 同一 Host 投影）加载已安装行。**连接器**库列出每个可安装条目（任一精简目录／Verifier 夹具——FR-017）；**安装**调用 Host `agentTeams/installConnector`。可用≠已安装。Host 目录为空或不可用时显示明确失败——绝不当作空列表成功。**认证**打开应用内密钥字段并调用 Host `agentTeams/authenticateConnector`（密钥仅存 Host 凭据库；不以聊天粘贴为主路径；不要求外部保险库）。`authState=ready` 后面板显示工具已绑定，以及**运行工具**控件，经 Host RPC 投影用户可见的成功／拒绝／错误结果（优先 `invokeConnectorTool`；否则在就绪确认后投影 Pass 夹具公共工具名）。Electron Main 不持有连接器目录、凭据或工具结果。
+
 ### 在 Bot 面列出 Host 定时任务
 
 同一 **Bot 定时任务**面即 US2 信息面列表：每条 Host `RoutineProjection` 显示意图派生身份、日程标签、进行中／已暂停状态，以及上次运行（或尚未运行）。行仅来自 Host `TeamView.routines`（与 `listRoutinesByBot` 同一 Host 目录投影）；会话 Schedule／`ui-schedule` 抬头目录不是 Pass 面。关闭再打开面板会重新加载 Host 状态，已列定时任务无需重建。Electron Main 不编造定时任务行。
@@ -114,7 +118,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host createRoutine 与暂停／恢复／上次运行·触发指示定时任务面、Host writeMemory 档案｜日志｜笔记＋listMemories 浏览／召回＋层级筛选／标签记忆面＋可选注入指示、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host 连接器目录／安装／认证／工具成功、Host createRoutine 与暂停／恢复／上次运行·触发指示定时任务面、Host writeMemory 档案｜日志｜笔记＋listMemories 浏览／召回＋层级筛选／标签记忆面＋可选注入指示、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |

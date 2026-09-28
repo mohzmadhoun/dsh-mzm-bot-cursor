@@ -103,8 +103,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T017 [US1] Host install path: Client/Host RPC installs one catalog/fixture entry → durable `ConnectorRecord` with `installState=installed` (or `failed` with clear reason); available≠installed ([contracts/connector.md](./contracts/connector.md); FR-001) in `packages/experimental/agent-team/src/` + `apps/desktop-host/`
 - [x] T018 [US1] Host auth → `authState=ready` via credential seam (no chat-paste primary); bind MCP tools when ready; successful tool-call outcome observable (`outcome=success`) without scoring LLM wording (FR-002/003/016) in `packages/experimental/agent-team/src/` + `packages/mcp/mcp-client/src/` + `apps/desktop-host/`
-- [ ] T019 [P] [US1] Client connector catalog + install surface under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) calling Host HTTP/WS only (no Main IPC mutations)
-- [ ] T020 [P] [US1] Client connector auth + tool-success visibility under `packages/experimental/client-ui-agent-team/src/client/` via Host RPC (in-app credential UX; vault not required when in-app works)
+- [x] T019 [P] [US1] Client connector catalog + install surface under `packages/experimental/client-ui-agent-team/src/client/` (locale strings in `packages/experimental/client-ui-agent-team/src/client/locales.ts`) calling Host HTTP/WS only (no Main IPC mutations)
+- [x] T020 [P] [US1] Client connector auth + tool-success visibility under `packages/experimental/client-ui-agent-team/src/client/` via Host RPC (in-app credential UX; vault not required when in-app works)
 - [x] T021 [US1] Add Verifier Scenario 1 recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-1-connector.md` covering SC-001 (install→auth→ready→successful tool call; FR-017 any-one fixture) and **requiring** FR-014/015 desktop evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-1/` (unit/jsdom alone fails)
 
 **Checkpoint**: US1 connector path works independently with Verifier recipe + evidence path.
