@@ -2115,6 +2115,124 @@ describe('Team Remote API', () => {
     })
   })
 
+  it('US3 T020: writeMemory kind=note validates non-empty content, rejects empty, persists distinguishable from profile and log', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('note validate a'),
+      textResponse('note validate b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Note Alpha',
+      modelSelection: { provider: 'mock', model: 'note-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+
+    // Empty / whitespace-only note content rejects without writing (FR-003 / SC-003).
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '   \t\n  ',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  ',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/content must be non-empty/) },
+    })
+    expect(ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories)
+      .toEqual([])
+
+    // Non-empty note persists on Host catalog (agent layer + account-wide user layer).
+    const agentNote = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  Freeform scratch for P5 US3  ',
+      signal: SIGNAL,
+    })
+    expect(agentNote.memory).toMatchObject({
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Freeform scratch for P5 US3',
+    })
+    const userNote = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: 'Account noted P5 US3',
+      signal: SIGNAL,
+    })
+    expect(userNote.memory).toMatchObject({
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: 'Account noted P5 US3',
+    })
+
+    // Leave/return without restart: list + view still show the same curated note rows.
+    const listed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(listed).toEqual([agentNote.memory, userNote.memory])
+    expect(listed.every(row => row.kind === 'note')).toBe(true)
+    const remoteList = await ctx.agentTeams.remoteListMemories(lead, { botId: alpha.id }, SIGNAL)
+    expect(remoteList).toMatchObject({ ok: true, value: { memories: listed } })
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.memories).toEqual([agentNote.memory, userNote.memory])
+
+    // Distinguishable from profile and log: co-exist; kinds remain distinct (SC-003).
+    const profile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Prefers short notes',
+      signal: SIGNAL,
+    })
+    const log = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Logged note write rehearsal',
+      signal: SIGNAL,
+    })
+    const mixed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(mixed).toEqual([agentNote.memory, userNote.memory, profile.memory, log.memory])
+    expect(new Set(mixed.map(row => row.kind))).toEqual(new Set(['note', 'profile', 'log']))
+    expect(mixed.filter(row => row.kind === 'note')).toEqual([agentNote.memory, userNote.memory])
+    expect(mixed.filter(row => row.kind === 'profile')).toEqual([profile.memory])
+    expect(mixed.filter(row => row.kind === 'log')).toEqual([log.memory])
+
+    // Remote success path for note write (FR-015: Host Remote write — bot-tool not required).
+    const remoteWrite = await ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Second note fact',
+    }, SIGNAL)
+    expect(remoteWrite).toMatchObject({
+      ok: true,
+      value: {
+        memory: {
+          kind: 'note',
+          layer: 'agent',
+          botId: alpha.id,
+          content: 'Second note fact',
+        },
+      },
+    })
+  })
+
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
       textResponse('routine validate a'),

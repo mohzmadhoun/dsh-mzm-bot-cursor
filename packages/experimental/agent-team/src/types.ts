@@ -806,9 +806,10 @@ export interface ResumeRoutineResult {
 }
 
 /**
- * Host write-memory input (P5 FR-001…003 / T006–T008 / US1 T014 / US2 T017).
+ * Host write-memory input (P5 FR-001…003 / T006–T008 / US1 T014 / US2 T017 / US3 T020).
  * Non-empty `content` required after trim; empty rejects without writing
- * (FR-001 profile, FR-002 log, FR-003 note). Persisted `kind` distinguishes log from profile.
+ * (FR-001 profile, FR-002 log, FR-003 note). Persisted `kind` distinguishes
+ * profile, log, and note on list/view.
  * `kind` and `layer` are independently chosen (FR-017).
  * When `layer=agent`, `botId` is required and must name an active Bot.
  * When `layer=user`, `botId` must be absent or null (account-wide).
