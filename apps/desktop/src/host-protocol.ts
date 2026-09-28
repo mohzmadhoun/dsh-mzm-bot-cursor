@@ -26,9 +26,9 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * event-routine wake, trust deny path, and credential store (research R6 / R9 / T013;
  * `specs/006-connectors-mcp-events-trust/contracts/`).
  * shell-exec / box-ready / computer-use-control / computer-screenshot /
- * computer-settings-mutate payloads are also not members and must not be added — Host owns
- * the sandboxed Shell execution world, box readiness, computerUse registry/provider runs,
- * and Computer settings SoT (research R6 / T013; `specs/007-box-subagent-settings/contracts/`).
+ * computer-settings-mutate payloads are also not members and must not be added — Host owns the sandboxed Shell
+ * execution world, box readiness, computerUse registry/provider runs, and Computer settings SoT
+ * (research R6 / T013; `specs/007-box-subagent-settings/contracts/`).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',

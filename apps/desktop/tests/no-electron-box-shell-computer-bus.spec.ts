@@ -95,7 +95,7 @@ describe('no Electron box/Shell/computerUse/Computer-settings bus (T014 / resear
     expect(ipcSource).toMatch(/no shell-exec/i)
     expect(ipcSource).toMatch(/Host owns the sandboxed Shell execution world/i)
     expect(protocolSource).toMatch(/must not be added/i)
-    expect(protocolSource).toMatch(/Host owns\s+the sandboxed Shell execution world/i)
+    expect(protocolSource).toMatch(/Host owns the sandboxed Shell/i)
     expect(protocolSource).toMatch(/shell-exec/)
     expect(protocolSource).toMatch(/box-ready/)
     expect(protocolSource).toMatch(/computer-use-control/)
