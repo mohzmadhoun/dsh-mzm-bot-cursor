@@ -16,6 +16,9 @@ export const DESKTOP_HOST_PROTOCOL_VERSION = 4 as const
  * Routine-catalog / routine-create / pause / resume / cron-fire / last-run payloads are also not
  * members and must not be added — Host owns the durable Routine catalog and cron wake path
  * (research R7 / T010; `specs/004-routines-cron/contracts/`).
+ * Memory-catalog / memory-write / memory-list / memory-browse / memory-recall / memory-injection
+ * payloads are also not members and must not be added — Host owns the durable Memory catalog
+ * (research R7 / T010; `specs/005-memory-productization/contracts/`).
  */
 export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
   'ready',
@@ -28,7 +31,8 @@ export const DESKTOP_HOST_CHILD_EVENT_TYPES = [
  * Main→Child control `type` values sent on the Host Node IPC channel.
  * There is no mailbox, bot-message, identity, persona, section, bot-delete,
  * skill-catalog, skill-attachment, skill-authoring, routine-catalog, routine-create,
- * pause-routine, resume-routine, cron-fire, or last-run control type on this channel.
+ * pause-routine, resume-routine, cron-fire, last-run, memory-catalog, memory-write,
+ * memory-list, memory-browse, memory-recall, or memory-injection control type on this channel.
  */
 export const DESKTOP_HOST_CONTROL_TYPES = ['shutdown', 'update-tasks'] as const
 
