@@ -52,6 +52,7 @@ import {
   PASS_FIXTURE_TOOL_RAW_NAME,
   storeConnectorSecret,
 } from './connector-bind.ts'
+import { gateConnectorToolApproval } from './connector-approval.ts'
 import {
   bindTeammateSkillInstructions,
   composeSkillInstructions,
@@ -1136,13 +1137,16 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Invoke one MCP tool from an authenticated connector (P6 US1 T018).
+   * Invoke one MCP tool from an authenticated connector (P6 US1 T018 / US3 T026).
    * Requires `installState=installed` and `authState=ready` with tools bound on `ctx.tools`.
-   * Returns a Host-observable {@link ConnectorToolCall} (`outcome=success|error`) —
-   * Verifier MUST NOT score LLM reply wording (FR-003 / FR-016).
+   * When `ctx.approval` is mounted, gates through `dsh-user-approval` before execute —
+   * user-deny or standing `never` returns `outcome=denied` without treating the call as
+   * success (FR-006). Returns a Host-observable {@link ConnectorToolCall}
+   * (`outcome=success|denied|error`) — Verifier MUST NOT score LLM reply wording
+   * (FR-003 / FR-016).
    * @param caller - exact live Team member.
    * @param request - connector id, optional tool name / arguments, and cancellation.
-   * @returns observable tool-call outcome (success for Story 1 Pass).
+   * @returns observable tool-call outcome (success for Story 1; denied for Story 3).
    */
   async invokeConnectorTool(
     caller: Agent,
@@ -1199,10 +1203,28 @@ export class TeamService extends TypertRemoteService {
         'TEAM_INVALID_ARGUMENT',
       )
     }
+    const callId = ToolCallId(`connector-tool-${randomUUID()}`)
+    const gate = await gateConnectorToolApproval(this.ctx, {
+      agent: caller,
+      toolName,
+      callId,
+      signal: request.signal,
+    })
+    if (gate.kind === 'denied') {
+      return {
+        toolCall: {
+          connectorId,
+          toolName,
+          outcome: 'denied',
+          detail: gate.detail,
+        },
+      }
+    }
     const result = await tools.execute({
       signal: request.signal,
-      callId: ToolCallId(`connector-tool-${randomUUID()}`),
+      callId,
       name: toolName,
+      agent: caller,
       arguments: request.arguments === undefined ? {} : { ...request.arguments },
     })
     const toolCall: ConnectorToolCall = result.isError
