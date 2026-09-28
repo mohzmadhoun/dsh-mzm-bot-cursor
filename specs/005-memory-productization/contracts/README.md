@@ -5,6 +5,15 @@
 **Audience**: DH Runtime, DH Electron, DH Client/Web, DH Verifier, DH Architect
 **Non-goal**: Implementation code; these are interface/acceptance contracts for tasks.
 
+## Implementer start here (T001)
+
+1. Read this contracts index, then the four contract files below.
+2. Honor the **PO-locked Host Memory catalog Option** — do not reopen:
+   - [research.md](../research.md) **R1** (SoT) + R2–R9
+   - [plan.md](../plan.md) Topology + **Locks honored** table
+3. Seam locks for Verifier / implementers: [../verifier/memory-seam-locks.md](../verifier/memory-seam-locks.md) (T004).
+4. ADR (Accepted, no rewrite): `MzM-Docs/adr/agent-vs-user-memory-layers.md`.
+
 Cross-refs: [spec.md](../spec.md) · [data-model.md](../data-model.md) · [research.md](../research.md) · PO-locked Host Memory catalog Option on MOH-233 · ADR `MzM-Docs/adr/agent-vs-user-memory-layers.md` · Clarify PR #169 · predecessors [001](../../001-multi-model-bots/contracts/) · [002](../../002-identity-personas/contracts/) · [003](../../003-skills-ux/contracts/) · [004](../../004-routines-cron/contracts/)
 
 | Contract file | Seam |
