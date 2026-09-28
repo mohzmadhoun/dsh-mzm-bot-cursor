@@ -78,8 +78,8 @@ async function main(): Promise<void> {
   // P3 thin pack + Host-durable user skills — Host owns catalog; Electron Main must not.
   // P4: jobs-local stays on the desktop/base profile for optional in-flight fire visibility only
   // (T013) — never Routine catalog / cron SoT (see specs/004-routines-cron/verifier/optional-jobs-visibility.md).
-  // P5: Host Memory catalog SoT lives on Agent Teams Lead journal `team/memory` (T006–T008) —
-  // never Electron Main bus, Client-only store, or transcript (research R1/R6/R7).
+  // P5 Memory Pass: Host Memory catalog SoT on Agent Teams Lead journal `team/memory` (T006–T008) —
+  // not transcript dump, not Electron Main store, not Client-only SoT (research R1/R6/R7; T037).
   await ctx.plugin(desktopManagedSkills, {
     managedRoot: MANAGED_SKILLS_ROOT,
     userRoot: join(resolveDshHome(), 'desktop-user-skills'),

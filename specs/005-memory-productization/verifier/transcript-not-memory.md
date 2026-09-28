@@ -53,4 +53,4 @@ Transcript remains required for session honesty. It is **not** the curated Memor
 - T004 / [memory-seam-locks.md](./memory-seam-locks.md) owns the full seam lock set — this file is the focused T012 regression guard.
 - T009 / [memory-inject-bind.md](./memory-inject-bind.md) owns the normative inject approach — this file forbids transcript as a substitute for that path.
 - T010–T011 own Electron Main exclusion docs + no-memory-bus test — adjacent thin-shell guard, not this file.
-- T031 / Scenario 4 non-goals recipe expands SC-006…010 absence checks later.
+- T031 / [non-goals.md](./non-goals.md) expands SC-006…010 absence checks (Scenario 4).
