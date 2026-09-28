@@ -1,0 +1,76 @@
+T019–T020 Client connector UI / Scenario 1 (SC-001) — DH Verifier
+=================================================================
+Verdict: Pass
+Stamp: 2026-09-28 · tip origin/cursor/p6-us1-client-connector-fe1d @ 743ebf6eb1
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+  · client-ui-agent-team lib/client.js rebundled (tsdown) after Host-result unwrap fix
+Product tip under test: 743ebf6eb1 (PR #211) — Phase 6 - fix - unwrap invokeConnectorTool Host result
+Prior Fail: tip bc691342e2 / evidence stamp 590a015999 (tool call error — flat vs { toolCall })
+Linear: Epic MOH-281 · T019–T020 Client US1
+Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-1-connector.md
+
+Acceptance (T019–T020 / SC-001)
+-------------------------------
+[x] Catalog UI via Host HTTP/WS (locale-owned) — measured Desktop
+    evidence/scenario-1/00-catalog-open.png
+[x] Step A Install durable row (verifier-fixture) — measured
+    evidence/scenario-1/01-connector-installed.png
+    connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2
+    (durable row from prior install; installState=installed)
+[x] Step B In-app auth → authState=ready + tools bound — measured
+    evidence/scenario-1/02-auth-ready.png · SC-007 vault not required
+[x] Step C Successful tool call user-visible — measured
+    evidence/scenario-1/03-tool-success.png
+    outcome=success · toolName=mcp__verifier_fixture__ping
+    successText="Tool call succeeded\nmcp__verifier_fixture__ping"
+[x] Locale-owned copy — measured (locales.ts keys; UI English from t())
+[x] No Main IPC mutations — measured (ctx.remote.agentTeams only)
+[x] FR-014 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-015 (SO 12) — media committed under verifier/evidence/scenario-1/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths (PO)
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip 743ebf6eb1 (DISPLAY=:1, port 9222):
+  catalog: verifier-fixture fixture=true
+  install: installState=installed (durable)
+  auth: authState=ready toolsReady=true credentialConfigured=true
+        tools bound mcp__verifier_fixture__ping
+  tool: data-team-connector-tool-outcome / label=success
+        "Tool call succeeded mcp__verifier_fixture__ping"
+panel-state.json · p6-t019-t020-scenario1-reverify-cdp.log
+Walkthrough: scenario-1-connector-walkthrough.mp4
+Prior Fail frames retained: 03-tool-error.png (historical; not Pass)
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p6-t019-t020-00-catalog-open.png
+  /opt/cursor/artifacts/p6-t019-t020-01-connector-installed.png
+  /opt/cursor/artifacts/p6-t019-t020-02-auth-ready.png
+  /opt/cursor/artifacts/p6-t019-t020-03-tool-success.png
+  /opt/cursor/artifacts/p6-t019-t020-scenario-1-connector-walkthrough.mp4
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p6-t019-t020-00-catalog-open.png" alt="SC-001 catalog open verifier-fixture" />
+  <img src="/opt/cursor/artifacts/p6-t019-t020-01-connector-installed.png" alt="SC-001 connector installed" />
+  <img src="/opt/cursor/artifacts/p6-t019-t020-02-auth-ready.png" alt="SC-001 auth ready tools bound" />
+  <img src="/opt/cursor/artifacts/p6-t019-t020-03-tool-success.png" alt="SC-001 tool call succeeded mcp__verifier_fixture__ping" />
+  <video src="/opt/cursor/artifacts/p6-t019-t020-scenario-1-connector-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-001 install→auth→tool success: **measured** (Desktop frames 00–03 + CDP)
+- SC-007 in-app / vault optional: **measured**
+- FR-017 any-one fixture: **measured** (verifier-fixture)
+- Unwrap fix closes prior Fail: **measured** (success indicator; was Tool call error)
+- Locale-owned + Host HTTP/WS only: **measured**
+- FR-014 desktop visual: **measured**
+- FR-015 commit under scenario-1/: **measured** (this stamp)
+- FR-015 PR HTML embeds: **inferred** until product-owner assistant updates PR #211 body
+
+Scope lock
+----------
+Does NOT merge. Leave Linear In Progress until PO merges GUI evidence + SO12 embeds.
+Verifier does not mark Linear Done. Epic MOH-281 US1 Client T019–T020 Scenario 1 Pass stamped.

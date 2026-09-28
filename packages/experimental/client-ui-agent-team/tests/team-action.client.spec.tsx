@@ -15,8 +15,11 @@ import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts
 import {
   TeamAction, type TeamActionInjected, type TeamActionProps, type TeamActionResult,
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
-  type TeamCreateBotActionResult, type TeamCreateRoutineActionResult,
-  type TeamCreateSectionActionResult, type TeamDeleteBotActionResult,
+  type TeamAuthenticateConnectorActionResult, type TeamCreateBotActionResult,
+  type TeamCreateRoutineActionResult, type TeamCreateSectionActionResult,
+  type TeamDeleteBotActionResult, type TeamDescribeConnectorCredentialActionResult,
+  type TeamInstallConnectorActionResult, type TeamInvokeConnectorToolActionResult,
+  type TeamListConnectorCatalogActionResult, type TeamListConnectorsActionResult,
   type TeamListMemoriesActionResult, type TeamRenameBotActionResult,
   type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
@@ -322,6 +325,97 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
         ok: true,
         value: {
           memories: [],
+        },
+      },
+    }),
+    listConnectorCatalog: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          catalog: [{
+            catalogId: 'verifier-fixture',
+            displayName: 'Verifier Fixture Connector',
+            serverName: 'verifier_fixture',
+            transport: 'stdio' as const,
+            fixture: true,
+            authMode: 'in_app' as const,
+          }],
+        },
+      },
+    }),
+    listConnectors: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          connectors: [],
+        },
+      },
+    }),
+    installConnector: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          connector: {
+            connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+            catalogId: 'verifier-fixture',
+            serverName: 'verifier_fixture',
+            displayName: 'Verifier Fixture Connector',
+            installState: 'installed' as const,
+            authState: 'needs_auth' as const,
+            transport: 'stdio' as const,
+            credentialConfigured: false,
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        },
+      },
+    }),
+    authenticateConnector: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          connector: {
+            connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+            catalogId: 'verifier-fixture',
+            serverName: 'verifier_fixture',
+            displayName: 'Verifier Fixture Connector',
+            installState: 'installed' as const,
+            authState: 'ready' as const,
+            transport: 'stdio' as const,
+            credentialConfigured: true,
+            createdAt: 1,
+            updatedAt: 2,
+          },
+        },
+      },
+    }),
+    describeConnectorCredential: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+          credentialKey: 'agent-teams-connector/connector-1',
+          configured: true,
+          writable: true,
+          kind: 'api-key' as const,
+        },
+      },
+    }),
+    invokeConnectorTool: () => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          toolCall: {
+            connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+            toolName: 'mcp__verifier_fixture__ping',
+            outcome: 'success' as const,
+          },
         },
       },
     }),
@@ -1038,9 +1132,9 @@ describe('TeamAction', () => {
     fireEvent.click(screen.getByRole('button', { name: /Agent Team/u }))
     await screen.findByText('Implement runtime')
 
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'worker' } })
+    fireEvent.change(screen.getByRole('combobox', { name: zh.owner }), { target: { value: 'worker' } })
     await waitFor(() => {
-      expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('worker')
+      expect(screen.getByRole<HTMLSelectElement>('combobox', { name: zh.owner }).value).toBe('worker')
       expect(current).toMatchObject({ revision: 2, ownerName: 'worker' })
     })
 
@@ -1311,7 +1405,7 @@ describe('TeamAction', () => {
     })
 
     fireEvent.click(screen.getByRole('button', { name: '取消' }))
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: '' } })
+    fireEvent.change(screen.getByRole('combobox', { name: zh.owner }), { target: { value: '' } })
     await waitFor(() => {
       expect(updateTask).toHaveBeenLastCalledWith(SESSION, expect.objectContaining({
         action: 'reassign',
@@ -3852,6 +3946,211 @@ describe('TeamAction', () => {
     expect(screen.getByText('Secret agent log for A')).toBeTruthy()
     expect(screen.getByText('Secret agent log for B')).toBeTruthy()
     expect(screen.queryByText('Shared user profile')).toBeNull()
+  })
+
+  it('lists Host connector catalog and installs one entry (T019 / US1)', async () => {
+    const ConnectorId = (id: string) => id as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId
+    const installed = {
+      connectorId: ConnectorId('connector-1'),
+      catalogId: 'verifier-fixture',
+      serverName: 'verifier_fixture',
+      displayName: 'Verifier Fixture Connector',
+      installState: 'installed' as const,
+      authState: 'needs_auth' as const,
+      transport: 'stdio' as const,
+      credentialConfigured: false,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, connectors: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, connectors: [installed] },
+      })
+    const listConnectorCatalog = vi.fn((): Promise<TeamListConnectorCatalogActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          catalog: [{
+            catalogId: 'verifier-fixture',
+            displayName: 'Verifier Fixture Connector',
+            serverName: 'verifier_fixture',
+            transport: 'stdio' as const,
+            fixture: true,
+            authMode: 'in_app' as const,
+          }],
+        },
+      },
+    }))
+    const installConnector = vi.fn((): Promise<TeamInstallConnectorActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { connector: installed } },
+    }))
+    render(<TeamAction {...props(actions({ load, listConnectorCatalog, installConnector }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.connectors)).toBeTruthy()
+    expect(screen.getByText(zh.connectorsHint)).toBeTruthy()
+    expect(await screen.findByText('Verifier Fixture Connector')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-catalog="verifier-fixture"]')).toBeTruthy()
+    expect(await screen.findByText(zh.connectorsEmptyInstalled).then(() => true).catch(() => false)).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorInstall }))
+    await waitFor(() => {
+      expect(installConnector).toHaveBeenCalledWith(SESSION, { catalogId: 'verifier-fixture' })
+    })
+    await waitFor(() => {
+      expect(document.querySelector('[data-team-connector-installed-badge="verifier-fixture"]')).toBeTruthy()
+    })
+    expect(document.querySelector('[data-team-connector="connector-1"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-auth-state="needs_auth"]')).toBeTruthy()
+    expect(screen.queryByText(zh.connectorsEmptyInstalled)).toBeNull()
+  })
+
+  it('shows catalog unavailable when Host listConnectorCatalog is empty (T019)', async () => {
+    const listConnectorCatalog = vi.fn((): Promise<TeamListConnectorCatalogActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { catalog: [] } },
+    }))
+    render(<TeamAction {...props(actions({ listConnectorCatalog }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.connectorsCatalogUnavailable)).toBeTruthy()
+    expect(document.querySelector('[data-team-connectors-catalog-unavailable]')).toBeTruthy()
+  })
+
+  it('authenticates via in-app credential UX and shows tool success (T020 / US1)', async () => {
+    const ConnectorId = (id: string) => id as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId
+    const needsAuth = {
+      connectorId: ConnectorId('connector-1'),
+      catalogId: 'verifier-fixture',
+      serverName: 'verifier_fixture',
+      displayName: 'Verifier Fixture Connector',
+      installState: 'installed' as const,
+      authState: 'needs_auth' as const,
+      transport: 'stdio' as const,
+      credentialConfigured: false,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const ready = {
+      ...needsAuth,
+      authState: 'ready' as const,
+      credentialConfigured: true,
+      updatedAt: 2,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, connectors: [needsAuth] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, connectors: [ready] },
+      })
+    const authenticateConnector = vi.fn((): Promise<TeamAuthenticateConnectorActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { connector: ready } },
+    }))
+    const describeConnectorCredential = vi.fn(
+      (): Promise<TeamDescribeConnectorCredentialActionResult> => Promise.resolve({
+        ok: true,
+        value: {
+          ok: true,
+          value: {
+            connectorId: ConnectorId('connector-1'),
+            credentialKey: 'agent-teams-connector/connector-1',
+            configured: true,
+            writable: true,
+            kind: 'api-key' as const,
+          },
+        },
+      }),
+    )
+    const invokeConnectorTool = vi.fn((): Promise<TeamInvokeConnectorToolActionResult> => Promise.resolve({
+      ok: true,
+      value: {
+        ok: true,
+        value: {
+          toolCall: {
+            connectorId: ConnectorId('connector-1'),
+            toolName: 'mcp__verifier_fixture__ping',
+            outcome: 'success' as const,
+          },
+        },
+      },
+    }))
+    const listConnectors = vi.fn((): Promise<TeamListConnectorsActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { connectors: [ready] } },
+    }))
+    render(<TeamAction {...props(actions({
+      load,
+      authenticateConnector,
+      describeConnectorCredential,
+      invokeConnectorTool,
+      listConnectors,
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh['connectorAuthState.needs_auth'])).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuth }))
+    expect(screen.getByText(zh.connectorAuthHint)).toBeTruthy()
+    expect(screen.getByText(zh.connectorAuthReject)).toBeTruthy()
+    const secret = screen.getByLabelText(zh.connectorAuthSecret)
+    fireEvent.change(secret, { target: { value: 'fixture-token' } })
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuthSave }))
+    await waitFor(() => {
+      expect(authenticateConnector).toHaveBeenCalledWith(SESSION, {
+        connectorId: 'connector-1',
+        secret: 'fixture-token',
+      })
+    })
+    await waitFor(() => {
+      expect(describeConnectorCredential).toHaveBeenCalledWith(SESSION, {
+        connectorId: 'connector-1',
+      })
+    })
+    expect(await screen.findByText(zh.connectorToolsReady)).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-tools-ready="true"]')).toBeTruthy()
+    expect(screen.getByText(zh.connectorCredentialConfigured)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorInvokeTool }))
+    await waitFor(() => {
+      expect(invokeConnectorTool).toHaveBeenCalledWith(SESSION, { connectorId: 'connector-1' })
+    })
+    expect(await screen.findByText(zh.connectorToolSuccess)).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-tool-outcome="success"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-tool-name="mcp__verifier_fixture__ping"]')).toBeTruthy()
+    expect(JSON.stringify(authenticateConnector.mock.calls)).not.toContain('1Password')
+  })
+
+  it('keeps prior connector rows when authenticateConnector transport fails (T020)', async () => {
+    const ConnectorId = (id: string) => id as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId
+    const needsAuth = {
+      connectorId: ConnectorId('connector-1'),
+      catalogId: 'verifier-fixture',
+      serverName: 'verifier_fixture',
+      displayName: 'Verifier Fixture Connector',
+      installState: 'installed' as const,
+      authState: 'needs_auth' as const,
+      transport: 'stdio' as const,
+      credentialConfigured: false,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, connectors: [needsAuth] },
+    })
+    const authenticateConnector = vi.fn((): Promise<TeamAuthenticateConnectorActionResult> => Promise.resolve(
+      remoteFailure('authenticateConnector offline'),
+    ))
+    render(<TeamAction {...props(actions({ load, authenticateConnector }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh['connectorAuthState.needs_auth'])).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuth }))
+    fireEvent.change(screen.getByLabelText(zh.connectorAuthSecret), {
+      target: { value: 'token' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuthSave }))
+    expect(await screen.findByText('authenticateConnector offline (gateway/internal)')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-auth-state="needs_auth"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-tool-outcome]')).toBeNull()
   })
 
 })
