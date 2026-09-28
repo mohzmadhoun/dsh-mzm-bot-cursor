@@ -1,5 +1,6 @@
 Verdict: Pass
-Stamp: 2026-09-28 · tip 952e55c05fbeaf33be5237defdfb0cb32d472779 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
+Stamp: 2026-09-28 · tip 9af3a0ff06c2c1ecb9da4bd6b5fd82adbdc8baa0 · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
+Checkout under test (master base): 952e55c05fbeaf33be5237defdfb0cb32d472779
 Linear: MOH-386 · Epic MOH-350 · P-MOH-2
 Branch: cursor/p7-polish-sc006-evidence-15d6 (PO opens PR + independent Verifier re-gate; author ≠ gate)
 Method: time-boxed composite per scenario-5-full-replay.md (cite US1–US3 Pass + fresh Desktop smoke + T032 + SC-005)
