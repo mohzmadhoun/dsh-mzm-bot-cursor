@@ -32,9 +32,8 @@
 ## Notes
 
 - Validation iteration 1 (2026-09-28): All items pass against plan-locked P5 In/Out/Exit from `MzM-Docs/mzm-bot-plan.md` §4 and P2 ADR `MzM-Docs/adr/agent-vs-user-memory-layers.md`.
-- Defaults recorded under Assumptions: user-visible write required for Pass; recall = user-visible return of curated fact content after restart; kinds (profile/log/note) orthogonal to layers (agent/user); edit/delete optional; LLM wording beyond fact content not scored.
-- Standing order **11** encoded as FR-011 + per-GUI-story evidence clauses + SC-001…SC-005/SC-007 — desktop screenshots/recordings required; unit/jsdom alone fails GUI Pass. Specify does not capture media.
+- Standing order **11** encoded as FR-011 + per-GUI-story evidence clauses + SC-001…SC-005/SC-007 — desktop screenshots/recordings required; unit/jsdom alone fails GUI Pass. Clarify does not capture media.
 - Standing order **12** encoded as FR-012 + evidence clauses — evidence **committed** under `verifier/evidence/` and **embedded** in GUI PR body via `/opt/cursor/artifacts/…` paths.
-- Three open questions deferred to `/speckit-clarify` (listed in spec; no `[NEEDS CLARIFICATION]` markers): bot-tool write as Pass gate; in-turn model-visible recall vs surface browse; kind→layer defaults.
-- Spec Quality Checklist: 16/16 items passing.
-- Ready for Verifier specify docs gate, then `/speckit-clarify` only after Pass. No rewrite of `specs/001`–`004`. No living-gate/plan edits in this tree.
+- Clarification iteration 1 (2026-09-28 Session): Three open questions locked — (1) user-visible write sufficient (bot-tool optional, FR-015/SC-009); (2) surface recall + one model-visible Host-injection path required (FR-016/SC-004); (3) kinds×layers orthogonal (FR-017/SC-010). Open questions section removed.
+- Spec Quality Checklist: 16/16 items passing (unchanged after clarify; no regressions).
+- Ready for Verifier clarify docs-only gate, then `/speckit-plan`. No rewrite of `specs/001`–`004`. No living-gate/plan edits in this tree.
