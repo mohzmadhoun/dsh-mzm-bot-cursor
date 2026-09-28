@@ -167,18 +167,17 @@ Affirmative Pass path: **Host Connector catalog** SoT + `dsh-mcp-client` bind; P
 **Spot-check:**
 
 ```sh
-# Fail if product/Verifier paths affirm P6 Pass *as* those forbidden bars
-! rg -n -i 'documents P6 Pass as|Pass as ("?Electron Main store"?|"?Client-only SoT"?|"?live Slack/GitHub required"?|"?fixed named connector"?|"?mandatory vault"?)|P6 Pass (is|=) (Electron Main store|Client-only SoT|live Slack/GitHub required|fixed named connector|mandatory vault)' \
+# Fail if product paths affirm P6 Pass *as* those forbidden bars (exclude this README — it documents the ban)
+! rg -n -i 'Pass as ("?Electron Main store"?|"?Client-only SoT"?|"?live Slack/GitHub required"?|"?fixed named connector"?|"?mandatory vault"?)|P6 Pass (is|=) (Electron Main store|Client-only SoT|live Slack/GitHub required|fixed named connector|mandatory vault)' \
   apps/desktop-host \
   packages/experimental/client-ui-agent-team/src/client \
-  specs/006-connectors-mcp-events-trust/verifier/README.md \
   --glob '!**/node_modules/**' --glob '!**/lib/**'
-# Affirm Host SoT + vault-optional / any-one fixture locks
+# Affirm Host SoT + vault-optional / any-one fixture locks in Verifier README
 rg -n 'Host Connector catalog SoT|vault optional|any one thin-catalog|Pass-path language \(T039\)' \
   specs/006-connectors-mcp-events-trust/verifier/README.md
 ```
 
-**Claim:** Documented here (T039). Spot-check clean on `apps/desktop-host/`, `packages/experimental/client-ui-agent-team/src/client/`, and this README — no product path documents P6 Pass as the forbidden bars; Client auth copy already states vault not required / Host credential store.
+**Claim:** Documented here (T039). Spot-check clean on `apps/desktop-host/` and `packages/experimental/client-ui-agent-team/src/client/` — no product path frames P6 Pass via the forbidden bars; Client auth copy already states vault not required / Host credential store. This README affirms Host SoT + the ban list.
 
 ## T040 — Linear tracking (capacity restored)
 
