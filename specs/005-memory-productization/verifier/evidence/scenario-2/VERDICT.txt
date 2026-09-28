@@ -1,0 +1,78 @@
+T026 Scenario 2 recall after restart (SC-004) — DH Verifier
+===========================================================
+Verdict: Pass (SC-004 surface three kinds after cold restart + Host
+         model-visible inject wiring; LLM wording not scored)
+Stamp: 2026-09-28 · tip origin/master @ e6f958e90a (#189 Client T025 on tip;
+  #190 Host T023–T024 inject bind on tip)
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+  · runtime: rebuilt client-ui-agent-team + agent-team tsdown bundles on tip
+Branch: cursor/p5-t026-scenario2-recall-fe1d
+Linear: MOH-264 (T026) · Epic MOH-228 — left In Progress (PO closes after merge)
+Recipe: specs/005-memory-productization/verifier/scenario-2-recall.md
+
+Acceptance (T026 / SC-004)
+--------------------------
+[x] Step A — Scenario 1 fixtures present (profile+log+note) before restart
+    evidence/scenario-2/00-pre-restart-three-kinds.png
+[x] Step B — Desktop cold restart (quit Main+Host + relaunch) completed
+[x] Step C — Surface browse/recall after restart returns profile+log+note
+    with kinds distinguishable + fixture contentHits all true —
+    evidence/scenario-2/01-post-restart-surface.png · 02-browse-recall.png
+[x] Step D — Model-visible Host inject path (wiring, not LLM wording):
+    - Desktop subsequent bot turn started (message sent; reply not scored) —
+      evidence/scenario-2/03-inject-path.png
+    - Host T024 assemble: curated fact in agent-teams:memory-recall —
+      p5-t026-host-inject-vitest.log (1 passed)
+    - Optional Client inject indicator absent (Host omits memoryRecallInjects;
+      absence does not fail per memory-inject-bind.md)
+[x] FR-011 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-012 (SO 12) — media committed under verifier/evidence/scenario-2/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip e6f958e90a (DISPLAY=:1, port 9222):
+  botId=4ec8ec63-6eab-4125-b0b8-0f3b87f79793
+  preRestart kinds=["profile","log","note"] contentHits all true
+  cold restart: quit pids + relaunch CDP ready ~3s
+  postRestart kinds=["profile","log","note"] rowCount=4
+  contentHits={"profile":true,"log":true,"note":true}
+  browse/recall control exercised (data-team-browse-memories)
+  injectIndicator.present=false (optional; Host stamp not projected)
+  subsequentTurn.started=true llmWordingScored=false
+Supporting: panel-state.json · p5-t026-scenario2-cdp.log
+Host inject: p5-t026-host-inject-vitest.log (US4 T024 — 1 passed)
+Host list:   p5-t026-host-t023-vitest.log (US4 T023 — 1 passed)
+Walkthrough: scenario-2-recall-walkthrough.mp4
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p5-t026-01-post-restart-surface.png
+  /opt/cursor/artifacts/p5-t026-02-browse-recall.png
+  /opt/cursor/artifacts/p5-t026-03-inject-path.png
+  /opt/cursor/artifacts/p5-t026-scenario2-recall-walkthrough.mp4
+  /opt/cursor/artifacts/p5-t026-00-pre-restart-three-kinds.png
+  /opt/cursor/artifacts/p5-t026-00-agent-team-open-post-restart.png
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p5-t026-01-post-restart-surface.png" alt="SC-004 post-restart Bot memory — profile+log+note" />
+  <img src="/opt/cursor/artifacts/p5-t026-02-browse-recall.png" alt="SC-004 Browse/recall Host listMemories after restart" />
+  <img src="/opt/cursor/artifacts/p5-t026-03-inject-path.png" alt="SC-004 subsequent turn — Host inject wiring (LLM not scored)" />
+  <video src="/opt/cursor/artifacts/p5-t026-scenario2-recall-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-004 surface three kinds after cold restart: **measured** (Desktop frames 01–02 + CDP)
+- SC-004 Host inject wiring (≥1 curated fact model-visible): **measured** (Host T024 vitest + Desktop subsequent turn; LLM wording not scored)
+- Optional Client inject indicator: **measured absent** (Host omits stamp field — OK)
+- FR-011 desktop visual: **measured**
+- FR-012 commit under scenario-2/: **measured** (this PR)
+- FR-012 PR HTML embeds: **inferred** until product-owner assistant updates PR body
+
+Scope lock
+----------
+Does NOT close MOH-264 — leave In Progress until PO merges this stamp PR.
+Does NOT mark Linear Done. Does NOT merge.
+Does NOT claim Scenario 3 layers (T027+) or Scenario 5 full replay (T033).
