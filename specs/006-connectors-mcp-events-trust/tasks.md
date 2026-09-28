@@ -138,7 +138,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [ ] T026 [US3] Host enforce deny path via `dsh-user-approval` user-deny **or** standing `never`/block (either OK for Pass); denied action MUST NOT present as success (`outcome=denied`) in `packages/interaction/user-approval/src/` + Host gate wiring under `packages/experimental/agent-team/src/` / `apps/desktop-host/` per FR-006
 - [ ] T027 [P] [US3] Client approval/deny card or standing-deny control + blocked-state UI under `packages/experimental/client-ui-agent-team/src/client/` answering on **Host HTTP** path (no Electron Main answerer)
-- [ ] T028 [US3] Add Verifier Scenario 3 recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-3-trust-deny.md` covering SC-003 with FR-014/015 evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-3/`
+- [x] T028 [US3] Add Verifier Scenario 3 recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-3-trust-deny.md` covering SC-003 with FR-014/015 evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-3/`
 
 **Checkpoint**: US3 deny path independently testable.
 
