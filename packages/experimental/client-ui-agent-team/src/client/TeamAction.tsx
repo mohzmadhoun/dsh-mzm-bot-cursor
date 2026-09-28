@@ -229,11 +229,17 @@ interface CreateRoutineDraft {
 }
 
 /**
- * Draft fields for Host writeMemory profile kind (P5 FR-001 / T015).
- * Content MUST be non-empty after trim; layer is agent | user (FR-017 orthogonal).
- * T015 ships profile only — log/note kinds land on the shared surface in later US tasks.
+ * Writable kinds on the shared Host writeMemory surface for P5 US1–US2.
+ * Note lands on the same surface in US3 (T021); Host already accepts all three kinds.
+ */
+type MemoryWriteKind = Extract<MemoryKind, 'profile' | 'log'>
+
+/**
+ * Draft fields for Host writeMemory on the shared surface (P5 FR-001 / FR-002 / T015+T018).
+ * Kind is profile | log; content MUST be non-empty after trim; layer is agent | user (FR-017 orthogonal).
  */
 interface WriteMemoryDraft {
+  kind: MemoryWriteKind | ''
   content: string
   layer: MemoryLayer | ''
 }
@@ -247,7 +253,7 @@ const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
 const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
 const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = { intent: '', scheduleExpr: '' }
-const EMPTY_WRITE_MEMORY_DRAFT: WriteMemoryDraft = { content: '', layer: '' }
+const EMPTY_WRITE_MEMORY_DRAFT: WriteMemoryDraft = { kind: '', content: '', layer: '' }
 
 /** Select sentinel for Unassigned/default — never a Host catalog id (clarify lock 4). */
 const UNASSIGNED_OPTION = ''
@@ -258,11 +264,11 @@ const ATTACH_SKILL_NONE = ''
 /** Select sentinel for routine schedule — never a product scheduleExpr. */
 const ROUTINE_SCHEDULE_NONE = ''
 
+/** Select sentinel for memory kind — never a Host MemoryKind value. */
+const MEMORY_KIND_NONE = ''
+
 /** Select sentinel for memory layer — never a Host MemoryLayer value. */
 const MEMORY_LAYER_NONE = ''
-
-/** US1 profile kind fixed for T015 write surface (log/note added by later tasks). */
-const MEMORY_WRITE_KIND: MemoryKind = 'profile'
 
 /** Product-supported schedule presets for Host createRoutine (P4 T008 / FR-001). */
 const ROUTINE_SCHEDULE_PRESETS = [
@@ -270,6 +276,12 @@ const ROUTINE_SCHEDULE_PRESETS = [
   { value: '@hourly', label: 'routineSchedule.hourly' },
   { value: '@daily', label: 'routineSchedule.daily' },
 ] as const satisfies readonly { readonly value: string; readonly label: TeamKey }[]
+
+/** Writable kinds on the shared writeMemory surface (US1 profile + US2 log; note = T021). */
+const MEMORY_WRITE_KIND_OPTIONS = [
+  { value: 'profile', label: 'memoryKind.profile' },
+  { value: 'log', label: 'memoryKind.log' },
+] as const satisfies readonly { readonly value: MemoryWriteKind; readonly label: TeamKey }[]
 
 /** Product layer choices for Host writeMemory (FR-017 — orthogonal to kind). */
 const MEMORY_LAYER_OPTIONS = [
@@ -569,7 +581,7 @@ export function TeamAction({
   /** Bot whose Host createRoutine editor is open (US1 / T017). */
   const [creatingRoutineBotId, setCreatingRoutineBotId] = useState<SessionId | null>(null)
   const [createRoutineDraft, setCreateRoutineDraft] = useState<CreateRoutineDraft>(EMPTY_CREATE_ROUTINE_DRAFT)
-  /** Bot whose Host writeMemory (profile) editor is open (P5 US1 / T015). */
+  /** Bot whose Host writeMemory (profile|log) editor is open (P5 US1–US2 / T015+T018). */
   const [writingMemoryBotId, setWritingMemoryBotId] = useState<SessionId | null>(null)
   const [writeMemoryDraft, setWriteMemoryDraft] = useState<WriteMemoryDraft>(EMPTY_WRITE_MEMORY_DRAFT)
   /**
@@ -1454,18 +1466,19 @@ export function TeamAction({
   }
 
   /**
-   * Host writeMemory profile fact in bot context (P5 FR-001 / SC-001 / T015).
-   * Empty content rejects Client-side; layer choice is orthogonal (FR-017).
+   * Host writeMemory profile|log fact in bot context (P5 FR-001 / FR-002 / T015+T018).
+   * Empty content rejects Client-side; kind and layer are required; layer is orthogonal (FR-017).
    * Agent layer requires this botId; user layer omits botId (account-wide).
    * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
    */
   const submitWriteMemory = async (member: TeamRosterMember): Promise<void> => {
+    const kind = writeMemoryDraft.kind
     const content = writeMemoryDraft.content.trim()
     const layer = writeMemoryDraft.layer
-    /* v8 ignore next -- WriteMemoryForm disables Save while content or layer is empty. */
-    if (content === '' || layer === '') return
+    /* v8 ignore next -- WriteMemoryForm disables Save while kind, content, or layer is empty. */
+    if (kind === '' || content === '' || layer === '') return
     const saved = await settleWriteMemory(member.id, () => writeMemory(sessionId, {
-      kind: MEMORY_WRITE_KIND,
+      kind,
       layer,
       content,
       ...layer === 'agent' ? { botId: member.id } : { botId: null },
@@ -2937,18 +2950,22 @@ interface WriteMemoryFormProps {
 }
 
 /**
- * Host writeMemory profile editor in bot context (P5 FR-001 / SC-001 / T015).
- * Empty content or missing layer show a clear reject and block Save.
- * Kind is fixed to profile for US1; layer choice is orthogonal (FR-017).
+ * Host writeMemory editor for profile|log on the shared surface (P5 FR-001 / FR-002 / T015+T018).
+ * Missing kind/layer or empty content show a clear reject and block Save.
+ * Layer choice is orthogonal to kind (FR-017). Calls Host Remotes only.
  */
 function WriteMemoryForm({
   draft, setDraft, pending, onSave, onCancel, t,
 }: WriteMemoryFormProps) {
-  const ready = draft.content.trim() !== '' && draft.layer !== ''
+  const ready = draft.kind !== '' && draft.content.trim() !== '' && draft.layer !== ''
+  const contentPlaceholder = draft.kind === 'log'
+    ? t('memoryContentPlaceholder.log')
+    : t('memoryContentPlaceholder.profile')
   return (
     <div
       className={css.form}
       data-team-write-memory-editor=""
+      {...draft.kind !== '' ? { 'data-team-write-memory-kind': draft.kind } : {}}
     >
       <p className={css.hint}>{t('writeMemoryHint')}</p>
       {!ready && (
@@ -2960,11 +2977,31 @@ function WriteMemoryForm({
           {t('memoryWriteReject')}
         </div>
       )}
+      <select
+        aria-label={t('memoryKind')}
+        data-team-memory-kind-select=""
+        value={draft.kind === '' ? MEMORY_KIND_NONE : draft.kind}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+          const value = event.target.value
+          setDraft({
+            ...draft,
+            kind: value === MEMORY_KIND_NONE ? '' : value as MemoryWriteKind,
+          })
+        }}
+      >
+        <option value={MEMORY_KIND_NONE}>{t('memoryKindPlaceholder')}</option>
+        {MEMORY_WRITE_KIND_OPTIONS.map(option => (
+          <option key={option.value} value={option.value}>
+            {t(option.label)}
+          </option>
+        ))}
+      </select>
       <textarea
         aria-label={t('memoryContent')}
         data-team-memory-content-input=""
         value={draft.content}
-        placeholder={t('memoryContentPlaceholder')}
+        placeholder={contentPlaceholder}
         disabled={pending}
         onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
           setDraft({ ...draft, content: event.target.value })
