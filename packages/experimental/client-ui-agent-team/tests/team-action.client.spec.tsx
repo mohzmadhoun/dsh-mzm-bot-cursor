@@ -3574,4 +3574,124 @@ describe('TeamAction', () => {
     expect(screen.getByText('Keep me')).toBeTruthy()
   })
 
+  it('browses / recalls Host listMemories on the memory surface (T025 / US4)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const profile = {
+      memoryId: 'memory-profile-r1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Timezone: UTC',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const log = {
+      memoryId: 'memory-log-r1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'log' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Shipped US4 recall',
+      createdAt: 2,
+      updatedAt: 2,
+    }
+    const note = {
+      memoryId: 'memory-note-r1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'note' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Remember the inject path',
+      createdAt: 3,
+      updatedAt: 3,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, memories: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, memories: [profile, log, note] },
+      })
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memories: [profile, log, note] } },
+    }))
+    render(<TeamAction {...props(actions({ load, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.botMemoriesEmpty)).toBeTruthy()
+    expect(document.querySelector(`[data-team-memory-recall-surface="${workerId}"]`)).toBeTruthy()
+    expect(screen.getByText(zh.browseMemoriesHint)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.browseMemories }))
+    await waitFor(() => {
+      expect(listMemories).toHaveBeenCalledWith(SESSION, { botId: workerId })
+    })
+    expect(await screen.findByText('Timezone: UTC')).toBeTruthy()
+    expect(screen.getByText('Shipped US4 recall')).toBeTruthy()
+    expect(screen.getByText('Remember the inject path')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="profile"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="log"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="note"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-inject-indicator]')).toBeNull()
+  })
+
+  it('shows optional Host inject indicator when memoryRecallInjects present (T025)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const memoryId = 'memory-profile-inj' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId
+    const profile = {
+      memoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Injected profile fact',
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const assembledAt = 1_700_000_000_000
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: {
+        ...view,
+        memories: [profile],
+        memoryRecallInjects: [{
+          memoryIds: [memoryId],
+          botId: workerId,
+          assembledAt,
+        }],
+      },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Injected profile fact')).toBeTruthy()
+    const indicator = document.querySelector(
+      `[data-team-memory-inject-indicator="applied"][data-team-memory-inject-bot="${workerId}"]`,
+    )
+    expect(indicator).not.toBeNull()
+    expect(indicator?.getAttribute('data-team-memory-inject-at')).toBe(String(assembledAt))
+    expect(indicator?.getAttribute('data-team-memory-inject-ids')).toBe(memoryId)
+    expect(screen.getByText(zh.memoryInjectApplied.replace('{time}', new Date(assembledAt).toISOString()))).toBeTruthy()
+  })
+
+  it('keeps prior memories and shows failure when browse listMemories is unavailable (T025)', async () => {
+    const existing = {
+      memoryId: 'memory-keep' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'note' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Keep after browse fail',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, memories: [existing] },
+    })
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve(
+      remoteFailure('listMemories offline'),
+    ))
+    render(<TeamAction {...props(actions({ load, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Keep after browse fail')).toBeTruthy()
+    expect(document.querySelector('[data-team-browse-memories="worker-id"]')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.browseMemories }))
+    expect(await screen.findByText('listMemories offline (gateway/internal)')).toBeTruthy()
+    expect(screen.getByText('Keep after browse fail')).toBeTruthy()
+  })
+
 })

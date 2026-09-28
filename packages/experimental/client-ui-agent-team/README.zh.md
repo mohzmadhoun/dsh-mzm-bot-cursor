@@ -75,6 +75,10 @@ kind: "package-reference"
 
 每个 teammate 卡片展示由 Host `TeamView.memories` 投影的 **Bot 记忆**面（该 Bot 的 agent 层行加上账户级 user 行——与 Host `listMemories` 同一过滤）。**写入记忆**打开类型（档案、日志或笔记）、内容与 Agent／User 层级字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/writeMemory`——不是 Electron Main IPC。空内容或缺少类型／层级显示明确 Client 拒绝且不调用 Host；Host 拒绝时列表不变。成功后调用 Host `agentTeams/listMemories` 并刷新 Team 视图，使已保存事实以可区分的 kind／layer 标签出现。Electron Main 不持有记忆记录。
 
+### 重启后浏览／召回 Host 记忆
+
+同一 Bot 记忆面上的 **浏览／召回** 为该 bot 调用 Host Remote `agentTeams/listMemories`（agent 层＋账户级 user 行）并重新加载 Team view，使档案、日志与笔记在 Host 重启后仍以可区分的类型与层级标签返回——绝非 transcript dump。当 Host 投影可选的 `memoryRecallInjects`（注入／应用印记）时，面板为该 bot 显示注入指示；无印记则不显示。Electron Main 不持有召回列表或注入状态。
+
 ### 在 Bot 面列出 Host 定时任务
 
 同一 **Bot 定时任务**面即 US2 信息面列表：每条 Host `RoutineProjection` 显示意图派生身份、日程标签、进行中／已暂停状态，以及上次运行（或尚未运行）。行仅来自 Host `TeamView.routines`（与 `listRoutinesByBot` 同一 Host 目录投影）；会话 Schedule／`ui-schedule` 抬头目录不是 Pass 面。关闭再打开面板会重新加载 Host 状态，已列定时任务无需重建。Electron Main 不编造定时任务行。
@@ -106,7 +110,7 @@ Client export 挂载来自 [`@deepseek-ai/dsh-experimental-agent-team/remote`](.
 | 文件 | 职责 |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | 生成的 Remote、locale、导航与 slot registration |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host createRoutine 与暂停／恢复／上次运行·触发指示定时任务面、Host writeMemory 档案｜日志＋listMemories 记忆面、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster、具名侧栏分组＋未分组、Host 技能发现／编写／加载／挂载／运行、Host createRoutine 与暂停／恢复／上次运行·触发指示定时任务面、Host writeMemory 档案｜日志｜笔记＋listMemories 浏览／召回记忆面＋可选注入指示、Host mailbox handoff、Host bot 创建、persona／重命名／头像／删除编辑器与任务板交互状态 |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | 来自 `TeamView.handoffs` 的 Conversation notices 条 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 中英文 panel 文案 |
 | [`src/index.ts`](src/index.ts) | 不执行行为的 Host entry |

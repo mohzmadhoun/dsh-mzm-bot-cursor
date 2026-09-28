@@ -75,6 +75,10 @@ Each teammate card exposes a **Bot routines** surface projected from Host `TeamV
 
 Each teammate card exposes a **Bot memory** surface projected from Host `TeamView.memories` (agent-layer rows for that bot plus account-wide user rows — same filter as Host `listMemories`). **Write memory** opens kind (profile, log, or note), content, and Agent/User layer fields and calls Host Remote `agentTeams/writeMemory` over authenticated HTTP/WS — not Electron Main IPC. Empty content or missing kind/layer shows a clear Client reject and does not call Host; Host rejections leave the list unchanged. Success calls Host `agentTeams/listMemories` then reloads the Team view so saved facts appear with distinguishable kind and layer labels. Electron Main does not own memory records.
 
+### Browse / recall Host memory after restart
+
+**Browse / recall** on the same Bot memory surface calls Host Remote `agentTeams/listMemories` for that bot (agent-layer + account-wide user rows) and reloads the Team view so profile, log, and note rows return with distinguishable kind and layer labels after Host restart — never a transcript dump. When Host projects optional `memoryRecallInjects` (inject / apply stamps), the pane shows an inject indicator for that bot; absent stamps show no indicator. Electron Main does not own recall lists or inject state.
+
 ### List Host routines on a bot pane
 
 The same **Bot routines** pane is the US2 info-pane list: each Host `RoutineProjection` row shows intent-derived identity, schedule label, active/paused status, and last-run (or not-run-yet). Rows come only from Host `TeamView.routines` (same Host catalog projection as `listRoutinesByBot`); the session Schedule / `ui-schedule` header catalog is not the Pass surface. Closing and reopening the panel reloads Host state so listed routines remain without re-create. Electron Main does not invent routine rows.
@@ -106,7 +110,7 @@ Starting a create or update invalidates older refreshes. Success reloads the com
 | File | Role |
 |---|---|
 | [`src/client/mount.ts`](src/client/mount.ts) | Generated Remote, locale, navigation, and slot registrations |
-| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host writeMemory profile|log + listMemories memory pane, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
+| [`src/client/TeamAction.tsx`](src/client/TeamAction.tsx) | Roster, named sidebar sections + Unassigned, Host skill discovery/author/load/attach/run, Host createRoutine + pause/resume + last-run/fire-indicator routines pane, Host writeMemory profile|log|note + listMemories browse/recall memory pane + optional inject indicator, Host mailbox handoffs, Host bot-create, persona/rename/avatar/delete editors, and task-board interaction state |
 | [`src/client/HandoffNotices.tsx`](src/client/HandoffNotices.tsx) | Conversation notices strip from `TeamView.handoffs` |
 | [`src/client/locales.ts`](src/client/locales.ts) | English and Chinese panel copy |
 | [`src/index.ts`](src/index.ts) | Inert Host entry |
