@@ -1,12 +1,12 @@
 T024 Client event-routine UI / Scenario 2 (SC-002 · SC-008) — DH Verifier
 =========================================================================
 Verdict: Pass
-Stamp: 2026-09-28 · tip cursor/p6-us2-client-event-fe1d @ 57ea115e44
+Stamp: 2026-09-28 · tip cursor/p6-us2-client-event-fe1d @ b516a61720
   · rebases PR #212 tip a294bc770f onto origin/master (Host #213 + T025 recipe)
   · Desktop DISPLAY=:1 CDP 9222 · Host inspect 9230 · DSH Local Build (Electron)
   · launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
   · client-ui-agent-team lib/client.js rebundled (tsdown) after rebase
-Product tip under test: 7d6ae2f75a (rebased T024 Client) — Host APIs from #213 @ 362a3eb02b
+Product tip under test: 7d6ae2f75a (rebased T024 Client) — Host APIs from #213 @ b516a61720
 Linear: Epic MOH-281 · T024 Client US2 · recipe MOH-323 / T025
 Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-2-event-routine.md
 
