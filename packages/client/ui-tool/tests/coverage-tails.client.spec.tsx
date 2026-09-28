@@ -111,4 +111,33 @@ describe('Tool presentation tails', () => {
     expect(stoppedView.container.querySelector('[data-state="stopped"]')).not.toBeNull()
     expect(stoppedView.getByText('已停止')).toBeTruthy()
   })
+
+  it('BashRow projects Shell/box success and not_ready outcomes (T018)', () => {
+    const success: ToolResultNode = {
+      kind: 'tool-result', seq: 4, time: 4_000, callId: 'c1',
+      call: { name: 'bash', argsRaw: '{"command":"echo ok","description":"Echo"}' },
+      callTime: 3_000,
+      content: [{ type: 'text', text: 'ok\n' }], isError: false, subCalls: [],
+    }
+    const successView = render(<BashRow {...bashProps(success)} />)
+    expect(successView.container.querySelector('[data-shell-box-outcome="success"]')).not.toBeNull()
+    expect(successView.container.querySelector('[data-shell-box-outcome-label="success"]')).not.toBeNull()
+    expect(successView.getByText(zh['shellBox.success'])).toBeTruthy()
+    successView.unmount()
+
+    const notReady: ToolResultNode = {
+      kind: 'tool-result', seq: 5, time: 5_000, callId: 'c1',
+      call: { name: 'bash', argsRaw: '{"command":"echo","description":"Echo"}' },
+      callTime: 4_000,
+      content: [{ type: 'text', text: 'BOX_NOT_READY' }],
+      isError: true,
+      meta: { outcome: 'not_ready' },
+      error: { name: 'BoxNotReadyError', code: 'BOX_NOT_READY' },
+      subCalls: [],
+    }
+    const notReadyView = render(<BashRow {...bashProps(notReady)} />)
+    expect(notReadyView.container.querySelector('[data-shell-box-outcome="not_ready"]')).not.toBeNull()
+    expect(notReadyView.container.querySelector('[data-state="stopped"]')).not.toBeNull()
+    expect(notReadyView.getByText(zh['shellBox.notReady'])).toBeTruthy()
+  })
 })
