@@ -10008,6 +10008,177 @@
       }
     },
     {
+      "key": "event:team/memory",
+      "kind": "event",
+      "event": "team/memory",
+      "surface": false,
+      "digest": "cd7327796d10f119fb1bf9f89d6bf8ad7968370a4eba70c72fa0ac7dfbab5c89",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 15,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 16,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "memory",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 14,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "content",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "kind",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "layer",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "memoryId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "log"
+          },
+          {
+            "kind": "literal",
+            "value": "profile"
+          },
+          {
+            "kind": "literal",
+            "value": "note"
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "agent"
+          },
+          {
+            "kind": "literal",
+            "value": "user"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/memory"
+          }
+        ]
+      }
+    },
+    {
       "key": "event:team/message/delivered",
       "kind": "event",
       "event": "team/message/delivered",
@@ -14261,6 +14432,115 @@
   ],
   "types": [
     {
+      "digest": "0063a35ce8a0543869c1c09a53f2551945b3c30ed270563cf7e535b657daee88",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "content",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "kind",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "layer",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "memoryId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              3
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "log"
+          },
+          {
+            "kind": "literal",
+            "value": "note"
+          },
+          {
+            "kind": "literal",
+            "value": "profile"
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "agent"
+          },
+          {
+            "kind": "literal",
+            "value": "user"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#MemoryRecord"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:169"
+      ]
+    },
+    {
       "digest": "0116b1f89c05221d56b0ba35c83d302bf4857bc7277d247e9bbaf74b27d2c66e",
       "schema": {
         "root": 0,
@@ -15408,7 +15688,7 @@
         "event:team/message/delivered.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:840"
+        "packages/experimental/agent-team/src/types.ts:999"
       ]
     },
     {
@@ -15771,7 +16051,7 @@
         "event:team/message/queued.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:838"
+        "packages/experimental/agent-team/src/types.ts:997"
       ]
     },
     {
@@ -18389,6 +18669,20 @@
       "sources": []
     },
     {
+      "digest": "1526cddd746aecb3d0d37eef5c792e80b9813b118e91a8bfc4bfdcb5d01af659",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "profile"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "1528539c63db8b23506f0209a99ce77d8ad138adfbfcee3d4769b7382d93756c",
       "schema": {
         "root": 0,
@@ -20480,7 +20774,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSource"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:367"
+        "packages/experimental/agent-team/src/types.ts:429"
       ]
     },
     {
@@ -24769,7 +25063,7 @@
         "event:team/section.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:831"
+        "packages/experimental/agent-team/src/types.ts:985"
       ]
     },
     {
@@ -27796,6 +28090,20 @@
       ]
     },
     {
+      "digest": "32d25cfc57283ae68896513eaeb492bfc76720890b2e30cffc906a5c4ba66407",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "log"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "32eb735f9f5a9449b4b7c5bad3fba842e16a609334dd8615aabb9d60ff7f939b",
       "schema": {
         "root": 0,
@@ -27914,6 +28222,54 @@
       ],
       "sources": [
         "packages/core/session/src/types.ts:439"
+      ]
+    },
+    {
+      "digest": "33d73b60d1d1bfc788176037ad7685b4de38b09495592088f1356d2273c7a3a3",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "agent"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "33dc3fc9a0a91ae855e45e3205a1397467e3dd7eb69d34ecfed3f63ddd18c206",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "log"
+          },
+          {
+            "kind": "literal",
+            "value": "note"
+          },
+          {
+            "kind": "literal",
+            "value": "profile"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#MemoryKind"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:159"
       ]
     },
     {
@@ -28789,6 +29145,35 @@
       "sources": []
     },
     {
+      "digest": "3854343c105c10f9e6574a5d638f31fa83c50bc107cd66f02d691dfe4f8f9392",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "agent"
+          },
+          {
+            "kind": "literal",
+            "value": "user"
+          }
+        ]
+      },
+      "names": [
+        "packages/experimental/agent-team/src/types.ts#MemoryLayer"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:162"
+      ]
+    },
+    {
       "digest": "3860b4757d512a2869be833acb0faf834335b1b056bf3f83df5474dce95f8fa6",
       "schema": {
         "root": 0,
@@ -29404,6 +29789,20 @@
       ]
     },
     {
+      "digest": "3ae748c5e4a02ba40546af7a7ce4a7c1720b594fb700e02305d5702c1c2ebe77",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "note"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "3b1be838223869fe0a08210db85bf773796ed3f2373ac16555dff227cade0c48",
       "schema": {
         "root": 0,
@@ -29609,7 +30008,7 @@
         "event:team/routine.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:836"
+        "packages/experimental/agent-team/src/types.ts:990"
       ]
     },
     {
@@ -32798,7 +33197,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMemberSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:193"
+        "packages/experimental/agent-team/src/types.ts:250"
       ]
     },
     {
@@ -32841,7 +33240,7 @@
         "packages/experimental/agent-team/src/types.ts#SkillAttachment"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:150"
+        "packages/experimental/agent-team/src/types.ts:207"
       ]
     },
     {
@@ -33654,6 +34053,7 @@
         "packages/attachment/attachment/src/brand.ts#AttachmentId",
         "packages/compaction/compaction/src/brand.ts#CompactionId",
         "packages/core/session/src/types.ts#SessionId",
+        "packages/experimental/agent-team/src/types.ts#MemoryId",
         "packages/experimental/agent-team/src/types.ts#RoutineId",
         "packages/experimental/agent-team/src/types.ts#SidebarSectionId",
         "packages/experimental/agent-team/src/types.ts#SkillId",
@@ -33682,6 +34082,7 @@
         "packages/attachment/attachment/src/brand.ts:6",
         "packages/compaction/compaction/src/brand.ts:4",
         "packages/core/session/src/types.ts:19",
+        "packages/experimental/agent-team/src/types.ts:147",
         "packages/experimental/agent-team/src/types.ts:21",
         "packages/experimental/agent-team/src/types.ts:33",
         "packages/experimental/agent-team/src/types.ts:52",
@@ -35320,7 +35721,7 @@
         "event:team/member.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:824"
+        "packages/experimental/agent-team/src/types.ts:978"
       ]
     },
     {
@@ -35567,7 +35968,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:280"
+        "packages/experimental/agent-team/src/types.ts:337"
       ]
     },
     {
@@ -36648,7 +37049,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamMessageSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:358"
+        "packages/experimental/agent-team/src/types.ts:420"
       ]
     },
     {
@@ -36815,8 +37216,8 @@
       },
       "names": [
         "SessionEventEnvelope[39].sourceEventSeqs",
-        "SessionEventEnvelope[54].sourceEventSeqs",
-        "SessionEventEnvelope[57].sourceEventSeqs",
+        "SessionEventEnvelope[55].sourceEventSeqs",
+        "SessionEventEnvelope[58].sourceEventSeqs",
         "event:assistant/attempt.data.stream[0][0].dt",
         "event:assistant/attempt.data.stream[0][1].dt",
         "event:assistant/attempt.data.stream[0][2].dt",
@@ -40044,7 +40445,7 @@
         "packages/experimental/agent-team/src/types.ts#AvatarMarker"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:185"
+        "packages/experimental/agent-team/src/types.ts:242"
       ]
     },
     {
@@ -41810,6 +42211,20 @@
       ]
     },
     {
+      "digest": "78cfd7e5bfd3e82c1af9bb85b9d27e0c59704cbdf6d183ddab05c1743ce9333e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "team/memory"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "79650cfa10aa3c52440328d85e8a25f0ffadc8d7efd784e3c0819d8bb74a1985",
       "schema": {
         "root": 0,
@@ -41910,7 +42325,8 @@
         ]
       },
       "names": [
-        "event:team/member.data.member.sectionId"
+        "event:team/member.data.member.sectionId",
+        "event:team/memory.data.memory.botId"
       ],
       "sources": []
     },
@@ -46336,8 +46752,8 @@
       },
       "names": [
         "SessionEventEnvelope[39]",
-        "SessionEventEnvelope[54]",
-        "SessionEventEnvelope[57]"
+        "SessionEventEnvelope[55]",
+        "SessionEventEnvelope[58]"
       ],
       "sources": []
     },
@@ -48695,7 +49111,7 @@
         "event:team/task.data"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:826"
+        "packages/experimental/agent-team/src/types.ts:980"
       ]
     },
     {
@@ -51303,7 +51719,7 @@
         "packages/experimental/agent-team/src/types.ts#SidebarSectionSnapshot"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:309"
+        "packages/experimental/agent-team/src/types.ts:366"
       ]
     },
     {
@@ -51518,7 +51934,7 @@
         "packages/experimental/agent-team/src/types.ts#TeamTaskStatus"
       ],
       "sources": [
-        "packages/experimental/agent-team/src/types.ts:277"
+        "packages/experimental/agent-team/src/types.ts:334"
       ]
     },
     {
@@ -56578,6 +56994,140 @@
       "sources": []
     },
     {
+      "digest": "c9d1cad103f2dc9ab532176771d039bbb2609065470751dfc1f5825728e61421",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "memory",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 13,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "content",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "kind",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "layer",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "memoryId",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 5,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              4
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              7,
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "log"
+          },
+          {
+            "kind": "literal",
+            "value": "note"
+          },
+          {
+            "kind": "literal",
+            "value": "profile"
+          },
+          {
+            "kind": "union",
+            "types": [
+              11,
+              12
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "agent"
+          },
+          {
+            "kind": "literal",
+            "value": "user"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          }
+        ]
+      },
+      "names": [
+        "event:team/memory.data"
+      ],
+      "sources": [
+        "packages/experimental/agent-team/src/types.ts:995"
+      ]
+    },
+    {
       "digest": "ca085dba2c877feceebf3c62f9d39c6c2a4d2314d97b94b3927a780fe8fe2bb2",
       "schema": {
         "root": 0,
@@ -56835,6 +57385,177 @@
         ]
       },
       "names": [],
+      "sources": []
+    },
+    {
+      "digest": "cd7327796d10f119fb1bf9f89d6bf8ad7968370a4eba70c72fa0ac7dfbab5c89",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 15,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 16,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "memory",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "teamId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "version",
+                "type": 14,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "botId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "content",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "createdAt",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "kind",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "layer",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "memoryId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "updatedAt",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "primitive",
+            "type": "null"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "log"
+          },
+          {
+            "kind": "literal",
+            "value": "profile"
+          },
+          {
+            "kind": "literal",
+            "value": "note"
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "agent"
+          },
+          {
+            "kind": "literal",
+            "value": "user"
+          },
+          {
+            "kind": "literal",
+            "value": 2
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "team/memory"
+          }
+        ]
+      },
+      "names": [
+        "event:team/memory"
+      ],
       "sources": []
     },
     {
@@ -60361,11 +61082,12 @@
         "SessionEventEnvelope[51]",
         "SessionEventEnvelope[52]",
         "SessionEventEnvelope[53]",
-        "SessionEventEnvelope[55]",
+        "SessionEventEnvelope[54]",
         "SessionEventEnvelope[56]",
-        "SessionEventEnvelope[58]",
+        "SessionEventEnvelope[57]",
         "SessionEventEnvelope[59]",
         "SessionEventEnvelope[5]",
+        "SessionEventEnvelope[60]",
         "SessionEventEnvelope[7]",
         "SessionEventEnvelope[8]",
         "SessionEventEnvelope[9]"

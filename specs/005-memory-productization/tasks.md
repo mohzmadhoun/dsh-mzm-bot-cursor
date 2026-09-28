@@ -107,7 +107,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T017 [US2] Host `createMemory` for `kind=log` validates non-empty `content`; rejects empty; persists on Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-002
 - [x] T018 [P] [US2] Client log kind on the shared memory write surface under `packages/experimental/client-ui-agent-team/src/client/` via Host RPC (locale-owned copy)
-- [ ] T019 [US2] Extend `specs/005-memory-productization/verifier/scenario-1-write-kinds.md` for SC-002 (log write + empty reject + leave/return) with FR-011/012 evidence under `verifier/evidence/scenario-1/`
+- [x] T019 [US2] Extend `specs/005-memory-productization/verifier/scenario-1-write-kinds.md` for SC-002 (log write + empty reject + leave/return) with FR-011/012 evidence under `verifier/evidence/scenario-1/`
 
 **Checkpoint**: US2 log write independently testable on Desktop.
 
