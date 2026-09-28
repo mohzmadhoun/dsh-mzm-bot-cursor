@@ -41,8 +41,23 @@ export const PASS_FIXTURE_SERVER_NAME = 'verifier_fixture'
 export const PASS_FIXTURE_TOOL_RAW_NAME = 'ping'
 
 /**
- * Thin managed / Verifier fixture catalog (P6 T009 / FR-017).
- * Pass = any one completable entry — this fixture is the default Host Pass path.
+ * Thin-catalog Verifier fixture that settles install as `failed` (US1 T017).
+ * Proves durable failed rows with a clear reason; never counts as Story 1 Pass.
+ */
+export const PASS_BROKEN_FIXTURE_CATALOG_ID = 'verifier-fixture-broken'
+
+/** Broken-fixture MCP serverName (never binds tools — install fails first). */
+export const PASS_BROKEN_FIXTURE_SERVER_NAME = 'verifier_fixture_broken'
+
+/** Clear durable install failure reason for {@link PASS_BROKEN_FIXTURE_CATALOG_ID}. */
+export const PASS_BROKEN_INSTALL_ERROR =
+  'fixture install rejected: connector cannot be installed'
+
+/**
+ * Thin managed / Verifier fixture catalog (P6 T009 / FR-017 / US1 T017).
+ * Pass = any one completable entry — `verifier-fixture` is the default Host Pass path.
+ * `verifier-fixture-broken` exists only to settle `installState=failed` with a clear reason.
+ * Catalog availability is not install — Client must call `installConnector` (FR-001).
  */
 export const PASS_CONNECTOR_CATALOG: readonly ConnectorCatalogEntry[] = [
   {
@@ -53,7 +68,24 @@ export const PASS_CONNECTOR_CATALOG: readonly ConnectorCatalogEntry[] = [
     fixture: true,
     authMode: 'in_app',
   },
+  {
+    catalogId: PASS_BROKEN_FIXTURE_CATALOG_ID,
+    displayName: 'Verifier Fixture Broken Install',
+    serverName: PASS_BROKEN_FIXTURE_SERVER_NAME,
+    transport: 'stdio',
+    fixture: true,
+    authMode: 'none',
+  },
 ]
+
+/**
+ * Whether install of this thin-catalog entry must settle as `installState=failed`.
+ * @param catalogId - thin-catalog entry id.
+ * @returns true when Host MUST persist a failed ConnectorRecord (T017).
+ */
+export function isBrokenInstallFixture(catalogId: string): boolean {
+  return catalogId === PASS_BROKEN_FIXTURE_CATALOG_ID
+}
 
 /**
  * Build the Host credential store address for one connector (P6 T011).
