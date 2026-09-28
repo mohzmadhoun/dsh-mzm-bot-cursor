@@ -48,9 +48,11 @@ import type {
   RenameSectionResult,
   ResumeRoutineInput,
   ResumeRoutineResult,
+  RoutineEventTrigger,
   RoutineId,
   RoutineProjection,
   RoutineStatus,
+  RoutineTriggerKind,
   SetAvatarInput,
   SetAvatarResult,
   SidebarSectionId,
@@ -293,12 +295,16 @@ interface SkillAuthorDraft {
 }
 
 /**
- * Draft fields for Host createRoutine (P4 FR-001 / T017).
- * Both intent and scheduleExpr MUST be non-empty after trim; schedule must be product-supported.
+ * Draft fields for Host createRoutine (P4 FR-001 / T017; P6 US2 T024 event).
+ * Cron: intent + product-supported scheduleExpr. Event: intent + Pass family webhook_harness.
  */
 interface CreateRoutineDraft {
   intent: string
+  /** Defaults to cron so P4 create path stays one-select away from schedule. */
+  triggerKind: RoutineTriggerKind
   scheduleExpr: string
+  /** Pass event family when triggerKind=event (FR-018). */
+  eventTrigger: RoutineEventTrigger
 }
 
 /**
@@ -336,7 +342,12 @@ const EMPTY_AVATAR_DRAFT: AvatarDraft = { shape: '', color: '' }
 const EMPTY_SECTION_NAME_DRAFT: SectionNameDraft = { name: '' }
 const EMPTY_ATTACH_SKILL_DRAFT: AttachSkillDraft = { skillId: '' }
 const EMPTY_SKILL_AUTHOR_DRAFT: SkillAuthorDraft = { displayName: '', instructionalBody: '' }
-const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = { intent: '', scheduleExpr: '' }
+const EMPTY_CREATE_ROUTINE_DRAFT: CreateRoutineDraft = {
+  intent: '',
+  triggerKind: 'cron',
+  scheduleExpr: '',
+  eventTrigger: 'webhook_harness',
+}
 const EMPTY_WRITE_MEMORY_DRAFT: WriteMemoryDraft = { kind: '', content: '', layer: '' }
 const EMPTY_CONNECTOR_AUTH_DRAFT: ConnectorAuthDraft = { secret: '' }
 
@@ -381,6 +392,17 @@ const ROUTINE_SCHEDULE_PRESETS = [
   { value: '@hourly', label: 'routineSchedule.hourly' },
   { value: '@daily', label: 'routineSchedule.daily' },
 ] as const satisfies readonly { readonly value: string; readonly label: TeamKey }[]
+
+/** Trigger kinds for Host createRoutine (P4 cron + P6 event / T024). */
+const ROUTINE_TRIGGER_KIND_OPTIONS = [
+  { value: 'cron', label: 'routineTrigger.cron' },
+  { value: 'event', label: 'routineTrigger.event' },
+] as const satisfies readonly { readonly value: RoutineTriggerKind; readonly label: TeamKey }[]
+
+/** Pass event-family options for Host createRoutine triggerKind=event (FR-018). */
+const ROUTINE_EVENT_TRIGGER_OPTIONS = [
+  { value: 'webhook_harness', label: 'routineEventTrigger.webhook_harness' },
+] as const satisfies readonly { readonly value: RoutineEventTrigger; readonly label: TeamKey }[]
 
 /** Writable kinds on the shared writeMemory surface (US1 profile + US2 log + US3 note). */
 const MEMORY_WRITE_KIND_OPTIONS = [
@@ -689,6 +711,14 @@ function routineStatusKey(status: RoutineStatus): TeamKey {
   switch (status) {
     case 'active': return 'routineStatus.active'
     case 'paused': return 'routineStatus.paused'
+  }
+}
+
+/** Locale key for Host Routine triggerKind (cron / event) — pane distinguishability (T024). */
+function routineTriggerKindKey(kind: RoutineTriggerKind): TeamKey {
+  switch (kind) {
+    case 'cron': return 'routineTrigger.cron'
+    case 'event': return 'routineTrigger.event'
   }
 }
 
@@ -1831,21 +1861,35 @@ export function TeamAction({
   }
 
   /**
-   * Host createRoutine in bot context (P4 FR-001 / SC-007 / T017).
-   * Empty intent or schedule reject Client-side; Host rejects leave catalog unchanged.
-   * No confirm step and no separate displayName — identity derives from intent.
+   * Host createRoutine in bot context (P4 FR-001 / SC-007 / T017; P6 US2 T024 event).
+   * Cron: empty intent or schedule reject Client-side. Event: empty intent reject; Pass family webhook_harness.
+   * Host rejects leave catalog unchanged. No confirm step and no separate displayName.
    */
   const submitCreateRoutine = async (member: TeamRosterMember): Promise<void> => {
     const intent = createRoutineDraft.intent.trim()
-    const scheduleExpr = createRoutineDraft.scheduleExpr.trim()
-    /* v8 ignore next -- CreateRoutineForm disables Save while either normalized field is empty. */
-    if (intent === '' || scheduleExpr === '') return
-    const saved = await settleCreateRoutine(member.id, () => createRoutine(sessionId, {
-      botId: member.id,
-      intent,
-      scheduleExpr,
-    }))
-    if (saved === undefined) return
+    const triggerKind = createRoutineDraft.triggerKind
+    if (triggerKind === 'event') {
+      /* v8 ignore next -- CreateRoutineForm disables Save while intent is empty for event. */
+      if (intent === '') return
+      const saved = await settleCreateRoutine(member.id, () => createRoutine(sessionId, {
+        botId: member.id,
+        intent,
+        triggerKind: 'event',
+        eventTrigger: createRoutineDraft.eventTrigger,
+      }))
+      if (saved === undefined) return
+    } else {
+      const scheduleExpr = createRoutineDraft.scheduleExpr.trim()
+      /* v8 ignore next -- CreateRoutineForm disables Save while either normalized field is empty. */
+      if (intent === '' || scheduleExpr === '') return
+      const saved = await settleCreateRoutine(member.id, () => createRoutine(sessionId, {
+        botId: member.id,
+        intent,
+        scheduleExpr,
+        triggerKind: 'cron',
+      }))
+      if (saved === undefined) return
+    }
     setCreatingRoutineBotId(null)
     setWritingMemoryBotId(null)
     setCreateRoutineDraft(EMPTY_CREATE_ROUTINE_DRAFT)
@@ -2283,10 +2327,20 @@ export function TeamAction({
                         className={css.botRoutineRow}
                         data-team-routine={routine.routineId}
                         data-team-routine-status={routine.status}
+                        data-team-routine-trigger-kind={routine.triggerKind}
                         data-team-routine-schedule-expr={routine.scheduleExpr}
+                        {...routine.eventTrigger !== undefined
+                          ? { 'data-team-routine-event-trigger': routine.eventTrigger }
+                          : {}}
                         data-team-routine-fire-indicator={fireIndicator}
                       >
                         <span data-team-routine-identity>{routine.identity}</span>
+                        <span
+                          className={css.botRoutineTriggerKind}
+                          data-team-routine-trigger-kind-label={routine.triggerKind}
+                        >
+                          {t(routineTriggerKindKey(routine.triggerKind))}
+                        </span>
                         <span
                           className={css.botRoutineMeta}
                           data-team-routine-schedule=""
@@ -3605,17 +3659,23 @@ interface CreateRoutineFormProps {
 }
 
 /**
- * Host createRoutine editor in bot context (P4 FR-001 / SC-007 / T017).
- * Empty intent or schedule show a clear reject and block Save; no confirm step.
+ * Host createRoutine editor in bot context (P4 FR-001 / SC-007 / T017; P6 US2 T024 event).
+ * Cron: empty intent or schedule show a clear reject and block Save.
+ * Event: empty intent blocks Save; Pass family is webhook_harness (FR-018).
+ * No confirm step.
  */
 function CreateRoutineForm({
   draft, setDraft, pending, onSave, onCancel, t,
 }: CreateRoutineFormProps) {
-  const ready = draft.intent.trim() !== '' && draft.scheduleExpr.trim() !== ''
+  const intentReady = draft.intent.trim() !== ''
+  const cronReady = intentReady && draft.scheduleExpr.trim() !== ''
+  const eventReady = intentReady
+  const ready = draft.triggerKind === 'event' ? eventReady : cronReady
   return (
     <div
       className={css.form}
       data-team-create-routine-editor=""
+      data-team-create-routine-trigger-kind={draft.triggerKind}
     >
       <p className={css.hint}>{t('createRoutineHint')}</p>
       {!ready && (
@@ -3627,6 +3687,30 @@ function CreateRoutineForm({
           {t('routineCreateReject')}
         </div>
       )}
+      <select
+        aria-label={t('routineTriggerKind')}
+        data-team-routine-trigger-kind-select=""
+        value={draft.triggerKind}
+        disabled={pending}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+          const value = event.target.value
+          if (value !== 'cron' && value !== 'event') return
+          setDraft({
+            ...draft,
+            triggerKind: value,
+            // Clear the opposite field so Save readiness matches the chosen kind.
+            ...value === 'cron'
+              ? { eventTrigger: 'webhook_harness' as const }
+              : { scheduleExpr: '' },
+          })
+        }}
+      >
+        {ROUTINE_TRIGGER_KIND_OPTIONS.map(option => (
+          <option key={option.value} value={option.value}>
+            {t(option.label)}
+          </option>
+        ))}
+      </select>
       <input
         aria-label={t('routineIntent')}
         data-team-routine-intent=""
@@ -3637,26 +3721,47 @@ function CreateRoutineForm({
           setDraft({ ...draft, intent: event.target.value })
         }}
       />
-      <select
-        aria-label={t('routineSchedule')}
-        data-team-routine-schedule-select=""
-        value={draft.scheduleExpr === '' ? ROUTINE_SCHEDULE_NONE : draft.scheduleExpr}
-        disabled={pending}
-        onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-          const value = event.target.value
-          setDraft({
-            ...draft,
-            scheduleExpr: value === ROUTINE_SCHEDULE_NONE ? '' : value,
-          })
-        }}
-      >
-        <option value={ROUTINE_SCHEDULE_NONE}>{t('routineSchedulePlaceholder')}</option>
-        {ROUTINE_SCHEDULE_PRESETS.map(preset => (
-          <option key={preset.value} value={preset.value}>
-            {t(preset.label)}
-          </option>
-        ))}
-      </select>
+      {draft.triggerKind === 'cron' && (
+        <select
+          aria-label={t('routineSchedule')}
+          data-team-routine-schedule-select=""
+          value={draft.scheduleExpr === '' ? ROUTINE_SCHEDULE_NONE : draft.scheduleExpr}
+          disabled={pending}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+            const value = event.target.value
+            setDraft({
+              ...draft,
+              scheduleExpr: value === ROUTINE_SCHEDULE_NONE ? '' : value,
+            })
+          }}
+        >
+          <option value={ROUTINE_SCHEDULE_NONE}>{t('routineSchedulePlaceholder')}</option>
+          {ROUTINE_SCHEDULE_PRESETS.map(preset => (
+            <option key={preset.value} value={preset.value}>
+              {t(preset.label)}
+            </option>
+          ))}
+        </select>
+      )}
+      {draft.triggerKind === 'event' && (
+        <select
+          aria-label={t('routineEventTrigger')}
+          data-team-routine-event-trigger-select=""
+          value={draft.eventTrigger}
+          disabled={pending}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+            const value = event.target.value
+            if (value !== 'webhook_harness') return
+            setDraft({ ...draft, eventTrigger: value })
+          }}
+        >
+          {ROUTINE_EVENT_TRIGGER_OPTIONS.map(option => (
+            <option key={option.value} value={option.value}>
+              {t(option.label)}
+            </option>
+          ))}
+        </select>
+      )}
       <div className={css.formActions}>
         <button type="button" disabled={pending || !ready} onClick={onSave}>{t('save')}</button>
         <button type="button" disabled={pending} onClick={onCancel}>{t('cancel')}</button>

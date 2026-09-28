@@ -2836,6 +2836,7 @@ describe('TeamAction', () => {
         botId: workerId,
         intent: 'Summarize inbox',
         scheduleExpr: '@every 5m',
+        triggerKind: 'cron',
       })
     })
     expect(await screen.findByText('Summarize inbox')).toBeTruthy()
@@ -3254,6 +3255,165 @@ describe('TeamAction', () => {
     expect(await screen.findByText('pauseRoutine offline (gateway/internal)')).toBeTruthy()
     expect(document.querySelector(`[data-team-routine="${routineId}"]`)
       ?.getAttribute('data-team-routine-status')).toBe('active')
+  })
+
+
+  it('creates a Host event routine via createRoutine with webhook_harness (T024 / US2)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const createdRoutine = {
+      routineId: 'routine-event' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'On harness ping',
+      intent: 'On harness ping',
+      scheduleExpr: '',
+      scheduleLabel: 'Webhook harness',
+      triggerKind: 'event' as const,
+      eventTrigger: 'webhook_harness' as const,
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, routines: [createdRoutine] },
+      })
+    const createRoutine = vi.fn((): Promise<TeamCreateRoutineActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { routine: createdRoutine } },
+    }))
+    render(<TeamAction {...props(actions({ load, createRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.botRoutinesEmpty)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.createRoutine }))
+    fireEvent.change(screen.getByLabelText(zh.routineTriggerKind), {
+      target: { value: 'event' },
+    })
+    expect(document.querySelector('[data-team-create-routine-trigger-kind="event"]')).not.toBeNull()
+    expect(screen.getByLabelText(zh.routineEventTrigger)).toBeTruthy()
+    expect(screen.queryByLabelText(zh.routineSchedule)).toBeNull()
+    expect(screen.getByText(zh.routineCreateReject)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(zh.routineIntent), {
+      target: { value: 'On harness ping' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(createRoutine).toHaveBeenCalledWith(SESSION, {
+        botId: workerId,
+        intent: 'On harness ping',
+        triggerKind: 'event',
+        eventTrigger: 'webhook_harness',
+      })
+    })
+    expect(await screen.findByText('On harness ping')).toBeTruthy()
+    const row = document.querySelector('[data-team-routine="routine-event"]')
+    expect(row?.getAttribute('data-team-routine-trigger-kind')).toBe('event')
+    expect(row?.getAttribute('data-team-routine-event-trigger')).toBe('webhook_harness')
+    expect(row?.querySelector('[data-team-routine-trigger-kind-label="event"]')?.textContent)
+      .toBe(zh['routineTrigger.event'])
+    expect(row?.querySelector('[data-team-routine-schedule]')?.textContent).toBe('Webhook harness')
+    expect(row?.getAttribute('data-team-routine-fire-indicator')).toBe('never')
+  })
+
+  it('labels event vs cron routines distinctly on the pane (T024 / US2)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const cron = {
+      routineId: 'routine-cron' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Cron digest',
+      intent: 'Cron digest',
+      scheduleExpr: '@hourly',
+      scheduleLabel: 'Every hour',
+      triggerKind: 'cron' as const,
+      status: 'active' as const,
+      lastRunAt: null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const event = {
+      routineId: 'routine-event-label' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId,
+      botId: workerId,
+      identity: 'Event wake',
+      intent: 'Event wake',
+      scheduleExpr: '',
+      scheduleLabel: 'Webhook harness',
+      triggerKind: 'event' as const,
+      eventTrigger: 'webhook_harness' as const,
+      status: 'paused' as const,
+      lastRunAt: Date.UTC(2026, 8, 28, 11, 0, 0),
+      createdAt: 2,
+      updatedAt: 3,
+    }
+    render(<TeamAction {...props(actions({
+      load: () => Promise.resolve({
+        ok: true as const,
+        value: { ...view, routines: [cron, event] },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Cron digest')).toBeTruthy()
+    const cronRow = document.querySelector('[data-team-routine="routine-cron"]')
+    const eventRow = document.querySelector('[data-team-routine="routine-event-label"]')
+    expect(cronRow?.getAttribute('data-team-routine-trigger-kind')).toBe('cron')
+    expect(cronRow?.querySelector('[data-team-routine-trigger-kind-label="cron"]')?.textContent)
+      .toBe(zh['routineTrigger.cron'])
+    expect(cronRow?.getAttribute('data-team-routine-event-trigger')).toBeNull()
+    expect(eventRow?.getAttribute('data-team-routine-trigger-kind')).toBe('event')
+    expect(eventRow?.querySelector('[data-team-routine-trigger-kind-label="event"]')?.textContent)
+      .toBe(zh['routineTrigger.event'])
+    expect(eventRow?.getAttribute('data-team-routine-event-trigger')).toBe('webhook_harness')
+    expect(eventRow?.getAttribute('data-team-routine-status')).toBe('paused')
+    expect(eventRow?.getAttribute('data-team-routine-fire-indicator')).toBe('fired')
+    expect(screen.getByRole('button', { name: zh.pauseRoutine })).toBeTruthy()
+    expect(screen.getByRole('button', { name: zh.resumeRoutine })).toBeTruthy()
+  })
+
+  it('pauses and resumes an event routine via Host RPC (T024 / US2)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const routineId = 'routine-event-pause' as import('@deepseek-ai/dsh-experimental-agent-team/client').RoutineId
+    const active = {
+      routineId,
+      botId: workerId,
+      identity: 'Harness wake',
+      intent: 'Harness wake',
+      scheduleExpr: '',
+      scheduleLabel: 'Webhook harness',
+      triggerKind: 'event' as const,
+      eventTrigger: 'webhook_harness' as const,
+      status: 'active' as const,
+      lastRunAt: null as number | null,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const paused = { ...active, status: 'paused' as const, updatedAt: 2 }
+    const resumed = { ...active, status: 'active' as const, updatedAt: 3 }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [active] } })
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, routines: [paused] } })
+      .mockResolvedValue({ ok: true as const, value: { ...view, routines: [resumed] } })
+    const pauseRoutine = vi.fn((): Promise<
+      import('../src/client/TeamAction.tsx').TeamPauseRoutineActionResult
+    > => Promise.resolve({ ok: true, value: { ok: true, value: { routine: paused } } }))
+    const resumeRoutine = vi.fn((): Promise<
+      import('../src/client/TeamAction.tsx').TeamResumeRoutineActionResult
+    > => Promise.resolve({ ok: true, value: { ok: true, value: { routine: resumed } } }))
+    render(<TeamAction {...props(actions({ load, pauseRoutine, resumeRoutine }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Harness wake')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.pauseRoutine }))
+    await waitFor(() => { expect(pauseRoutine).toHaveBeenCalledWith(SESSION, { routineId }) })
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+        ?.getAttribute('data-team-routine-status')).toBe('paused')
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.resumeRoutine }))
+    await waitFor(() => { expect(resumeRoutine).toHaveBeenCalledWith(SESSION, { routineId }) })
+    await waitFor(() => {
+      expect(document.querySelector(`[data-team-routine="${routineId}"]`)
+        ?.getAttribute('data-team-routine-status')).toBe('active')
+    })
   })
 
 
