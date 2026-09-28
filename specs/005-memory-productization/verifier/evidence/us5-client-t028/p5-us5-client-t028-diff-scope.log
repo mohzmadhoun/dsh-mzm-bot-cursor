@@ -1,0 +1,11 @@
+CLIENT tip: 61fcbef52bee338499d1a9554c6705d38bffdd4b
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/192
+
+packages/experimental/client-ui-agent-team/README.i18n.yaml
+packages/experimental/client-ui-agent-team/README.md
+packages/experimental/client-ui-agent-team/README.zh.md
+packages/experimental/client-ui-agent-team/src/client/TeamAction.module.css
+packages/experimental/client-ui-agent-team/src/client/TeamAction.tsx
+packages/experimental/client-ui-agent-team/src/client/locales.ts
+packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx
+specs/005-memory-productization/tasks.md

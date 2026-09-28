@@ -1,0 +1,62 @@
+T028 Client memory layer-distinguishable UI — DH Verifier
+=========================================================
+Verdict: PASS (Client product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p5-us5-client-layers-fe1d @ 61fcbef52bee338499d1a9554c6705d38bffdd4b
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/192 (OPEN, base master)
+Linear: MOH-266 (T028) — left In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T028 / Client product — not SC-005 / Scenario 3 Desktop Done)
+------------------------------------------------------------------------
+[x] Write layer choice (Agent / User) remains on memory write draft (FR-017 orthogonal to kind).
+[x] Browse layer filter All / Agent / User on Bot memory pane with Host-projected layer labels.
+[x] Client filters bot A agent rows out of bot B pane while sharing user-layer rows (FR-007 UI).
+[x] Locale-owned copy for browse filter / hints (zh + en); no Electron Main layer filter SoT.
+[x] Focused vitest T028 (2) + memory regression (13) pass.
+[x] Unit/jsdom proof enough for T028 Pass — Desktop SC-005 / SO11 is T030 (deferred).
+
+Evidence (measured)
+-------------------
+Commands @ 61fcbef52b:
+
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T028'
+  → 2 passed | 90 skipped
+    - filters browse list by Agent vs User layer and keeps write layer choice (T028 / US5)
+    - hides bot A agent rows on bot B while sharing user-layer rows (T028 / FR-007)
+
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'memory|T015|T025|T028|layer'
+  → 13 passed | 79 skipped (memory surface regression)
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-memory-bus.spec.ts
+  → 3 passed (spot-check; Host SoT invariant)
+
+Logs: p5-us5-client-t028-vitest.log · p5-us5-client-t028-vitest-verbose.log
+      p5-us5-client-t028-memory-regression.log · p5-us5-client-t028-electron-bus.log
+      p5-us5-client-t028-diff-scope.log
+(also under /opt/cursor/artifacts/us5-t028/)
+
+Diff scope (origin/master...61fcbef52b): 8 files under
+  packages/experimental/client-ui-agent-team/{src/client,tests,README*}
+  + specs/005-memory-productization/tasks.md
+  Zero Host agent-team product paths in this Client slice.
+
+Claims
+------
+- Write layer choice + browse All/Agent/User filter: **measured**
+- Host-projected layer labels on browse rows: **measured**
+- Cross-bot agent isolation vs user sharing in Client pane: **measured**
+- tasks.md T028 [x] on Client tip: **measured**
+- Desktop SC-005 / SO11 FR-011/012 (T030): **not run** (explicitly deferred)
+
+Scope lock
+----------
+Does NOT stamp SC-005 / SC-010 product Done or Scenario 3 Desktop FR-011/012.
+Does NOT gate Host catalog isolation (T027 — sibling stamp) or Verifier T030 Desktop.
+Does NOT mark Linear MOH-266 Done.
+Does NOT merge product or verify PRs.
+Next: Host T027 Pass (sibling) · T030 Desktop SC-005/SC-010 + SO11 evidence.
+Leave MOH-266 In Progress until PO merges.

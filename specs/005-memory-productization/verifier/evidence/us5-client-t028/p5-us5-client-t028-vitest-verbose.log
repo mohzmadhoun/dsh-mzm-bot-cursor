@@ -1,0 +1,103 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > ignores a stale Team load after the conversation switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > loads roster/task diagnostics on open and navigates a healthy teammate
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a Host-owned bot from displayName plus provider/model assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > still calls createBot when the draft repeats a roster distinct-models assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a distinct draft message when the draft differs from roster bots
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the distinct-models check cannot pass yet for one teammate pair
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the roster meets the distinct-models rule for two teammate pairs
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > warns when the draft (provider, model) duplicates an existing roster assignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > hands MISSING_CREDENTIAL create failure to in-app Models settings (not 1Password)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > offers Models re-entry for AUTH invalid/revoked create failure (T035)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows createBot Remote and Team rejections and ignores a late success after session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful createBot after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > cancels bot create without calling Host createBot
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps only the newest overlapping refresh for one session
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a successful task mutation newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps a created task newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps task and create failures newer than an in-flight refresh
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > tracks simultaneous create and task mutations independently
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads derived fields for every task after a mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a task from normalized blocker and write-scope lists
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > assigns, edits, completes, reopens, and deletes with contiguous CAS revisions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads and warns instead of retrying a stale task mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps reload failures visible after task and dependency conflicts
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders roster/task state variants and contains navigation, refresh, and close actions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows load and create failures and ignores a create result after a session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains stale-session and ordinary task failures without retrying
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not publish a task conflict after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful task after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > contains edit and dependency failures and supports form cancellation and unassignment
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a Remote carrier failure from the dependency mutation
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > skips the dependency mutation when an edit keeps the same blockers
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > reloads a dependency conflict and ignores dependency settlement after a session switch
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renders Host mailbox handoffs from agentTeams/view with deliveryState (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows the empty handoffs notice when the Host projection has none
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > saves persona through Host updatePersona and shows anti-jobs on the overview (T016/T017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior overview anti-jobs and shows failure when updatePersona is unavailable (T018)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Team rejection for updatePersona without mutating overview persona (T018)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > opens an empty persona editor when the teammate has no Host persona yet
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > ignores a late updatePersona success after the conversation switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > does not settle a successful updatePersona after its reload switches sessions
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renames a bot through Host renameBot and shows the new displayName on the overview (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior displayName and shows failure when renameBot is unavailable (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Team rejection for renameBot without mutating overview displayName (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > sets a preset avatar through Host setAvatar and shows the marker on the overview (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior avatar and shows failure when setAvatar is unavailable (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > omits custom image upload controls so preset avatar Pass is not blocked (T024)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > requires explicit confirm before Host deleteBot and removes the bot from overview (T027)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > cancels pending confirm without calling Host deleteBot (T027)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps the bot listed and shows failure when deleteBot is unavailable (T027)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Team rejection for deleteBot without removing the overview row (T027)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a named section through Host createSection and lists it beside Unassigned (T034)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > assigns a bot into a named section and moves it back to Unassigned (T034)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > renames a named section through Host renameSection (T034)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior section membership and shows failure when assignSection is unavailable (T034)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > lists Host managed and user skills in the discovery library (T016)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > selects a discovered skill as available-to-attach without a load wizard (T017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows a clear failure when the Host skill catalog is empty (T018)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps available-to-attach across refresh when the skill remains in the catalog (T017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > attaches an available skill to a bot and shows it on that bot’s skills surface (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > marks an attached skill session-active via dedicated Run control (T024)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior attachments and shows failure when attachSkill is unavailable (T025)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Team rejection for attachSkill without mutating prior attachments (T025)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > rejects empty skill author drafts with clear Client messaging (T029)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a user skill via Host upsertUserSkill and lists it in discovery (T029/T030)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > edits a user skill through Host upsertUserSkill with skillId (T029)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host upsertUserSkill rejection without inventing a catalog row (T029)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > attaches and runs an authored user skill like managed (T030)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > creates a Host routine in bot context without confirm (T017 / SC-007)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host createRoutine rejection without inventing a listed routine (T017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior routines and shows failure when createRoutine transport is unavailable (T017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > lists only the selected bot’s Host routines after create (T017 / SC-006)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > projects Host routines pane with identity, schedule, status, and lastRunAt (T020 / US2)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host lastRunAt fire indicator as never before first fire (T027 / US4)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host lastRunAt fire indicator as fired after cron commit (T027 / US4)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > updates fire indicator never → fired when Host projects new lastRunAt (T027 / US4)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps Host routines listed after leave and return (T020 / US2 durability)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > pauses an active Host routine via pauseRoutine and shows Paused (T023 / US3)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > resumes a paused Host routine via resumeRoutine and shows Active (T023 / US3)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior status and shows failure when pauseRoutine transport is unavailable (T023)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > writes a non-empty profile memory via Host writeMemory and lists it (T015 / US1)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > writes a user-layer profile memory without botId (T015 / FR-017)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > writes a non-empty log memory via Host writeMemory and lists it (T018 / US2)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps profile and log distinguishable after both writes (T018 / SC-002)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > writes a non-empty note memory via Host writeMemory and lists it (T021 / US3)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps profile, log, and note distinguishable after three writes (T021 / SC-003)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows Host writeMemory rejection without inventing a listed memory (T015)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior memories and shows failure when writeMemory transport is unavailable (T015)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > browses / recalls Host listMemories on the memory surface (T025 / US4)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > shows optional Host inject indicator when memoryRecallInjects present (T025)
+ ↓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > keeps prior memories and shows failure when browse listMemories is unavailable (T025)
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > filters browse list by Agent vs User layer and keeps write layer choice (T028 / US5) 182ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx > TeamAction > hides bot A agent rows on bot B while sharing user-layer rows (T028 / FR-007) 38ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 90 skipped (92)
+   Start at  09:23:07
+   Duration  2.71s (transform 1.35s, setup 178ms, import 1.82s, tests 221ms, environment 380ms)

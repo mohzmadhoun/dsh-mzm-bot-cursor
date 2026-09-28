@@ -1,0 +1,15 @@
+HOST tip: b28dd51d2d69851a4503517b79a50f99b28bb78a
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/193
+
+packages/experimental/agent-team/README.md
+packages/experimental/agent-team/README.zh.md
+packages/experimental/agent-team/src/index.ts
+packages/experimental/agent-team/src/memory-bind.ts
+packages/experimental/agent-team/src/projection.ts
+packages/experimental/agent-team/src/validation.ts
+packages/experimental/agent-team/tests/persistence.spec.ts
+packages/experimental/agent-team/tests/projection-events.spec.ts
+packages/experimental/agent-team/tests/team.spec.ts
+specs/005-memory-productization/tasks.md
+specs/005-memory-productization/verifier/README.md
+specs/005-memory-productization/verifier/scenario-3-layers.md

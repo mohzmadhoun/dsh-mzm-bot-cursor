@@ -1,0 +1,65 @@
+T027 Host catalog agent vs user layer isolation — DH Verifier
+=============================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p5-us5-host-layers-fe1d @ b28dd51d2d69851a4503517b79a50f99b28bb78a
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/193 (OPEN, base master)
+Linear: MOH-265 (T027) — left In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T027 / Host product — not SC-005 / Scenario 3 Desktop Done)
+----------------------------------------------------------------------
+[x] Host listMemories(botId=B) MUST NOT include A’s agent-layer rows as B’s (FR-006).
+[x] Same user-layer row available in A and B contexts after save (FR-007).
+[x] Isolation + user sharing survive Host restart via catalog projection (not transcript).
+[x] memoryEligibleForBot shared across list projection and memory-recall compose.
+[x] Pass path uses Host catalog memory-* ids — transcript MUST NOT substitute.
+[x] Orthogonality Host half (T029 bundled): all three kinds writable on agent and user.
+[x] No Electron Main memory bus (spot-check).
+[x] Unit/session proof enough for T027 Pass — Desktop SC-005 / SO11 is T030 (deferred).
+
+Evidence (measured)
+-------------------
+Commands @ b28dd51d2d:
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    packages/experimental/agent-team/tests/persistence.spec.ts \
+    packages/experimental/agent-team/tests/projection-events.spec.ts \
+    packages/experimental/agent-team/tests/memory-bind.spec.ts \
+    -t 'US5 T027|isolates agent-layer'
+  → 5 passed | 111 skipped (4 files)
+    - projectMemories projects agent isolation and user sharing from Host rows
+    - US5 T027: memoryEligibleForBot keys agent by botId and shares user account-wide
+    - composeMemoryRecall joins eligible rows and isolates agent-layer by botId
+    - US5 T027: listMemories isolates agent by botId and shares user across bots
+    - US5 T027: agent isolation + user sharing survive Host restart (not transcript)
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-memory-bus.spec.ts
+  → 3 passed (spot-check)
+
+Logs: p5-us5-host-t027-vitest.log · p5-us5-host-t027-vitest-verbose.log
+      p5-us5-host-t027-electron-bus.log · p5-us5-host-t027-diff-scope.log
+(also under /opt/cursor/artifacts/us5-t027/)
+
+Diff scope (origin/master...b28dd51d2d): 12 files under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/005-memory-productization/{tasks.md,verifier/README.md,verifier/scenario-3-layers.md}
+  Zero Client UI / apps/desktop product paths in this Host slice.
+
+Claims
+------
+- Agent isolation by botId on listMemories: **measured**
+- User sharing account-wide across bots: **measured**
+- Restart survival via Host catalog (memory-* ids): **measured**
+- memoryEligibleForBot on list + inject compose: **measured**
+- tasks.md T027 [x], T028/T030 [ ] on Host tip (T029 [x] docs bundled): **measured**
+- Desktop SC-005 / SO11 FR-011/012 (T030): **not run** (explicitly deferred)
+
+Scope lock
+----------
+Does NOT stamp SC-005 / SC-010 product Done or Scenario 3 Desktop FR-011/012.
+Does NOT gate Client layer UI (T028 — separate stamp) or Verifier T030 Desktop.
+Does NOT mark Linear MOH-265 Done.
+Does NOT merge product or verify PRs.
+Next: Client T028 Pass (sibling stamp) · T030 Desktop SC-005/SC-010 + SO11.
+Leave MOH-265 In Progress until PO merges.
