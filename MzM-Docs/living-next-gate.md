@@ -23,41 +23,42 @@
 
 **P6 (Connectors / MCP + event routines + trust)** — **Done** on `master`. Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay Pass [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. Prior living hold [MOH-349](https://linear.app/momadhoun/issue/MOH-349/p6-living-next-gate-p7-hold) Done.
 
-**P7 (Computer / box + subagent parity + settings chrome)** — **Current / tasks in progress.** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress on DeepSeek Harness - Cursor (`P-MOH-2`). Specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) **Done** ([#228](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/228) @ `db82670947`) → `specs/007-box-subagent-settings/`. Clarify [MOH-352](https://linear.app/momadhoun/issue/MOH-352/p7-spec-kit-clarify-007-box-subagent-settings) **Done** ([#230](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/230) @ `3c232d67df`). Plan [MOH-353](https://linear.app/momadhoun/issue/MOH-353/p7-spec-kit-plan-007-box-subagent-settings) **Done** ([#232](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/232) @ `da8184f1b9`). Tasks child [MOH-354](https://linear.app/momadhoun/issue/MOH-354/p7-spec-kit-tasks-007-box-subagent-settings) In Progress (do **not** rewrite `specs/001`–`006`).
+**P7 (Computer / box + subagent parity + settings chrome)** — **Current / analyze in progress.** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress on DeepSeek Harness - Cursor (`P-MOH-2`). Specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) **Done** ([#228](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/228) @ `db82670947`) → `specs/007-box-subagent-settings/`. Clarify [MOH-352](https://linear.app/momadhoun/issue/MOH-352/p7-spec-kit-clarify-007-box-subagent-settings) **Done** ([#230](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/230) @ `3c232d67df`). Plan [MOH-353](https://linear.app/momadhoun/issue/MOH-353/p7-spec-kit-plan-007-box-subagent-settings) **Done** ([#232](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/232) @ `da8184f1b9`). Tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354/p7-spec-kit-tasks-007-box-subagent-settings) **Done** ([#234](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/234) @ `ea4a79d857`). Analyze child [MOH-355](https://linear.app/momadhoun/issue/MOH-355/p7-spec-kit-analyze-007-box-subagent-settings) In Progress (do **not** rewrite `specs/001`–`006`).
 
 ## Next gate
 
-**Spec Kit tasks in progress** — [MOH-354](https://linear.app/momadhoun/issue/MOH-354/p7-spec-kit-tasks-007-box-subagent-settings) under epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7.
+**Spec Kit analyze in progress** — [MOH-355](https://linear.app/momadhoun/issue/MOH-355/p7-spec-kit-analyze-007-box-subagent-settings) under epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7.
 
-- **DH Spec Go** — `/speckit-tasks` for P7 only under `specs/007-box-subagent-settings/`.
-- After tasks: continue Spec Kit order (analyze) under PO orchestration before implement fan-out.
+- **DH Spec Go** — `/speckit-analyze` for P7 only under `specs/007-box-subagent-settings/`.
+- Require 0 CRITICAL/HIGH before implement unlock.
+- After analyze PASS: PO unlocks implement fan-out under MOH-350.
 - **Scope lock (plan In):** Box/Shell backends; computerUse-class subagents; settings/chrome polish toward Grok-easy.
-- **Clarify + plan locks (honor in tasks):** Global Settings → **Computer**; rows **Shell** + **Computer use**; computerUse Pass = screenshot-only (or equiv.) + parent handoff; Box readiness = clear not-ready/starting ≠ ready; Path A seams; evidence slices `verifier/evidence/shell-box/`, `computer-use/`, `settings/`.
+- **Clarify + plan + tasks locks (honor in analyze):** Global Settings → **Computer**; rows **Shell** + **Computer use**; computerUse Pass = screenshot-only (or equiv.) + parent handoff; Box readiness = clear not-ready/starting ≠ ready; Path A seams; evidence slices `verifier/evidence/shell-box/`, `computer-use/`, `settings/`.
 - **Out:** Treating “Verifier” as a P7 feature — Verifier already gates every phase. Inventory items listed as program Out until a later named phase amends the plan (voice, draft-first send-on-behalf, group channels, user machines, learn-from-demo, billing chrome, full skill pack, pixel Grok).
 - **Exit (Verifier-provable):** one local Shell/box tool path proven; one computerUse-class subagent path proven; settings rows required for those daily paths present (chrome polish ≠ Verifier substitute).
 - **SO 11+12** — GUI recipes need desktop screenshots/recordings committed under `verifier/evidence/` + PR embeds.
 - Lead does **not** invent a second P7 epic or child T### ids. This living update is docs only — **no product code**.
 
-## Phase 7 active (tasks)
+## Phase 7 active (analyze)
 
-1. **DH Spec** — **Go** on tasks (MOH-354) → `specs/007-box-subagent-settings/`.
+1. **DH Spec** — **Go** on analyze (MOH-355) → `specs/007-box-subagent-settings/`.
 2. **DH Lead** — This living gate; Status / Next gate / Owners; no feature code; epic MOH-350 bound.
 3. **PO** — Orchestration; ship/no-ship on later gates; no second epic.
-4. **DH Architect** — Idle unless Spec needs seam clarification during tasks.
-5. **DH Runtime / Electron / Verifier** — **Idle** until after tasks→analyze (or as later gates unlock).
+4. **DH Architect** — Idle unless Spec needs seam clarification during analyze.
+5. **DH Runtime / Electron / Verifier** — **Idle** until after analyze PASS (or as later gates unlock).
 
 ## Owners / next
 
 | Role | Action |
 |------|--------|
-| **DH Spec** | **Go** — Spec Kit tasks (MOH-354) → `specs/007-box-subagent-settings/` |
+| **DH Spec** | **Go** — Spec Kit analyze (MOH-355) → `specs/007-box-subagent-settings/` |
 | **DH Lead** | This living gate; epic MOH-350; no feature code |
 | **PO Assistant** | Orchestration under MOH-350; no second epic invent |
-| **DH Architect** | Idle unless Spec needs seam clarification during tasks |
-| **DH Runtime** | Idle until after tasks→analyze |
-| **DH Electron** | Idle until after tasks→analyze |
-| **DH Verifier** | Idle until after tasks→analyze |
+| **DH Architect** | Idle unless Spec needs seam clarification during analyze |
+| **DH Runtime** | Idle until after analyze PASS |
+| **DH Electron** | Idle until after analyze PASS |
+| **DH Verifier** | Idle until after analyze PASS |
 
 ## Blockers
 
-None. P7 epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress; specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) Done (#228); clarify [MOH-352](https://linear.app/momadhoun/issue/MOH-352/p7-spec-kit-clarify-007-box-subagent-settings) Done (#230 @ `3c232d67df`); plan [MOH-353](https://linear.app/momadhoun/issue/MOH-353/p7-spec-kit-plan-007-box-subagent-settings) Done (#232 @ `da8184f1b9`); tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354/p7-spec-kit-tasks-007-box-subagent-settings) In Progress. Hard gate before implement: finish Spec Kit tasks→analyze.
+None. P7 epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress; specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) Done (#228); clarify [MOH-352](https://linear.app/momadhoun/issue/MOH-352/p7-spec-kit-clarify-007-box-subagent-settings) Done (#230 @ `3c232d67df`); plan [MOH-353](https://linear.app/momadhoun/issue/MOH-353/p7-spec-kit-plan-007-box-subagent-settings) Done (#232 @ `da8184f1b9`); tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354/p7-spec-kit-tasks-007-box-subagent-settings) Done (#234 @ `ea4a79d857`); analyze [MOH-355](https://linear.app/momadhoun/issue/MOH-355/p7-spec-kit-analyze-007-box-subagent-settings) In Progress. Hard gate before implement: finish Spec Kit analyze (0 CRITICAL/HIGH).
