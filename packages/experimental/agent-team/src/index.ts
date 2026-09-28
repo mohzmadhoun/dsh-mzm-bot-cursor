@@ -1079,12 +1079,14 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Connector authenticate (P6 T011 / T012 / US1 T018).
+   * Lead-authorized Host Connector authenticate (P6 T011 / T012 / US1 T018 / US4 T029).
    * Stores secret in Host credentials only; binds Pass MCP fixture tools when ready.
-   * Chat-paste is not the primary auth path — secret enters via this Host credential seam (FR-002/008).
+   * Chat-paste is not the primary auth path — secret enters via this Host credential
+   * seam (FR-002/008). Journal / session-log / exportable dumps receive the
+   * value-free `credentialKey` address only (FR-007).
    * @param caller - exact live Lead Agent.
    * @param request - connector id, secret, and cancellation.
-   * @returns Host-owned Connector projection after auth ready.
+   * @returns Host-owned Connector projection after auth ready (never embeds secret).
    */
   async authenticateConnector(
     caller: Agent,
@@ -1122,6 +1124,7 @@ export class TeamService extends TypertRemoteService {
           'TEAM_INVALID_ARGUMENT',
         )
       }
+      // Credential seam owns the value; journal row below stores address only (US4 T029).
       const key = await storeConnectorSecret(this.ctx, connectorId, secret)
       const row: ConnectorRecord = {
         ...current,

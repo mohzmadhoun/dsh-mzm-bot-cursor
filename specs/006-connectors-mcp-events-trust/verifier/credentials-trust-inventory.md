@@ -106,7 +106,7 @@ Silent fail as “deny” is **rejected** by research R4.
 | Secret storage | Host credential seam only |
 | Session log / export | Must not embed plaintext connector tokens/passwords/API keys |
 | Describe APIs | Already value-free — product must not invent dump fields that reintroduce secrets |
-| Evidence | US4 dump-inspection recipe (T030) — may be non-GUI log/artifact |
+| Evidence | Host dump-absence tests (T029) + US4 dump-inspection recipe (T030) — may be non-GUI log/artifact |
 
 ---
 
@@ -132,7 +132,7 @@ Silent fail as “deny” is **rejected** by research R4.
 | Approval service | Yes | T026 gate wiring |
 | Host HTTP answerer for Desktop | Partial / product gap | T027 Client + Host path |
 | Standing `never` policy | Yes | Usable for deny Pass |
-| Secrets-absent dump proof | No recipe yet | T029 / T030 |
+| Secrets-absent dump proof | Host Path A tests (T029: `connector-secrets-dump.spec.ts`) | T030 Verifier Scenario 4 recipe |
 
 ---
 
