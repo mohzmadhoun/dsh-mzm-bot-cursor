@@ -1,12 +1,12 @@
 T024 Client event-routine UI / Scenario 2 (SC-002 · SC-008) — DH Verifier
 =========================================================================
 Verdict: Pass
-Stamp: 2026-09-28 · tip cursor/p6-us2-client-event-fe1d @ b516a61720
+Stamp: 2026-09-28 · tip cursor/p6-us2-client-event-fe1d @ 8879f7141e
   · rebases PR #212 tip a294bc770f onto origin/master (Host #213 + T025 recipe)
   · Desktop DISPLAY=:1 CDP 9222 · Host inspect 9230 · DSH Local Build (Electron)
   · launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
   · client-ui-agent-team lib/client.js rebundled (tsdown) after rebase
-Product tip under test: 7d6ae2f75a (rebased T024 Client) — Host APIs from #213 @ b516a61720
+Product tip under test: 7d6ae2f75a (rebased T024 Client) — Host APIs from #213 @ 8879f7141e
 Linear: Epic MOH-281 · T024 Client US2 · recipe MOH-323 / T025
 Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-2-event-routine.md
 
@@ -73,10 +73,10 @@ Claims
 - FR-014 desktop visual: **measured**
 - FR-015 commit under scenario-2/: **measured** (this stamp)
 - FR-015 PR HTML embeds: **inferred** until product-owner assistant updates PR #212 body
-- PR #212 base rebase onto master+Host: **measured** on this verify tip (product branch still CONFLICTING until republished)
+- PR #212 rebase onto master+Host: **measured** (MERGEABLE after republish; tip includes Host #213 + evidence)
 
 Scope lock
 ----------
 Does NOT merge. Leave Linear In Progress until PO merges GUI evidence + SO12 embeds.
 Verifier does not mark Linear Done. Epic MOH-281 US2 Client T024 Scenario 2 Pass stamped.
-Blockers: none for Pass stamp; PO must embed SO12 paths on PR #212 and republish rebased tip if product branch still dirty vs master.
+Blockers: none for Pass stamp; PO must embed SO12 /opt/cursor/artifacts paths in PR #212 body.
