@@ -510,5 +510,79 @@ for (const backend of backends) {
       await rootHandle.dispose()
       await second.dispose()
     })
+
+    it('US4 T023: listMemories projects durable MemoryProjection kinds across Host restart', {
+      timeout: PERSISTENCE_TEST_TIMEOUT_MS,
+    }, async () => {
+      const storageRoot = mkdtempSync(join(tmpdir(), `dsh-team-memory-${backend.name.toLowerCase()}-`))
+      roots.push(storageRoot)
+      const leadId = SessionId(`${backend.name.toLowerCase()}-memory-lead`)
+      const first = await stack(backend, storageRoot, [
+        textResponse('memory restart create'),
+      ])
+      const lead = await first.ctx.agentLoop.create(leadId, { provider: 'mock', model: 'mock' })
+      const bot = await first.ctx.agentTeams.createBot(lead, {
+        displayName: 'Recall Bot',
+        modelSelection: { provider: 'mock', model: 'recall-bot' },
+        signal: SIGNAL,
+      })
+      await vi.waitFor(() => { expect(first.ctx.agents.get(bot.id)).toBeUndefined() }, { timeout: 5_000 })
+
+      const profile = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'profile',
+        layer: 'agent',
+        botId: bot.id,
+        content: 'Recall prefers UTC',
+        signal: SIGNAL,
+      })
+      const log = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'log',
+        layer: 'user',
+        botId: null,
+        content: 'Shipped recall log across restart',
+        signal: SIGNAL,
+      })
+      const note = await first.ctx.agentTeams.writeMemory(lead, {
+        kind: 'note',
+        layer: 'agent',
+        botId: bot.id,
+        content: 'Curated recall note fact',
+        signal: SIGNAL,
+      })
+      const before = first.ctx.agentTeams.listMemories(lead, { botId: bot.id, signal: SIGNAL }).memories
+      expect(before).toEqual([profile.memory, log.memory, note.memory])
+      expect(new Set(before.map(row => row.kind))).toEqual(new Set(['profile', 'log', 'note']))
+      await first.ctx.sessions.flush(lead.session)
+      await first.dispose()
+
+      const second = await stack(backend, storageRoot, [])
+      const resumed = await second.ctx.agents.resume({
+        resumeSessionId: leadId,
+        agentOptions: { provider: 'mock', model: 'mock' },
+      })
+      await vi.waitFor(() => {
+        expect(durable(resumed.agent).members.some(row => row.id === bot.id && row.phase === 'active'))
+          .toBe(true)
+      }, { timeout: 5_000 })
+
+      const after = second.ctx.agentTeams.listMemories(resumed.agent, {
+        botId: bot.id,
+        signal: SIGNAL,
+      }).memories
+      expect(after).toEqual([profile.memory, log.memory, note.memory])
+      expect(after.map(row => row.kind)).toEqual(['profile', 'log', 'note'])
+      expect(after.map(row => row.content)).toEqual([
+        'Recall prefers UTC',
+        'Shipped recall log across restart',
+        'Curated recall note fact',
+      ])
+      // Transcript dump is not Pass — assert Host catalog projection only.
+      expect(after.every(row => row.memoryId.startsWith('memory-'))).toBe(true)
+      const view = await second.ctx.agentTeams.remoteView(resumed.agent, SIGNAL)
+      expect(view.memories).toEqual([profile.memory, log.memory, note.memory])
+
+      await resumed.dispose()
+      await second.dispose()
+    })
   })
 }

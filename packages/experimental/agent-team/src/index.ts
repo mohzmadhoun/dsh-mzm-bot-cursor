@@ -26,6 +26,11 @@ import {
 import { readPersistedSession } from './persisted.ts'
 import { projectMailboxHandoffs, projectMemory, projectMemories, projectRoutine, projectRoutines, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
 import {
+  bindTeammateMemoryRecall,
+  composeMemoryRecall,
+  type MemoryBindRef,
+} from './memory-bind.ts'
+import {
   bindTeammateSkillInstructions,
   composeSkillInstructions,
   type SkillBindRef,
@@ -164,6 +169,12 @@ export {
   composeSkillInstructions,
 } from './skill-bind.ts'
 export type { SkillBindRef } from './skill-bind.ts'
+export {
+  MEMORY_RECALL_SECTION,
+  bindTeammateMemoryRecall,
+  composeMemoryRecall,
+} from './memory-bind.ts'
+export type { MemoryBindRef } from './memory-bind.ts'
 export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -217,6 +228,8 @@ export class TeamService extends TypertRemoteService {
   private readonly personaBinds = new Map<SessionId, PersonaBindRef>()
   /** Live teammate skill-instruction refs for FR-014 bind updates after Host attach. */
   private readonly skillBinds = new Map<SessionId, SkillBindRef>()
+  /** Live teammate memory-recall refs for FR-016 bind updates after Host write. */
+  private readonly memoryBinds = new Map<SessionId, MemoryBindRef>()
   /** Disposers for Host-authored runtime skill registrations (re-register on update). */
   private readonly userSkillRegistrations = new Map<string, () => void>()
   /** In-flight Host Routine fires keyed by routineId (dedupe concurrent ticker ticks). */
@@ -265,6 +278,7 @@ export class TeamService extends TypertRemoteService {
       this.bindTeammateModelSelection(agent)
       this.bindTeammatePersona(agent)
       this.bindTeammateSkillInstructions(agent)
+      this.bindTeammateMemoryRecall(agent)
       this.scheduleRecovery(agent)
     })
     ctx.on('agent/status', ({ agent }) => {
@@ -709,6 +723,7 @@ export class TeamService extends TypertRemoteService {
    * so profile, log, and note are distinguishable on list/view (SC-001…SC-003).
    * Enforces layer/`botId` rules (agent requires active bot; user requires null/absent botId).
    * Kinds are orthogonal to layers (FR-017). Bot-tool write is not required for Pass (FR-015).
+   * After commit, refreshes live `agent-teams:memory-recall` binds for eligible bots (US4 T024 / FR-016).
    * Electron Main must not invent memory records — Host owns the durable write (research R1).
    * Not chat transcript (research R6).
    * @param caller - exact live Lead Agent.
@@ -767,13 +782,15 @@ export class TeamService extends TypertRemoteService {
       })
       return row
     })
+    this.refreshMemoryBindsAfterWrite(root, memory)
     return { memory: projectMemory(memory) }
   }
 
   /**
-   * Project Host memories for browse / recall (P5 FR-007 / US5 / T007–T008).
+   * Project Host memories for browse / recall (P5 FR-004/005 / FR-007 / US4 T023 / US5 / T007–T008).
    * When `botId` is set: that bot’s agent-layer rows plus all account-wide user rows.
    * When omitted: full Host catalog. Host journal SoT only — never Electron Main or transcript.
+   * Rows survive Host child restart via Lead Session `team/memory` replay; kinds stay distinguishable.
    * @param caller - exact live Team member.
    * @param request - optional bot id and cancellation.
    * @returns Host Memory projections for the requested scope.
@@ -1820,6 +1837,52 @@ export class TeamService extends TypertRemoteService {
       bodies.push(definition?.content)
     }
     return composeSkillInstructions(bodies)
+  }
+
+  /**
+   * Bind one teammate Agent's eligible Host Memory catalog rows into system-prompt assembly (FR-016).
+   * Lead Agents and non-Team children are left unbound. Empty catalog contributes no prose.
+   * Cold resume recomposes from the durable Lead journal via {@link refreshTeammateMemoryBind}.
+   * @param agent - newly created or resumed exact live Agent.
+   */
+  private bindTeammateMemoryRecall(agent: Agent): void {
+    const membership = this.roster.tryMembership(agent)
+    if (membership === undefined || membership.role !== 'teammate') return
+    const ref: MemoryBindRef = { current: '' }
+    this.memoryBinds.set(agent.id, ref)
+    bindTeammateMemoryRecall(agent, ref, () => {
+      this.memoryBinds.delete(agent.id)
+    })
+    this.refreshTeammateMemoryBind(agent.id, membership.root)
+  }
+
+  /**
+   * Push eligible catalog rows onto live Agent binds after a Host memory write.
+   * Agent-layer writes refresh that bot only; user-layer writes refresh every live teammate bind.
+   * @param root - exact live Lead owning the catalog.
+   * @param memory - newly committed Host Memory row.
+   */
+  private refreshMemoryBindsAfterWrite(root: Agent, memory: MemoryRecord): void {
+    if (memory.layer === 'agent') {
+      if (memory.botId === null) return
+      this.refreshTeammateMemoryBind(memory.botId, root)
+      return
+    }
+    for (const botId of this.memoryBinds.keys()) {
+      this.refreshTeammateMemoryBind(botId, root)
+    }
+  }
+
+  /**
+   * Recompose eligible Host Memory rows onto the live Agent bind when the Bot is activated.
+   * Cold resume and Host `writeMemory` refresh through this path so subsequent turns see new facts.
+   * @param botId - teammate Session identity.
+   * @param root - exact live Lead owning the catalog.
+   */
+  private refreshTeammateMemoryBind(botId: SessionId, root: Agent): void {
+    const existing = this.memoryBinds.get(botId)
+    if (existing === undefined) return
+    existing.current = composeMemoryRecall(this.journal.state(root).memories, botId)
   }
 
   /** Reconcile roster provisioning before retrying that member's pending mailbox. */

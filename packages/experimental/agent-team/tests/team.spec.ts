@@ -2233,6 +2233,98 @@ describe('Team Remote API', () => {
     })
   })
 
+  it('US4 T024: binds curated MemoryRecord into agent-teams:memory-recall on subsequent turns', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('memory recall create a'),
+      textResponse('memory recall create b'),
+      textResponse('memory recall turn a'),
+      textResponse('memory recall turn b'),
+      textResponse('memory recall live update'),
+    ])
+    const botA = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Recall A',
+      modelSelection: { provider: 'mock', model: 'recall-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, botA.id)
+    const botB = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Recall B',
+      modelSelection: { provider: 'mock', model: 'recall-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, botB.id)
+
+    const agentFact = 'Alpha prefers UTC for recall inject'
+    const userFact = 'Account timezone America/New_York'
+    const peerFact = 'Beta private agent memory'
+    await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: botA.id,
+      content: agentFact,
+      signal: SIGNAL,
+    })
+    await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: userFact,
+      signal: SIGNAL,
+    })
+    await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: botB.id,
+      content: peerFact,
+      signal: SIGNAL,
+    })
+
+    const followUp = await ctx.agentTeams.sendMessage(lead, {
+      target: botA.name,
+      content: content('second turn with memory recall'),
+      signal: SIGNAL,
+    })
+    expect(followUp.status).toBe('accepted')
+    const liveA = await waitRunning(ctx, botA.id)
+    const promptA = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(liveA)))
+    expect(promptA).toContain(agentFact)
+    expect(promptA).toContain(userFact)
+    expect(promptA).not.toContain(peerFact)
+    expect((await ctx.systemPrompt.assemble(assembleContextFor(liveA))).sections
+      .some(section => section.name === 'agent-teams:memory-recall'
+        && section.text.includes(agentFact)))
+      .toBe(true)
+
+    // Live Host write refreshes the mutable bind without requiring Agent recreate.
+    const liveNote = 'Live note after bind'
+    await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: botA.id,
+      content: liveNote,
+      signal: SIGNAL,
+    })
+    const livePrompt = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(liveA)))
+    expect(livePrompt).toContain(liveNote)
+    expect(livePrompt).toContain(agentFact)
+    await waitNoAgent(ctx, botA.id)
+
+    // Bot B must not gain A's agent-layer rows solely from A's save (ADR / US5).
+    const wakeB = await ctx.agentTeams.sendMessage(lead, {
+      target: botB.name,
+      content: content('wake peer for memory isolation'),
+      signal: SIGNAL,
+    })
+    expect(wakeB.status).toBe('accepted')
+    const liveB = await waitRunning(ctx, botB.id)
+    const promptB = renderPrompt(await ctx.systemPrompt.assemble(assembleContextFor(liveB)))
+    expect(promptB).toContain(peerFact)
+    expect(promptB).toContain(userFact)
+    expect(promptB).not.toContain(agentFact)
+    expect(promptB).not.toContain(liveNote)
+    await waitNoAgent(ctx, botB.id)
+  })
+
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
       textResponse('routine validate a'),
