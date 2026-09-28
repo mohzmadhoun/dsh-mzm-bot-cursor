@@ -48,7 +48,7 @@
 | 4 | **MCP fixture bind** | T010 | Ready auth registers `ctx.tools` via `dsh-mcp-client` (`verifier-fixture` / `mcp__verifier_fixture__ping`) | `bindPassConnectorMcpTools`; same vitest log | Pass |
 | 5 | **Credential seam** | T011 | Secrets in Host `ctx.credentials`; describe value-free (FR-007) | `describeConnectorCredential` / `storeConnectorSecret`; same vitest log | Pass |
 | 6 | **Host HTTP/WS Remotes** | T012 | Catalog/install/auth/describe + event `createRoutine` Remotes; `TeamView.connectors` | `index.ts` / `client.ts` / `projection.ts`; [vitest-team-routines.log](./evidence/foundation-host/vitest-team-routines.log) | Pass |
-| 7 | **Electron thin shell** | T013–T014 | Forbidden IPC + `no-electron-connectors-events-trust-bus` | master #206 | Pass |
+| 7 | **Electron thin shell** | T013–T014 · T037 reconfirm | Forbidden IPC + `no-electron-connectors-events-trust-bus` | master #206 · [p6-t037-electron-bus.log](./evidence/foundation-host/p6-t037-electron-bus.log) (**3 passed**) | Pass |
 | 8 | **B1 harness doc** | T015 | Webhook ingress → match event routines → existing-bot wake (not new-Session) | [webhook-harness-b1.md](./webhook-harness-b1.md) | Pass |
 
 **Scope lock:** This Pass does **not** mark SC-001…SC-008 Done. Scenario recipes and product US1–US5 implementation remain open. US fan-out may begin after this stamp lands on master.
