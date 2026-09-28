@@ -114,8 +114,9 @@ export function requiredScheduleExpr(value: string): string {
 }
 
 /**
- * Normalize Host memory content (P5 FR-001…003 / T006).
- * Empty / whitespace-only content rejects write without persisting.
+ * Normalize Host memory content (P5 FR-001…003 / T006 / US1 T014).
+ * Empty / whitespace-only content rejects write without persisting
+ * (`content must be non-empty` — clear Client-visible Remote reason).
  * @param value - raw content from Host write.
  * @returns trimmed non-empty curated fact text.
  */

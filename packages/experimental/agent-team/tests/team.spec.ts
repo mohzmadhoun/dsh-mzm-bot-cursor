@@ -1909,6 +1909,102 @@ describe('Team Remote API', () => {
     ])
   })
 
+  it('US1 T014: writeMemory kind=profile validates non-empty content, rejects empty, persists on Host catalog', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('profile validate a'),
+      textResponse('profile validate b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Profile Alpha',
+      modelSelection: { provider: 'mock', model: 'profile-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+
+    // Empty / whitespace-only profile content rejects without writing (FR-001 / SC-001).
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '   \t\n  ',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  ',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/content must be non-empty/) },
+    })
+    expect(ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories)
+      .toEqual([])
+
+    // Non-empty profile persists on Host catalog (agent layer + account-wide user layer).
+    const agentProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  Prefers concise answers  ',
+      signal: SIGNAL,
+    })
+    expect(agentProfile.memory).toMatchObject({
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Prefers concise answers',
+    })
+    const userProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'user',
+      botId: null,
+      content: 'Account prefers UTC',
+      signal: SIGNAL,
+    })
+    expect(userProfile.memory).toMatchObject({
+      kind: 'profile',
+      layer: 'user',
+      botId: null,
+      content: 'Account prefers UTC',
+    })
+
+    // Leave/return without restart: list + view still show the same curated profile rows.
+    const listed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(listed).toEqual([agentProfile.memory, userProfile.memory])
+    expect(listed.every(row => row.kind === 'profile')).toBe(true)
+    const remoteList = await ctx.agentTeams.remoteListMemories(lead, { botId: alpha.id }, SIGNAL)
+    expect(remoteList).toMatchObject({ ok: true, value: { memories: listed } })
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.memories).toEqual([agentProfile.memory, userProfile.memory])
+
+    // Remote success path for profile write (FR-015: Host Remote write — bot-tool not required).
+    const remoteWrite = await ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Second profile fact',
+    }, SIGNAL)
+    expect(remoteWrite).toMatchObject({
+      ok: true,
+      value: {
+        memory: {
+          kind: 'profile',
+          layer: 'agent',
+          botId: alpha.id,
+          content: 'Second profile fact',
+        },
+      },
+    })
+  })
+
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
       textResponse('routine validate a'),

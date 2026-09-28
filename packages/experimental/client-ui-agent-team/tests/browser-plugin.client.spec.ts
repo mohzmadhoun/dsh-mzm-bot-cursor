@@ -66,6 +66,7 @@ async function bench(options: {
     handoffs: [],
     skills: [],
     routines: [],
+    memories: [],
   }
   ctx.provide('remote.agentTeams', {
     view: (...args: unknown[]) => {
