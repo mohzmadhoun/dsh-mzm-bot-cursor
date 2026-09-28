@@ -1,0 +1,75 @@
+T033 Verifier Scenario 5 full replay (SC-007) + T035 bus — DH Verifier
+=======================================================================
+Verdict: Pass (composite SC-007 — time-boxed: cite Scenario 1–3 Pass stamps
+         on master + fresh Desktop smoke + T035 bus green + non-goals spotcheck)
+Stamp: 2026-09-28
+Product tip: origin/master @ 36bbe93a50 (#194 polish on tip; #195 Scenario 3)
+Evidence tip: cursor/p5-t033-t035-polish-verify-fe1d (branch tip)
+Linear: MOH-271 (T033) · MOH-273 (T035) · Epic MOH-228 — left In Progress (PO closes after merge)
+Recipe: specs/005-memory-productization/verifier/scenario-5-full-replay.md
+Evidence home: specs/005-memory-productization/verifier/evidence/scenario-5/
+
+Composite rows
+--------------
+[x] Foundational Pass (T013) — Pass (README stamp + evidence/foundation-host/)
+[x] T035 no-electron-memory-bus — Pass (3/3) · vitest-electron-bus.log
+    host-protocol / ipc exclusion comments hold (measured)
+[x] Scenario 1 write kinds (T016/T019/T022) — Pass
+    evidence/scenario-1/ VERDICT + FR-011 media (profile/log/note)
+[x] Scenario 2 recall after restart (T026) — Pass
+    evidence/scenario-2/ VERDICT + FR-011 media
+[x] Scenario 3 layers (T030) — Pass
+    evidence/scenario-3/ VERDICT + FR-011 media (master #195)
+[x] Scenario 4 non-goals (T031) — Pass
+    verifier/non-goals.md + evidence/non-goals/ (master #194)
+    · contracts/non-goals.md · transcript-not-memory.md · host-protocol exclusions
+    · no rewrite of specs/001–004 · non-goals-spotcheck.log
+    · T035 bus reconfirm (this stamp)
+[x] SC-007 Desktop smoke — Pass (Agent Team + memory surface live)
+    00-agent-team-open-sc007.png · 01-memory-surface-sc007.png
+    · panel-state-sc007.json · p5-t033-sc007-smoke-cdp.log
+[x] SC-007 full composite Pass — prior Scenario 1–3 media + smoke + bus satisfy recipe
+
+Supporting logs (this stamp)
+----------------------------
+  replay-pointer.log
+  vitest-electron-bus.log (3 passed)
+  vitest-foundations.log
+  non-goals-spotcheck.log
+  p5-t033-sc007-smoke-cdp.log
+  VERDICT.txt (this file)
+
+SO11 mirrors (this PR)
+----------------------
+  /opt/cursor/artifacts/p5-t033-t035/00-agent-team-open-sc007.png
+  /opt/cursor/artifacts/p5-t033-t035/01-memory-surface-sc007.png
+  /opt/cursor/artifacts/p5-t033-t035/p5-t033-sc007-smoke-cdp.log
+  /opt/cursor/artifacts/p5-t033-t035/vitest-electron-bus.log
+  /opt/cursor/artifacts/p5-t033-t035/non-goals-spotcheck.log
+  /opt/cursor/artifacts/p5-t033-t035/replay-pointer.log
+
+Cited prior SO11 GUI media (not re-captured)
+--------------------------------------------
+  scenario-1: /opt/cursor/artifacts/p5-t016-* · p5-t019-* · p5-t022-*
+    · in-repo evidence/scenario-1/
+  scenario-2: /opt/cursor/artifacts/p5-t026-* · in-repo evidence/scenario-2/
+  scenario-3: /opt/cursor/artifacts/p5-t030-* · in-repo evidence/scenario-3/
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p5-t033-t035/00-agent-team-open-sc007.png" alt="SC-007 Agent Team open" />
+  <img src="/opt/cursor/artifacts/p5-t033-t035/01-memory-surface-sc007.png" alt="SC-007 memory surface" />
+
+Claims
+------
+- Recipe + ordered path documented: **measured**
+- Foundational + SC-001…SC-005 + SC-010 + T035 bus: **measured**
+- Scenario 4 full T031 recipe file: **measured** (master #194) · contracts+spotcheck **measured**
+- SC-007 product composite: **measured** Pass (time-boxed cite + Desktop smoke)
+- FR-011/012 commit: **measured** · PR HTML embeds: **inferred** until PO updates body
+
+Scope lock
+----------
+Does NOT mark SC-007 Linear Done. Does NOT close MOH-271 / MOH-273 / epic MOH-228.
+Does NOT merge. Leave Done to PO after merge + SO12 embeds.
+Does NOT claim a fresh one-session full GUI replay of Scenarios 1–3; cites prior Pass stamps.

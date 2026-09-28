@@ -169,9 +169,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 - [x] T031 [P] Create Verifier non-goals recipe `specs/005-memory-productization/verifier/non-goals.md` covering SC-006 / SC-008…010 / [contracts/non-goals.md](./contracts/non-goals.md): no Grok chrome parity beyond ADR; no P6 connectors/MCP/events; no P7 Box/Shell; **no Electron memory bus**; transcript ≠ catalog; bot-tool / edit-delete optional; no kind→layer locks; no rewrite of `specs/001`–`004`
 - [x] T032 [P] Create evidence directory placeholders + README expectations under `specs/005-memory-productization/verifier/evidence/{scenario-1,scenario-2,scenario-3,scenario-4,non-goals,scenario-5}/` documenting required screenshot/recording filenames for FR-011/012 / SO 11+12 (scenario-4 may alias non-goals docs/absence)
-- [ ] T033 Add Verifier Scenario 5 full replay recipe `specs/005-memory-productization/verifier/scenario-5-full-replay.md` covering SC-007 (Scenarios 1–4 + foundational stamp) with mandatory desktop visual evidence for GUI slices
+- [x] T033 Add Verifier Scenario 5 full replay recipe `specs/005-memory-productization/verifier/scenario-5-full-replay.md` covering SC-007 (Scenarios 1–4 + foundational stamp) with mandatory desktop visual evidence for GUI slices
 - [x] T034 [P] Re-validate quickstart Scenario → recipe map in `specs/005-memory-productization/quickstart.md` and `specs/005-memory-productization/verifier/README.md` (owners + evidence paths)
-- [ ] T035 [P] Confirm `apps/desktop/tests/no-electron-memory-bus.spec.ts` + `apps/desktop/src/host-protocol.ts` exclusions still green after story work
+- [x] T035 [P] Confirm `apps/desktop/tests/no-electron-memory-bus.spec.ts` + `apps/desktop/src/host-protocol.ts` exclusions still green after story work
 - [x] T036 [P] Confirm no product edits to `specs/001-multi-model-bots/**`, `specs/002-identity-personas/**`, `specs/003-skills-ux/**`, or `specs/004-routines-cron/**` in this feature’s implement PRs — document check in `specs/005-memory-productization/verifier/README.md`
 - [x] T037 Polish: ensure no product code path documents Memory Pass as “transcript dump,” “Electron Main store,” or “Client-only SoT” in `apps/desktop-host/`, `packages/experimental/client-ui-agent-team/src/client/`, or `specs/005-memory-productization/verifier/README.md`
 

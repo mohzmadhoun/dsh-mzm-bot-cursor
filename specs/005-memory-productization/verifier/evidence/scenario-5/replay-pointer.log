@@ -1,0 +1,8 @@
+FOUNDATIONAL_GATE: README foundational Pass holds; electron bus re-green (T035)
+SCENARIO_1: evidence/scenario-1/ VERDICT Pass (T016/T019/T022) — cited
+SCENARIO_2: evidence/scenario-2/ VERDICT Pass (T026) — cited
+SCENARIO_3: evidence/scenario-3/ VERDICT Pass (T030) — cited
+SCENARIO_4: verifier/non-goals.md + evidence/non-goals/ (T031 #194) + T035 bus + spotcheck
+DESKTOP_SMOKE: 00-agent-team-open-sc007.png · 01-memory-surface-sc007.png · SC007_SMOKE_PASS
+UTC: 2026-09-28T09:55:00Z
+SHA_BASE: 36bbe93a50

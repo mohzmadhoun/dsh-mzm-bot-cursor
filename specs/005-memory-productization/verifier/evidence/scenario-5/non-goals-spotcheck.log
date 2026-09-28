@@ -1,0 +1,30 @@
+=== T033/T035 non-goals spotcheck (post-#194 rebase; contracts + T031 + guards) ===
+UTC: 2026-09-28T09:55:00Z
+SHA_BASE: 36bbe93a50 (origin/master after #194 polish)
+
+--- contracts/non-goals.md present ---
+PASS
+--- verifier/non-goals.md present (T031 #194) ---
+PASS
+--- transcript-not-memory.md present ---
+PASS
+--- evidence/non-goals/ present ---
+PASS
+--- host-protocol memory exclusions ---
+apps/desktop/src/ipc.ts:28: * There is no memory-catalog, memory-write, memory-list, memory-browse, memory-recall,
+apps/desktop/src/ipc.ts:29: * or memory-injection channel — Host owns the durable Memory catalog and inject path
+apps/desktop/src/host-protocol.ts:19: * Memory-catalog / memory-write / memory-list / memory-browse / memory-recall / memory-injection
+apps/desktop/src/host-protocol.ts:34: * pause-routine, resume-routine, cron-fire, last-run, memory-catalog, memory-write,
+apps/desktop/src/host-protocol.ts:35: * memory-list, memory-browse, memory-recall, or memory-injection control type on this channel.
+
+--- no rewrite of specs/001–004 in this tip vs master merge-base (expect empty at rebase start) ---
+changed_count=0
+PASS_NO_REWRITE
+
+--- Scenario 1–3 Pass stamps present ---
+scenario-1 VERDICT: Pass (T016/T019/T022) — file present
+scenario-2 VERDICT: Pass (T026) — file present
+scenario-3 VERDICT: Pass (T030) — file present
+
+--- T031 non-goals.md recipe ---
+PRESENT — polish docs #194 merged @ 36bbe93a50
