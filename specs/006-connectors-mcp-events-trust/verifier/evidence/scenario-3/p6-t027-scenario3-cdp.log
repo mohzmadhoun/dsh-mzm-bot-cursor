@@ -1,0 +1,40 @@
+page dsh-app://app/ What is triage in bug reports — DSH Local Build
+tip 057e0e9491 sha 057e0e94911650dca1452bb86370d82cf7362099 utc 2026-09-28T13:01:51.329Z display :1 cdp 9222
+setup connector ready connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2
+Step A permission gate PASS policy=ask
+Step B standing never PASS
+{
+  "tip": "057e0e94911650dca1452bb86370d82cf7362099",
+  "tipShort": "057e0e9491",
+  "utc": "2026-09-28T13:01:51.329Z",
+  "display": ":1",
+  "cdp": "9222",
+  "path": "B-standing-never",
+  "catalogId": "verifier-fixture",
+  "steps": {
+    "setup": {
+      "connectorId": "connector-9b78bdf7-2cce-42dd-bd11-630020917ac2",
+      "authState": "ready",
+      "toolsReady": true
+    },
+    "gate": {
+      "trustDenyVisible": true,
+      "policyBefore": "ask",
+      "standingAttr": "off"
+    },
+    "deny": {
+      "path": "standing-never",
+      "policyAfter": "never",
+      "standingAttr": "on"
+    },
+    "outcome": {
+      "outcome": "denied",
+      "blockedVisible": true,
+      "successVisible": false,
+      "detailText": "Blocked (denied)\nmcp__verifier_fixture__ping",
+      "deniedAttr": 1,
+      "blockedAttr": 1
+    }
+  },
+  "pass": true
+}

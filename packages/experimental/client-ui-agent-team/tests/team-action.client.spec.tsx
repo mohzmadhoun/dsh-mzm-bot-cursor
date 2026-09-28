@@ -18,8 +18,10 @@ import {
   type TeamAuthenticateConnectorActionResult, type TeamCreateBotActionResult,
   type TeamCreateRoutineActionResult, type TeamCreateSectionActionResult,
   type TeamDeleteBotActionResult, type TeamDescribeConnectorCredentialActionResult,
-  type TeamInstallConnectorActionResult, type TeamInvokeConnectorToolActionResult,
+  type TeamGetTrustPolicyActionResult, type TeamInstallConnectorActionResult,
+  type TeamInvokeConnectorToolActionResult,
   type TeamListConnectorCatalogActionResult, type TeamListConnectorsActionResult,
+  type TeamSetStandingDenyActionResult,
   type TeamListMemoriesActionResult, type TeamRenameBotActionResult,
   type TeamRenameSectionActionResult,
   type TeamSetAvatarActionResult, type TeamTaskActionResult,
@@ -419,6 +421,21 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
         },
       },
     }),
+    getTrustPolicy: () => Promise.resolve({
+      ok: true as const,
+      value: { ok: true as const, value: { policy: 'ask' as const } },
+    }),
+    setStandingDeny: () => Promise.resolve({
+      ok: true as const,
+      value: { ok: true as const, value: { policy: 'never' as const } },
+    }),
+    listPendingTrustApprovals: () => Promise.resolve([]),
+    answerTrustApproval: () => Promise.resolve({
+      requestId: 'none',
+      outcome: 'rejected' as const,
+      source: 'user_deny' as const,
+    }),
+    subscribePendingTrustApprovals: () => () => {},
     createTask: () => Promise.resolve(taskSuccess({ ...task, id: TASK_2, subject: 'New task' })),
     updateTask: () => Promise.resolve({
       ok: true,
@@ -4311,6 +4328,123 @@ describe('TeamAction', () => {
     expect(await screen.findByText('authenticateConnector offline (gateway/internal)')).toBeTruthy()
     expect(document.querySelector('[data-team-connector-auth-state="needs_auth"]')).toBeTruthy()
     expect(document.querySelector('[data-team-connector-tool-outcome]')).toBeNull()
+  })
+
+  it('enables standing deny via Host setStandingDeny and shows blocked tool outcome (T027)', async () => {
+    const ConnectorId = (id: string) => id as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId
+    const ready = {
+      connectorId: ConnectorId('connector-1'),
+      catalogId: 'verifier-fixture',
+      serverName: 'verifier_fixture',
+      displayName: 'Verifier Fixture Connector',
+      installState: 'installed' as const,
+      authState: 'ready' as const,
+      transport: 'stdio' as const,
+      credentialConfigured: true,
+      createdAt: 1,
+      updatedAt: 2,
+    }
+    let policy: 'ask' | 'never' = 'ask'
+    const getTrustPolicy = vi.fn((): Promise<TeamGetTrustPolicyActionResult> => Promise.resolve({
+      ok: true as const,
+      value: { ok: true as const, value: { policy } },
+    }))
+    const setStandingDeny = vi.fn((
+      _session: typeof SESSION,
+      input: { enabled: boolean },
+    ): Promise<TeamSetStandingDenyActionResult> => {
+      policy = input.enabled ? 'never' : 'ask'
+      return Promise.resolve({
+        ok: true as const,
+        value: { ok: true as const, value: { policy } },
+      })
+    })
+    const invokeConnectorTool = vi.fn((): Promise<TeamInvokeConnectorToolActionResult> => Promise.resolve({
+      ok: true as const,
+      value: {
+        ok: true as const,
+        value: {
+          toolCall: {
+            connectorId: ConnectorId('connector-1'),
+            toolName: 'mcp__verifier_fixture__ping',
+            outcome: 'denied' as const,
+            detail: 'standing never',
+          },
+        },
+      },
+    }))
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, connectors: [ready] },
+    })
+    render(<TeamAction {...props(actions({
+      load,
+      getTrustPolicy,
+      setStandingDeny,
+      invokeConnectorTool,
+      listConnectors: () => Promise.resolve({
+        ok: true as const,
+        value: { ok: true as const, value: { connectors: [ready] } },
+      }),
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.trustDeny)).toBeTruthy()
+    expect(document.querySelector('[data-team-trust-deny]')).toBeTruthy()
+    expect(await screen.findByText(zh.standingDenyInactive)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.standingDenyEnable }))
+    await waitFor(() => {
+      expect(setStandingDeny).toHaveBeenCalledWith(SESSION, { enabled: true })
+    })
+    expect(await screen.findByText(zh.standingDenyActive)).toBeTruthy()
+    expect(document.querySelector('[data-team-standing-deny="on"]')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorInvokeTool }))
+    expect(await screen.findByText(zh.connectorToolBlocked)).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-tool-outcome="denied"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-blocked]')).toBeTruthy()
+    expect(screen.queryByText(zh.connectorToolSuccess)).toBeNull()
+  })
+
+  it('answers Host HTTP approval deny card without Main bus (T027)', async () => {
+    let pending = [{
+      requestId: 'req-1',
+      toolName: 'mcp__verifier_fixture__ping',
+      reason: 'connector tool invoke requires approval',
+    }]
+    const listeners = new Set<(rows: typeof pending) => void>()
+    const listPendingTrustApprovals = vi.fn(async () => pending)
+    const answerTrustApproval = vi.fn(async (
+      _session: typeof SESSION,
+      input: { requestId: string; decision: 'deny' | 'allow' },
+    ) => {
+      pending = pending.filter(row => row.requestId !== input.requestId)
+      for (const listener of listeners) listener(pending)
+      return {
+        requestId: input.requestId,
+        outcome: 'rejected' as const,
+        source: 'user_deny' as const,
+      }
+    })
+    const subscribePendingTrustApprovals = vi.fn((listener: (rows: typeof pending) => void) => {
+      listeners.add(listener)
+      listener(pending)
+      return () => { listeners.delete(listener) }
+    })
+    render(<TeamAction {...props(actions({
+      listPendingTrustApprovals,
+      answerTrustApproval,
+      subscribePendingTrustApprovals,
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.approvalDenyCard)).toBeTruthy()
+    expect(document.querySelector('[data-team-approval-deny-card="req-1"]')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.approvalDenyReject }))
+    await waitFor(() => {
+      expect(answerTrustApproval).toHaveBeenCalledWith(SESSION, {
+        requestId: 'req-1',
+        decision: 'deny',
+      })
+    })
+    expect(await screen.findByText(zh.approvalDenyEmpty)).toBeTruthy()
   })
 
 })

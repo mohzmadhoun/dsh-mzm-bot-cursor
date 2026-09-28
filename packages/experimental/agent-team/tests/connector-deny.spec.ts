@@ -148,4 +148,16 @@ describe('P6 T026 Host connector tool deny path', () => {
     })
     expect(invoked.toolCall.detail).toMatch(/after-allow/)
   })
+
+  it('getTrustPolicy / setStandingDeny Remotes project standing never (T027 Host half)', async () => {
+    const { ctx, lead } = await setup([textResponse('deny policy remote')])
+    await readyConnector(ctx, lead)
+    const before = ctx.agentTeams.getTrustPolicy(lead, SIGNAL)
+    expect(before.policy).toBe('ask')
+    const set = ctx.agentTeams.setStandingDeny(lead, { enabled: true, signal: SIGNAL })
+    expect(set.policy).toBe('never')
+    expect(ctx.agentTeams.getTrustPolicy(lead, SIGNAL).policy).toBe('never')
+    const remoteSet = await ctx.agentTeams.remoteSetStandingDeny(lead, { enabled: false }, SIGNAL)
+    expect(remoteSet).toMatchObject({ ok: true, value: { policy: 'ask' } })
+  })
 })

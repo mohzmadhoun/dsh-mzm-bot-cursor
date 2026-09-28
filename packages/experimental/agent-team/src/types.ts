@@ -1130,6 +1130,27 @@ export interface InvokeConnectorToolResult {
 }
 
 /**
+ * Host trust / approval policy for connector tool gates (P6 US3 T027 / research R4).
+ * `never` = standing deny; `ask` = interactive answerer may prompt.
+ */
+export type TrustPolicy = 'ask' | 'never'
+
+/** Host getTrustPolicy business value. */
+export interface GetTrustPolicyResult {
+  readonly policy: TrustPolicy
+}
+
+/** Host setStandingDeny input — `enabled: true` → policy `never`. */
+export interface SetStandingDenyInput {
+  readonly enabled: boolean
+}
+
+/** Host setStandingDeny business value after policy write. */
+export interface SetStandingDenyResult {
+  readonly policy: TrustPolicy
+}
+
+/**
  * Host describe-connector-credential input (P6 T011).
  * Returns configured/writable facts only — never the secret value (FR-007).
  */

@@ -881,3 +881,42 @@
   color: var(--dsw-alias-label-primary);
   font-size: 11px;
 }
+
+.connectorToolBlocked {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-fill-reject-light, color-mix(in srgb, var(--dsw-alias-label-primary) 8%, transparent));
+  color: var(--dsw-alias-label-primary);
+  font-size: 11px;
+}
+
+.trustDenySection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+}
+
+.approvalDenyCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-fill-warning-light, color-mix(in srgb, var(--dsw-alias-label-primary) 6%, transparent));
+}
+
+.standingDenyActive {
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-weight: 600;
+}

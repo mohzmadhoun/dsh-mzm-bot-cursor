@@ -87,6 +87,10 @@ kind: "package-reference"
 
 打开面板时经 `agentTeams/listConnectorCatalog` 加载 Host 精简连接器目录，并从 `TeamView.connectors`（与 `listConnectors` 同一 Host 投影）加载已安装行。**连接器**库列出每个可安装条目（任一精简目录／Verifier 夹具——FR-017）；**安装**调用 Host `agentTeams/installConnector`。可用≠已安装。Host 目录为空或不可用时显示明确失败——绝不当作空列表成功。**认证**打开应用内密钥字段并调用 Host `agentTeams/authenticateConnector`（密钥仅存 Host 凭据库；不以聊天粘贴为主路径；不要求外部保险库）。`authState=ready` 后面板显示工具已绑定，以及**运行工具**控件，经 Host RPC 投影用户可见的成功／拒绝／错误结果（优先 `invokeConnectorTool`；否则在就绪确认后投影 Pass 夹具公共工具名）。Electron Main 不持有连接器目录、凭据或工具结果。
 
+### 拒绝连接器工具（站立拒绝或审批卡）
+
+连接器面包含 **信任／拒绝** 控件：**启用站立拒绝（never）** 调用 Host `agentTeams/setStandingDeny`（Host HTTP／WS），面板显示 Host 策略为 never。当 Host 返回 `outcome=denied` 时，运行工具会显示与成功不同的 **已阻止（拒绝）** 状态。当 Host 经 HTTP `approval/request` 瀑布投影待决审批时，Team **权限请求** 卡经同一 Host HTTP 回答者桥接拒绝／允许一次；Electron Main 不持有回答者或信任规则总线（P6 US3 T027／FR-006）。
+
 ### 在 Bot 面列出 Host 定时任务
 
 同一 **Bot 定时任务**面即 US2 信息面列表：每条 Host `RoutineProjection` 显示意图派生身份、**触发类型**（cron／event）、日程或事件族标签、进行中／已暂停状态，以及上次运行（或尚未运行）。行仅来自 Host `TeamView.routines`（与 `listRoutinesByBot` 同一 Host 目录投影）；会话 Schedule／`ui-schedule` 抬头目录不是 Pass 面。关闭再打开面板会重新加载 Host 状态，已列定时任务无需重建。Electron Main 不编造定时任务行。

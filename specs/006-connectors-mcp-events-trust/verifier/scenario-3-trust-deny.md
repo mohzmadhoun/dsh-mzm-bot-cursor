@@ -1,6 +1,6 @@
 # Scenario 3 — Denied permission
 
-**Status:** Recipe drafted — product SC Pass **not** stamped (FR-014/015 evidence pending US3 Host/Client Desktop path + Desktop run)
+**Status:** Product SC Pass **stamped** — Desktop Path B standing never · tip `bd9b86c084` (Client `d02d11fe30` + `$on` bind fix) · evidence under [evidence/scenario-3/](./evidence/scenario-3/)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host deny enforce via `dsh-user-approval` / standing never) · DH Client (approval/deny card or standing-deny control + blocked-state UI on Host HTTP)
 **Linear:** [MOH-326](https://linear.app/momadhoun/issue/MOH-326/t028-us3-verifier-scenario-3-trust-deny-recipe) · Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-events-trust)
 **Acceptance slice:** T028 — Verifier Scenario 3 recipe covering SC-003 (one deny with user-visible distinct blocked state) with mandatory FR-014/015 (standing orders **11** + **12**) desktop evidence under `verifier/evidence/scenario-3/`
@@ -16,7 +16,7 @@
 | SC coverage | SC-003 one deny · FR-006 user-deny **or** standing never · denial ≠ success |
 | FR-014 (SO 11) | Desktop screenshot(s) and/or short screen recording of the **real Desktop app** under `verifier/evidence/scenario-3/` — unit/jsdom alone **fails** |
 | FR-015 (SO 12) | Evidence **committed** on the PR branch under that path **and** embedded in the GUI PR body via absolute `/opt/cursor/artifacts/…` `<img>` / `<video controls>` — artifact page links alone **fail** |
-| Product SC stamp | **Deferred** — fill `evidence/scenario-3/VERDICT.txt` only after Desktop FR-014/015 media lands |
+| Product SC stamp | **Pass** — see `evidence/scenario-3/VERDICT.txt` (tip `bd9b86c084`) |
 
 ---
 
@@ -29,8 +29,8 @@
 | Architect Path A locks (T005) | R4 answerer plane | **measured:** [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md) |
 | Electron no-bus (T013/T014) | Seam honesty | **measured:** [#206](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/206) |
 | US1 connector tool path (T017–T020) | Prefer deny target = real connector tool | **measured:** Scenario 1 Desktop Pass under [evidence/scenario-1/](./evidence/scenario-1/) |
-| US3 Host deny enforce (T026) | SC-003 Host half | **inferred:** open until Runtime lands gate wiring + `outcome=denied` |
-| Client approval/deny UI (T027) | SC-003 desktop deny card / standing control | **inferred:** open until Client lands Host-HTTP answerer |
+| US3 Host deny enforce (T026) | SC-003 Host half | **measured:** on master (`eba9c0d98d` / #216) |
+| Client approval/deny UI (T027) | SC-003 desktop deny card / standing control | **measured:** tip `d02d11fe30` + boot fix `057e0e9491` · Desktop Pass |
 
 **Desktop prerequisites** (full Scenario 3 Pass): buildable Desktop (`apps/desktop`, `apps/desktop-host`) with ≥1 bot; a connector tool or trust-gated action that can raise a permission gate; user-deny card **or** standing deny/block control answering on Host HTTP/WS; clear blocked/denied chrome distinct from success; `DISPLAY` when Cloud Agent (`DISPLAY=:1`, `DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop`).
 
@@ -210,4 +210,4 @@ Blockers: none
 
 ## Evidence for PO / DH Lead
 
-**Recipe delivered (T028).** Product SC Pass **not** stamped. Foundational approval seam + no-Main-bus locks are on master; US1 connector tool path is Pass-stamped under Scenario 1. Full Scenario 3 Done waits on US3 Host/Client Desktop path (T026–T027) plus Verifier FR-014/015 desktop evidence using Steps A–C above. Placeholders under [evidence/scenario-3/](./evidence/scenario-3/) require SO 11+12 media before GUI Pass.
+**Product SC Pass stamped (T027 Desktop + T028 recipe).** Path B standing never on real Desktop (`DISPLAY=:1`). FR-014/015 media under [evidence/scenario-3/](./evidence/scenario-3/). Tip `057e0e9491` = Client `d02d11fe30` + unbound-`$on` boot fix. Host T026 on master. Embed SO11 mirrors in Client deny PR body. Verifier does **not** merge or mark Linear Done.

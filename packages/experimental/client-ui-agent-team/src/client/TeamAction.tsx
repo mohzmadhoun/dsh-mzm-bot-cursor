@@ -175,6 +175,59 @@ export type ConnectorToolInvokeResult = InvokeConnectorToolResult
 export type TeamInvokeConnectorToolActionResult =
   RemoteResult<BotIdentityMutationResult<InvokeConnectorToolResult>>
 
+/**
+ * Host trust policy for connector / approval gates (P6 US3 T027 / research R4).
+ * `never` = standing deny; `ask` = interactive answerer may prompt.
+ */
+export type TrustPolicy = 'ask' | 'never'
+
+/** Host getTrustPolicy business value (standing deny state). */
+export interface GetTrustPolicyResult {
+  readonly policy: TrustPolicy
+}
+
+/** Host setStandingDeny input — `enabled: true` maps to policy `never`. */
+export interface SetStandingDenyInput {
+  readonly enabled: boolean
+}
+
+/** Host setStandingDeny business value after policy write. */
+export interface SetStandingDenyResult {
+  readonly policy: TrustPolicy
+}
+
+/**
+ * One pending approval for the Team deny card (P6 US3 T027).
+ * Answered on Host HTTP via mount answerer bridge — never Electron Main.
+ */
+export interface PendingTrustApproval {
+  readonly requestId: string
+  readonly toolName: string
+  readonly reason?: string
+  readonly connectorId?: ConnectorId
+}
+
+/** Host/Client answerTrustApproval input (user deny or complementary allow-once). */
+export interface AnswerTrustApprovalInput {
+  readonly requestId: string
+  readonly decision: 'deny' | 'allow'
+}
+
+/** Host/Client answerTrustApproval result. */
+export interface AnswerTrustApprovalResult {
+  readonly requestId: string
+  readonly outcome: 'rejected' | 'allowed-once'
+  readonly source: 'user_deny' | 'user_allow'
+}
+
+/** Generated Remote result for getTrustPolicy. */
+export type TeamGetTrustPolicyActionResult =
+  RemoteResult<BotIdentityMutationResult<GetTrustPolicyResult>>
+
+/** Generated Remote result for setStandingDeny. */
+export type TeamSetStandingDenyActionResult =
+  RemoteResult<BotIdentityMutationResult<SetStandingDenyResult>>
+
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
   load: (sessionId: SessionId) => Promise<TeamActionResult<TeamView>>
@@ -211,6 +264,27 @@ export interface TeamActionInjected {
     sessionId: SessionId,
     input: InvokeConnectorToolInput,
   ) => Promise<TeamInvokeConnectorToolActionResult>
+  /** Host trust policy read (standing deny / ask) — Host HTTP only (P6 T027). */
+  getTrustPolicy: (sessionId: SessionId) => Promise<TeamGetTrustPolicyActionResult>
+  /** Host standing deny toggle — maps to approval policy never|ask (P6 T027). */
+  setStandingDeny: (
+    sessionId: SessionId,
+    input: SetStandingDenyInput,
+  ) => Promise<TeamSetStandingDenyActionResult>
+  /**
+   * Snapshot of pending Host approval prompts for the deny card.
+   * Populated by the Client mount Host-HTTP answerer bridge (approval/request).
+   */
+  listPendingTrustApprovals: (sessionId: SessionId) => Promise<readonly PendingTrustApproval[]>
+  /** Answer one pending approval on Host HTTP (user deny / allow-once). */
+  answerTrustApproval: (
+    sessionId: SessionId,
+    input: AnswerTrustApprovalInput,
+  ) => Promise<AnswerTrustApprovalResult>
+  /** Subscribe to pending approval card updates from the Host HTTP answerer bridge. */
+  subscribePendingTrustApprovals: (
+    listener: (approvals: readonly PendingTrustApproval[]) => void,
+  ) => () => void
   createTask: (sessionId: SessionId, input: {
     subject: string
     description: string
@@ -768,6 +842,8 @@ export function TeamAction({
   createRoutine, pauseRoutine, resumeRoutine, writeMemory, listMemories,
   listConnectorCatalog, listConnectors, installConnector, authenticateConnector,
   describeConnectorCredential, invokeConnectorTool,
+  getTrustPolicy, setStandingDeny, listPendingTrustApprovals, answerTrustApproval,
+  subscribePendingTrustApprovals,
   createTask, updateTask, openTeammate, openModelsSettings, t,
 }: TeamActionProps) {
   const [open, setOpen] = useState(false)
@@ -825,6 +901,17 @@ export function TeamAction({
   const [connectorToolOutcomes, setConnectorToolOutcomes] = useState<
     ReadonlyMap<ConnectorId, ConnectorToolOutcomeView>
   >(() => new Map())
+  /**
+   * Host trust policy (ask | never) for standing deny (P6 US3 T027).
+   * Null until first Host getTrustPolicy settles; unavailable when Remote fails.
+   */
+  const [trustPolicy, setTrustPolicy] = useState<TrustPolicy | null>(null)
+  /** True when Host trust Remotes failed or are missing (not silent success). */
+  const [trustPolicyUnavailable, setTrustPolicyUnavailable] = useState(false)
+  /** Pending Host HTTP approvals for the deny card (P6 US3 T027). */
+  const [pendingTrustApprovals, setPendingTrustApprovals] = useState<readonly PendingTrustApproval[]>(
+    [],
+  )
   /**
    * Session-local instructional bodies from successful upserts (edit prefill).
    * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
@@ -898,6 +985,9 @@ export function TeamAction({
     setAuthenticatingConnectorId(null)
     setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
     setConnectorToolOutcomes(new Map())
+    setTrustPolicy(null)
+    setTrustPolicyUnavailable(false)
+    setPendingTrustApprovals([])
     setAuthoredBodies(new Map())
     setSessionActiveSkills(new Set())
     setAvailableToAttach(new Set())
@@ -907,6 +997,13 @@ export function TeamAction({
     setEditDraft(EMPTY_DRAFT)
     setPendingTasks(new Set())
   }, [clearError, sessionId])
+
+  useEffect(() => {
+    return subscribePendingTrustApprovals((approvals) => {
+      setPendingTrustApprovals(approvals)
+    })
+  }, [subscribePendingTrustApprovals])
+
 
   const refresh = useCallback(async (): Promise<boolean> => {
     const requestedSession = sessionId
@@ -950,12 +1047,42 @@ export function TeamAction({
         setConnectorCatalog(catalogResult.value.value.catalog)
         setConnectorCatalogUnavailable(false)
       }
+      // Host trust policy (T027) — fail loud when Remotes unavailable.
+      const policyResult = await getTrustPolicy(requestedSession)
+      if (sessionRef.current !== requestedSession || refreshGeneration.current !== generation) {
+        return true
+      }
+      if (!policyResult.ok) {
+        setTrustPolicy(null)
+        setTrustPolicyUnavailable(true)
+        reportFailure(policyResult.error)
+      } else if (!policyResult.value.ok) {
+        setTrustPolicy(null)
+        setTrustPolicyUnavailable(true)
+        reportFailure(policyResult.value.error)
+      } else {
+        setTrustPolicy(policyResult.value.value.policy)
+        setTrustPolicyUnavailable(false)
+      }
+      const pending = await listPendingTrustApprovals(requestedSession)
+      if (sessionRef.current !== requestedSession || refreshGeneration.current !== generation) {
+        return true
+      }
+      setPendingTrustApprovals(pending)
       return true
     } else {
       reportFailure(result.error)
       return false
     }
-  }, [clearError, listConnectorCatalog, load, reportFailure, sessionId])
+  }, [
+    clearError,
+    getTrustPolicy,
+    listConnectorCatalog,
+    listPendingTrustApprovals,
+    load,
+    reportFailure,
+    sessionId,
+  ])
 
   /** Clarify lock 2 / FR-002: selecting a discovered skill makes it available to attach (no wizard). */
   const makeAvailableToAttach = useCallback((skillId: SkillId): void => {
@@ -1573,6 +1700,68 @@ export function TeamAction({
     }
   }, [clearError, invalidateRefresh, listConnectors, refresh, reportFailure, sessionId])
 
+  const settleStandingDeny = useCallback(async (
+    enabled: boolean,
+  ): Promise<TrustPolicy | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add('standing-deny'))
+    try {
+      const result = await setStandingDeny(requestedSession, { enabled })
+      if (sessionRef.current !== requestedSession) return undefined
+      if (!result.ok) {
+        reportFailure(result.error)
+        return undefined
+      }
+      if (!result.value.ok) {
+        reportFailure(result.value.error)
+        return undefined
+      }
+      const policy = result.value.value.policy
+      setTrustPolicy(policy)
+      setTrustPolicyUnavailable(false)
+      clearError()
+      await refresh()
+      if (sessionRef.current !== requestedSession) return undefined
+      return policy
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete('standing-deny')
+          return next
+        })
+      }
+    }
+  }, [clearError, invalidateRefresh, refresh, reportFailure, sessionId, setStandingDeny])
+
+  const settleAnswerTrustApproval = useCallback(async (
+    input: AnswerTrustApprovalInput,
+  ): Promise<AnswerTrustApprovalResult | undefined> => {
+    const requestedSession = sessionId
+    invalidateRefresh()
+    setPendingTasks(current => new Set(current).add(`answer-trust:${input.requestId}`))
+    try {
+      const answered = await answerTrustApproval(requestedSession, input)
+      if (sessionRef.current !== requestedSession) return undefined
+      clearError()
+      const pending = await listPendingTrustApprovals(requestedSession)
+      if (sessionRef.current !== requestedSession) return undefined
+      setPendingTrustApprovals(pending)
+      return answered
+    } finally {
+      if (sessionRef.current === requestedSession) {
+        setPendingTasks((current) => {
+          const next = new Set(current)
+          next.delete(`answer-trust:${input.requestId}`)
+          return next
+        })
+      }
+    }
+  }, [
+    answerTrustApproval, clearError, invalidateRefresh, listPendingTrustApprovals, sessionId,
+  ])
+
   const settleRoutineStatus = useCallback(async (
     routineId: RoutineId,
     operation: () => Promise<TeamPauseRoutineActionResult | TeamResumeRoutineActionResult>,
@@ -1978,6 +2167,24 @@ export function TeamAction({
    */
   const submitInvokeConnectorTool = async (connectorId: ConnectorId): Promise<void> => {
     await settleInvokeConnectorTool(connectorId, () => invokeConnectorTool(sessionId, { connectorId }))
+  }
+
+  /**
+   * Host setStandingDeny — standing never / ask (P6 US3 T027 / FR-006 Path B).
+   * Answers on Host HTTP only; Electron Main does not own the trust bus.
+   */
+  const submitStandingDeny = async (enabled: boolean): Promise<void> => {
+    await settleStandingDeny(enabled)
+  }
+
+  /**
+   * Host HTTP answerer deny/allow for the Team approval card (P6 US3 T027 Path A).
+   */
+  const submitAnswerTrustApproval = async (
+    requestId: string,
+    decision: AnswerTrustApprovalInput['decision'],
+  ): Promise<void> => {
+    await settleAnswerTrustApproval({ requestId, decision })
   }
 
   /**
@@ -2945,6 +3152,105 @@ export function TeamAction({
                   <h3>{t('connectors')}</h3>
                 </div>
                 <p className={css.hint}>{t('connectorsHint')}</p>
+                <div
+                  className={css.trustDenySection}
+                  data-team-trust-deny=""
+                  data-team-standing-deny-policy={trustPolicy ?? 'unknown'}
+                  data-team-standing-deny={trustPolicy === 'never' ? 'on' : 'off'}
+                >
+                  <div className={css.botSkillsHeader}>
+                    <span className={css.botSkillsLabel}>{t('trustDeny')}</span>
+                  </div>
+                  <p className={css.hint}>{t('trustDenyHint')}</p>
+                  {trustPolicyUnavailable
+                    ? (
+                      <div
+                        className={css.error}
+                        role="alert"
+                        data-team-standing-deny-unavailable=""
+                      >
+                        {t('standingDenyUnavailable')}
+                      </div>
+                    )
+                    : (
+                      <>
+                        <div
+                          className={trustPolicy === 'never' ? css.standingDenyActive : css.meta}
+                          data-team-standing-deny-status={trustPolicy ?? 'loading'}
+                        >
+                          {trustPolicy === 'never'
+                            ? t('standingDenyActive')
+                            : trustPolicy === 'ask'
+                              ? t('standingDenyInactive')
+                              : t('loading')}
+                          {trustPolicy !== null && (
+                            <span className={css.meta} data-team-trust-policy={trustPolicy}>
+                              {t(`trustPolicy.${trustPolicy}`)}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className={css.personaButton}
+                          data-team-standing-deny-toggle=""
+                          disabled={pendingTasks.has('standing-deny') || trustPolicy === null}
+                          onClick={() => {
+                            void submitStandingDeny(trustPolicy !== 'never')
+                          }}
+                        >
+                          {trustPolicy === 'never' ? t('standingDenyDisable') : t('standingDenyEnable')}
+                        </button>
+                      </>
+                    )}
+                  <div className={css.botSkillsHeader}>
+                    <span className={css.botSkillsLabel}>{t('approvalDenyCard')}</span>
+                  </div>
+                  <p className={css.hint}>{t('approvalDenyHint')}</p>
+                  {pendingTrustApprovals.length === 0
+                    ? (
+                      <div className={css.notice} data-team-approval-deny-empty="">
+                        {t('approvalDenyEmpty')}
+                      </div>
+                    )
+                    : pendingTrustApprovals.map((pending) => {
+                      const answerPending = pendingTasks.has(`answer-trust:${pending.requestId}`)
+                      return (
+                        <div
+                          key={pending.requestId}
+                          className={css.approvalDenyCard}
+                          data-team-approval-deny-card={pending.requestId}
+                          data-team-approval-deny-tool={pending.toolName}
+                        >
+                          <strong>{pending.reason ?? pending.toolName}</strong>
+                          <span className={css.meta}>{pending.toolName}</span>
+                          <div className={css.formActions}>
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              data-team-approval-deny-reject={pending.requestId}
+                              disabled={answerPending}
+                              onClick={() => {
+                                void submitAnswerTrustApproval(pending.requestId, 'deny')
+                              }}
+                            >
+                              {t('approvalDenyReject')}
+                            </button>
+                            <button
+                              type="button"
+                              className={css.personaButton}
+                              data-team-approval-deny-allow={pending.requestId}
+                              disabled={answerPending}
+                              onClick={() => {
+                                void submitAnswerTrustApproval(pending.requestId, 'allow')
+                              }}
+                            >
+                              {t('approvalDenyAllow')}
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
                 {connectorCatalogUnavailable
                   ? (
                     <div
@@ -3143,19 +3449,28 @@ export function TeamAction({
                                     className={
                                       toolOutcome.outcome === 'success'
                                         ? css.connectorToolSuccess
-                                        : css.connectorToolFailure
+                                        : toolOutcome.outcome === 'denied'
+                                          ? css.connectorToolBlocked
+                                          : css.connectorToolFailure
                                     }
                                     data-team-connector-tool-outcome-label={toolOutcome.outcome}
                                     data-team-connector-tool-name={toolOutcome.toolName}
+                                    {...toolOutcome.outcome === 'denied'
+                                      ? { 'data-team-connector-blocked': '' }
+                                      : {}}
                                   >
                                     {toolOutcome.outcome === 'success'
                                       ? <><IconCheckOutline14 /> {t('connectorToolSuccess')}</>
                                       : toolOutcome.outcome === 'denied'
-                                        ? t('connectorToolDenied')
+                                        ? t('connectorToolBlocked')
                                         : t('connectorToolError')}
                                     <span className={css.meta}>{toolOutcome.toolName}</span>
                                   </div>
-                                  <p className={css.hint}>{t('connectorToolOutcomeHint')}</p>
+                                  <p className={css.hint}>
+                                    {toolOutcome.outcome === 'denied'
+                                      ? t('connectorToolBlockedHint')
+                                      : t('connectorToolOutcomeHint')}
+                                  </p>
                                 </>
                               )}
                             </li>

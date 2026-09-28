@@ -107,6 +107,10 @@ import type {
   InvokeConnectorToolInput,
   InvokeConnectorToolRequest,
   InvokeConnectorToolResult,
+  GetTrustPolicyResult,
+  SetStandingDenyInput,
+  SetStandingDenyResult,
+  TrustPolicy,
   ListConnectorCatalogResult,
   ListConnectorsResult,
   ConnectorToolCall,
@@ -1243,6 +1247,49 @@ export class TeamService extends TypertRemoteService {
     return { toolCall }
   }
 
+
+  /**
+   * Read effective Host approval policy for standing deny (P6 US3 T027).
+   * When `ctx.approval` is absent, reports `ask` (pre-gate allow path).
+   * @param caller - exact live Team member.
+   * @param signal - cancellation.
+   * @returns current trust policy (`ask` | `never`).
+   */
+  getTrustPolicy(caller: Agent, signal: AbortSignal): GetTrustPolicyResult {
+    this.roster.membership(caller)
+    signal.throwIfAborted()
+    const approval = this.ctx.get('approval')
+    if (approval === undefined) return { policy: 'ask' }
+    const override = approval.overrideOf(caller.session)
+    const policy: TrustPolicy = override ?? 'ask'
+    return { policy }
+  }
+
+  /**
+   * Enable or clear standing deny on the caller's session (P6 US3 T027 / FR-006 Path B).
+   * Maps to `dsh-user-approval` policy `never` | `ask` via Host HTTP — never Electron Main.
+   * @param caller - exact live Team member.
+   * @param request - enabled flag and cancellation.
+   * @returns resulting trust policy.
+   */
+  setStandingDeny(
+    caller: Agent,
+    request: SetStandingDenyInput & { readonly signal: AbortSignal },
+  ): SetStandingDenyResult {
+    this.roster.membership(caller)
+    request.signal.throwIfAborted()
+    const approval = this.ctx.get('approval')
+    if (approval === undefined) {
+      throw new TeamError(
+        'Host approval service is not mounted; standing deny requires dsh-user-approval',
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const policy: TrustPolicy = request.enabled ? 'never' : 'ask'
+    approval.setPolicy(caller, policy)
+    return { policy }
+  }
+
   /**
    * Describe one connector credential without returning the secret (P6 T011 / FR-007).
    * @param caller - exact live Team member.
@@ -2220,6 +2267,31 @@ export class TeamService extends TypertRemoteService {
   ): Promise<BotIdentityMutationResult<InvokeConnectorToolResult>> {
     return this.botIdentityMutationResult(
       this.invokeConnectorTool(agent, { ...request, signal }),
+    )
+  }
+
+
+  /** Read Host trust policy for standing deny (P6 US3 T027). */
+  @Remote('getTrustPolicy')
+  remoteGetTrustPolicy(
+    agent: Agent,
+    _request: Record<string, never>,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<GetTrustPolicyResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.getTrustPolicy(agent, signal)),
+    )
+  }
+
+  /** Set standing deny (never) or restore ask (P6 US3 T027 / FR-006 Path B). */
+  @Remote('setStandingDeny')
+  remoteSetStandingDeny(
+    agent: Agent,
+    request: SetStandingDenyInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<SetStandingDenyResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.setStandingDeny(agent, { ...request, signal })),
     )
   }
 
