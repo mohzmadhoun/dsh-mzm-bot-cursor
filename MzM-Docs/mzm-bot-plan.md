@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done; P4 Routines cron (MOH-188) Done; P5 Memory (MOH-228) Done; **P6** Connectors/MCP + event routines + trust (MOH-281) Done on master 2026-09-28 (T001–T040; US1–US5 Verifier Pass; SC-006 [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`); **next = P7** Computer/box + subagent parity + settings chrome — held until PO opens epic |
-| **Date** | 2026-09-25 (living §10 updated 2026-09-28 P6 Done → P7 hold) |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done; P4 Routines cron (MOH-188) Done; P5 Memory (MOH-228) Done; **P6** Connectors/MCP + event routines + trust (MOH-281) Done on master 2026-09-28 (T001–T040; US1–US5 Verifier Pass; SC-006 [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`); **P7** Computer/box + subagent parity + settings chrome **Kicked / specify in progress** — epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome); specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) |
+| **Date** | 2026-09-25 (living §10 updated 2026-09-28 P7 kicked / specify in progress) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
 | **Inputs** | `MzM-Docs/mzm-bot-initial-plan.md` · `docs/designs/mzbot-wedge-to-grok-like.md` · `.specify/memory/constitution.md` · MzM Bot Plan room freeze |
@@ -116,16 +116,16 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **In** | MCP/connectors; event-triggered routines; richer trust/permissions productization; 1Password-class credential UX if needed |
 | **Out** | Box/computer parity (P7) |
 | **Exit (Verifier-provable)** | One connector: install → auth → successful tool call; one event-triggered routine fires end-to-end; one denied-permission path proven; secrets absent from session dumps |
-| **Status** | **Done** — epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust); specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. |
+| **Status** | **Done** — epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust); specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay Pass [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`. |
 
-### P7 — Computer / box + subagent parity + settings chrome (next — held)
+### P7 — Computer / box + subagent parity + settings chrome (kicked / specify in progress)
 
 | | |
 |--|--|
 | **In** | Box/Shell backends; computerUse-class subagents; settings/chrome polish toward Grok-easy |
 | **Out** | Treating “Verifier” as a P7 feature — Verifier already gates every phase |
 | **Exit (Verifier-provable)** | One local Shell/box tool path proven; one computerUse-class subagent path proven; settings rows required for those daily paths present (chrome polish ≠ Verifier substitute) |
-| **Status** | **Next — held** until PO opens P7 epic on DeepSeek Harness - Cursor (`P-MOH-2`). Living gate: [living-next-gate.md](./living-next-gate.md). Lead does **not** invent the P7 epic. |
+| **Status** | **Kicked / specify in progress** — epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) In Progress; Spec Kit specify [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) → new `specs/007-…`. Living gate: [living-next-gate.md](./living-next-gate.md). |
 
 ---
 
@@ -215,7 +215,8 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 10. ~~**P6 Spec Kit specify → analyze**~~ **DONE** 2026-09-28 — specify [#199](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/199) → clarify [#200](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/200) → plan [#201](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/201) → tasks [#202](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/202) → analyze [#203](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/203) PASS @ `ff149f38d1`; tree `specs/006-connectors-mcp-events-trust/`.
 11. ~~**P6 Linear epic**~~ **DONE** 2026-09-28 — [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) on DeepSeek Harness - Cursor (`P-MOH-2`); capacity restored.
 12. ~~**P6 Setup + Foundational + US1–US5 + polish**~~ **DONE** 2026-09-28 — T001–T040; US1–US5 Verifier Pass (SO 11+12); SC-006 [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`; epic MOH-281 Done.
-13. **Next — P7 kick (held):** Computer / box + subagent parity + settings chrome — **PO opens epic** on **DeepSeek Harness - Cursor** when ready → then Spec Kit specify → new `specs/007-…` (do not rewrite 001–006). Lead does **not** invent the P7 epic. Living gate: [living-next-gate.md](./living-next-gate.md).
+13. ~~**P7 kick (held)**~~ **DONE** 2026-09-28 — PO opened epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome); prior hold [MOH-349](https://linear.app/momadhoun/issue/MOH-349/p6-living-next-gate-p7-hold) Done.
+14. **Current — P7 Spec Kit specify in progress:** [MOH-351](https://linear.app/momadhoun/issue/MOH-351/p7-spec-kit-specify-computer-box-subagent-parity-settings-chrome) under epic MOH-350 → new `specs/007-…` (do not rewrite 001–006). Living gate: [living-next-gate.md](./living-next-gate.md).
 
 ---
 
