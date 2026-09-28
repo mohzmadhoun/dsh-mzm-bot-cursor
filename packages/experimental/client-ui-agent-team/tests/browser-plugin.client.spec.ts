@@ -51,6 +51,11 @@ async function bench(options: {
     $mount(contribution: unknown): Promise<() => Promise<void>> {
       return this.mount(contribution)
     }
+
+    /** Host approval waterfall used by Team deny card (P6 T027 / Path A). */
+    $on(_event: string, _listener: (...args: unknown[]) => unknown): () => void {
+      return () => {}
+    }
   }
   const remote = new RemoteService(ctx)
   const failure = {

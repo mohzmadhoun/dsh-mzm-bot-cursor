@@ -122,7 +122,7 @@ describe('Tool presentation tails', () => {
     const successView = render(<BashRow {...bashProps(success)} />)
     expect(successView.container.querySelector('[data-shell-box-outcome="success"]')).not.toBeNull()
     expect(successView.container.querySelector('[data-shell-box-outcome-label="success"]')).not.toBeNull()
-    expect(successView.getByText(zh['shellBox.success'])).toBeTruthy()
+    expect(successView.container.querySelector('[data-shell-box-outcome-label="success"]')?.textContent).toBe(zh['shellBox.success'])
     successView.unmount()
 
     const notReady: ToolResultNode = {
@@ -138,6 +138,6 @@ describe('Tool presentation tails', () => {
     const notReadyView = render(<BashRow {...bashProps(notReady)} />)
     expect(notReadyView.container.querySelector('[data-shell-box-outcome="not_ready"]')).not.toBeNull()
     expect(notReadyView.container.querySelector('[data-state="stopped"]')).not.toBeNull()
-    expect(notReadyView.getByText(zh['shellBox.notReady'])).toBeTruthy()
+    expect(notReadyView.container.querySelector('[data-shell-box-outcome-label="not_ready"]')?.textContent).toBe(zh['shellBox.notReady'])
   })
 })
