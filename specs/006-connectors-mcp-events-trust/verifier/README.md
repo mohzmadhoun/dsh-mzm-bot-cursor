@@ -6,7 +6,7 @@
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
 **Architect Path A:** Host Connector catalog SoT + `dsh-mcp-client`; B1 webhook→Routine wake; additive `triggerKind`/`eventTrigger`; deny = user-deny or standing never; in-app primary / vault optional; no Electron Main bus — see [research.md](../research.md) / [plan.md](../plan.md) / [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md)
 **Setup inventories:** [host-connector-inventory.md](./host-connector-inventory.md) (T002) · [event-harness-inventory.md](./event-harness-inventory.md) (T003) · [credentials-trust-inventory.md](./credentials-trust-inventory.md) (T004) · [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md) (T005)
-**Evidence:** [evidence/](./evidence/) — placeholders land in polish T034; Scenario recipes land with US tasks
+**Evidence:** [evidence/](./evidence/) — Scenario 1 placeholders under [evidence/scenario-1/](./evidence/scenario-1/) (T021); remaining dirs in polish T034; Scenario recipes land with US tasks
 **Linear:** **Blocked** — workspace free-issue limit; **no invented epic/issue ids**; **no `taskstoissues` in this PR**. Track T001–T040 via PR only until capacity returns (project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot).
 
 ## T001 — Design tree confirm (Setup)
@@ -77,7 +77,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 
 | Scenario | Quickstart | Recipe path (later) | Evidence | Primary owners | Acceptance | FR-014/015 |
 |----------|------------|---------------------|----------|----------------|------------|------------|
-| **1** Install → auth → tool call | [Scenario 1](../quickstart.md#scenario-1--connector-install--auth--successful-tool-call) | `scenario-1-connector.md` (T021) · [connector.md](../contracts/connector.md) | `evidence/scenario-1/` | **Host / Runtime** + **Client** + **Verifier** | SC-001, SC-007 | **Required** |
+| **1** Install → auth → tool call | [Scenario 1](../quickstart.md#scenario-1--connector-install--auth--successful-tool-call) | [scenario-1-connector.md](./scenario-1-connector.md) (T021) · [connector.md](../contracts/connector.md) | [evidence/scenario-1/](./evidence/scenario-1/) | **Host / Runtime** + **Client** + **Verifier** | SC-001, SC-007 | **Required** |
 | **2** Event routine create + fire | [Scenario 2](../quickstart.md#scenario-2--event-triggered-routine-e2e) | `scenario-2-event-routine.md` (T025) · [event-routine.md](../contracts/event-routine.md) | `evidence/scenario-2/` | **Host / Runtime** + **Client** + **Verifier** | SC-002, SC-008 | **Required** |
 | **3** Denied permission | [Scenario 3](../quickstart.md#scenario-3--denied-permission) | `scenario-3-trust-deny.md` (T028) · [trust-deny.md](../contracts/trust-deny.md) | `evidence/scenario-3/` | **Host / Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
 | **4** Secrets absent from dumps | [Scenario 4](../quickstart.md#scenario-4--secrets-absent-from-session-dumps) | `scenario-4-secrets-absent.md` (T030) · [secrets.md](../contracts/secrets.md) | `evidence/scenario-4/` | **Host / Runtime** + **Verifier** | SC-004, SC-007 | Dump log OK; GUI auth if shown |
