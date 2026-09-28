@@ -252,6 +252,11 @@
     - id: ui-settings-models
       name: '@deepseek-ai/dsh-client-ui-settings-models'
 
+    # Global Settings → Computer: Shell readiness + Computer use enablement
+    # over Host `computer` settings Remotes (P7 US3 / FR-004).
+    - id: ui-settings-computer
+      name: '@deepseek-ai/dsh-client-ui-settings-computer'
+
     # Plugin management: the sidebar Plugins page installs, enables, disables,
     # and removes the profile's bundles through the `pluginManager` Remote.
     # Without a profile-backed Host it reports itself unavailable.
