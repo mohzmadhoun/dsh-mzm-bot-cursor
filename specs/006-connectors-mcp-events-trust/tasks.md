@@ -168,7 +168,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 5
 
 - [x] T031 [US5] Confirm / complete Client in-app credential UX for Pass connector under `packages/experimental/client-ui-agent-team/src/client/` (Host RPC only; secrets off renderer durable storage); document that vault/1Password-class is **not** required for Pass when in-app auth completes the fixture (FR-008/009) in `specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md`
-- [ ] T032 [US5] Add Verifier Scenario credential-UX / SC-007 checks to `specs/006-connectors-mcp-events-trust/verifier/scenario-1-connector.md` (or `scenario-5-credential-ux.md` if split) requiring FR-014/015 desktop evidence of the auth surface under `verifier/evidence/scenario-1/` (or dedicated dir) when GUI is shown
+- [x] T032 [US5] Add Verifier Scenario credential-UX / SC-007 checks to `specs/006-connectors-mcp-events-trust/verifier/scenario-1-connector.md` (or `scenario-5-credential-ux.md` if split) requiring FR-014/015 desktop evidence of the auth surface under `verifier/evidence/scenario-1/` (or dedicated dir) when GUI is shown
 
 **Checkpoint**: US5 credential UX independently testable; vault optional lock honored.
 
