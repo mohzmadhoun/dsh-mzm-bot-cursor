@@ -73,7 +73,9 @@ Desktop dual-process layout from [plan.md](./plan.md):
 - [x] T010 [P] Extend `apps/desktop/src/host-protocol.ts` comments/exclusion documentation so memory-catalog, memory-write, memory-list/browse, memory-recall, and memory-injection payloads are **forbidden** on Node IPC (same pattern as identity + skills + routines exclusions; research R7)
 - [x] T011 [P] Add architecture/regression guard that Electron Main has no parallel memory store/bus/write/recall/inject in `apps/desktop/tests/no-electron-memory-bus.spec.ts` (and document expected absence in `apps/desktop/src/ipc.ts` / `apps/desktop/src/host-protocol.ts`) per research R7 / [contracts/non-goals.md](./contracts/non-goals.md)
 - [x] T012 [P] Add regression/docs guard that P5 Pass path is **not** “transcript dump as curated memory” and **not** Client-only persistence as SoT in `specs/005-memory-productization/verifier/transcript-not-memory.md` (research R6; [contracts/non-goals.md](./contracts/non-goals.md))
-- [ ] T013 Foundational checklist stamp in `specs/005-memory-productization/verifier/README.md` (T006–T012 complete; no US product work before this stamp)
+- [x] T013 Foundational checklist stamp in `specs/005-memory-productization/verifier/README.md` (T006–T012 complete; no US product work before this stamp)
+
+**Foundational checkpoint (Verifier 2026-09-28):** T006–T012 on master @ `bb73a3eac0` (#178 Host · #177 Electron · #176 inject/transcript docs). **T013 Pass** stamped in `verifier/README.md` on branch `cursor/p5-t013-foundation-stamp-fe1d` — US1–US5 fan-out unlocked after stamp merge.
 
 **Checkpoint**: Foundation ready — Host catalog + protocol exclusions + absence guards; user stories may begin.
 
