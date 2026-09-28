@@ -119,8 +119,8 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Host `createRoutine` with `triggerKind=event` + `eventTrigger=webhook_harness` validates non-empty `intent`; rejects empty with clear reason; persists on Host Routine catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-004 — **additive** to cron; do not rewrite `specs/004`
-- [ ] T023 [US2] Host webhook-harness match → Routine wake on existing bot with intent; update `lastRunAt`; paused status MUST suppress fire for matching deliveries (FR-005/018; B1) via `packages/webhook/webhook/src/` adapt + `packages/experimental/agent-team/src/` + `apps/desktop-host/` — manual “Run now” alone insufficient for Pass
+- [x] T022 [US2] Host `createRoutine` with `triggerKind=event` + `eventTrigger=webhook_harness` validates non-empty `intent`; rejects empty with clear reason; persists on Host Routine catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-004 — **additive** to cron; do not rewrite `specs/004`
+- [x] T023 [US2] Host webhook-harness match → Routine wake on existing bot with intent; update `lastRunAt`; paused status MUST suppress fire for matching deliveries (FR-005/018; B1) via `packages/webhook/webhook/src/` adapt + `packages/experimental/agent-team/src/` + `apps/desktop-host/` — manual “Run now” alone insufficient for Pass
 - [ ] T024 [P] [US2] Client event-routine create + pane labeling (event vs cron distinguishable) + last-run / pause-resume projection under `packages/experimental/client-ui-agent-team/src/client/` via Host RPC (locale-owned copy)
 - [ ] T025 [US2] Add Verifier Scenario 2 recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-2-event-routine.md` covering SC-002 (create + harness fire + last-run + pause suppress) and SC-008 (cron still usable) with FR-014/015 evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-2/`
 

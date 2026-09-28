@@ -1,10 +1,10 @@
 # T015 — Host webhook-harness Pass path (B1)
 
-**Status:** Documented (Foundational; wake implement lands with US2 T022–T023)
+**Status:** Implemented (Host US2 T022–T023 — wake path live; Scenario 2 Verifier recipe still T025)
 **Owners:** DH Runtime (Host wake) · DH Verifier (SC-002 harness) · PO (scope)
 **Linear:** **Blocked** — track via PR only (project `DeepSeek Harness - Cursor` / `P-MOH-2`; no invented issue ids)
 **Acceptance slice:** Foundational T015 — B1 adapt path for [contracts/event-routine.md](../contracts/event-routine.md) (research R3 / FR-018)
-**Surfaces:** `packages/webhook/webhook/src/` · `packages/experimental/agent-team/src/{types,routine-cron,index}.ts` · Desktop Host composition
+**Surfaces:** `packages/webhook/webhook/src/` · `packages/experimental/agent-team/src/{types,routine-cron,routine-event,index}.ts` · Desktop Host composition
 
 ## Measurable Done (this doc)
 
@@ -15,6 +15,7 @@
 | Additive catalog | Event rows use `triggerKind=event` + `eventTrigger=webhook_harness`; cron rows unchanged (SC-008) |
 | Pause | Matching deliveries MUST NOT fire while `status=paused` |
 | Cron separation | Host cron ticker (`isRoutineDue`) skips non-cron rows; event fire is a separate match path |
+| Host wake (T023) | `TeamService.deliverWebhookHarness` + optional `ctx.webhookRuntime` rule kind `webhook_harness` (returns `null`) |
 
 ---
 
@@ -54,4 +55,4 @@ US2 product tasks (T022–T025) wire the ingress→match→wake glue and Scenari
 | FR-018 | Pass path = harness fixture — not gated on live families |
 | Non-goals | No rewrite of `specs/004`; no Electron Main webhook SoT; no live connector families required for Pass |
 
-**PO / DH Lead:** T015 documents B1 only. Do not mark SC-002 Done on this stamp — Scenario 2 + desktop evidence remain Verifier-owned after US2 lands.
+**PO / DH Lead:** Host T022–T023 implement the wake path. Do not mark SC-002 Done until Scenario 2 + desktop evidence (T025) land.
