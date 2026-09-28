@@ -14,7 +14,7 @@ const sampleImage = {
   width: 1,
   height: 1,
   name: 'pass.png',
-}
+} as const
 
 function running(over?: Partial<RunningToolCall>): RunningToolCall {
   return {
@@ -40,7 +40,7 @@ function settled(over?: Partial<ToolResultNode>): ToolResultNode {
     isError: false,
     subCalls: [],
     ...over,
-  }
+  } as ToolResultNode
 }
 
 describe('computerUseObservation', () => {
