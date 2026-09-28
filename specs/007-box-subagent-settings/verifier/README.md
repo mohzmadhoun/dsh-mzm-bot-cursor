@@ -100,7 +100,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 
 | Scenario | Quickstart | Recipe path (when landed) | Evidence | Primary owners | Acceptance | FR-013/014 |
 |----------|------------|---------------------------|----------|----------------|------------|------------|
-| **1** Local Shell/box tool success | [Scenario 1](../quickstart.md#scenario-1--local-shell--box-tool-success) | `scenario-1-shell-box.md` (T019) · [shell-box.md](../contracts/shell-box.md) | [evidence/shell-box/](./evidence/shell-box/) | **Runtime** + **Client** + **Verifier** | SC-001 | **Required** |
+| **1** Local Shell/box tool success | [Scenario 1](../quickstart.md#scenario-1--local-shell--box-tool-success) | [scenario-1-shell-box.md](./scenario-1-shell-box.md) (T019) · [shell-box.md](../contracts/shell-box.md) | [evidence/shell-box/](./evidence/shell-box/) | **Runtime** + **Client** + **Verifier** | SC-001 | **Required** |
 | **2** computerUse screenshot + handoff | [Scenario 2](../quickstart.md#scenario-2--computeruse-class-path-screenshot-only) | `scenario-2-computer-use.md` (T023) · [computer-use.md](../contracts/computer-use.md) | [evidence/computer-use/](./evidence/computer-use/) | **Runtime** + **Client** + **Verifier** | SC-002 | **Required** |
 | **3** Settings → Computer rows | [Scenario 3](../quickstart.md#scenario-3--settings--computer-rows) | `scenario-3-settings.md` (T027) · [settings.md](../contracts/settings.md) | [evidence/settings/](./evidence/settings/) | **Client** + **Runtime** + **Verifier** | SC-003, SC-004 | **Required** |
 | **4** Non-goals absence | [Scenario 4](../quickstart.md#scenario-4--non-goals-absence) | `non-goals.md` (T028) · [contracts/non-goals.md](../contracts/non-goals.md) | optional notes under `evidence/` | **Runtime** + **Electron** + **Verifier** | SC-005 | Docs/absence OK |
@@ -149,5 +149,32 @@ Phase 7 implement / Verifier PRs for `specs/007-box-subagent-settings` MUST NOT 
 
 - **This file (`verifier/README.md`)** — DH Verifier owns for T006 / T015 / T031 / T033 / T035 stamps.
 - Inventories T002–T004, seam locks T005 — Runtime / Client / Electron / Spec own those files under `verifier/`; do not collide with this README.
-- Evidence placeholders T029 and Scenario recipes T019/T023/T027/T028/T030 — Verifier-owned follow-ons; not claimed by this T015 stamp.
+- Evidence placeholders T029 and Scenario recipes T023/T027/T028/T030 — Verifier-owned follow-ons; T019 Scenario 1 recipe is recorded below (product SC still open).
 - Do **not** edit `MzM-Docs/` in this PR (Lead owns living after Verifier Pass).
+
+## Scenario 1 recipe (T019) — Shell/box
+
+**Verdict:** **Pass** (recipe/docs only — **no** product SC-001)
+**Stamp:** 2026-09-28 · branch `cursor/p7-us1-verifier-dc28`
+**Linear:** [MOH-375](https://linear.app/momadhoun/issue/MOH-375/t019-us1-verifier-scenario-1-shellbox-recipe) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · `P-MOH-2` only
+**Artifact:** [scenario-1-shell-box.md](./scenario-1-shell-box.md)
+**Evidence home:** [evidence/shell-box/](./evidence/shell-box/) (`.gitkeep` placeholder — media required before SC-001 Pass)
+**Scope lock:** This stamp delivers the rerunnable Scenario 1 acceptance recipe (SC-001 / FR-011 local only / not-ready ≠ Pass / FR-013/014 SO 11+12). It does **not** stamp product SC-001 Done. Unit/jsdom alone **fails** GUI Pass. Runtime/Client US1 (T016–T018) may still be in flight — they must satisfy this recipe; fill `evidence/shell-box/VERDICT.txt` only after real Desktop screenshots/recording are committed + PR-embedded.
+
+| Check | Status |
+|-------|--------|
+| Recipe covers SC-001 one local Shell/box success | Yes |
+| FR-011 local only (PTC/remote not Pass) | Yes |
+| Not-ready / starting ≠ Pass (FR-002) | Yes (Step A) |
+| FR-013/014 evidence under `evidence/shell-box/` required | Yes — filenames in recipe; media pending |
+| Product SC-001 desktop Pass | **Not claimed** |
+
+**Rerun (idempotent):**
+
+```sh
+test -f specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md
+test -d specs/007-box-subagent-settings/verifier/evidence/shell-box
+rg -n 'SC-001|FR-011|not-ready|FR-013|FR-014|SO 11' specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md
+```
+
+**PO / DH Lead:** Recipe gate for US1 is ready. Do **not** close SC-001 / MOH-375 product Done until Desktop evidence under `evidence/shell-box/` lands per the recipe. Next product: T016–T018 Host/Client Shell/box path.
