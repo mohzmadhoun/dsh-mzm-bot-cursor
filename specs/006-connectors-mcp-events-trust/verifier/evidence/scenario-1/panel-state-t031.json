@@ -1,0 +1,30 @@
+{
+  "tip": "b8609fad91bbb77e5483bb3a2ed5a25c8f65bd1e",
+  "tipShort": "b8609fad91",
+  "utc": "2026-09-28T14:08:37.014Z",
+  "display": ":1",
+  "cdp": "9222",
+  "catalogId": "verifier-fixture",
+  "slice": "T031-US5-SC-007",
+  "steps": {
+    "install": {
+      "connectorId": "connector-9b78bdf7-2cce-42dd-bd11-630020917ac2",
+      "authState": "needs_auth",
+      "installState": "installed"
+    },
+    "authSurface": {
+      "visible": true,
+      "authMode": "in_app",
+      "vaultNotRequiredMarker": true,
+      "vaultText": "Pass fixture auth completes in-app; a 1Password-class external vault is not required (FR-009). Secrets are not written to renderer durable storage (FR-008)."
+    },
+    "auth": {
+      "authState": "ready",
+      "toolsReady": true,
+      "credentialConfigured": true,
+      "hostRpcCompleted": true,
+      "vaultRequired": false
+    }
+  },
+  "pass": true
+}
