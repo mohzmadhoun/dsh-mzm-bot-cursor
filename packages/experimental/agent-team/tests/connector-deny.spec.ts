@@ -78,9 +78,9 @@ describe('P6 T026 Host connector tool deny path', () => {
 
     const executed = vi.fn()
     const tools = ctx.get('tools')
-    expect(tools).toBeDefined()
-    const originalExecute = tools!.execute.bind(tools)
-    tools!.execute = (async (...args: Parameters<typeof originalExecute>) => {
+    if (tools === undefined) throw new Error('expected ctx.tools')
+    const originalExecute = tools.execute.bind(tools)
+    tools.execute = (async (...args: Parameters<typeof originalExecute>) => {
       executed()
       return originalExecute(...args)
     }) as typeof tools.execute
