@@ -30,8 +30,10 @@ import type {
   HostMailboxMessage,
   InstallConnectorInput,
   InstallConnectorResult,
+  InvokeConnectorToolResult,
   ListConnectorCatalogResult,
   ListConnectorsResult,
+  ConnectorToolCall,
   ListMemoriesInput,
   ListMemoriesResult,
   MemoryId,
@@ -155,24 +157,21 @@ export type TeamDescribeConnectorCredentialActionResult =
 /**
  * Host / Client connector tool-invoke input (P6 US1 T020).
  * Invokes one tool exposed by an authenticated connector for user-visible outcome.
+ * Narrower than Host `InvokeConnectorToolInput` (optional toolName / arguments).
  */
 export interface InvokeConnectorToolInput {
   readonly connectorId: ConnectorId
 }
 
 /**
- * Observable connector tool-call outcome for the Connectors panel (data-model ConnectorToolCall).
- * LLM reply wording is not scored (FR-016).
+ * Host RPC business value for `invokeConnectorTool` — wraps {@link ConnectorToolCall}.
+ * Matches Host `InvokeConnectorToolResult` wire (`{ toolCall }`); do not flatten.
  */
-export interface ConnectorToolInvokeResult {
-  readonly connectorId: ConnectorId
-  readonly toolName: string
-  readonly outcome: 'success' | 'denied' | 'error'
-}
+export type ConnectorToolInvokeResult = InvokeConnectorToolResult
 
 /** Generated Remote result whose business value preserves Team invokeConnectorTool rejections. */
 export type TeamInvokeConnectorToolActionResult =
-  RemoteResult<BotIdentityMutationResult<ConnectorToolInvokeResult>>
+  RemoteResult<BotIdentityMutationResult<InvokeConnectorToolResult>>
 
 /** Business actions injected by the browser plugin. */
 export interface TeamActionInjected {
@@ -326,7 +325,7 @@ interface ConnectorAuthDraft {
 /** Last Host-projected connector tool outcome shown on the Connectors panel (T020). */
 interface ConnectorToolOutcomeView {
   readonly toolName: string
-  readonly outcome: ConnectorToolInvokeResult['outcome']
+  readonly outcome: ConnectorToolCall['outcome']
 }
 
 const EMPTY_DRAFT: Draft = { subject: '', description: '', blockers: '', scopes: '' }
@@ -1497,7 +1496,7 @@ export function TeamAction({
   const settleInvokeConnectorTool = useCallback(async (
     connectorId: ConnectorId,
     operation: () => Promise<TeamInvokeConnectorToolActionResult>,
-  ): Promise<ConnectorToolInvokeResult | undefined> => {
+  ): Promise<ConnectorToolCall | undefined> => {
     const requestedSession = sessionId
     invalidateRefresh()
     setPendingTasks(current => new Set(current).add(`invoke-connector:${connectorId}`))
@@ -1512,10 +1511,11 @@ export function TeamAction({
         reportFailure(result.value.error)
         return undefined
       }
-      const invoked = result.value.value
+      // Host InvokeConnectorToolResult = { toolCall }; unwrap before panel projection.
+      const toolCall = result.value.value.toolCall
       setConnectorToolOutcomes((current) => {
         const next = new Map(current)
-        next.set(connectorId, { toolName: invoked.toolName, outcome: invoked.outcome })
+        next.set(connectorId, { toolName: toolCall.toolName, outcome: toolCall.outcome })
         return next
       })
       const listed = await listConnectors(requestedSession)
@@ -1531,7 +1531,7 @@ export function TeamAction({
       clearError()
       await refresh()
       if (sessionRef.current !== requestedSession) return undefined
-      return invoked
+      return toolCall
     } finally {
       if (sessionRef.current === requestedSession) {
         setPendingTasks((current) => {

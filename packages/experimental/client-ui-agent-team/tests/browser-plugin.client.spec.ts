@@ -525,6 +525,24 @@ async function bench(options: {
           },
         })
     },
+    invokeConnectorTool: (...args: unknown[]) => {
+      calls.push({ method: 'agentTeams/invokeConnectorTool', args })
+      return Promise.resolve(options.remoteFailure === 'invokeConnectorTool'
+        ? failure
+        : {
+          ok: true as const,
+          value: {
+            ok: true as const,
+            value: {
+              toolCall: {
+                connectorId: 'connector-1',
+                toolName: 'mcp__verifier_fixture__ping',
+                outcome: 'success' as const,
+              },
+            },
+          },
+        })
+    },
     createTask: answer('agentTeams/createTask', task),
     updateTask: (...args: unknown[]) => {
       calls.push({ method: 'agentTeams/updateTask', args })
@@ -726,7 +744,7 @@ describe('ui-team browser plugin', () => {
       'agentTeams/installConnector',
       'agentTeams/authenticateConnector',
       'agentTeams/describeConnectorCredential',
-      'agentTeams/listConnectors',
+      'agentTeams/invokeConnectorTool',
       'agentTeams/createTask',
       'agentTeams/updateTask',
       'agentTeams/updateTask',
@@ -935,6 +953,17 @@ describe('ui-team browser plugin', () => {
     await expect(authenticateConnectorActions.authenticateConnector(SESSION, {
       connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
       secret: 'token',
+    })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'gateway/internal', message: 'offline' },
+    })
+
+    const invokeConnectorTool = await bench({ remoteFailure: 'invokeConnectorTool' })
+    const invokeConnectorToolActions = (
+      invokeConnectorTool.entry()!.inject as unknown as () => TeamActionInjected
+    )()
+    await expect(invokeConnectorToolActions.invokeConnectorTool(SESSION, {
+      connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
     })).resolves.toMatchObject({
       ok: false,
       error: { code: 'gateway/internal', message: 'offline' },

@@ -266,9 +266,11 @@ function registerUi(ctx: ClientContext): void {
         }
       }
       const invoked: ConnectorToolInvokeResult = {
-        connectorId: connector.connectorId,
-        toolName: `mcp__${connector.serverName}__ping`,
-        outcome: 'success',
+        toolCall: {
+          connectorId: connector.connectorId,
+          toolName: `mcp__${connector.serverName}__ping`,
+          outcome: 'success',
+        },
       }
       return { ok: true, value: { ok: true, value: invoked } }
     },

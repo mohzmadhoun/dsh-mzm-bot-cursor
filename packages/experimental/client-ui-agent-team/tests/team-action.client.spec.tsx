@@ -411,9 +411,11 @@ function actions(overrides: Partial<TeamActionInjected> = {}): TeamActionInjecte
       value: {
         ok: true,
         value: {
-          connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
-          toolName: 'mcp__verifier_fixture__ping',
-          outcome: 'success' as const,
+          toolCall: {
+            connectorId: 'connector-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId,
+            toolName: 'mcp__verifier_fixture__ping',
+            outcome: 'success' as const,
+          },
         },
       },
     }),
@@ -4066,9 +4068,11 @@ describe('TeamAction', () => {
       value: {
         ok: true,
         value: {
-          connectorId: ConnectorId('connector-1'),
-          toolName: 'mcp__verifier_fixture__ping',
-          outcome: 'success' as const,
+          toolCall: {
+            connectorId: ConnectorId('connector-1'),
+            toolName: 'mcp__verifier_fixture__ping',
+            outcome: 'success' as const,
+          },
         },
       },
     }))
