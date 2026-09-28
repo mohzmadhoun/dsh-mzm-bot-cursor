@@ -47,13 +47,16 @@ function statusLabel(
  * Load one admitted screenshot through the session-authorized loader.
  * @param attachment - durable Host image reference.
  * @param loadImage - session-authorized URL loader from the chat node.
+ * @param t - conversation locale seat for metadata fallback copy.
  */
 function ObservationImage({
   attachment,
   loadImage,
+  t,
 }: {
   attachment: ImageAttachmentRef
   loadImage: MessageImageLoader
+  t: ObservationRowProps['t']
 }) {
   const [url, setUrl] = useState<string | null>(null)
   useEffect(() => {
@@ -80,16 +83,12 @@ function ObservationImage({
         ? <img src={url} alt="" width={attachment.width} height={attachment.height} />
         : (
           <div className={css.imageMeta}>
-            {attachment.mediaType}
-            {' '}
-            {attachment.width}
-            ×
-            {attachment.height}
-            {' '}
-            (
-            {attachment.bytes}
-            {' '}
-            bytes)
+            {t('computerUse.screenshotMeta', {
+              mediaType: attachment.mediaType,
+              width: attachment.width,
+              height: attachment.height,
+              bytes: attachment.bytes,
+            })}
           </div>
         )}
     </figure>
@@ -169,6 +168,7 @@ export function ComputerUseObservationRow({
                   key={attachment.attachmentId}
                   attachment={attachment}
                   loadImage={loadImage}
+                  t={t}
                 />
               ))}
             </>
