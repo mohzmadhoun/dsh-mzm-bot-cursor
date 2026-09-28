@@ -1007,7 +1007,11 @@ export interface InstallConnectorRequest extends InstallConnectorInput {
   readonly signal: AbortSignal
 }
 
-/** Host-owned Connector after a successful install (`installState=installed`). */
+/**
+ * Host-owned Connector after an install attempt settles.
+ * `installState` is `installed` on success or `failed` with `error` on failure (US1 T017).
+ * Catalog availability alone is not an install — see `listConnectorCatalog` vs `listConnectors`.
+ */
 export interface InstallConnectorResult {
   readonly connector: ConnectorProjection
 }
@@ -1041,6 +1045,55 @@ export interface ListConnectorCatalogResult {
 /** Host list durable connector rows. */
 export interface ListConnectorsResult {
   readonly connectors: readonly ConnectorProjection[]
+}
+
+/**
+ * Observable connector tool-call outcome vocabulary (data-model `ConnectorToolCall.outcome`).
+ * Success proves US1 / SC-001; deny is reserved for US3; LLM reply wording is not scored (FR-016).
+ */
+export type ConnectorToolCallOutcome = 'success' | 'denied' | 'error'
+
+/**
+ * One Host-observable connector tool invocation (data-model `ConnectorToolCall`).
+ * Returned by `invokeConnectorTool` — not inferred from LLM chat text (FR-003 / FR-016).
+ */
+export interface ConnectorToolCall {
+  readonly connectorId: ConnectorId
+  /** Public ToolRuntime name (`mcp__<serverName>__<tool>`). */
+  readonly toolName: string
+  readonly outcome: ConnectorToolCallOutcome
+  /** Optional non-secret tool result summary for Verifier / Client visibility. */
+  readonly detail?: string
+}
+
+/**
+ * Host invoke-connector-tool input (P6 US1 T018).
+ * Requires `installState=installed` and `authState=ready` with MCP tools bound.
+ */
+export interface InvokeConnectorToolInput {
+  readonly connectorId: ConnectorId
+  /**
+   * Optional public tool name; defaults to the Pass fixture ping tool for that connector.
+   * Must match a tool registered for this connector's `serverName` namespace.
+   */
+  readonly toolName?: string
+  /**
+   * Optional Pass-fixture tool arguments (JSON-safe Remote boundary).
+   * Fixture `ping` accepts optional `message`; other keys are ignored by the Host fixture.
+   */
+  readonly arguments?: {
+    readonly message?: string
+  }
+}
+
+/** Host connector tool invoke, including cancellation. */
+export interface InvokeConnectorToolRequest extends InvokeConnectorToolInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-observable tool-call result (`outcome=success` for Story 1 Pass). */
+export interface InvokeConnectorToolResult {
+  readonly toolCall: ConnectorToolCall
 }
 
 /**

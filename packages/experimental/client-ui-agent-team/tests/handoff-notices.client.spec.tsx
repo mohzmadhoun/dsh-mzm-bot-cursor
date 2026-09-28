@@ -42,6 +42,7 @@ const baseView: TeamView = {
   skills: [],
   routines: [],
   memories: [],
+  connectors: [],
 }
 
 function props(

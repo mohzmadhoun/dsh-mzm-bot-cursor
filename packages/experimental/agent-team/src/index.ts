@@ -4,7 +4,8 @@ import { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { randomUUID } from 'node:crypto'
 import type { Agent } from '@deepseek-ai/dsh-agent'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
+import { publicToolName } from '@deepseek-ai/dsh-mcp-client/src/tools.ts'
 import { queueHostSubagentPrompt } from '@deepseek-ai/dsh-subagent/internal'
 import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
@@ -44,7 +45,10 @@ import {
 import {
   bindPassConnectorMcpTools,
   describeConnectorCredential as describeConnectorCredentialRecord,
+  isBrokenInstallFixture,
+  PASS_BROKEN_INSTALL_ERROR,
   PASS_CONNECTOR_CATALOG,
+  PASS_FIXTURE_TOOL_RAW_NAME,
   storeConnectorSecret,
 } from './connector-bind.ts'
 import {
@@ -98,8 +102,12 @@ import type {
   InstallConnectorInput,
   InstallConnectorRequest,
   InstallConnectorResult,
+  InvokeConnectorToolInput,
+  InvokeConnectorToolRequest,
+  InvokeConnectorToolResult,
   ListConnectorCatalogResult,
   ListConnectorsResult,
+  ConnectorToolCall,
   ListMemoriesInput,
   ListMemoriesRequest,
   ListMemoriesResult,
@@ -205,6 +213,10 @@ export {
   CONNECTOR_CREDENTIAL_SCOPE,
   connectorCredentialKey,
   describeConnectorCredential,
+  isBrokenInstallFixture,
+  PASS_BROKEN_FIXTURE_CATALOG_ID,
+  PASS_BROKEN_FIXTURE_SERVER_NAME,
+  PASS_BROKEN_INSTALL_ERROR,
   PASS_CONNECTOR_CATALOG,
   PASS_FIXTURE_CATALOG_ID,
   PASS_FIXTURE_SERVER_NAME,
@@ -913,10 +925,14 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Connector install (P6 T009 / T012).
+   * Lead-authorized Host Connector install (P6 T009 / T012 / US1 T017).
+   * Catalog availability is not install: thin-catalog entries stay listable until this
+   * mutation writes a durable `ConnectorRecord`. Success settles `installState=installed`;
+   * known uninstallable Verifier fixtures settle `installState=failed` with a clear `error`
+   * (FR-001). Electron Main must not invent connector rows (research R1).
    * @param caller - exact live Lead Agent.
    * @param request - catalog id and cancellation.
-   * @returns Host-owned Connector projection after install.
+   * @returns Host-owned Connector projection after install settlement.
    */
   async installConnector(
     caller: Agent,
@@ -949,17 +965,31 @@ export class TeamService extends TypertRemoteService {
         )
       }
       const now = Date.now()
-      const row: ConnectorRecord = {
-        connectorId: ConnectorId(`connector-${randomUUID()}`),
-        catalogId: entry.catalogId,
-        serverName: entry.serverName,
-        displayName: entry.displayName,
-        installState: 'installed',
-        authState: entry.authMode === 'none' ? 'none' : 'needs_auth',
-        transport: entry.transport,
-        createdAt: now,
-        updatedAt: now,
-      }
+      const failedInstall = isBrokenInstallFixture(entry.catalogId)
+      const row: ConnectorRecord = failedInstall
+        ? {
+          connectorId: ConnectorId(`connector-${randomUUID()}`),
+          catalogId: entry.catalogId,
+          serverName: entry.serverName,
+          displayName: entry.displayName,
+          installState: 'failed',
+          authState: 'none',
+          transport: entry.transport,
+          error: PASS_BROKEN_INSTALL_ERROR,
+          createdAt: now,
+          updatedAt: now,
+        }
+        : {
+          connectorId: ConnectorId(`connector-${randomUUID()}`),
+          catalogId: entry.catalogId,
+          serverName: entry.serverName,
+          displayName: entry.displayName,
+          installState: 'installed',
+          authState: entry.authMode === 'none' ? 'none' : 'needs_auth',
+          transport: entry.transport,
+          createdAt: now,
+          updatedAt: now,
+        }
       await this.journal.appendAndFlush(root, 'team/connector', {
         version: 2,
         teamId: TeamId(root.id),
@@ -971,8 +1001,9 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Connector authenticate (P6 T011 / T012).
+   * Lead-authorized Host Connector authenticate (P6 T011 / T012 / US1 T018).
    * Stores secret in Host credentials only; binds Pass MCP fixture tools when ready.
+   * Chat-paste is not the primary auth path — secret enters via this Host credential seam (FR-002/008).
    * @param caller - exact live Lead Agent.
    * @param request - connector id, secret, and cancellation.
    * @returns Host-owned Connector projection after auth ready.
@@ -1007,6 +1038,12 @@ export class TeamService extends TypertRemoteService {
           'TEAM_INVALID_ARGUMENT',
         )
       }
+      if (current.authState === 'ready') {
+        throw new TeamError(
+          `connector "${connectorId}" is already authenticated`,
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
       const key = await storeConnectorSecret(this.ctx, connectorId, secret)
       const row: ConnectorRecord = {
         ...current,
@@ -1023,6 +1060,92 @@ export class TeamService extends TypertRemoteService {
     })
     this.bindConnectorMcpTools(connector)
     return { connector: projectConnector(connector) }
+  }
+
+  /**
+   * Invoke one MCP tool from an authenticated connector (P6 US1 T018).
+   * Requires `installState=installed` and `authState=ready` with tools bound on `ctx.tools`.
+   * Returns a Host-observable {@link ConnectorToolCall} (`outcome=success|error`) —
+   * Verifier MUST NOT score LLM reply wording (FR-003 / FR-016).
+   * @param caller - exact live Team member.
+   * @param request - connector id, optional tool name / arguments, and cancellation.
+   * @returns observable tool-call outcome (success for Story 1 Pass).
+   */
+  async invokeConnectorTool(
+    caller: Agent,
+    request: InvokeConnectorToolRequest,
+  ): Promise<InvokeConnectorToolResult> {
+    this.roster.membership(caller)
+    request.signal.throwIfAborted()
+    const connectorId = ConnectorId(String(request.connectorId).trim())
+    if (connectorId.length === 0) {
+      throw new TeamError('connectorId must be non-empty', 'TEAM_INVALID_ARGUMENT')
+    }
+    const membership = this.roster.membership(caller)
+    const current = this.journal.state(membership.root).connectors
+      .find(row => row.connectorId === connectorId)
+    if (current === undefined) {
+      throw new TeamError(
+        `connector "${connectorId}" not found`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    if (current.installState !== 'installed') {
+      throw new TeamError(
+        `connector "${connectorId}" must be installed before tool invoke`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    if (current.authState !== 'ready') {
+      throw new TeamError(
+        `connector "${connectorId}" must be authState=ready before tool invoke`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    this.bindConnectorMcpTools(current)
+    const tools = this.ctx.get('tools')
+    if (tools === undefined) {
+      throw new TeamError(
+        'Host tools registry is not mounted; connector tool invoke requires dsh-tools',
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const toolName = request.toolName === undefined || String(request.toolName).trim().length === 0
+      ? publicToolName(current.serverName, PASS_FIXTURE_TOOL_RAW_NAME)
+      : String(request.toolName).trim()
+    if (tools.get(toolName) === undefined) {
+      throw new TeamError(
+        `connector tool "${toolName}" is not bound on Host`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const expectedPrefix = `mcp__${current.serverName}__`
+    if (!toolName.startsWith(expectedPrefix)) {
+      throw new TeamError(
+        `toolName must be under connector serverName namespace "${expectedPrefix}"`,
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    const result = await tools.execute({
+      signal: request.signal,
+      callId: ToolCallId(`connector-tool-${randomUUID()}`),
+      name: toolName,
+      arguments: request.arguments === undefined ? {} : { ...request.arguments },
+    })
+    const toolCall: ConnectorToolCall = result.isError
+      ? {
+        connectorId,
+        toolName,
+        outcome: 'error',
+        detail: result.error.message,
+      }
+      : {
+        connectorId,
+        toolName,
+        outcome: 'success',
+        ...connectorToolCallDetail(result.content),
+      }
+    return { toolCall }
   }
 
   /**
@@ -1061,7 +1184,7 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Bind or re-bind Pass MCP fixture tools for a ready connector (P6 T010).
+   * Bind or re-bind Pass MCP fixture tools for a ready connector (P6 T010 / US1 T018).
    * @param connector - durable row at auth ready.
    */
   private bindConnectorMcpTools(connector: ConnectorRecord): void {
@@ -1898,7 +2021,7 @@ export class TeamService extends TypertRemoteService {
     return this.botIdentityMutationResult(this.installConnector(agent, { ...request, signal }))
   }
 
-  /** Authenticate one Host Connector; secret stays in credentials (P6 T011 / T012). */
+  /** Authenticate one Host Connector; secret stays in credentials (P6 T011 / T012 / US1 T018). */
   @Remote('authenticateConnector')
   remoteAuthenticateConnector(
     agent: Agent,
@@ -1907,6 +2030,18 @@ export class TeamService extends TypertRemoteService {
   ): Promise<BotIdentityMutationResult<AuthenticateConnectorResult>> {
     return this.botIdentityMutationResult(
       this.authenticateConnector(agent, { ...request, signal }),
+    )
+  }
+
+  /** Invoke one authenticated connector MCP tool; returns outcome without LLM wording (US1 T018). */
+  @Remote('invokeConnectorTool')
+  remoteInvokeConnectorTool(
+    agent: Agent,
+    request: InvokeConnectorToolInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<InvokeConnectorToolResult>> {
+    return this.botIdentityMutationResult(
+      this.invokeConnectorTool(agent, { ...request, signal }),
     )
   }
 
@@ -2241,6 +2376,22 @@ export class TeamService extends TypertRemoteService {
     }
     if (failures.length > 0) throw new AggregateError(failures, 'Agent Teams runtime disposal failed')
   }
+}
+
+/**
+ * Extract optional non-secret text detail from a successful tool result for Verifier visibility.
+ * @param content - ToolRuntime content blocks from a successful execute.
+ * @returns detail field when text is present; otherwise empty object.
+ */
+function connectorToolCallDetail(
+  content: readonly { readonly type: string; readonly text?: string }[],
+): { readonly detail: string } | Record<string, never> {
+  const textBlocks = content
+    .filter((block): block is { type: 'text'; text: string } =>
+      block.type === 'text' && typeof block.text === 'string' && block.text.trim().length > 0)
+    .map(block => block.text.trim())
+  const joined = textBlocks.join('\n')
+  return joined.length > 0 ? { detail: joined } : {}
 }
 
 export default TeamService

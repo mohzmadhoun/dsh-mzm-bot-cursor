@@ -67,6 +67,7 @@ async function bench(options: {
     skills: [],
     routines: [],
     memories: [],
+    connectors: [],
   }
   ctx.provide('remote.agentTeams', {
     view: (...args: unknown[]) => {
@@ -312,6 +313,7 @@ async function bench(options: {
                 intent: 'Ping',
                 scheduleExpr: '@every 5m',
                 scheduleLabel: 'Every 5m',
+                triggerKind: 'cron' as const,
                 status: 'active' as const,
                 lastRunAt: null,
                 createdAt: 1,
@@ -337,6 +339,7 @@ async function bench(options: {
                 intent: 'Ping',
                 scheduleExpr: '@every 5m',
                 scheduleLabel: 'Every 5m',
+                triggerKind: 'cron' as const,
                 status: 'paused' as const,
                 lastRunAt: null,
                 createdAt: 1,
@@ -362,6 +365,7 @@ async function bench(options: {
                 intent: 'Ping',
                 scheduleExpr: '@every 5m',
                 scheduleLabel: 'Every 5m',
+                triggerKind: 'cron' as const,
                 status: 'active' as const,
                 lastRunAt: null,
                 createdAt: 1,

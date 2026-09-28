@@ -1,4 +1,4 @@
-/** P6 T007–T012: Host Connector catalog + additive event routines + MCP/credential bind. */
+/** P6 T007–T012 foundation + US1 T017–T018 Host connector install/auth/tool-success. */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
@@ -15,6 +15,8 @@ import * as SubagentSpawn from '@deepseek-ai/dsh-subagent-spawn-in-process'
 import { MockAdapter, textResponse } from '../../../core/agent-loop/tests/mock-adapter.ts'
 import { MemoryCredentials } from '../../../credentials/credentials/tests/memory.ts'
 import TeamService, {
+  PASS_BROKEN_FIXTURE_CATALOG_ID,
+  PASS_BROKEN_INSTALL_ERROR,
   PASS_CONNECTOR_CATALOG,
   PASS_FIXTURE_CATALOG_ID,
   PASS_FIXTURE_SERVER_NAME,
@@ -257,5 +259,131 @@ describe('P6 T007-T012 Host connector + event routine foundation', () => {
       ok: true,
       value: { routine: { triggerKind: 'event', scheduleLabel: 'Webhook harness' } },
     })
+  })
+})
+
+describe('P6 US1 T017-T018 Host connector install auth tool success', () => {
+  it('T017: install settles installed; broken fixture settles failed; available≠installed', async () => {
+    const { ctx, lead } = await setup([textResponse('us1 install')])
+    await ctx.agentTeams.createBot(lead, {
+      displayName: 'Install Bot',
+      modelSelection: { provider: 'mock', model: 'i1' },
+      signal: SIGNAL,
+    })
+
+    const catalog = ctx.agentTeams.listConnectorCatalog(lead, SIGNAL)
+    expect(catalog.catalog.some(entry => entry.catalogId === PASS_FIXTURE_CATALOG_ID)).toBe(true)
+    expect(catalog.catalog.some(entry => entry.catalogId === PASS_BROKEN_FIXTURE_CATALOG_ID)).toBe(true)
+    // Catalog availability is not install — durable list stays empty until installConnector.
+    expect(ctx.agentTeams.listConnectors(lead, SIGNAL).connectors).toEqual([])
+
+    const installed = await ctx.agentTeams.installConnector(lead, {
+      catalogId: PASS_FIXTURE_CATALOG_ID,
+      signal: SIGNAL,
+    })
+    expect(installed.connector.installState).toBe('installed')
+    expect(installed.connector.error).toBeUndefined()
+
+    const failed = await ctx.agentTeams.installConnector(lead, {
+      catalogId: PASS_BROKEN_FIXTURE_CATALOG_ID,
+      signal: SIGNAL,
+    })
+    expect(failed.connector).toMatchObject({
+      catalogId: PASS_BROKEN_FIXTURE_CATALOG_ID,
+      installState: 'failed',
+      authState: 'none',
+      error: PASS_BROKEN_INSTALL_ERROR,
+    })
+
+    const listed = ctx.agentTeams.listConnectors(lead, SIGNAL).connectors
+    expect(listed).toHaveLength(2)
+    expect(listed.map(row => row.installState).sort()).toEqual(['failed', 'installed'])
+
+    // Failed row is not Pass; auth rejects.
+    await expect(ctx.agentTeams.authenticateConnector(lead, {
+      connectorId: failed.connector.connectorId,
+      secret: 'unused-secret',
+      signal: SIGNAL,
+    })).rejects.toMatchObject({
+      code: 'TEAM_INVALID_ARGUMENT',
+      message: /must be installed before auth/,
+    })
+
+    const remoteFail = await ctx.agentTeams.remoteInstallConnector(
+      lead,
+      { catalogId: PASS_BROKEN_FIXTURE_CATALOG_ID },
+      SIGNAL,
+    )
+    // Re-install after failed is allowed (duplicate excludes failed); settles failed again.
+    expect(remoteFail).toMatchObject({
+      ok: true,
+      value: { connector: { installState: 'failed', error: PASS_BROKEN_INSTALL_ERROR } },
+    })
+  })
+
+  it('T018: auth→ready via credentials; MCP bind; invokeConnectorTool outcome=success', async () => {
+    const { ctx, lead } = await setup([textResponse('us1 tool')])
+    await ctx.agentTeams.createBot(lead, {
+      displayName: 'Tool Bot',
+      modelSelection: { provider: 'mock', model: 't1' },
+      signal: SIGNAL,
+    })
+
+    const installed = await ctx.agentTeams.installConnector(lead, {
+      catalogId: PASS_FIXTURE_CATALOG_ID,
+      signal: SIGNAL,
+    })
+    const connectorId = installed.connector.connectorId
+    const secret = 'us1-in-app-token'
+
+    await expect(ctx.agentTeams.invokeConnectorTool(lead, {
+      connectorId,
+      signal: SIGNAL,
+    })).rejects.toMatchObject({
+      code: 'TEAM_INVALID_ARGUMENT',
+      message: /must be authState=ready/,
+    })
+
+    const ready = await ctx.agentTeams.authenticateConnector(lead, {
+      connectorId,
+      secret,
+      signal: SIGNAL,
+    })
+    expect(ready.connector.authState).toBe('ready')
+    expect(ctx.tools.get(passFixturePublicToolName())).toBeDefined()
+    // Secret stays off journal / view projection (credential seam only).
+    expect(JSON.stringify(await ctx.agentTeams.remoteView(lead, SIGNAL))).not.toContain(secret)
+
+    const invoked = await ctx.agentTeams.invokeConnectorTool(lead, {
+      connectorId,
+      arguments: { message: 'ping-ok' },
+      signal: SIGNAL,
+    })
+    expect(invoked.toolCall).toMatchObject({
+      connectorId,
+      toolName: passFixturePublicToolName(),
+      outcome: 'success',
+    })
+    expect(invoked.toolCall.detail).toMatch(/connector:verifier_fixture:ping-ok/)
+    // Observable outcome is structured — not LLM chat wording (FR-016).
+    expect(invoked.toolCall).not.toHaveProperty('llmReply')
+
+    const remote = await ctx.agentTeams.remoteInvokeConnectorTool(lead, {
+      connectorId,
+      arguments: { message: 'remote-ok' },
+    }, SIGNAL)
+    expect(remote).toMatchObject({
+      ok: true,
+      value: {
+        toolCall: {
+          connectorId,
+          toolName: passFixturePublicToolName(),
+          outcome: 'success',
+        },
+      },
+    })
+    if (!remote.ok) throw new Error('remote invoke failed')
+    expect(remote.value.toolCall.detail).toMatch(/remote-ok/)
+    expect(JSON.stringify(remote.value)).not.toContain(secret)
   })
 })
