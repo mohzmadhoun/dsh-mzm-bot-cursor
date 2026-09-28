@@ -4,6 +4,7 @@ Verdict: Pass (SC-005 agent isolation + user sharing after save + cold restart;
          SC-010 kinds×layers orthogonal — no kind→layer lock required for Pass)
 Stamp: 2026-09-28 · tip origin/master @ d3229a120c (#192 Client T028 on tip;
   #193 Host T027 on tip)
+  · content stamp e3dc09dcfb (this PR)
   · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
   · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
   · runtime: rebuilt client-ui-agent-team + agent-team tsdown bundles on tip
