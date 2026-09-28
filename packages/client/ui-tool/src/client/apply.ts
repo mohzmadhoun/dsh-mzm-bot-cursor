@@ -10,6 +10,8 @@ import { ToolCallTree } from './tool/ToolCallTree.tsx'
 import { CONVERSATION_NS as NS } from './locale.ts'
 import { askQuestionToolview } from './tool/toolviews/ask-question-row.tsx'
 import { bashToolviewSample } from './tool/toolviews/bash-sample.tsx'
+import { computerUseObservationToolview } from './tool/toolviews/computer-use-observation-row.tsx'
+import { computerUseSubagentToolview } from './tool/toolviews/computer-use-subagent-row.tsx'
 import { fileMutationToolview } from './tool/toolviews/file-mutation-row.tsx'
 import { readToolview } from './tool/toolviews/read-row.tsx'
 import { readImageToolview } from './tool/toolviews/read-image-row.tsx'
@@ -48,4 +50,7 @@ export function apply(ctx: ClientContext): void {
   ctx.plugin(webToolview)
   ctx.plugin(todoToolview)
   ctx.plugin(askQuestionToolview)
+  // P7 T022 — computerUse Pass screenshot observation + subagent parent handoff.
+  ctx.plugin(computerUseObservationToolview)
+  ctx.plugin(computerUseSubagentToolview)
 }
