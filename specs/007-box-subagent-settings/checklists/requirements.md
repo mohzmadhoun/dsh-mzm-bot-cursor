@@ -31,7 +31,8 @@
 
 ## Notes
 
-- Validation iteration 1 (2026-09-28): all items pass.
-- Simplest-path locks recorded under Assumptions (local Shell/box path; computerUse capability class; settings rows for daily paths only; user machines OUT).
-- Non-blocking open questions deferred to `/speckit-clarify` (product labels; screenshot-vs-interactive; readiness copy).
-- Items marked incomplete would require spec updates before `/speckit-clarify` or `/speckit-plan` — none remain.
+- Validation iteration 1 (2026-09-28): all items pass (specify).
+- Validation iteration 2 (2026-09-28 clarify): all items remain passing after Clarifications Session 2026-09-28.
+- Clarify locks: Settings → Computer with Shell + Computer use rows; screenshot-only computerUse Pass; readiness copy meaning-clear / string not scored; global Settings home; evidence slices shell-box / computer-use / settings.
+- Spec status: Clarified — ready for `/speckit-plan`.
+- Items marked incomplete would require spec updates before `/speckit-plan` — none remain.
