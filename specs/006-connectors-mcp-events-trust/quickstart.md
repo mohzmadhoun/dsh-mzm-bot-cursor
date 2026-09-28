@@ -5,7 +5,7 @@
 **Purpose:** Runnable validation scenarios for Verifier / implementers. Not an implementation guide.
 
 Prerequisites and expected outcomes reference [contracts/](./contracts/) and [data-model.md](./data-model.md).
-Verifier recipes home: `verifier/` (created during implement / Verifier tasks — not in this plan PR).
+Verifier recipes home: [verifier/](./verifier/) — owners map in [verifier/README.md](./verifier/README.md) (T036).
 
 **Standing orders 11+12 / FR-014/015:** Every GUI scenario below requires desktop screenshot(s) and/or a short screen recording of the real Desktop app, **committed** under `specs/006-connectors-mcp-events-trust/verifier/evidence/` and embedded in the GUI PR body. Unit/jsdom alone fails.
 
@@ -27,14 +27,29 @@ Verifier recipes home: `verifier/` (created during implement / Verifier tasks �
 
 ## Scenario checklist (contracts + visual evidence)
 
-| Scenario | Contract | Evidence dir (implement) | Success criteria | FR-014/015 |
-|----------|----------|--------------------------|------------------|------------|
+| Scenario | Contract | Evidence dir | Success criteria | FR-014/015 |
+|----------|----------|--------------|------------------|------------|
 | **1** Install → auth → tool call | [connector.md](./contracts/connector.md) | `verifier/evidence/scenario-1/` | SC-001, SC-007 | Required |
 | **2** Event routine create + fire | [event-routine.md](./contracts/event-routine.md) | `verifier/evidence/scenario-2/` | SC-002, SC-008 | Required |
 | **3** Denied-permission path | [trust-deny.md](./contracts/trust-deny.md) | `verifier/evidence/scenario-3/` | SC-003 | Required |
 | **4** Secrets absent from dumps | [secrets.md](./contracts/secrets.md) | `verifier/evidence/scenario-4/` | SC-004, SC-007 | Dump log OK; GUI auth if shown |
 | **5** Non-goals absence | [non-goals.md](./contracts/non-goals.md) | `verifier/evidence/non-goals/` | SC-005 | Docs/absence OK |
 | **6** Full Phase 6 replay | All above | `verifier/evidence/scenario-6/` | SC-006 | Required for GUI slices |
+
+### Scenario → recipe map (T036)
+
+| Quickstart | Recipe file(s) | Evidence dir | Primary owners |
+|------------|----------------|--------------|----------------|
+| Scenario 1 Install → auth → tool | [verifier/scenario-1-connector.md](./verifier/scenario-1-connector.md) · US5 deep: [verifier/scenario-5-credential-ux.md](./verifier/scenario-5-credential-ux.md) | `evidence/scenario-1/` | Host / Runtime + Client + Verifier |
+| Scenario 2 Event routine E2E | [verifier/scenario-2-event-routine.md](./verifier/scenario-2-event-routine.md) | `evidence/scenario-2/` | Host / Runtime + Client + Verifier |
+| Scenario 3 Denied permission | [verifier/scenario-3-trust-deny.md](./verifier/scenario-3-trust-deny.md) | `evidence/scenario-3/` | Host / Runtime + Client + Verifier |
+| Scenario 4 Secrets absent | [verifier/scenario-4-secrets-absent.md](./verifier/scenario-4-secrets-absent.md) | `evidence/scenario-4/` | Host / Runtime + Verifier |
+| Scenario 5 Non-goals absence | [verifier/non-goals.md](./verifier/non-goals.md) · [contracts/non-goals.md](./contracts/non-goals.md) | `evidence/non-goals/` | Host / Runtime + Electron + Verifier |
+| Scenario 6 Full Phase 6 replay | [verifier/scenario-6-full-replay.md](./verifier/scenario-6-full-replay.md) | `evidence/scenario-6/` | Verifier |
+
+**Naming note:** Recipe file `scenario-5-credential-ux.md` is the US5 / SC-007 auth-surface split (evidence stays under `scenario-1/`). Quickstart Scenario 5 is **non-goals** (`non-goals.md` / SC-005), not the credential-UX file.
+
+Mirror walkthrough copies under `/opt/cursor/artifacts/` when Cloud Agent Verifier runs (standing order 11). Commit under `verifier/evidence/` and embed in PR body (standing order 12).
 
 ---
 
@@ -96,8 +111,10 @@ Verifier recipes home: `verifier/` (created during implement / Verifier tasks �
 ## Scenario 5 — Non-goals absence
 
 **Contract:** [contracts/non-goals.md](./contracts/non-goals.md)
+**Recipe:** [verifier/non-goals.md](./verifier/non-goals.md) (T033)
+**Evidence:** `verifier/evidence/non-goals/` (T034)
 
-Documented absence checks: no Box/Shell Pass requirement; no full catalog / live-family Pass requirement; no rewrite of `specs/001`–`005`; no Electron Main connector/event/trust bus; vault not mandatory when in-app works.
+Documented absence checks: no Box/Shell Pass requirement; no full catalog / live-family Pass requirement; no rewrite of `specs/001`–`005`; no Electron Main connector/event/trust bus; vault not mandatory when in-app works; cron additive (SC-008).
 
 **Expected:** SC-005.
 
@@ -105,7 +122,10 @@ Documented absence checks: no Box/Shell Pass requirement; no full catalog / live
 
 ## Scenario 6 — Full Phase 6 replay
 
-Re-run Scenarios 1–5 on the real desktop app; record pass/fail against this spec including FR-014/015 for GUI slices (SC-006).
+**Recipe:** [verifier/scenario-6-full-replay.md](./verifier/scenario-6-full-replay.md) (T035)
+**Evidence:** `verifier/evidence/scenario-6/` (T034)
+
+Re-run Scenarios 1–5 on the real desktop app (plus foundational Pass T016); record pass/fail against this spec including FR-014/015 for GUI slices (SC-006).
 
 ---
 
@@ -124,6 +144,18 @@ Re-run Scenarios 1–5 on the real desktop app; record pass/fail against this sp
 
 ---
 
+## Evidence path convention
+
+```text
+specs/006-connectors-mcp-events-trust/verifier/evidence/
+├── scenario-1/   # QS1 connector install→auth→tool (+ US5 credential UX)
+├── scenario-2/   # QS2 event routine create + harness fire
+├── scenario-3/   # QS3 denied permission
+├── scenario-4/   # QS4 secrets absent (dump/log OK)
+├── non-goals/    # QS5 / SC-005 measured absence checks
+└── scenario-6/   # QS6 full replay (SC-006)
+```
+
 ## Next
 
-`/speckit-tasks` after this plan is Verifier-accepted (Architect Path A locked). No Linear ids until capacity.
+Polish T033–T036 deliver Verifier non-goals + evidence layout + SC-006 full-replay recipe + this map. Product SC Done remains Verifier-stamped per scenario. Linear/`taskstoissues` blocked — PR-only until capacity.

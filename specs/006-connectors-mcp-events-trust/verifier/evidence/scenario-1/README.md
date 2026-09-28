@@ -35,3 +35,5 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `p6-t031-us5-credential-ux-walkthrough.mp4` | `p6-t031-us5-credential-ux-walkthrough.mp4` |
 
 **Status:** T031 US5 / SC-007 Desktop Pass stamped 2026-09-28 on tip `b8609fad91` (PR #221). Auth surface + vault-not-required + Host RPC ready measured on Desktop.
+
+**T034 layout:** This directory is the quickstart Scenario 1 evidence home (also US5 auth-surface). Required filenames above satisfy FR-014/015 / SO 11+12. Do **not** move US5 auth media to `non-goals/` or `scenario-6/`.

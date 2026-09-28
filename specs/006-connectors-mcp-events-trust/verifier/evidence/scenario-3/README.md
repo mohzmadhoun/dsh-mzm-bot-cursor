@@ -32,3 +32,5 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `scenario-3-trust-deny-walkthrough.mp4` | `p6-t028-scenario-3-trust-deny-walkthrough.mp4` |
 
 **Status:** Desktop Pass stamped — Path B standing never · tip `bd9b86c084` (Client `d02d11fe30` + `$on` bind fix). See [VERDICT.txt](./VERDICT.txt).
+
+**T034 layout:** Quickstart Scenario 3 evidence home. Required filenames above satisfy FR-014/015 / SO 11+12.

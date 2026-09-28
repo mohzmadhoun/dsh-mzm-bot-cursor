@@ -36,3 +36,5 @@ Commit media here; embed absolute `/opt/cursor/artifacts/…` copies in GUI PR b
 | `scenario-2-event-routine-walkthrough.mp4` | `p6-t024-scenario-2-event-routine-walkthrough.mp4` (alias `p6-t025-scenario-2-…`) |
 
 **Status:** GUI Pass stamped for Client T024 / Scenario 2 on tip `7d6ae2f75a` (rebased onto master + Host #213). See [VERDICT.txt](./VERDICT.txt).
+
+**T034 layout:** Quickstart Scenario 2 evidence home. Required filenames above satisfy FR-014/015 / SO 11+12.
