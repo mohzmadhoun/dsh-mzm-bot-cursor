@@ -79,7 +79,7 @@ describe('ComputerSection', () => {
     render(<ComputerSection {...props({ status: 'unavailable', writable: false, value: undefined })} />)
     expect(screen.getByText('Shell')).toBeTruthy()
     expect(screen.getByText('Computer use')).toBeTruthy()
-    expect(screen.getByRole('switch', { name: 'Enable Computer use' })).toBeDisabled()
+    expect(screen.getByRole('switch', { name: 'Enable Computer use' }).hasAttribute('disabled')).toBe(true)
   })
 
   it.each([

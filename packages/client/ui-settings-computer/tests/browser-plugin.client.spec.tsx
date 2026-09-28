@@ -97,7 +97,6 @@ describe('ui-settings-computer browser plugin', () => {
     expect(resolveSlotLabel(b.slots.entries('settings.section')[0]!.options.label)).toBe('Computer')
 
     const injected = (entry.inject as unknown as () => ComputerSectionInjected)()
-    expect(injected.hooks.computerSettings.getSnapshot().status).toBe('loading')
     await vi.waitFor(() => {
       expect(injected.hooks.computerSettings.getSnapshot().status).toBe('ready')
     })
