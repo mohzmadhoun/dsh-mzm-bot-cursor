@@ -338,7 +338,7 @@ const MEMORY_BROWSE_LAYER_FILTER_OPTIONS = [
 function memoriesForBrowseLayer(
   memories: readonly MemoryProjection[],
   layerFilter: MemoryBrowseLayerFilter,
-): MemoryProjection[] {
+): readonly MemoryProjection[] {
   if (layerFilter === 'all') return memories
   return memories.filter(memory => memory.layer === layerFilter)
 }
