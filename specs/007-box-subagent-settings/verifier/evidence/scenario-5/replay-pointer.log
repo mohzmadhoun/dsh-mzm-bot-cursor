@@ -1,0 +1,13 @@
+FOUNDATIONAL_GATE: Pass — verifier/README.md Foundational Pass checklist (T015) @ tip 47cd9dd45f recorded Pass (foundations only)
+T032_BUS: Pass — vitest-electron-bus.log (3/3) + host-protocol/ipc exclusions (comments only; no control channels)
+SC-001: Pass — cite evidence/shell-box/ VERDICT + FR-013/014 media on master
+SC-002: Pass — cite evidence/computer-use/ VERDICT + FR-013/014 media on master
+SC-003/SC-004: Pass — cite evidence/settings/ VERDICT + FR-013/014 media on master (chrome alone ≠ SC-001/SC-002)
+SC-005: Pass — evidence/non-goals/ VERDICT + spotcheck
+DESKTOP_SMOKE: Pass — DISPLAY=:1 DSH Local Build 0.1.6-alpha.2 CDP 9222
+  Shell row data-box-readiness=ready · local sandbox
+  Computer use row data-computer-use-enabled=true
+  New Session / Into the Unknown live
+UTC: 2026-09-28T20:02:41Z
+SHA: 952e55c05fbeaf33be5237defdfb0cb32d472779
+SC-006_PRODUCT_PASS: claimed in VERDICT.txt (time-boxed composite per scenario-5-full-replay.md)

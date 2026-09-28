@@ -1,0 +1,80 @@
+=== SC-005 / Scenario 4 non-goals spot-check ===
+UTC: 2026-09-28T19:51:18Z
+SHA: 952e55c05fbeaf33be5237defdfb0cb32d472779
+
+--- FR-006 user machines (expect empty) ---
+specs/007-box-subagent-settings/verifier/non-goals.md:35:| User machines | No ListMachines / CopyToBox–CopyFromBox / local-exec-on-user-PC required for Pass (FR-006) | Recipe ready — stamp under evidence/non-goals |
+specs/007-box-subagent-settings/verifier/non-goals.md:58:! rg -n -i 'user.?machine.*(required|must).*Pass|CopyToBox.*(required|must).*Pass|ListMachines.*(required|must).*Pass|local.?exec.*(user).*(required|must).*Pass' \
+
+--- FR-007 voice/billing/etc (expect empty) ---
+specs/007-box-subagent-settings/verifier/non-goals.md:36:| Voice / draft-first / group / learn-from-demo / billing / full skill pack / pixel Grok | None required for Pass (FR-007) | Recipe ready |
+specs/007-box-subagent-settings/verifier/non-goals.md:77:! rg -n -i '(voice|draft.?first|group channel|learn.?from.?demo|billing chrome|full skill pack|pixel grok).*(required|must).*Pass|Pass.*(requires|require).*(voice|draft.?first|billing|pixel grok)' \
+
+--- FR-008 verifier-as-feature (expect empty) ---
+(no matches — Pass)
+
+--- FR-009 no rewrite 001-006 vs master (expect empty on this tip before our commit) ---
+(empty above = Pass)
+
+--- FR-010 catalog not required ---
+specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md:145:| Full Grok catalog required for Pass | **Fail** the over-strict gate (FR-010) |
+specs/007-box-subagent-settings/verifier/non-goals.md:6:**Acceptance:** Spec FR-006 · FR-007 · FR-008 · FR-009 · FR-010 · FR-011 · SC-005 · Out of Scope · [quickstart.md](../quickstart.md) Scenario 4
+specs/007-box-subagent-settings/verifier/non-goals.md:21:- Full Grok Computer catalog (Update/Reset/box-doctor/…) is treated as a mandatory Pass gate (FR-010)
+specs/007-box-subagent-settings/verifier/non-goals.md:39:| Full Grok Computer catalog | Only **Shell** + **Computer use** rows required; Update/Reset/box-doctor optional (FR-010) | Recipe ready |
+specs/007-box-subagent-settings/verifier/non-goals.md:125:## Full Computer catalog not required (FR-010)
+specs/007-box-subagent-settings/verifier/non-goals.md:127:**Acceptance:** FR-010 · SC-005 · [scenario-3-settings-computer.md](./scenario-3-settings-computer.md)
+specs/007-box-subagent-settings/verifier/non-goals.md:129:Only **Shell** and **Computer use** rows under Settings → **Computer** are required. Update/Reset/box-doctor/full catalog MUST NOT be Pass gates.
+specs/007-box-subagent-settings/verifier/non-goals.md:137:rg -n 'FR-010|Update/Reset|catalog not required' \
+specs/007-box-subagent-settings/verifier/non-goals.md:142:**Claim:** Scenario 3 recipe already notes FR-010 — spot-check confirms no over-strict gate.
+specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md:9:**Architect locks:** Path A Client `settings.section` **Computer** over Host settings document / Remotes (R4); locale-owned English labels **Shell** + **Computer use** (FR-004 / FR-016); Shell row may be read-only Host readiness (PO); per-agent gear alone fails FR-016; chrome alone ≠ Phase Pass / ≠ SC-001 / ≠ SC-002 (FR-005 / SC-004); no Electron Main Computer-settings SoT (R1/R6); Update/Reset/box-doctor/full catalog not required (FR-010)
+specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md:16:| SC coverage | SC-003 both rows under **Computer** · Shell readiness visible · FR-016 Global Settings · FR-010 out-of-Pass chrome not required · SC-004 / FR-005 chrome alone ≠ SC-001/SC-002 |
+
+--- FR-003 interactive browser not required ---
+specs/007-box-subagent-settings/verifier/README.md:192:rg -n 'Host SoT|interactive browser.*not.*required|PTC/remote not Pass|chrome alone|Pass-path language \(T034\)' \
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:50:| Interactive browser | **Not** required for Pass (FR-003) |
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:118:3. Pass gate that **requires** interactive browser click/type → **Fail** the gate (over-strict vs FR-003).
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:125:| Interactive browser | Optional; not required | Required for Pass |
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:138:| Pass requires interactive browser click/type | **Fail** the over-strict gate (FR-003) |
+specs/007-box-subagent-settings/verifier/non-goals.md:22:- Interactive browser click/type is required for computerUse Pass (clarify lock / FR-003)
+specs/007-box-subagent-settings/verifier/non-goals.md:40:| Interactive browser as Pass gate | Screenshot-only + handoff enough (FR-003) | Recipe ready |
+specs/007-box-subagent-settings/verifier/non-goals.md:146:## Interactive browser not a Pass gate (FR-003)
+specs/007-box-subagent-settings/verifier/non-goals.md:148:**Acceptance:** FR-003 · clarify lock · SC-005 · [scenario-2-computer-use.md](./scenario-2-computer-use.md)
+specs/007-box-subagent-settings/verifier/non-goals.md:150:computerUse Pass = screenshot-only (or equiv.) + parent handoff. Interactive browser click/type MUST NOT be required.
+specs/007-box-subagent-settings/verifier/non-goals.md:158:rg -n 'interactive browser not required|screenshot-only|FR-003' \
+specs/007-box-subagent-settings/verifier/non-goals.md:163:**Claim:** Scenario 2 recipe already locks screenshot-only — spot-check confirms.
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:9:**Architect locks:** Path A `dsh-computer-use` + one provider (Cua or Host Pass fixture) + `dsh-subagent` spawn-in-process (R3); screenshot-only Pass — interactive browser click/type **not** required (FR-003 / R0); Host SoT + Client HTTP/WS projection; no Electron Main `computer-use-control` / `computer-screenshot` bus (R1/R6); Settings chrome alone ≠ SC-002 (FR-005 / SC-004)
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:16:| SC coverage | SC-002 screenshot (or equiv. GUI observation) + parent handoff · FR-003 interactive browser not required · FR-015 LLM wording not scored |
+specs/007-box-subagent-settings/verifier/scenario-2-computer-use.md:50:| Interactive browser | **Not** required for Pass (FR-003) |
+
+--- FR-011 PTC not Pass ---
+specs/007-box-subagent-settings/verifier/scenario-5-full-replay.md:48:6. Fail if Pass was claimed via Electron Main box/Shell/computerUse bus / Client-only SoT / interactive-browser required / PTC-as-Shell Pass / settings chrome alone = Done.
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:137:| Pass requires PTC or brokered remote only | **Fail** (FR-011) |
+specs/007-box-subagent-settings/verifier/README.md:132:11. P7 Pass is **not** Electron Main store, Client-only SoT, interactive-browser required, PTC-as-Shell Pass, per-agent gear alone, or settings chrome = Done (T034).
+specs/007-box-subagent-settings/verifier/README.md:186:! rg -n -i 'Pass as ("?Electron Main store"?|"?Client-only SoT"?|"?interactive-browser required"?|"?PTC-as-Shell Pass"?|"?per-agent gear alone"?|"?settings chrome = Done"?)|P7 Pass (is|=) (Electron Main store|Client-only SoT|interactive-browser required|PTC-as-Shell Pass|per-agent gear alone|settings chrome = Done)' \
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:6:**Acceptance slice:** T019 — Verifier Scenario 1 recipe covering SC-001 (one local Shell/box tool success; FR-011 local only; not-ready ≠ Pass) with mandatory FR-013/014 (standing orders **11** + **12**) desktop evidence under `verifier/evidence/shell-box/`
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:9:**Architect locks:** Path A Host sandboxed Shell world (R2); readiness clear ≠ ready (R0 / FR-002); one Verifier-reachable **local** path enough — PTC/remote not Pass (FR-011); Host SoT + Client HTTP/WS projection; no Electron Main shell-exec / box-ready bus (R1/R6)
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:16:| SC coverage | SC-001 one local Shell/box tool success · FR-011 local only · FR-002 not-ready ≠ Pass · FR-015 LLM wording not scored |
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:45:| Pass topology | **Local** Host sandboxed Shell (`bash` and/or `pwsh` via sandbox-local) — FR-011 |
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:83:## Step B — One local Shell/box tool success (SC-001 · FR-001 · FR-011 · FR-015)
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:89:3. Confirm the path is **local** Host sandboxed Shell — do **not** require PTC or brokered remote for Pass (FR-011).
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:104:| Local only | Pass via Host local sandboxed Shell | Pass gated on PTC / remote-only topology (FR-011 Fail) |
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:137:| Pass requires PTC or brokered remote only | **Fail** (FR-011) |
+specs/007-box-subagent-settings/verifier/scenario-1-shell-box.md:186:FR-011: Pass — local Host sandboxed Shell only (bubblewrap; danger-full-access rejected)
+specs/007-box-subagent-settings/verifier/non-goals.md:6:**Acceptance:** Spec FR-006 · FR-007 · FR-008 · FR-009 · FR-010 · FR-011 · SC-005 · Out of Scope · [quickstart.md](../quickstart.md) Scenario 4
+
+--- contracts + prior SC Pass stamps present ---
+contracts/non-goals.md:OK
+1:Verdict: Pass (evidence rework after independent FAIL on duplicate 01/02 blobs)
+5:SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
+1:Verdict: Pass
+5:SC-002: Pass — evidence: evidence/computer-use/{01-computer-use-observation,02-computer-use-parent-handoff}.png + scenario-2-computer-use-walkthrough.mp4
+1:Verdict: Pass
+5:SC-003: Pass — evidence: evidence/settings/{01-settings-computer-section,02-settings-shell-readiness}.png + scenario-3-settings-walkthrough.mp4
+media:OK specs/007-box-subagent-settings/verifier/evidence/shell-box/01-shell-box-ready.png
+media:OK specs/007-box-subagent-settings/verifier/evidence/shell-box/02-shell-box-success.png
+media:OK specs/007-box-subagent-settings/verifier/evidence/computer-use/01-computer-use-observation.png
+media:OK specs/007-box-subagent-settings/verifier/evidence/computer-use/02-computer-use-parent-handoff.png
+media:OK specs/007-box-subagent-settings/verifier/evidence/settings/01-settings-computer-section.png
+media:OK specs/007-box-subagent-settings/verifier/evidence/settings/02-settings-shell-readiness.png
+
+SC-005_ABSENCE: Pass (spot-check measured)

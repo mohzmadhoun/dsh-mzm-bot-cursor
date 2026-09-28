@@ -1,0 +1,11 @@
+Verdict: Pass (SC-005 absence / Scenario 4)
+Stamp: 2026-09-28 · tip 952e55c05fbe · composite with SC-006 evidence branch cursor/p7-polish-sc006-evidence-15d6
+Linear: MOH-384 / MOH-386 · Epic MOH-350 · P-MOH-2
+SC-005: Pass — Out of Scope surfaces not required for Phase 7 product Pass
+Evidence: evidence/non-goals/measured-checks.txt · p7-t032-electron-bus.log · p7-t033-no-rewrite-001-006.log
+FR-006…FR-011 absence spot-checks: Pass (measured)
+T032 Electron bus: Pass (3/3 vitest)
+FR-009 no rewrite 001–006: Pass (empty diff vs origin/master on this tip before evidence-only commit)
+Claim tags: measured
+Blockers: none
+Scope lock: chrome alone ≠ SC-001/SC-002; absence of Out of Scope ≠ Fail

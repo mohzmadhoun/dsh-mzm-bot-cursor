@@ -1,0 +1,53 @@
+{
+  "opened": {
+    "ok": true,
+    "label": "Settings"
+  },
+  "computerNav": {
+    "ok": true,
+    "text": "Computer"
+  },
+  "panel": {
+    "text": "DSH Local Build\nNew Session\nPlugins\nWorkspaces\nNo sessions yet\nSettings\nSettings\nGeneral\nModels\nComputer\nBuilt-in plugins\nAgent presets\nArchived sessions\nOpen configuration file\nClose\nComputer\nShell\n\nHost sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.\n\nReady\nLocal sandbox\nComputer use\n\nWhen enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass.\n\nInto the Unknown\nPreview\nChoose workspace\nStandard mode\nChoose a workspace to start",
+    "rows": [
+      {
+        "attrs": {
+          "class": "WUiIYa_section",
+          "data-settings-computer": "true",
+          "data-computer-status": "ready"
+        },
+        "text": "ComputerShellHost sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.ReadyLocal sandboxComputer useWhen enabled, computerUse-class subagents may "
+      },
+      {
+        "attrs": {
+          "class": "WUiIYa_row",
+          "data-settings-computer-row": "shell",
+          "data-box-readiness": "ready",
+          "data-box-local": "true",
+          "data-box-id": "desktop-local"
+        },
+        "text": "ShellHost sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.ReadyLocal sandbox"
+      },
+      {
+        "attrs": {
+          "class": "WUiIYa_row",
+          "data-settings-computer-row": "computer-use",
+          "data-computer-use-enabled": "true"
+        },
+        "text": "Computer useWhen enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass."
+      }
+    ],
+    "signals": {
+      "shell": true,
+      "computerUse": true,
+      "ready": true,
+      "localSandbox": true,
+      "notReady": true
+    },
+    "liveHooks": {
+      "shellBox": 1,
+      "computerUseObs": 1,
+      "settingsComputer": 3
+    }
+  }
+}

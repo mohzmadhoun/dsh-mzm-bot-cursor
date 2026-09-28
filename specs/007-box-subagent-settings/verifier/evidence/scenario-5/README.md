@@ -8,11 +8,12 @@
 
 | Artifact | Content | Status |
 |----------|---------|--------|
-| `replay-pointer.log` | Gate + SHA/UTC + cited Scenario 1–4 evidence paths | Placeholder (T030) |
-| `vitest-electron-bus.log` | T032 `no-electron-box-shell-computer-bus` rerun | Placeholder (T032 / composite) |
-| `non-goals-spotcheck.log` | Contracts + exclusions + no-rewrite + Scenario recipes present | Placeholder |
-| `00-desktop-smoke-sc006.png` (optional) | Fresh Desktop Shell/box + computerUse + Settings smoke | Placeholder until composite run |
-| `VERDICT.txt` | Composite SC-006 stamp | **Not filled** — do not claim product Pass without composite Desktop evidence |
+| `replay-pointer.log` | Gate + SHA/UTC + cited Scenario 1–4 evidence paths | **Filled** (SC-006 composite) |
+| `vitest-electron-bus.log` | T032 `no-electron-box-shell-computer-bus` rerun | **Filled** (3/3 Pass) |
+| `non-goals-spotcheck.log` | Contracts + exclusions + no-rewrite + Scenario recipes present | **Filled** |
+| `00-desktop-smoke-sc006.png` | Fresh Desktop Settings → Computer smoke | **Filled** (Shell Ready + Computer use On) |
+| `scenario-5-sc006-desktop-smoke.mp4` | Short Desktop smoke recording | **Filled** |
+| `VERDICT.txt` | Composite SC-006 stamp | **Pass** (time-boxed composite) |
 
 ## Cited prior FR-013/014 media (not duplicated)
 
@@ -38,4 +39,4 @@ Do **not** delete existing media under `shell-box/` · `computer-use/` · `setti
 
 ## Stamp policy
 
-Created by T030. Fill [VERDICT.txt](./VERDICT.txt) only after composite Desktop evidence run per [scenario-5-full-replay.md](../../scenario-5-full-replay.md). Recipe-only delivery MUST NOT claim product SC-006 Pass.
+Product SC-006 Pass claimed via time-boxed composite on branch `cursor/p7-polish-sc006-evidence-15d6`. Independent Verifier re-gate required (author ≠ gate). Leave Linear Done to PO after Pass + merge.
