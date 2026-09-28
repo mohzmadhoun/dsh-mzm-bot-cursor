@@ -1,0 +1,54 @@
+Independent DH Verifier — SC-001 re-gate after remediation
+Target: PR #250 · cursor/p7-us1-sc001-evidence-dc28 @ dcd15ef779
+Verdict: PASS
+Stamp: 2026-09-28 · independent re-gate · P-MOH-2 · Epic MOH-350 · T019/MOH-375
+Agent: https://cursor.com/agents/bc-885c9b07-df77-5738-abcb-c7fdda7e6327
+Do not merge from this gate. US2 unlock: NOT granted (SC-001 evidence Pass only).
+
+## Checklist (user re-gate)
+
+1. 01 sha256 ≠ 02 sha256 ≠ 00 — PASS (measured)
+   - 00: 5e6da8dbf9c8fbb6818012371c0d1f4cd8dcd01905eedb6f406d3e8883a94dd1
+   - 01: a175a162d3444dc47304756dba72f8c68c180a8ffa91fea9d3fa3e3b8c95f1cb
+   - 02: 55c72df67dc033091418382ad359d184173786a6b0118bbbb5cf443d07321fe7
+   - Prior FAIL tip 00d1bbb4b1 had 01≡02 blob 11b42d22… — remediated (measured git ls-tree).
+
+2. Real non-trivial media under evidence/shell-box/ — PASS (measured)
+   - PNGs 1920×1200 RGB ≈2.5–2.6MB each; mp4 h264 1280×800 ≈52.6s / 1.08MB
+   - evidence == /opt/cursor/artifacts/ mirrors (sha256 match YES for all four files)
+
+3. not-ready ≠ Pass + local success still evidenced — PASS (measured Desktop frames)
+   - 00: "Box not ready" + escalate Rejected / "Shell tool error" (not Pass)
+   - 01: New Session idle composer ("Into the Unknown") — distinct ready/idle frame
+   - 02: "Shell tool succeeded" + output SC001_SHELL_BOX_OK
+   - walkthrough mp4: idle New Session → success session with same marker (frames @2s/25s/48s)
+
+4. Path A; not jsdom-alone — PASS (measured)
+   - Real Electron Desktop DISPLAY screenshots/recording (DSH Local Build)
+   - VERDICT/recipe: Host SoT + Client HTTP/WS; no Electron Main shell-exec/box-ready bus
+   - Evidence PR is media+stamp only; product Path A already on master foundations/US1
+
+5. SO12 PR body absolute /opt/cursor/artifacts/ embeds — PASS (measured + inferred per re-gate rule)
+   - measured: published body currently shows cursor.com/artifacts markdown/img after forge rewrite
+   - measured: video href retains path=%2Fopt%2Fcursor%2Fartifacts%2Fscenario-1-shell-box-walkthrough.mp4
+   - measured: artifacts exist at those absolute paths with matching sha256
+   - inferred: PO submitted absolute HTML embeds (VERDICT documents exact <img>/<video> sources;
+     re-gate instruction: accept forge rewrite when original absolute paths + artifacts exist)
+   - Prior FAIL driver (SO12 alone) cleared under this rule; media defect also cleared.
+
+## Acceptance criteria (scenario-1-shell-box.md)
+
+| Criterion | Result |
+| SC-001 one local Shell/box success | Pass |
+| FR-002 not-ready ≠ Pass | Pass |
+| FR-011 local only | Pass (bubblewrap Host sandboxed Shell) |
+| FR-013 SO11 Desktop media | Pass |
+| FR-014 SO12 committed + embeds | Pass (committed + SO12 rule satisfied) |
+| FR-015 LLM wording | not scored |
+| Path A Host SoT | Pass |
+
+## Blockers for DH Lead
+
+None for SC-001 evidence Pass on tip dcd15ef779.
+Do not merge unasked. Do not unlock US2 from this stamp.
+PO may merge GUI evidence PR #250 when ready; living gate / US2 remain separate.
