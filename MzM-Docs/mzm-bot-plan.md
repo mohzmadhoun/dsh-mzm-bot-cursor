@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done on master 2026-09-27 (SC-005 Pass #136); **P4** epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) — Spec Kit specify [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress |
-| **Date** | 2026-09-25 (living §10 updated 2026-09-27 P4 open) |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done; P4 Routines cron (MOH-188) Done on master 2026-09-28 (SC-001…005 Pass #166 @ `aca0c2b7c5`); **P5** epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) — Spec Kit specify [MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization) In Progress |
+| **Date** | 2026-09-25 (living §10 updated 2026-09-28 P5 open) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
 | **Inputs** | `MzM-Docs/mzm-bot-initial-plan.md` · `docs/designs/mzbot-wedge-to-grok-like.md` · `.specify/memory/constitution.md` · MzM Bot Plan room freeze |
@@ -91,22 +91,23 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **Exit** | User can attach/run a skill on a bot; Verifier covers load + one authoring path |
 | **Status** | **Done** — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); specs under `specs/003-skills-ux/`. US1–US4 + polish + SC-001…SC-005 stamped; product Verifier Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`. |
 
-### P4 — Routines (cron only) (current)
+### P4 — Routines (cron only) (done)
 
 | | |
 |--|--|
 | **In** | Create/pause/resume + pane list; Host jobs; **no** event listeners |
 | **Out** | Slack/GitHub/email/etc triggers (P6); recall UX (P5) |
 | **Exit** | Cron routine fires and is visible in pane; pause/resume verified |
-| **Status** | Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) In Progress. Spec Kit **specify** [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress. Living gate [living-next-gate.md](./living-next-gate.md). Do **not** rewrite `specs/001`–`003`. |
+| **Status** | **Done** — epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only); specs under `specs/004-routines-cron/`. SC-001…SC-005 Pass; product close [#166](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/166) @ `aca0c2b7c5`. |
 
-### P5 — Memory productization
+### P5 — Memory productization (current)
 
 | | |
 |--|--|
-| **In** | Profile / log / note + recall UX |
-| **Out** | Full Grok memory chrome parity beyond agreed ADR |
-| **Exit (Verifier-provable)** | Write profile/log/note fact → restart → recall returns it; Verifier scripted path documented |
+| **In** | Profile / log / note + recall UX; agent vs user memory layers per [adr/agent-vs-user-memory-layers.md](./adr/agent-vs-user-memory-layers.md) |
+| **Out** | Full Grok memory chrome parity beyond agreed ADR; P6 connectors/events; P7 Box/Shell |
+| **Exit (Verifier-provable)** | Write profile/log/note fact → restart → recall returns it; Verifier scripted path documented; SO 11+12 desktop visual evidence for GUI |
+| **Status** | Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) In Progress. Spec Kit **specify** [MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization) In Progress. Living gate [living-next-gate.md](./living-next-gate.md). Do **not** rewrite `specs/001`–`004`. |
 
 ### P6 — Connectors / MCP + event routines + trust productization
 
@@ -206,7 +207,8 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 4. ~~P1 wedge A implement + Verifier gates~~ **DONE** 2026-09-27 — epic MOH-37 Done on master. **Note:** P1 SC-005 live Desktop full replay remains **Deferred** (does **not** block later phases).
 5. ~~P2 Spec Kit design + implement + Verifier~~ **DONE** — epic [MOH-88](https://linear.app/momadhoun/issue/MOH-88/p2-identity-personas); Pass [#104](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/104).
 6. ~~P3 Spec Kit design + implement + Verifier~~ **DONE** 2026-09-27 — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); SC-005 Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`; specs `specs/003-skills-ux/`.
-7. **Current — P4 Spec Kit specify:** epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) + specify [MOH-189](https://linear.app/momadhoun/issue/MOH-189/p4-spec-kit-specify-routines-cron) In Progress on **DeepSeek Harness - Cursor** → **@DH Spec** `/speckit-specify` → new `specs/004-…` (do not rewrite 001–003). Living gate: [living-next-gate.md](./living-next-gate.md). Clarify/plan/tasks/analyze/implement follow after specify Verifier Pass — do **not** pre-load.
+7. ~~**P4 Spec Kit design + implement + Verifier**~~ **DONE** 2026-09-28 — epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only); SC-001…SC-005 Pass [#166](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/166) @ `aca0c2b7c5`; specs `specs/004-routines-cron/`.
+8. **Current — P5 Spec Kit specify:** epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) + specify [MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization) In Progress on **DeepSeek Harness - Cursor** → **@DH Spec** `/speckit-specify` → new `specs/005-memory-productization` (do not rewrite 001–004). Living gate: [living-next-gate.md](./living-next-gate.md). Clarify/plan/tasks/analyze/implement follow after specify Verifier Pass — do **not** pre-load.
 
 ---
 
