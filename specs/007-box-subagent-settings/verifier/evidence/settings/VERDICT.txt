@@ -1,0 +1,43 @@
+Verdict: Pass
+Stamp: 2026-09-28 · tip PENDING · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
+Linear: MOH-383 · Epic MOH-350 · P-MOH-2
+Branch: cursor/p7-us3-sc003-evidence-dc28 (PO opens PR + independent re-gate)
+SC-003: Pass — evidence: evidence/settings/{01-settings-computer-section,02-settings-shell-readiness}.png + scenario-3-settings-walkthrough.mp4
+SC-004 / FR-005: SC-003 alone does NOT grant SC-001 or SC-002; Phase still requires Scenarios 1–2 (evidence under shell-box/ + computer-use/ — not re-stamped here)
+FR-004 / FR-016: Global Settings → Computer; Shell + Computer use rows (locale-owned English)
+FR-002: Shell readiness visible (Ready / local sandbox); exact marketing string not scored
+FR-010: Update/Reset/catalog not required
+FR-013: desktop screenshots + short recording of real Electron Desktop (DISPLAY=:1); not unit/jsdom-only (SO 11)
+FR-014: media committed under verifier/evidence/settings/ AND mirrored under /opt/cursor/artifacts/ with identical filenames for PR embeds (SO 12)
+FR-015: LLM wording not scored
+Path A: Host SoT (computer settings Remotes); Client HTTP/WS projection (data-settings-computer / data-settings-computer-row / data-box-readiness); no Electron Main Computer-settings bus
+Blockers: none for SC-003 after Client getSnapshot stability + Host register authority deferral (measured on Desktop)
+
+## Measured Desktop path
+- Launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop (CDP :9222)
+- Global Settings → Computer (nav aria-selected / Wg2a9G_active)
+- Shell row: data-settings-computer-row=shell · data-box-readiness=ready · label Ready · Local sandbox
+- Computer use row: data-settings-computer-row=computer-use · data-computer-use-enabled=true
+- Supporting (not alone for Pass): Host vitest computer-settings-projection + box-readiness 9/9; Client ui-settings-computer 15/15
+
+## Distinct frames (not duplicate blobs)
+- 01-settings-computer-section.png — full Settings → Computer with Shell + Computer use rows (measured)
+- 02-settings-shell-readiness.png — clipped Shell row showing Ready readiness (measured; distinct sha256)
+- scenario-3-settings-walkthrough.mp4 — RecordScreen of Settings → Computer drive (measured)
+
+## Product fixes required for Desktop Pass (same branch)
+- Client: cache Computer settings getSnapshot projection (uSES stable reference; React #185 crash without it)
+- Host: defer Host-owned validate until after first resolve locks authority (reboot with persisted computer SoT)
+- Host: persist computerUseEnabled when committing readiness so Client decode stays complete
+
+sha256 (evidence == artifacts):
+- 01: a926f8a1c5bfe5ddfbcdef73083800d0cbd5fc082558991da7c0284c5599e8df
+- 02: 6c59c1f926405b805edf9204f779c810276c8c46a659e220dea7a6cc23d58eb3
+- mp4: 95447917b58591a8b43e6cc11974a3e360953e18c5b6c2ea86b57a5f5779b9bd
+
+## PR body embeds (PO / ManagePullRequest — SO 12)
+<img src="/opt/cursor/artifacts/01-settings-computer-section.png" alt="Settings Computer Shell and Computer use rows" />
+<img src="/opt/cursor/artifacts/02-settings-shell-readiness.png" alt="Shell row Host readiness visible (Ready)" />
+<video src="/opt/cursor/artifacts/scenario-3-settings-walkthrough.mp4" controls></video>
+
+Committed mirrors: specs/007-box-subagent-settings/verifier/evidence/settings/*

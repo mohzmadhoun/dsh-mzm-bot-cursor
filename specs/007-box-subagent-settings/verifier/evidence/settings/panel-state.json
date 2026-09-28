@@ -1,0 +1,57 @@
+{
+  "title": "Computer use screenshot subagent — DSH Local Build",
+  "hasSection": true,
+  "sectionStatus": "ready",
+  "shell": {
+    "readiness": "ready",
+    "local": "true",
+    "boxId": "desktop-local",
+    "text": "Shell\n\nHost sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.\n\nReady\nLocal sandbox"
+  },
+  "computerUse": {
+    "enabled": "true",
+    "text": "Computer use\n\nWhen enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass."
+  },
+  "readinessLabel": {
+    "value": "ready",
+    "text": "Ready"
+  },
+  "navHints": [
+    "Plugins",
+    "Plugins",
+    "General\nModels\nComputer\nBuilt-in plugins\nAgent presets\nArchived sessions",
+    "General",
+    "General",
+    "Models",
+    "Models",
+    "Computer",
+    "Computer",
+    "Agent presets",
+    "Agent presets",
+    "Archived sessions",
+    "Archived sessions",
+    "Computer use\n\nWhen enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass.",
+    "Computer use screenshot subagent\n/\n1 subagent",
+    "Computer use screenshot subagent",
+    "Agent Team"
+  ],
+  "hasShellCopy": true,
+  "hasComputerUseCopy": true,
+  "hasComputerNav": true,
+  "snippets": [
+    "Computer use screenshot subagent",
+    "Run Bash echo SC001_SHELL_BOX_OK",
+    "Settings",
+    "Settings",
+    "Computer",
+    "Computer",
+    "Shell",
+    "Host sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.",
+    "Ready",
+    "Computer use",
+    "When enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass.",
+    "Computer use screenshot subagent",
+    "Do exactly two tool calls in this order, then stop. No prose. No interactive browser. 1) Call tool computer_use_pass_screenshot with arguments {}. 2) Call tool subagent with description \"computerUse screenshot observation\" and prompt \"Call computer_use_pass_screenshot once with {} then stop.\""
+  ],
+  "textHead": "DSH Local Build\n0.1.6-alpha.2-930afcf-dirty\nNew Session\nPlugins\nWorkspaces\nubuntu\nComputer use screenshot subagent\n53min\nEcho SC001 verification via Bash\n1h\nRun Bash echo SC001_SHELL_BOX_OK\n1h\nSettings\nSettings\nGeneral\nModels\nComputer\nBuilt-in plugins\nAgent presets\nArchived sessions\nOpen configuration file\nClose\nComputer\nShell\n\nHost sandboxed Shell readiness (read-only); not-ready / starting / failed must not count as Shell tool success.\n\nReady\nLocal sandbox\nComputer use\n\nWhen enabled, computerUse-class subagents may observe the box desktop/browser and return screenshots. Settings chrome alone does not satisfy Shell or computerUse Pass.\n\nComputer use screenshot subagent\n/\n1 subagent\nStandard mode\nAgent Team\nChat\nTrajectory\nSystem prompt\nDo exactly two tool calls in this order, then stop. No prose. No interactive browser. 1) Call tool computer_use_pass_screenshot with arguments {}. 2) Call tool subagent with description \"computerUse screenshot observation\" and prompt \"Call computer_use_pass_screenshot once with {} then stop.\"\n18:03\n1 tool call · 1 subagent\nThink\n\nDone.\n\nUsage 29.3K tok\nRan for 4s\n18:04\nThought for a while\n\nSubagent 8440cc6b confirmed: one screenshot call, blank 1×1px result, no further actions.\n\nUsage 10.3K tok\nRan for 1s\n18:04\nThought for a while\nThink\n\nSubagent 8440cc6b settled. Both requested calls are complete; nothing further is pending.\n\nUsage 10.5K tok\nRan for 1s\n18:04\nMessage or run a task, / commands, @ files or sessions\nWorkspace Write\nDeepSeek-V41-Flash\nHigh\n3 turns 5 steps·267 tok/s\n50.1K tok·Cache hit 96%\n1%"
+}
