@@ -229,14 +229,14 @@ interface CreateRoutineDraft {
 }
 
 /**
- * Writable kinds on the shared Host writeMemory surface for P5 US1–US2.
- * Note lands on the same surface in US3 (T021); Host already accepts all three kinds.
+ * Writable kinds on the shared Host writeMemory surface for P5 US1–US3.
+ * Host already accepts profile | log | note; Client exposes all three (T015 / T018 / T021).
  */
-type MemoryWriteKind = Extract<MemoryKind, 'profile' | 'log'>
+type MemoryWriteKind = MemoryKind
 
 /**
- * Draft fields for Host writeMemory on the shared surface (P5 FR-001 / FR-002 / T015+T018).
- * Kind is profile | log; content MUST be non-empty after trim; layer is agent | user (FR-017 orthogonal).
+ * Draft fields for Host writeMemory on the shared surface (P5 FR-001–FR-003 / T015+T018+T021).
+ * Kind is profile | log | note; content MUST be non-empty after trim; layer is agent | user (FR-017 orthogonal).
  */
 interface WriteMemoryDraft {
   kind: MemoryWriteKind | ''
@@ -277,10 +277,11 @@ const ROUTINE_SCHEDULE_PRESETS = [
   { value: '@daily', label: 'routineSchedule.daily' },
 ] as const satisfies readonly { readonly value: string; readonly label: TeamKey }[]
 
-/** Writable kinds on the shared writeMemory surface (US1 profile + US2 log; note = T021). */
+/** Writable kinds on the shared writeMemory surface (US1 profile + US2 log + US3 note). */
 const MEMORY_WRITE_KIND_OPTIONS = [
   { value: 'profile', label: 'memoryKind.profile' },
   { value: 'log', label: 'memoryKind.log' },
+  { value: 'note', label: 'memoryKind.note' },
 ] as const satisfies readonly { readonly value: MemoryWriteKind; readonly label: TeamKey }[]
 
 /** Product layer choices for Host writeMemory (FR-017 — orthogonal to kind). */
@@ -581,7 +582,7 @@ export function TeamAction({
   /** Bot whose Host createRoutine editor is open (US1 / T017). */
   const [creatingRoutineBotId, setCreatingRoutineBotId] = useState<SessionId | null>(null)
   const [createRoutineDraft, setCreateRoutineDraft] = useState<CreateRoutineDraft>(EMPTY_CREATE_ROUTINE_DRAFT)
-  /** Bot whose Host writeMemory (profile|log) editor is open (P5 US1–US2 / T015+T018). */
+  /** Bot whose Host writeMemory (profile|log|note) editor is open (P5 US1–US3 / T015+T018+T021). */
   const [writingMemoryBotId, setWritingMemoryBotId] = useState<SessionId | null>(null)
   const [writeMemoryDraft, setWriteMemoryDraft] = useState<WriteMemoryDraft>(EMPTY_WRITE_MEMORY_DRAFT)
   /**
@@ -1466,7 +1467,7 @@ export function TeamAction({
   }
 
   /**
-   * Host writeMemory profile|log fact in bot context (P5 FR-001 / FR-002 / T015+T018).
+   * Host writeMemory profile|log|note fact in bot context (P5 FR-001–FR-003 / T015+T018+T021).
    * Empty content rejects Client-side; kind and layer are required; layer is orthogonal (FR-017).
    * Agent layer requires this botId; user layer omits botId (account-wide).
    * Calls authenticated Host HTTP/WS only — never Electron Main IPC.
@@ -2950,7 +2951,7 @@ interface WriteMemoryFormProps {
 }
 
 /**
- * Host writeMemory editor for profile|log on the shared surface (P5 FR-001 / FR-002 / T015+T018).
+ * Host writeMemory editor for profile|log|note on the shared surface (P5 FR-001–FR-003 / T015+T018+T021).
  * Missing kind/layer or empty content show a clear reject and block Save.
  * Layer choice is orthogonal to kind (FR-017). Calls Host Remotes only.
  */
@@ -2958,9 +2959,21 @@ function WriteMemoryForm({
   draft, setDraft, pending, onSave, onCancel, t,
 }: WriteMemoryFormProps) {
   const ready = draft.kind !== '' && draft.content.trim() !== '' && draft.layer !== ''
-  const contentPlaceholder = draft.kind === 'log'
-    ? t('memoryContentPlaceholder.log')
-    : t('memoryContentPlaceholder.profile')
+  const contentPlaceholder = (() => {
+    switch (draft.kind) {
+      case 'log':
+        return t('memoryContentPlaceholder.log')
+      case 'note':
+        return t('memoryContentPlaceholder.note')
+      case 'profile':
+      case '':
+        return t('memoryContentPlaceholder.profile')
+      default: {
+        const _exhaustive: never = draft.kind
+        return _exhaustive
+      }
+    }
+  })()
   return (
     <div
       className={css.form}
