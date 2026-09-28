@@ -18,7 +18,7 @@ Verifier recipes home: `verifier/` (created during implement / Verifier tasks �
 ## Prerequisites
 
 1. Desktop app buildable (`apps/desktop`, `apps/desktop-host`) with P1–P5 bots/routines/memory available.
-2. Host Connector catalog + event-capable Routine catalog mounted (Architect-confirmed homes; prefer Agent Teams + mcp-client / webhook harness).
+2. Host Connector catalog + event-capable Routine catalog mounted (Architect Path A: Agent Teams journal + mcp-client; B1 webhook→Routine wake).
 3. Thin catalog or Verifier fixture connector installable; webhook harness endpoint documented for Verifier.
 4. Spec artifacts: [spec.md](./spec.md), [plan.md](./plan.md), [research.md](./research.md).
 5. Topology: dual-process Host child; connector/event/trust traffic on Host HTTP/WS — not Main IPC.
@@ -126,4 +126,4 @@ Re-run Scenarios 1–5 on the real desktop app; record pass/fail against this sp
 
 ## Next
 
-`/speckit-tasks` after Architect answers research open questions and this plan is Verifier-accepted. No Linear ids until capacity.
+`/speckit-tasks` after this plan is Verifier-accepted (Architect Path A locked). No Linear ids until capacity.
