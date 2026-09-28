@@ -1,0 +1,21 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /tmp/p6-us2-host-event-wt
+
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-cron.spec.ts > routine-cron scheduleExpr stub > accepts @every 5m and computes next fire 2ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-cron.spec.ts > routine-cron scheduleExpr stub > accepts @hourly, @daily, and 5-field cron 1ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-cron.spec.ts > routine-cron scheduleExpr stub > rejects empty, sub-5m every, and unsupported expressions 1ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-cron.spec.ts > routine-cron scheduleExpr stub > US3 T022: only active routines are wake-eligible 0ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-cron.spec.ts > routine-cron scheduleExpr stub > US4 T025: isRoutineDue gates on active + next fire ≤ now 0ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-event.spec.ts > routine-event match helpers > T023: matches only active webhook_harness event rows 2ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-event.spec.ts > P6 US2 T022 Host createRoutine event path > T022: createRoutine event + webhook_harness requires non-empty intent; persists active row 91ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-event.spec.ts > P6 US2 T023 Host webhook-harness wake > T023: harness delivery wakes existing bot, updates lastRunAt; pause suppresses fire 88ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-event.spec.ts > P6 US2 T023 Host webhook-harness wake > T023: optional webhookRuntime ingress dispatches into Host wake (B1 adapt) 65ms
+ ✓ |thread-safe| packages/experimental/agent-team/tests/routine-event.spec.ts > P6 US2 T023 Host webhook-harness wake > T023: live followup wake + wake failure leaves lastRunAt unchanged 60ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  12:09:26
+   Duration  1.78s (transform 1.47s, setup 344ms, import 1.50s, tests 312ms, environment 0ms)

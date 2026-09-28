@@ -1,0 +1,10 @@
+ packages/experimental/agent-team/README.md         |   4 +-
+ packages/experimental/agent-team/README.zh.md      |   4 +-
+ packages/experimental/agent-team/src/client.ts     |   2 +
+ packages/experimental/agent-team/src/index.ts      | 180 ++++++++-
+ .../experimental/agent-team/src/routine-event.ts   |  57 +++
+ packages/experimental/agent-team/src/types.ts      |  31 ++
+ .../agent-team/tests/routine-event.spec.ts         | 413 +++++++++++++++++++++
+ specs/006-connectors-mcp-events-trust/tasks.md     |   4 +-
+ .../verifier/webhook-harness-b1.md                 |   7 +-
+ 9 files changed, 681 insertions(+), 21 deletions(-)

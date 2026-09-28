@@ -1,0 +1,68 @@
+T022–T023 Host event routine create + webhook-harness wake — DH Verifier
+=======================================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p6-us2-host-event-fe1d @ 2c3429f08f
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/213 (OPEN, base master)
+Linear: MOH-320 (T022) · MOH-321 (T023) — left In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T022–T023 / Host product — not SC-002 Scenario desktop Done)
+-----------------------------------------------------------------------
+[x] T022 createRoutine triggerKind=event + eventTrigger=webhook_harness validates
+    non-empty intent; rejects empty/whitespace with TEAM_INVALID_ARGUMENT; persists
+    active Host row (scheduleLabel Webhook harness, lastRunAt null) — FR-004.
+[x] T023 deliverWebhookHarness matches active webhook_harness rows, wakes existing
+    bot with intent (user/message or live followup), updates lastRunAt — FR-005/018 B1.
+    Manual Run-now alone not the Pass path (harness delivery exercised).
+[x] Pause suppresses matching deliveries (fired=[]); lastRunAt unchanged while paused.
+[x] Cron still due-evaluable (SC-008 Host): isRoutineDue true for due active cron;
+    event rows never due via cron ticker; evaluateDueRoutines returns [] for event-only.
+[x] Optional webhookRuntime rule kind webhook_harness dispatches into Host wake (B1).
+[x] Wake enqueue failure leaves lastRunAt unchanged.
+[x] tasks.md T022–T023 [x]; T025 Scenario 2 unchecked on this Host stamp.
+[x] Host-only: focused vitest enough for T022–T023 Pass — Desktop SC-002 is T025.
+
+Evidence (measured)
+-------------------
+Commands @ 2c3429f08f:
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/routine-event.spec.ts \
+    packages/experimental/agent-team/tests/routine-cron.spec.ts
+  → Test Files 2 passed | Tests 10 passed
+
+  Verbose names include:
+    - T022: createRoutine event + webhook_harness requires non-empty intent; persists active row
+    - T023: harness delivery wakes existing bot, updates lastRunAt; pause suppresses fire
+    - T023: optional webhookRuntime ingress dispatches into Host wake (B1 adapt)
+    - T023: live followup wake + wake failure leaves lastRunAt unchanged
+    - T023: matches only active webhook_harness event rows
+    - US4 T025: isRoutineDue gates on active + next fire ≤ now (cron due; event not due)
+
+Logs: p6-us2-host-t022-t023-vitest.log · p6-us2-host-t022-t023-vitest-verbose.log
+      p6-us2-host-t022-t023-diff-scope.log
+(also /opt/cursor/artifacts/p6-us2-host-t022-t023-*.log)
+
+Diff scope (origin/master...2c3429f08f Host T022–T023 slice): 9 files under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/006-connectors-mcp-events-trust/{tasks.md,verifier/webhook-harness-b1.md}
+  Zero Client UI / apps/desktop product paths in this Host slice.
+
+Claims
+------
+- Event create + empty-intent reject: **measured**
+- deliverWebhookHarness wake + lastRunAt: **measured**
+- Pause suppress: **measured**
+- Cron isRoutineDue still true for due cron; event skipped: **measured**
+- B1 webhookRuntime ingress → Host wake (not new-Session Pass): **measured**
+- tasks.md T022–T023 [x]: **measured**
+- Desktop SC-002 / FR-014/015 (T025): **not run** (out of scope)
+
+Scope lock
+----------
+Does NOT stamp SC-002 product Done or Scenario 2 desktop FR-014/015.
+Does NOT gate Client event pane (T024) or Verifier Scenario 2 recipe (T025).
+Does NOT mark Linear MOH-320 / MOH-321 Done.
+Does NOT merge PR #213.
+Next: Client T024 (if not already) · Verifier T025 Scenario 2 + desktop evidence.
+Leave MOH-320 / MOH-321 In Progress until PO merges.
