@@ -121,7 +121,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Host `createMemory` for `kind=note` validates non-empty `content`; rejects empty; persists on Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-003
+- [x] T020 [US3] Host `createMemory` for `kind=note` validates non-empty `content`; rejects empty; persists on Host catalog (`packages/experimental/agent-team/src/` / Desktop Host) per FR-003
 - [ ] T021 [P] [US3] Client note kind on the shared memory write surface under `packages/experimental/client-ui-agent-team/src/client/` via Host RPC
 - [ ] T022 [US3] Complete `specs/005-memory-productization/verifier/scenario-1-write-kinds.md` for SC-003 (note write + empty reject + leave/return + kinds distinguishable) and confirm SC-009 (bot-tool not required) — FR-011/012 evidence under `verifier/evidence/scenario-1/`
 
