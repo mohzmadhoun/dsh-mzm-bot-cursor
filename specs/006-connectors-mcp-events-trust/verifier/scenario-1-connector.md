@@ -1,6 +1,6 @@
 # Scenario 1 — Connector install → auth → successful tool call
 
-**Status:** Recipe present — product SC **Fail** stamped 2026-09-28 (T019–T020 Desktop: install+auth Pass; tool success Fail — Client↔Host invoke result shape). Evidence: [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt)
+**Status:** Product SC **Pass** stamped 2026-09-28 (T019–T020 Desktop install→auth→tool success @ tip `743ebf6eb1`). Evidence: [evidence/scenario-1/VERDICT.txt](./evidence/scenario-1/VERDICT.txt)
 **Owners:** DH Verifier (this recipe + Pass stamp) · DH Runtime (Host catalog / MCP bind / credentials) · DH Client (connector install + auth + tool-success surfaces)
 **Linear:** [MOH-319](https://linear.app/momadhoun/issue/MOH-319/t021-us1-verifier-scenario-1-connector-recipe) · Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-events-trust)
 **Acceptance slice:** T021 — Verifier Scenario 1 recipe covering SC-001 (install→auth→ready→successful tool call; FR-017 any-one fixture) with mandatory FR-014/015 (standing orders **11** + **12**) desktop evidence under `verifier/evidence/scenario-1/`
@@ -33,7 +33,7 @@
 | US1 Host Desktop install path (T017) | SC-001 Host half | **measured:** on master via [#210](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/210) |
 | US1 Host auth/tool outcome (T018) | SC-001 auth/tool Host half | **measured:** on master via [#210](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/210); Host vitest invoke Pass |
 | Client catalog + install UI (T019) | SC-001 desktop install | **measured:** Desktop Pass on tip `bc691342e2` (PR #211) — see [evidence/scenario-1/](./evidence/scenario-1/) |
-| Client auth + tool-success UI (T020) | SC-001 desktop auth/tool | **measured:** auth ready Pass; tool-success **Fail** (Client flat result vs Host `{ toolCall }` — [VERDICT.txt](./evidence/scenario-1/VERDICT.txt)) |
+| Client auth + tool-success UI (T020) | SC-001 desktop auth/tool | **measured:** Pass on tip `743ebf6eb1` (unwrap Host `{ toolCall }`) — [VERDICT.txt](./evidence/scenario-1/VERDICT.txt) |
 
 **Desktop prerequisites** (full Scenario 1 Pass): buildable Desktop (`apps/desktop`, `apps/desktop-host`) with ≥1 bot from prior phases; connector catalog / install / auth / tool-success surfaces on the real Desktop app; Host Connector catalog on Desktop Host; `DISPLAY` when Cloud Agent (`DISPLAY=:1`, `DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop`).
 
