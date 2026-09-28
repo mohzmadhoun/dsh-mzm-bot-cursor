@@ -397,7 +397,10 @@ interface WriteMemoryDraft {
   layer: MemoryLayer | ''
 }
 
-/** Draft secret for Host authenticateConnector in-app credential UX (P6 T020). */
+/**
+ * Ephemeral draft secret for Host authenticateConnector (P6 T020 / T031).
+ * Lives only in React state — never localStorage / sessionStorage / IndexedDB.
+ */
 interface ConnectorAuthDraft {
   secret: string
 }
@@ -2138,15 +2141,16 @@ export function TeamAction({
     await settleInstallConnector(catalogId, () => installConnector(sessionId, { catalogId }))
   }
 
-  /** Open in-app connector credential editor (P6 T020 / FR-002 / FR-008). */
+  /** Open in-app connector credential editor (P6 T020 / T031 / FR-002 / FR-008). */
   const startAuthenticateConnector = (connector: ConnectorProjection): void => {
     setAuthenticatingConnectorId(connector.connectorId)
     setConnectorAuthDraft(EMPTY_CONNECTOR_AUTH_DRAFT)
   }
 
   /**
-   * Host authenticateConnector with in-app secret (P6 T020).
-   * Empty secret rejects Client-side; secret never lands on journal/dump path.
+   * Host authenticateConnector with in-app secret (P6 T020 / T031 / FR-008 / FR-009).
+   * Empty secret rejects Client-side; secret is Host-RPC-only and cleared from draft on success.
+   * Vault / 1Password-class is not required when this path completes Pass fixture auth.
    */
   const submitAuthenticateConnector = async (connectorId: ConnectorId): Promise<void> => {
     const secret = connectorAuthDraft.secret.trim()
@@ -4320,8 +4324,8 @@ interface TaskFormProps {
 }
 
 /**
- * In-app Host authenticateConnector credential form (P6 T020 / FR-002 / FR-008).
- * Secret is never shown after save; chat-paste is not the primary path.
+ * In-app Host authenticateConnector credential form (P6 T020 / T031 / FR-002 / FR-008 / FR-009).
+ * Secret is never shown after save; chat-paste is not the primary path; vault not required for Pass.
  */
 interface ConnectorAuthFormProps {
   draft: ConnectorAuthDraft
@@ -4337,8 +4341,18 @@ function ConnectorAuthForm({
 }: ConnectorAuthFormProps) {
   const ready = draft.secret.trim() !== ''
   return (
-    <div className={css.form} data-team-connector-auth-editor>
+    <div
+      className={css.form}
+      data-team-connector-auth-editor=""
+      data-team-connector-auth-mode="in_app"
+    >
       <p className={css.hint}>{t('connectorAuthHint')}</p>
+      <p
+        className={css.hint}
+        data-team-connector-vault-not-required=""
+      >
+        {t('connectorAuthVaultOptional')}
+      </p>
       {!ready && (
         <div className={css.notice} data-team-connector-auth-reject="">
           {t('connectorAuthReject')}

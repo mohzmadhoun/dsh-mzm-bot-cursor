@@ -1,0 +1,75 @@
+T031 Client US5 credential UX / SC-007 (auth surface) — DH Verifier
+===================================================================
+Verdict: Pass
+Stamp: 2026-09-28 · tip origin/cursor/p6-us5-client-credential-fe1d @ b86a050956
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 DSH_HOME=<desktop development home> pnpm run start:desktop
+  · client-ui-agent-team lib/client.js rebundled (tsdown) before Desktop boot
+Product tip under test: b86a050956 (PR #221) — Phase 6 - T031 - Client in-app credential UX
+Evidence tip (this stamp commit): 78fa338b18 (78fa338b18884f80680dd23c8276dbe79858b835)
+Linear: Epic MOH-281 · T031 Client US5 · SC-007
+Recipe: specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md
+  · companion deep checks: scenario-5-credential-ux.md (T032 recipe on PR #220)
+  · shared evidence dir: verifier/evidence/scenario-1/
+
+Acceptance (T031 / SC-007 / FR-008 / FR-009 / FR-014 / FR-015)
+--------------------------------------------------------------
+[x] In-app auth surface visible (ConnectorAuthForm) — measured Desktop
+    evidence/scenario-1/02a-auth-surface.png
+    data-team-connector-auth-editor · data-team-connector-auth-mode=in_app
+[x] Vault not required marker — measured Desktop
+    data-team-connector-vault-not-required
+    copy: "Pass fixture auth completes in-app; a 1Password-class external vault is not required (FR-009). Secrets are not written to renderer durable storage (FR-008)."
+[x] Host RPC auth completes Pass fixture path → authState=ready — measured
+    evidence/scenario-1/02-auth-ready.png
+    connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2
+    authState=ready · toolsReady=true · credentialConfigured=true
+    tools bound mcp__verifier_fixture__ping
+    Host authenticateConnector only (no Electron Main credential-value bus)
+[x] FR-008 secrets off renderer durable SoT — measured (draft cleared; secret not echoed in DOM)
+[x] FR-009 vault optional — measured (Pass without vault UI; marker asserts not required)
+[x] Focused Client vitest T031 / US5 — measured green
+[x] FR-014 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-015 (SO 12) — media committed under verifier/evidence/scenario-1/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths (PO)
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip b86a050956 (DISPLAY=:1, port 9222):
+  catalog: verifier-fixture
+  install: installState=installed authState=needs_auth (pre-auth frame)
+  auth surface: authMode=in_app · vault-not-required marker present
+  auth save: Host RPC → authState=ready toolsReady=true credentialConfigured=true
+panel-state-t031.json · p6-t031-us5-credential-ux-cdp.log
+Walkthrough: p6-t031-us5-credential-ux-walkthrough.mp4
+Vitest: packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx -t 'T031 / US5'
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p6-t031-00-catalog-open.png
+  /opt/cursor/artifacts/p6-t031-01-connector-installed.png
+  /opt/cursor/artifacts/p6-t031-02a-auth-surface.png
+  /opt/cursor/artifacts/p6-t031-02-auth-ready.png
+  /opt/cursor/artifacts/p6-t031-us5-credential-ux-walkthrough.mp4
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p6-t031-02a-auth-surface.png" alt="SC-007 in-app auth surface vault not required" />
+  <img src="/opt/cursor/artifacts/p6-t031-02-auth-ready.png" alt="SC-007 Host RPC auth ready tools bound" />
+  <video src="/opt/cursor/artifacts/p6-t031-us5-credential-ux-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-007 in-app auth surface + vault not required: **measured**
+- FR-008 Host RPC / no renderer durable secret SoT: **measured**
+- FR-009 vault optional Pass: **measured**
+- Host RPC auth completes Pass fixture: **measured**
+- FR-014 desktop visual: **measured**
+- FR-015 commit under scenario-1/: **measured** (this stamp)
+- FR-015 PR HTML embeds: **inferred** until product-owner assistant updates PR #221 body
+
+Scope lock
+----------
+Does NOT merge. Leave Linear In Progress until PO merges GUI evidence + SO12 embeds.
+Verifier does not mark Linear Done. Epic MOH-281 US5 Client T031 Pass stamped.
+T032 recipe (PR #220) remains docs-only Pass; product SC-007 deep stamp uses this Desktop evidence set.
