@@ -28,7 +28,7 @@ import {
   type TeamUpdatePersonaActionResult, type TeamUpsertUserSkillActionResult,
   type TeamWriteMemoryActionResult,
 } from '../src/client/TeamAction.tsx'
-import { zh } from '../src/client/locales.ts'
+import { en, zh } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 
@@ -4328,6 +4328,90 @@ describe('TeamAction', () => {
     expect(await screen.findByText('authenticateConnector offline (gateway/internal)')).toBeTruthy()
     expect(document.querySelector('[data-team-connector-auth-state="needs_auth"]')).toBeTruthy()
     expect(document.querySelector('[data-team-connector-tool-outcome]')).toBeNull()
+  })
+
+  it('completes Pass in-app credential UX without vault or renderer durable secret (T031 / US5)', async () => {
+    const ConnectorId = (id: string) => id as import('@deepseek-ai/dsh-experimental-agent-team/client').ConnectorId
+    const SECRET = 'us5-fixture-token-not-for-storage'
+    const needsAuth = {
+      connectorId: ConnectorId('connector-1'),
+      catalogId: 'verifier-fixture',
+      serverName: 'verifier_fixture',
+      displayName: 'Verifier Fixture Connector',
+      installState: 'installed' as const,
+      authState: 'needs_auth' as const,
+      transport: 'stdio' as const,
+      credentialConfigured: false,
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const ready = {
+      ...needsAuth,
+      authState: 'ready' as const,
+      credentialConfigured: true,
+      updatedAt: 2,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, connectors: [needsAuth] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, connectors: [ready] },
+      })
+    const authenticateConnector = vi.fn((): Promise<TeamAuthenticateConnectorActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { connector: ready } },
+    }))
+    const describeConnectorCredential = vi.fn(
+      (): Promise<TeamDescribeConnectorCredentialActionResult> => Promise.resolve({
+        ok: true,
+        value: {
+          ok: true,
+          value: {
+            connectorId: ConnectorId('connector-1'),
+            credentialKey: 'agent-teams-connector/connector-1',
+            configured: true,
+            writable: true,
+            kind: 'api-key' as const,
+          },
+        },
+      }),
+    )
+    localStorage.clear()
+    sessionStorage.clear()
+    render(<TeamAction {...props(actions({
+      load,
+      authenticateConnector,
+      describeConnectorCredential,
+    }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh['connectorAuthState.needs_auth'])).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuth }))
+    const editor = document.querySelector('[data-team-connector-auth-editor]')
+    expect(editor?.getAttribute('data-team-connector-auth-mode')).toBe('in_app')
+    expect(document.querySelector('[data-team-connector-vault-not-required]')).toBeTruthy()
+    expect(screen.getByText(zh.connectorAuthVaultOptional)).toBeTruthy()
+    expect(zh.connectorAuthVaultOptional).toMatch(/FR-009/)
+    expect(zh.connectorAuthVaultOptional).toMatch(/FR-008/)
+    expect(zh.connectorAuthVaultOptional).toMatch(/不要求/)
+    expect(en.connectorAuthVaultOptional).toMatch(/not required/)
+    fireEvent.change(screen.getByLabelText(zh.connectorAuthSecret), {
+      target: { value: SECRET },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.connectorAuthSave }))
+    await waitFor(() => {
+      expect(authenticateConnector).toHaveBeenCalledWith(SESSION, {
+        connectorId: 'connector-1',
+        secret: SECRET,
+      })
+    })
+    expect(await screen.findByText(zh.connectorCredentialConfigured)).toBeTruthy()
+    expect(document.querySelector('[data-team-connector-auth-editor]')).toBeNull()
+    expect(document.querySelector('[data-team-connector-auth-secret]')).toBeNull()
+    expect(document.body.textContent ?? '').not.toContain(SECRET)
+    expect(localStorage.length).toBe(0)
+    expect(sessionStorage.length).toBe(0)
+    expect(JSON.stringify(authenticateConnector.mock.calls)).not.toContain('1Password')
+    expect(JSON.stringify(describeConnectorCredential.mock.calls)).not.toContain(SECRET)
   })
 
   it('enables standing deny via Host setStandingDeny and shows blocked tool outcome (T027)', async () => {
