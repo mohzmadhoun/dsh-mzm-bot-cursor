@@ -7,7 +7,7 @@
 **Architect Path A:** Host sandboxed Shell + `ctx.computerUse` (+ Cua or Host Pass fixture) + `dsh-subagent` spawn-in-process; Settings → **Computer** over Host SoT; Client projects Host HTTP/WS; no Electron Main box/Shell/computerUse/settings bus — see [research.md](../research.md) / [plan.md](../plan.md) / [box-computer-seam-locks.md](./box-computer-seam-locks.md) (T005)
 **Setup inventories (T002–T005):** [host-shell-box-inventory.md](./host-shell-box-inventory.md) · [computer-use-inventory.md](./computer-use-inventory.md) · [settings-computer-inventory.md](./settings-computer-inventory.md) · [box-computer-seam-locks.md](./box-computer-seam-locks.md)
 **Evidence:** [evidence/](./evidence/) — GUI slices locked as [evidence/shell-box/](./evidence/shell-box/) · [evidence/computer-use/](./evidence/computer-use/) · [evidence/settings/](./evidence/settings/) (FR-014; placeholders via plan tree / T029)
-**Linear:** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) · tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · T015 [MOH-371](https://linear.app/momadhoun/issue/MOH-371). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
+**Linear:** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) · tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · T015 [MOH-371](https://linear.app/momadhoun/issue/MOH-371) · filed map [linear-taskstoissues.md](./linear-taskstoissues.md) (T001–T035 → MOH-357…MOH-391). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
 ## T006 — Recipe home + Scenario 1–5 owners map (Setup)
 
@@ -131,25 +131,92 @@ Foundational Pass (T015) is **recorded** above. Scenario evidence still required
 10. No product rewrite of `specs/001`–`006` in P7 implement PRs (FR-009 / T033).
 11. P7 Pass is **not** Electron Main store, Client-only SoT, interactive-browser required, PTC-as-Shell Pass, per-agent gear alone, or settings chrome = Done (T034).
 
-## Linear tracking (T035 note)
+## T033 — No rewrite of `specs/001`–`006` (FR-009)
+
+**Verdict:** **Pass** (docs check)
+**Stamp:** 2026-09-28 · branch `cursor/p7-polish-spec-dc28` · base `origin/master` @ `50e68fcc76`
+**Linear:** [MOH-389](https://linear.app/momadhoun/issue/MOH-389) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · `P-MOH-2` only
+
+**Rule:** Phase 7 implement / Verifier PRs for `specs/007-box-subagent-settings` MUST NOT product-edit:
+
+- `specs/001-multi-model-bots/**`
+- `specs/002-identity-personas/**`
+- `specs/003-skills-ux/**`
+- `specs/004-routines-cron/**`
+- `specs/005-memory-productization/**`
+- `specs/006-connectors-mcp-events-trust/**`
+
+Prior-phase trees stay frozen unless a separate, explicitly scoped phase PR owns the change. Spec Kit feature work for Computer / box + subagent + settings lives only under `specs/007-box-subagent-settings/`.
+
+**Spot-check (per implement PR tip vs merge-base):**
+
+```sh
+git diff --name-only origin/master...HEAD -- \
+  specs/001-multi-model-bots specs/002-identity-personas \
+  specs/003-skills-ux specs/004-routines-cron \
+  specs/005-memory-productization specs/006-connectors-mcp-events-trust
+# Expect empty output for P7 implement PRs.
+```
+
+**Historical scan:** Merged Phase 7 subjects on `origin/master` (`git log --grep='Phase 7'`) — `git diff-tree --name-only` against the six prior-spec roots for each commit — **empty** (36 commits scanned, including living polish #261 + Electron absence guard #262; no product edits to `specs/001`–`006`). Merged implement / polish PRs #237–#262: file lists contain **no** `specs/001`…`006` paths.
+
+**Claim:** Documented here (T033 / FR-009). Spot-check empty on this polish branch tip.
+
+## T034 — Pass-path language (no forbidden SoT / Pass wording)
+
+**Verdict:** **Pass** (docs check)
+**Stamp:** 2026-09-28 · branch `cursor/p7-polish-spec-dc28` · base `origin/master` @ `50e68fcc76`
+**Linear:** [MOH-390](https://linear.app/momadhoun/issue/MOH-390) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · `P-MOH-2` only
+
+**Rule:** Product and Verifier docs MUST NOT document P7 Pass as any of:
+
+1. “Electron Main store” / Main bus as durable box / Shell / computerUse / Computer-settings SoT
+2. “Client-only SoT” / Client-local persistence alone as box readiness or Computer settings SoT
+3. “interactive-browser required” / click/type interactive browser as the computerUse Pass bar
+4. “PTC-as-Shell Pass” / PTC or remote Shell as the Shell Pass bar (FR-011 local only)
+5. “per-agent gear alone” / bot-local gear without Global Settings → **Computer** (FR-016)
+6. “settings chrome = Done” / SC-003 chrome alone granting SC-001 / SC-002 (FR-005 / SC-004)
+
+Affirmative Pass path: **Host SoT** for box readiness + sandboxed Shell + `ctx.computerUse` (+ Cua or Host Pass fixture) + `dsh-subagent` spawn-in-process; computerUse Pass = screenshot-only (or equiv.) + parent handoff; Shell Pass = one Verifier-reachable **local** Host sandboxed Shell tool success; Client Global Settings → **Computer** rows **Shell** + **Computer use** over Host HTTP/WS Remotes; Electron Main lifecycle-only (no product bus).
+
+**Spot-check:**
+
+```sh
+# Fail if product paths affirm P7 Pass *as* those forbidden bars (exclude this README — it documents the ban)
+! rg -n -i 'Pass as ("?Electron Main store"?|"?Client-only SoT"?|"?interactive-browser required"?|"?PTC-as-Shell Pass"?|"?per-agent gear alone"?|"?settings chrome = Done"?)|P7 Pass (is|=) (Electron Main store|Client-only SoT|interactive-browser required|PTC-as-Shell Pass|per-agent gear alone|settings chrome = Done)' \
+  apps/desktop-host \
+  packages/client/ui-settings-computer \
+  packages/experimental/client-ui-agent-team/src/client \
+  --glob '!**/node_modules/**' --glob '!**/lib/**'
+# Affirm Path A locks in Verifier README
+rg -n 'Host SoT|interactive browser.*not.*required|PTC/remote not Pass|chrome alone|Pass-path language \(T034\)' \
+  specs/007-box-subagent-settings/verifier/README.md
+```
+
+**Claim:** Documented here (T034). Spot-check clean on `apps/desktop-host/`, `packages/client/ui-settings-computer/`, and `packages/experimental/client-ui-agent-team/src/client/` — product prose already negates Main / Client-only SoT, interactive-browser requirement, and chrome-as-Pass; no path frames P7 Pass via the forbidden bars. This README affirms Host SoT + the ban list. No product prose edits required on this tip.
+
+## T035 — Linear tracking (P-MOH-2 only)
+
+**Verdict:** **Pass** (docs note)
+**Stamp:** 2026-09-28 · branch `cursor/p7-polish-spec-dc28` · base `origin/master` @ `50e68fcc76`
+**Linear:** [MOH-391](https://linear.app/momadhoun/issue/MOH-391) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · `P-MOH-2` only
 
 | Tracker | Id | Role |
 |---------|----|------|
 | Epic | [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) | P7 Computer / box + subagent + settings |
 | Tasks artifact | [MOH-354](https://linear.app/momadhoun/issue/MOH-354) | Spec Kit tasks home |
+| Filed map | [linear-taskstoissues.md](./linear-taskstoissues.md) | T001–T035 → MOH-357…MOH-391 |
 | Project | DeepSeek Harness - Cursor (`P-MOH-2`) | **Only** — never GrokBot |
 
-**Rule:** Do **not** invent Linear child issue ids in recipes or stamps. Materialize T001–T035 children only via Spec Kit `taskstoissues` after Verifier Pass on the tasks artifact (constitution §II).
+**Rule:** Do **not** invent Linear child issue ids in recipes or stamps. Materialize children only via Spec Kit `taskstoissues` after Verifier Pass on the tasks artifact (constitution §II). **Filed:** map under [linear-taskstoissues.md](./linear-taskstoissues.md). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never the GrokBot project.
 
-## Prior-spec freeze (T033 note)
-
-Phase 7 implement / Verifier PRs for `specs/007-box-subagent-settings` MUST NOT product-edit `specs/001-multi-model-bots/**` … `specs/006-connectors-mcp-events-trust/**` (FR-009). Document the check here when T033 runs.
+**Claim:** Documented here (T035). Header + this section + filed map state current truth.
 
 ## Coordination
 
-- **This file (`verifier/README.md`)** — DH Verifier owns for T006 / T015 / T031 / T033 / T035 stamps.
+- **This file (`verifier/README.md`)** — DH Verifier owns for T006 / T015 / T031 / T033 / T034 / T035 stamps.
 - Inventories T002–T004, seam locks T005 — Runtime / Client / Electron / Spec own those files under `verifier/`; do not collide with this README.
-- Evidence placeholders T029 and Scenario recipes T028/T030 — Verifier-owned follow-ons; T019 Scenario 1, T023 Scenario 2, and T027 Scenario 3 recipes are recorded below (SC-001 + SC-002 product Done on master; SC-003 product still open).
+- Evidence placeholders T029 and Scenario recipes T028/T030 — Verifier-owned follow-ons; T019 Scenario 1, T023 Scenario 2, and T027 Scenario 3 recipes are recorded below (SC-001 + SC-002 + SC-003 product Done on master).
 - Do **not** edit `MzM-Docs/` in this PR (Lead owns living after Verifier Pass).
 
 ## Scenario 1 recipe (T019) — Shell/box
