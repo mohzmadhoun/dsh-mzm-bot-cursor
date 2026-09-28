@@ -35,6 +35,11 @@ import type { IpcMainInvokeEvent } from 'electron'
  * event-routine wake, trust deny path, and credential store
  * (research R6 / R9 / T013–T014; `specs/006-connectors-mcp-events-trust/contracts/`);
  * Client mutates via authenticated Host HTTP/WS only.
+ * There is no shell-exec, box-ready, computer-use-control, computer-screenshot,
+ * or computer-settings-mutate channel — Host owns the sandboxed Shell execution world,
+ * box readiness, computerUse registry/provider runs, and Computer settings SoT
+ * (research R6 / T013–T014; `specs/007-box-subagent-settings/contracts/`);
+ * Client mutates via authenticated Host HTTP/WS only.
  */
 export const DESKTOP_IPC = {
   boot: 'dsh-desktop:boot',
