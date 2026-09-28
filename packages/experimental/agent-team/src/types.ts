@@ -1080,13 +1080,15 @@ export interface ListConnectorsResult {
 
 /**
  * Observable connector tool-call outcome vocabulary (data-model `ConnectorToolCall.outcome`).
- * Success proves US1 / SC-001; deny is reserved for US3; LLM reply wording is not scored (FR-016).
+ * Success proves US1 / SC-001; `denied` proves US3 / SC-003 (user-deny or standing never);
+ * LLM reply wording is not scored (FR-016).
  */
 export type ConnectorToolCallOutcome = 'success' | 'denied' | 'error'
 
 /**
  * One Host-observable connector tool invocation (data-model `ConnectorToolCall`).
  * Returned by `invokeConnectorTool` — not inferred from LLM chat text (FR-003 / FR-016).
+ * Denied means the Host gate refused the action; it MUST NOT be treated as success (FR-006).
  */
 export interface ConnectorToolCall {
   readonly connectorId: ConnectorId
@@ -1122,7 +1124,7 @@ export interface InvokeConnectorToolRequest extends InvokeConnectorToolInput {
   readonly signal: AbortSignal
 }
 
-/** Host-observable tool-call result (`outcome=success` for Story 1 Pass). */
+/** Host-observable tool-call result (`outcome=success` for Story 1; `denied` for Story 3). */
 export interface InvokeConnectorToolResult {
   readonly toolCall: ConnectorToolCall
 }
