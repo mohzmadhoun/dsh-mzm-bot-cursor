@@ -200,6 +200,32 @@
   color: var(--dsw-alias-state-error-primary);
 }
 
+.notReadySummary {
+  color: var(--dsw-alias-state-warning-primary, var(--dsw-alias-label-secondary));
+}
+
+/* Shell/box outcome indicator (P7 T018) — Verifier observes this label, not LLM wording. */
+.shellBoxOutcome {
+  flex: none;
+  margin-left: 8px;
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  line-height: calc(24px + var(--dsh-content-font-delta, 0px));
+  white-space: nowrap;
+}
+
+.shellBoxSuccess {
+  color: var(--dsw-alias-state-success-primary, var(--dsw-alias-label-secondary));
+}
+
+.shellBoxNotReady {
+  color: var(--dsw-alias-state-warning-primary, var(--dsw-alias-label-secondary));
+}
+
+.shellBoxError {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+
 /* Hover-revealed Inspect pill under the expanded terminal's bottom-left —
    ToolRow's .bodyWrap/.inspectButton treatment, replicated per the registrant
    posture: real flow (it reserves its line), revealed by hovering anywhere on

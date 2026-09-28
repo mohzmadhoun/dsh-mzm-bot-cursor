@@ -8,7 +8,7 @@ import type {
   TeamMemberView as TeamRosterMember, TeamTaskId,
 } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import type {} from '@deepseek-ai/dsh-experimental-agent-team/remote'
-import { RemoteError } from '@deepseek-ai/dsh-client-test-runtime'
+import { RemoteError, stubSettingsScope } from '@deepseek-ai/dsh-client-test-runtime'
 import type { TypertRemoteContribution } from '@deepseek-ai/dsh-typert-protocol'
 import { TeamAction, type TeamActionInjected } from '../src/client/TeamAction.tsx'
 import { inject, mountAgentTeamUi } from '../src/client/mount.ts'
@@ -592,10 +592,33 @@ async function bench(options: {
   } as never)
   ctx.provide('conversation', {})
   ctx.provide('locale', new LocaleRuntime(ctx))
+  const computerSettings = stubSettingsScope<{
+    boxId: string
+    readiness: 'not_ready' | 'starting' | 'ready' | 'failed'
+    local: boolean
+    updatedAt: string
+  }>()
+  computerSettings.publish({
+    status: 'ready',
+    value: {
+      boxId: 'desktop-local',
+      readiness: 'ready',
+      local: true,
+      updatedAt: '2026-09-28T00:00:00.000Z',
+    },
+    writable: false,
+    revision: 1,
+  })
+  ctx.provide('settingsScope', {
+    bind: () => computerSettings.scope,
+  } as never)
   await ctx.plugin(SlotRegistry).await()
   const collapseHeader = ctx.slots.register({
     name: 'root',
-    children: { 'conversation.session.header.actions': { kind: 'list', scope: 'session' } },
+    children: {
+      'conversation.session.header.actions': { kind: 'list', scope: 'session' },
+      'conversation.session.notices': { kind: 'list', scope: 'session' },
+    },
   } as never, () => null)
   if (options.registrationFailure === true) {
     vi.spyOn(ctx.slots, 'inject').mockImplementationOnce(() => { throw new Error('slot registration failed') })
@@ -629,9 +652,15 @@ async function bench(options: {
 describe('ui-team browser plugin', () => {
   it('registers one disposable header action with RPC-backed bot and task operations', async () => {
     const b = await bench()
-    expect(inject).toEqual(['sessions', 'uiWorkspace', 'remote', 'slots', 'locale'])
+    expect(inject).toEqual(['sessions', 'uiWorkspace', 'remote', 'slots', 'locale', 'settingsScope'])
     expect(b.entry()).toMatchObject({
       options: { id: 'agent-team', order: 20 },
+      locale: 'agent-team',
+    })
+    const readiness = b.ctx.slots.entries('conversation.session.notices')
+      .find(candidate => candidate.options.id === 'shell-box-readiness')
+    expect(readiness).toMatchObject({
+      options: { id: 'shell-box-readiness', order: 5 },
       locale: 'agent-team',
     })
     expect(b.remote.mount).toHaveBeenCalledOnce()

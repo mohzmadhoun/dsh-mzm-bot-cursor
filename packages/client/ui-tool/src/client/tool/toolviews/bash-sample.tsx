@@ -14,23 +14,29 @@ import {
   terminalCardModel,
   terminalFailed,
 } from '../models/terminal-card-model.ts'
+import { shellBoxOutcome, type ShellBoxOutcome } from '../models/shell-box-outcome.ts'
 import { formatToolBody, toolRowModel, type ToolRowState } from '../models/tool-call-model.ts'
 import { CONVERSATION_NS as NS } from '../../locale.ts'
 import css from './bash-sample.module.css'
 
 type BashRowProps = ToolCallViewProps & PropsLocale<'conversation'>
 
-function leadingFor(state: ToolRowState) {
+function leadingFor(state: ToolRowState, outcome: ShellBoxOutcome | null) {
+  if (outcome === 'not_ready') return <StateDot state="warning" />
   switch (state) {
     case 'error': return <StateDot state="error" />
     case 'stopped': return <StateDot state="warning" />
-    // Running keeps the icon — the row sweep carries the in-flight signal.
     default: return <IconApiOutline14 size={14} />
   }
 }
 
-/** Visually hidden status — StateDot is aria-hidden; AT needs a text label. */
-function stateStatus(state: ToolRowState, t: BashRowProps['t']): string | null {
+function stateStatus(
+  state: ToolRowState,
+  outcome: ShellBoxOutcome | null,
+  t: BashRowProps['t'],
+): string | null {
+  if (outcome === 'not_ready') return t('shellBox.notReady')
+  if (outcome === 'success') return t('shellBox.success')
   switch (state) {
     case 'running': return t('bash.running')
     case 'error': return t('bash.failed')
@@ -39,23 +45,30 @@ function stateStatus(state: ToolRowState, t: BashRowProps['t']): string | null {
   }
 }
 
-/** Renders expandable Bash output with an accessible lifecycle label. */
+function outcomeLabel(outcome: ShellBoxOutcome | null, t: BashRowProps['t']): string | null {
+  switch (outcome) {
+    case 'success': return t('shellBox.success')
+    case 'not_ready': return t('shellBox.notReady')
+    case 'error': return t('shellBox.error')
+    default: return null
+  }
+}
+
+/** Renders expandable Bash/Pwsh output with Shell/box success and not-ready indicators. */
 export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }: BashRowProps) {
   const model = toolRowModel(toolName, block)
-  // An omitted shell workdir is the session workspace; relative values resolve
-  // against it before reaching the terminal primitive.
   const cwd = useSessions(list => list.byId[sessionId]?.cwd)
   const terminalModel = terminalCardModel(block, cwd)
   const terminal = terminalModel === null ? null : localizeTerminalCardModel(terminalModel, t)
-  // A failing exit status is the terminal card's own error signal (the call
-  // itself settles isError:false), surfaced as the row's red state dot.
-  const state = model.state === 'ok' && terminalModel !== null && terminalFailed(terminalModel)
-    ? 'error'
-    : model.state
-  const status = stateStatus(state, t)
+  const boxOutcome = shellBoxOutcome(toolName, block)
+  const state: ToolRowState = boxOutcome === 'not_ready'
+    ? 'stopped'
+    : model.state === 'ok' && terminalModel !== null && terminalFailed(terminalModel)
+      ? 'error'
+      : model.state
+  const status = stateStatus(state, boxOutcome, t)
+  const boxLabel = outcomeLabel(boxOutcome, t)
   const [expanded, setExpanded] = useState(false)
-  // Failures, persistent-shell results, and spill previews use a generic body;
-  // background acknowledgements and malformed calls remain collapsed.
   const genericBody = terminal === null
     && (model.state === 'error' || isSettledPersistentShellCall(block) || isSpilledShellCall(block))
     && (model.bodyRaw !== null || model.output !== null)
@@ -68,9 +81,7 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
     [genericBody, model.bodyRaw, model.variant, open],
   )
   const failureLine = model.state === 'error' ? model.errorSummary : null
-  const toggleExpand = () => {
-    setExpanded(v => !v)
-  }
+  const toggleExpand = () => { setExpanded(v => !v) }
   const toggleFromKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!expandable || (event.key !== 'Enter' && event.key !== ' ')) return
     event.preventDefault()
@@ -81,11 +92,11 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
     : expandable
       ? (
         <>
-          <span className={css.iconIdle}>{leadingFor(state)}</span>
+          <span className={css.iconIdle}>{leadingFor(state, boxOutcome)}</span>
           <IconChevronDownOutline14 className={clsx(css.chevron, css.chevronHover)} />
         </>
       )
-      : leadingFor(state)
+      : leadingFor(state, boxOutcome)
   return (
     <div className={css.card}>
       <div
@@ -93,6 +104,7 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
         data-sample="bash"
         data-variant="bash"
         data-state={state}
+        data-shell-box-outcome={boxOutcome ?? undefined}
         data-expandable={expandable || undefined}
         role={expandable ? 'button' : undefined}
         tabIndex={expandable ? 0 : undefined}
@@ -104,9 +116,27 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
         {status !== null && <span className={css.visuallyHidden}>{status}</span>}
         <span className={css.title}>{t(model.titleKey)}</span>
         <span className={css.sep} aria-hidden />
-        <span className={clsx(css.summary, failureLine !== null && css.errorSummary)}>
+        <span className={clsx(
+          css.summary,
+          failureLine !== null && css.errorSummary,
+          boxOutcome === 'not_ready' && css.notReadySummary,
+        )}
+        >
           {failureLine ?? terminal?.description ?? model.summary}
         </span>
+        {boxLabel !== null && (
+          <span
+            className={clsx(
+              css.shellBoxOutcome,
+              boxOutcome === 'success' && css.shellBoxSuccess,
+              boxOutcome === 'not_ready' && css.shellBoxNotReady,
+              boxOutcome === 'error' && css.shellBoxError,
+            )}
+            data-shell-box-outcome-label={boxOutcome ?? undefined}
+          >
+            {boxLabel}
+          </span>
+        )}
       </div>
       {open && (
         <div className={css.bodyWrap}>
@@ -152,12 +182,14 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
   )
 }
 
-/** Registers the standalone Bash conversation-row sample. */
+/** Registers Bash and Pwsh conversation-row Shell/box projections (Path A). */
 export const bashToolviewSample = {
   name: 'bash-toolview-sample',
   inject: ['slots'],
   apply(ctx: Context): void {
-    ctx.slots.inject('tool.call.toolview', () =>
-      ctx.slots.register({ name: 'tool.call.toolview', key: 'bash', locale: NS }, BashRow))
+    ctx.slots.inject('tool.call.toolview', function* () {
+      yield ctx.slots.register({ name: 'tool.call.toolview', key: 'bash', locale: NS }, BashRow)
+      yield ctx.slots.register({ name: 'tool.call.toolview', key: 'pwsh', locale: NS }, BashRow)
+    })
   },
 }

@@ -37,6 +37,10 @@ import {
   HandoffNotices, type HandoffNoticesInjected,
 } from './HandoffNotices.tsx'
 import {
+  BoxReadinessNotices, decodeComputerBoxProjection,
+  type BoxReadinessNoticesInjected, type ComputerBoxSnapshot,
+} from './BoxReadinessNotices.tsx'
+import {
   TeamAction, type AnswerTrustApprovalInput, type AnswerTrustApprovalResult,
   type ConnectorToolInvokeResult, type InvokeConnectorToolInput,
   type PendingTrustApproval, type SetStandingDenyInput,
@@ -65,7 +69,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 }
 
 /** Required browser services for RPC, navigation, slots, and localized copy. */
-export const inject = ['sessions', 'uiWorkspace', 'remote', 'slots', 'locale']
+export const inject = ['sessions', 'uiWorkspace', 'remote', 'slots', 'locale', 'settingsScope']
 
 function registerUi(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'client-ui-agent-team: dictionaries')
@@ -472,6 +476,29 @@ function registerUi(ctx: ClientContext): void {
       inject: () => notices,
     }, HandoffNotices),
   )
+
+  // Host Computer readiness (P7 T018) — Path A settings Remotes; not Main IPC.
+  const computerScope = ctx.settingsScope.bind({
+    namespace: 'computer',
+    decode: decodeComputerBoxProjection,
+  })
+  const computerBox: BoxReadinessNoticesInjected['hooks']['computerBox'] = {
+    getSnapshot: (): ComputerBoxSnapshot => {
+      const snap = computerScope.getSnapshot()
+      return { status: snap.status, value: snap.value }
+    },
+    subscribe: listener => computerScope.subscribe(listener),
+  }
+  ctx.slots.inject(
+    'conversation.session.notices',
+    () => ctx.slots.register({
+      name: 'conversation.session.notices',
+      id: 'shell-box-readiness',
+      order: 5,
+      locale: NS,
+      inject: () => ({ hooks: { computerBox } }),
+    }, BoxReadinessNotices),
+  )
 }
 
 /**
@@ -485,7 +512,10 @@ export async function mountAgentTeamUi(
   contribution: TypertRemoteContribution,
 ): Promise<() => Promise<void>> {
   const disposeRemote = await ctx.remote.$mount(contribution)
-  const ui = ctx.inject(['sessions', 'uiWorkspace', 'remote.agentTeams', 'slots', 'locale'], registerUi)
+  const ui = ctx.inject(
+    ['sessions', 'uiWorkspace', 'remote.agentTeams', 'slots', 'locale', 'settingsScope'],
+    registerUi,
+  )
   try {
     await ui
   } catch (error) {
