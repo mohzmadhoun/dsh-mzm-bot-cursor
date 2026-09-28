@@ -7,7 +7,8 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import { createUserMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
 import { publicToolName } from '@deepseek-ai/dsh-mcp-client/src/tools.ts'
 import { queueHostSubagentPrompt } from '@deepseek-ai/dsh-subagent/internal'
-import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
+import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import { SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-session-persistence'
 import { writeSkillBundle } from '@deepseek-ai/dsh-skill-filesystem'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
@@ -130,6 +131,9 @@ import type {
   RoutineProjection,
   RoutineRecord,
   RoutineStatus,
+  WebhookHarnessDeliveryInput,
+  WebhookHarnessDeliveryRequest,
+  WebhookHarnessDeliveryResult,
   SendTeamMessageRequest,
   SendTeamMessageResult,
   SetAvatarInput,
@@ -229,6 +233,12 @@ import {
   isRoutineDue,
   routinesDueForWake,
 } from './routine-cron.ts'
+import {
+  isRoutineWebhookHarnessMatch,
+  optionalHarnessRoutineId,
+  routinesMatchingWebhookHarness,
+  WEBHOOK_HARNESS_FAMILY,
+} from './routine-event.ts'
 export {
   parseScheduleExpr,
   nextFireAt,
@@ -239,6 +249,12 @@ export {
   routinesDueForWake,
   MIN_EVERY_INTERVAL_MS,
 } from './routine-cron.ts'
+export {
+  isRoutineWebhookHarnessMatch,
+  optionalHarnessRoutineId,
+  routinesMatchingWebhookHarness,
+  WEBHOOK_HARNESS_FAMILY,
+} from './routine-event.ts'
 export {
   SKILL_INSTRUCTIONS_SECTION,
   bindTeammateSkillInstructions,
@@ -266,6 +282,30 @@ const DEFAULT_MAX_MESSAGE_BYTES = 65_536
 const DEFAULT_DISPOSAL_TIMEOUT_MS = 5_000
 /** Default Host Routine cron poll period (15s — Verifier ≤6 min window needs no sub-5m schedule). */
 const DEFAULT_ROUTINE_CRON_TICK_MS = 15_000
+
+/** Stable Host rule id registered on optional `ctx.webhookRuntime` (B1 adapt). */
+const WEBHOOK_HARNESS_RULE_ID = 'agent-teams-webhook-harness'
+
+/**
+ * Structural face for optional `dsh-webhook` runtime (peer may be absent).
+ * Rule callbacks MUST return `null` so Pass fire never creates a new Session.
+ */
+interface OptionalWebhookRuntime {
+  register(rule: {
+    readonly id: string
+    readonly kind: string
+    run(
+      delivery: {
+        readonly kind: string
+        readonly source: string
+        readonly deliveryId: string
+        readonly event: unknown
+        readonly receivedAt: number
+      },
+      signal: AbortSignal,
+    ): null | Promise<null>
+  }): () => void | Promise<void>
+}
 
 /** Validate one positive safe-integer deployment limit. */
 function positiveLimit(name: string, value: number): number {
@@ -383,6 +423,37 @@ export class TeamService extends TypertRemoteService {
       }, this.config.routineCronTickMs)
       return () => { clearInterval(timer) }
     }, 'agentTeams.routineCronTicker()')
+    // B1: adapt optional dsh-webhook ingress → Routine wake (existing bot + intent), not new-Session.
+    ctx.effect(() => {
+      const runtime = ctx.get('webhookRuntime') as OptionalWebhookRuntime | undefined
+      if (runtime === undefined) return () => {}
+      const dispose = runtime.register({
+        id: WEBHOOK_HARNESS_RULE_ID,
+        kind: WEBHOOK_HARNESS_FAMILY,
+        run: async (delivery, signal) => {
+          const event = delivery.event !== null && typeof delivery.event === 'object'
+            ? delivery.event as Record<string, unknown>
+            : {}
+          const routineId = optionalHarnessRoutineId(event.routineId)
+          const botIdRaw = typeof event.botId === 'string' ? event.botId.trim() : ''
+          await this.deliverWebhookHarness({
+            deliveryId: String(delivery.deliveryId),
+            receivedAt: delivery.receivedAt,
+            ...routineId === undefined ? {} : { routineId },
+            ...botIdRaw.length === 0 ? {} : { botId: SessionId(botIdRaw) },
+            signal,
+          })
+          return null
+        },
+      })
+      return () => {
+        void Promise.resolve(dispose()).catch((error: unknown) => {
+          this.ctx.logger.debug(
+            `Agent Teams webhook harness rule dispose: ${errorMessage(error)}`,
+          )
+        })
+      }
+    }, 'agentTeams.webhookHarnessRule()')
     for (const agent of ctx.agents.list()) this.scheduleRecovery(agent)
   }
 
@@ -726,14 +797,16 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Routine create (P4 US1 FR-001 / T015–T016).
+   * Lead-authorized Host Routine create (P4 US1 FR-001 / T015–T016; P6 US2 T022 additive event).
    * Persists a `RoutineRecord` on the Team journal (`team/routine`); status defaults to `active`.
    * Rejects empty intent or unsupported scheduleExpr without writing (loud TeamError).
+   * When `triggerKind=event`, requires Pass `eventTrigger=webhook_harness` and ignores scheduleExpr;
+   * empty intent still rejects with a clear reason (FR-004). Cron path remains additive (SC-008).
    * Per-`botId` isolation (SC-006); no confirm step and no separate displayName — identity from intent (SC-007).
    * Electron Main must not invent routine records — Host owns the durable write (research R1).
    * Not `@deepseek-ai/dsh-schedule` session reminders (research R2).
    * @param caller - exact live Lead Agent.
-   * @param request - bot id, intent, scheduleExpr, and cancellation.
+   * @param request - bot id, intent, scheduleExpr or eventTrigger, and cancellation.
    * @returns Host-owned Routine projection after create.
    */
   async createRoutine(caller: Agent, request: CreateRoutineRequest): Promise<CreateRoutineResult> {
@@ -1305,7 +1378,7 @@ export class TeamService extends TypertRemoteService {
         /* v8 ignore next -- disposal races the Host ticker mid-fire loop. */
         if (this.lifecycle.disposed) break
         if (this.inFlightFires.has(routine.routineId)) continue
-        const fired = await this.commitRoutineFire(root, routine, nowMs)
+        const fired = await this.commitRoutineFire(root, routine, nowMs, 'cron')
         if (fired !== undefined) committed.push(fired)
       }
     }
@@ -1313,16 +1386,68 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Wake one due routine's bot with intent, then persist `lastRunAt` after enqueue succeeds.
+   * Host webhook-harness delivery (P6 US2 T023 / FR-005 / FR-018; Architect Path A B1).
+   * Matches active `triggerKind=event` + `eventTrigger=webhook_harness` catalog rows, wakes
+   * each existing bot with that row's intent (same followup / subagent shape as cron fire),
+   * and commits `lastRunAt`. Paused rows never fire. Cron rows never match (SC-008).
+   * Manual “Run now” alone is insufficient for Pass — this harness path (or
+   * `webhookRuntime.dispatch` kind `webhook_harness`) is required.
+   * Default webhookRuntime new-Session creation is **not** the Pass fire path.
+   * @param request - delivery id, optional targeting, and cancellation.
+   * @returns projections for routines whose fire committed.
+   */
+  async deliverWebhookHarness(
+    request: WebhookHarnessDeliveryRequest,
+  ): Promise<WebhookHarnessDeliveryResult> {
+    request.signal.throwIfAborted()
+    const deliveryId = request.deliveryId.trim()
+    if (deliveryId.length === 0) {
+      throw new TeamError('deliveryId must be non-empty', 'TEAM_INVALID_ARGUMENT')
+    }
+    const receivedAt = request.receivedAt ?? Date.now()
+    if (!Number.isFinite(receivedAt) || !Number.isSafeInteger(receivedAt) || receivedAt < 0) {
+      throw new TeamError(
+        'receivedAt must be a non-negative safe integer',
+        'TEAM_INVALID_ARGUMENT',
+      )
+    }
+    if (this.lifecycle.disposed) {
+      return { fired: [], deliveryId, receivedAt }
+    }
+    const fired: RoutineProjection[] = []
+    for (const agent of this.ctx.agents.list()) {
+      if (this.lifecycle.disposed) break
+      const membership = this.roster.tryMembership(agent)
+      if (membership === undefined || membership.role !== 'lead') continue
+      const root = membership.root
+      const matched = routinesMatchingWebhookHarness(this.journal.state(root).routines, {
+        ...request.routineId === undefined ? {} : { routineId: request.routineId },
+        ...request.botId === undefined ? {} : { botId: request.botId },
+      })
+      for (const routine of matched) {
+        if (this.lifecycle.disposed) break
+        request.signal.throwIfAborted()
+        if (this.inFlightFires.has(routine.routineId)) continue
+        const committed = await this.commitRoutineFire(root, routine, receivedAt, 'webhook_harness')
+        if (committed !== undefined) fired.push(committed)
+      }
+    }
+    return { fired, deliveryId, receivedAt }
+  }
+
+  /**
+   * Wake one routine's bot with intent, then persist `lastRunAt` after enqueue succeeds.
    * @param root - exact live Team Lead owning the catalog.
-   * @param routine - due active catalog row (re-checked under journal lock before write).
+   * @param routine - catalog row (re-checked under journal lock before write).
    * @param firedAt - fire commit timestamp written to `lastRunAt`.
+   * @param source - `cron` requires due-ness; `webhook_harness` requires event match (B1).
    * @returns projection after fire commit, or undefined when wake/commit skipped.
    */
   private async commitRoutineFire(
     root: Agent,
     routine: RoutineRecord,
     firedAt: number,
+    source: 'cron' | 'webhook_harness',
   ): Promise<RoutineProjection | undefined> {
     /* v8 ignore next -- concurrent ticker ticks share one in-flight slot per routineId. */
     if (this.inFlightFires.has(routine.routineId)) return undefined
@@ -1333,12 +1458,16 @@ export class TeamService extends TypertRemoteService {
     try {
       /* v8 ignore next -- disposal races an admitted fire. */
       if (this.lifecycle.disposed) return undefined
-      // Re-check eligibility under current catalog (pause may have landed since due-scan).
+      // Re-check eligibility under current catalog (pause may have landed since match/due-scan).
       const latest = this.journal.state(root).routines.find(row => row.routineId === routine.routineId)
       /* v8 ignore next -- pause/delete races the due-scan. */
       if (latest === undefined || !isRoutineEligibleForWake(latest)) return undefined
-      /* v8 ignore next -- lastRunAt commit from a peer tick advances the anchor. */
-      if (!isRoutineDue(latest, firedAt)) return undefined
+      if (source === 'cron') {
+        /* v8 ignore next -- lastRunAt commit from a peer tick advances the anchor. */
+        if (!isRoutineDue(latest, firedAt)) return undefined
+      } else if (!isRoutineWebhookHarnessMatch(latest)) {
+        return undefined
+      }
       const bot = this.journal.state(root).members.find(member => member.id === latest.botId)
       if (bot === undefined || bot.phase !== 'active') {
         this.ctx.logger.warn(
@@ -1349,16 +1478,16 @@ export class TeamService extends TypertRemoteService {
       try {
         const live = this.ctx.agents.get(latest.botId)
         const content = [{ type: 'text' as const, text: latest.intent }]
-        const source = { kind: 'user' as const }
+        const messageSource = { kind: 'user' as const }
         if (live !== undefined) {
-          live.followup(createUserMessage({ content, source }))
+          live.followup(createUserMessage({ content, source: messageSource }))
         } else {
           await queueHostSubagentPrompt(
             this.ctx.subagents,
             root,
             latest.botId,
             content,
-            source,
+            messageSource,
             signal,
           )
         }
@@ -1376,6 +1505,7 @@ export class TeamService extends TypertRemoteService {
         const current = this.journal.state(root).routines.find(row => row.routineId === latest.routineId)
         /* v8 ignore next -- pause races the fire commit write. */
         if (current === undefined || !isRoutineEligibleForWake(current)) return undefined
+        if (source === 'webhook_harness' && !isRoutineWebhookHarnessMatch(current)) return undefined
         const row: RoutineRecord = {
           ...current,
           lastRunAt: firedAt,
@@ -1947,6 +2077,32 @@ export class TeamService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<BotIdentityMutationResult<ResumeRoutineResult>> {
     return this.botIdentityMutationResult(this.resumeRoutine(agent, { ...request, signal }))
+  }
+
+  /**
+   * Deliver one Host webhook-harness event through the generated Remote API (P6 US2 T023 / FR-005).
+   * Matches active event routines and wakes existing bots — not new-Session Pass; not Electron Main.
+   * @param agent - exact live Lead Agent (authority for Team catalog scan).
+   * @param request - delivery id and optional routine/bot targeting.
+   * @param signal - Remote call cancellation.
+   * @returns fired Routine projections or a typed Team rejection.
+   */
+  @Remote('deliverWebhookHarness')
+  remoteDeliverWebhookHarness(
+    agent: Agent,
+    request: WebhookHarnessDeliveryInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<WebhookHarnessDeliveryResult>> {
+    return this.botIdentityMutationResult((async () => {
+      const membership = this.roster.membership(agent)
+      if (membership.role !== 'lead') {
+        throw new TeamError(
+          'only the Team Lead can deliver a webhook harness event',
+          'TEAM_LEAD_REQUIRED',
+        )
+      }
+      return await this.deliverWebhookHarness({ ...request, signal })
+    })())
   }
 
   /**

@@ -947,6 +947,37 @@ export interface ResumeRoutineResult {
 }
 
 /**
+ * Host webhook-harness delivery (P6 US2 T023 / FR-005 / FR-018; data-model WebhookHarnessDelivery).
+ * Pass ingress for event-routine fire — Verifier fixture / `dsh-webhook` dispatch kind
+ * `webhook_harness`. Manual “Run now” alone is insufficient for Story 2 Pass.
+ * Optional `routineId` / `botId` narrow match; omission wakes every matching active row.
+ */
+export interface WebhookHarnessDeliveryInput {
+  /** Opaque delivery id for evidence correlation. */
+  readonly deliveryId: string
+  /** Host receipt time (epoch ms); defaults to `Date.now()` when omitted. */
+  readonly receivedAt?: number
+  /** Optional: fire only this catalog row. */
+  readonly routineId?: RoutineId
+  /** Optional: fire only routines owned by this bot. */
+  readonly botId?: SessionId
+}
+
+/** Lead-authorized Host webhook-harness delivery, including cancellation. */
+export interface WebhookHarnessDeliveryRequest extends WebhookHarnessDeliveryInput {
+  readonly signal: AbortSignal
+}
+
+/** Host Routine projections whose harness fire committed (`lastRunAt` updated). */
+export interface WebhookHarnessDeliveryResult {
+  readonly fired: readonly RoutineProjection[]
+  /** Echo of the delivery id for Verifier correlation. */
+  readonly deliveryId: string
+  /** Wall-clock sample used as fire commit timestamp. */
+  readonly receivedAt: number
+}
+
+/**
  * Host write-memory input (P5 FR-001…003 / T006–T008 / US1 T014 / US2 T017 / US3 T020).
  * Non-empty `content` required after trim; empty rejects without writing
  * (FR-001 profile, FR-002 log, FR-003 note). Persisted `kind` distinguishes

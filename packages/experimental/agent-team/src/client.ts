@@ -86,6 +86,8 @@ export type {
   UpsertUserSkillInput,
   UpsertUserSkillResult,
   UpdateTeamTaskRequest,
+  WebhookHarnessDeliveryInput,
+  WebhookHarnessDeliveryResult,
   WriteMemoryInput,
   WriteMemoryResult,
 } from './types.ts'
