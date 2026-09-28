@@ -8,9 +8,9 @@
 
 **Organization**: Shared Host box-readiness + sandboxed Shell mount + computerUse registry + Computer settings SoT foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority** (all P1): US1 Shell/box → US2 computerUse-class → US3 Settings rows. Chrome polish ≠ Verifier substitute (FR-005 / SC-004).
 
-**Linear**: Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · tasks gate [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
+**Linear**: Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · tasks gate [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356). **T001–T035 filed** — map [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md) (MOH-357…MOH-391). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
-**Branch**: `cursor/p7-setup-runtime-dc28` (Setup Runtime T002–T003; from `origin/master` @ analyze #236 / `6fa18cfcfe`)
+**Branch**: Setup Spec slice (`cursor/p7-setup-spec-dc28`); Runtime T002–T003 inventories already on master via #240
 
 **Architect Path A + clarify + PO locks (honor in every story/recipe)**:
 
@@ -264,6 +264,6 @@ Task: "Verifier scenario-2-computer-use.md + scenario-3-settings.md"
 - Clarify + PO locks (settings labels; screenshot-only; read-only Shell readiness; Host fixture OK; evidence dirs) non-negotiable
 - Standing orders **11** + **12** non-negotiable on GUI recipes
 - Do not rewrite specs/001–006; do not edit `MzM-Docs/` in implement PRs unless Lead-owned living gate says so
-- Linear under epic MOH-350 (T001–T035); **do not invent issue ids** beyond the epic until `taskstoissues`
+- **Linear under epic MOH-350** — T001–T035 filed as MOH-357…MOH-391; map [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md); P-MOH-2 only
 - Analyze follows this tasks PR; implement only after Verifier Pass on analyze (when gated)
 - **Stop after tasks** — do not start analyze/implement in the tasks spawn
