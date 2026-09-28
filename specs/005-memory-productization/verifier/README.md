@@ -5,26 +5,57 @@
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
 **PO / Architect lock:** Host Memory catalog SoT (research R1; prefer Agent Teams / Host journal) — see [research.md](../research.md) / [plan.md](../plan.md)
-**Setup inventories (Spec-owned; not this PR):** `host-memory-inventory.md` (T002) · `memory-inject-inventory.md` (T003) · `memory-seam-locks.md` (T004)
-**Evidence placeholders (T032):** `evidence/` — GUI media committed here + PR embeds (SO 11+12)
+**Setup inventories:** [host-memory-inventory.md](./host-memory-inventory.md) (T002) · [memory-inject-inventory.md](./memory-inject-inventory.md) (T003) · [memory-seam-locks.md](./memory-seam-locks.md) (T004)
+**Evidence:** [evidence/](./evidence/) — foundation stamp under [evidence/foundation-host/](./evidence/foundation-host/); GUI media + PR embeds for Scenario recipes (SO 11+12; placeholders T032)
 **Linear:** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228) · T001 [MOH-238](https://linear.app/momadhoun/issue/MOH-238) · T002 [MOH-239](https://linear.app/momadhoun/issue/MOH-239) · T003 [MOH-240](https://linear.app/momadhoun/issue/MOH-240) · T004 [MOH-241](https://linear.app/momadhoun/issue/MOH-241) · T005 [MOH-242](https://linear.app/momadhoun/issue/MOH-242) · T013 [MOH-250](https://linear.app/momadhoun/issue/MOH-250)
 
-## Foundational Pass gate (T013) — not stamped
+## Foundational Pass gate (T013)
 
 **Rule:** Product success criteria **SC-001…SC-010** MUST NOT be marked Done without a recorded foundational Pass (Host `MemoryRecord` + catalog + Host projection/mutations + inject-bind doc + Electron exclusion docs + no-Electron-memory-bus guard + transcript≠memory regression). Product SC evidence stays under Scenario recipes; this section is the foundation gate only.
 
-| Gate artifact | Location | Status |
-|---------------|----------|--------|
-| Host memory inventory (T002) | `verifier/host-memory-inventory.md` | Spec-owned — **not this PR** |
-| Memory inject inventory (T003) | `verifier/memory-inject-inventory.md` | Spec-owned — **not this PR** |
-| Memory seam locks (T004) | `verifier/memory-seam-locks.md` | Spec-owned — **not this PR** |
-| Host types + catalog + Remotes (T006–T008) | product packages | **Not ready** |
-| Inject-bind doc (T009) | `verifier/memory-inject-bind.md` | **Not ready** |
-| Electron exclusion + no-memory-bus (T010–T011) | `apps/desktop/` | **Not ready** |
-| Transcript ≠ memory (T012) | `verifier/transcript-not-memory.md` | **Not ready** |
-| Foundational Pass checklist (T013) | this README | **Deferred** — stamp only after T006–T012 |
+| Gate artifact | Location |
+|---------------|----------|
+| Host memory inventory (T002) | [host-memory-inventory.md](./host-memory-inventory.md) |
+| Memory inject inventory (T003) | [memory-inject-inventory.md](./memory-inject-inventory.md) |
+| Memory seam locks (T004) | [memory-seam-locks.md](./memory-seam-locks.md) |
+| Host types + catalog + Remotes (T006–T008) | `packages/experimental/agent-team/` (merged [#178](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/178)) |
+| Inject-bind doc (T009) | [memory-inject-bind.md](./memory-inject-bind.md) (merged [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176)) |
+| Electron exclusion + no-memory-bus (T010–T011) | `apps/desktop/` (merged [#177](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/177)) |
+| Transcript ≠ memory (T012) | [transcript-not-memory.md](./transcript-not-memory.md) (merged [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176)) |
+| Foundational Pass checklist (T013) | this README (checklist below) |
+| Evidence (post-merge rerun) | [evidence/foundation-host/](./evidence/foundation-host/) |
 
-**Scope lock:** Setup T005 does **not** authorize US1–US5 product work. Wait for Host/Electron foundation + T013 stamp ([tasks.md](../tasks.md) Phase 2 CRITICAL).
+### Foundational Pass checklist — recorded
+
+**Verdict:** **Pass** (foundations only)
+**Stamp:** 2026-09-28 · tip `origin/master` @ `bb73a3eac0` (includes merged [#178](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/178) T006–T008 · [#177](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/177) T010–T011 · [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176) T009/T012 · [#175](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/175)/[#174](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/174)/[#173](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/173) Setup)
+**Linear:** [MOH-250](https://linear.app/momadhoun/issue/MOH-250) · Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228)
+**Scope lock:** This Pass does **not** mark SC-001…SC-010 Done. Scenario recipes and product US1–US5 implementation remain open. US fan-out may begin after this stamp lands on master.
+
+| # | Foundation | Task | Pass bar | Evidence | Claim |
+|---|------------|------|----------|----------|-------|
+| 1 | **MemoryRecord types** | T006 | Host `MemoryRecord` with branded `memoryId`, `kind: profile\|log\|note`, `layer: agent\|user`, `botId` required when agent / null when user, non-empty `content`, `createdAt`, `updatedAt` | **measured:** `packages/experimental/agent-team/src/types.ts` exports `MemoryRecord` / `MemoryKind` / `MemoryLayer`; merge [#178](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/178) | Pass |
+| 2 | **Host catalog** | T007 | Durable write/list by bot + account-wide user rows on Host journal `team/memory` — not Electron Main, not transcript, not Client-only SoT | **measured:** `TeamService.writeMemory` / `listMemories`; journal append `team/memory`; focused agent-team vitest **3 passed** ([evidence](./evidence/foundation-host/vitest-memory.log)) | Pass |
+| 3 | **Host Remotes / projection** | T008 | Authenticated Host HTTP/WS mutations + Client-readable memory projection; Client invents no SoT | **measured:** `@Remote('writeMemory')` / `@Remote('listMemories')`; `projectMemory` / `projectMemories` / `view.memories` | Pass |
+| 4 | **Inject-bind doc** | T009 | Host `MemoryRecallInject` / instruction-bind approach locked; Verifier observes wiring not LLM wording | **measured:** [memory-inject-bind.md](./memory-inject-bind.md); merge [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176) | Pass |
+| 5 | **Electron exclusion docs** | T010 | host-protocol / ipc forbid memory-catalog, write, list/browse, recall, injection on Node IPC | **measured:** exclusion comments in `apps/desktop/src/host-protocol.ts` (+ ipc); merge [#177](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/177) | Pass |
+| 6 | **No Electron memory bus** | T011 | Electron Main has no parallel memory store/bus/write/recall/inject | **measured:** `apps/desktop/tests/no-electron-memory-bus.spec.ts` — **3 passed** ([evidence](./evidence/foundation-host/vitest-electron-bus.log)) | Pass |
+| 7 | **Transcript ≠ memory** | T012 | P5 Pass path is Host catalog write/list/recall + Host inject — not transcript dump; Client-only persistence is not SoT | **measured:** [transcript-not-memory.md](./transcript-not-memory.md); merge [#176](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/176) | Pass |
+
+**Rerun (idempotent):**
+
+```sh
+pnpm exec vitest run packages/experimental/agent-team -t 'memory|Memory|writeMemory|listMemories'
+pnpm exec vitest run apps/desktop/tests/no-electron-memory-bus.spec.ts
+test -f specs/005-memory-productization/verifier/memory-inject-bind.md
+test -f specs/005-memory-productization/verifier/transcript-not-memory.md
+rg -n "export interface MemoryRecord" packages/experimental/agent-team/src/types.ts
+rg -n "team/memory" packages/experimental/agent-team/src/journal.ts
+rg -n "@Remote\\('writeMemory'\\)|@Remote\\('listMemories'\\)" packages/experimental/agent-team/src/index.ts
+rg -n 'memory-catalog|memory-injection' apps/desktop/src/host-protocol.ts
+```
+
+**PO / DH Lead:** Foundations hold on master tip above. Do **not** close product SC Done on this stamp. Leave [MOH-250](https://linear.app/momadhoun/issue/MOH-250) In Progress until this stamp PR merges; then Done. Next: US1 write profile (T014+) + Scenario 1 recipe.
 
 ## FR-011/012 / standing orders 11+12 — desktop visual evidence (mandatory)
 
@@ -79,7 +110,7 @@ Scenario recipe bodies are **not** invented here — they land with US/polish ta
 ## Fan-out policy
 
 - Setup T001–T005 may land before Host foundation.
-- **No** US1–US5 product work until T006–T013 land (tasks CRITICAL).
+- **US1–US5 product work unblocked** after T006–T013 land on master (this stamp). Product SC still require Scenario recipes + FR-011/012 evidence.
 - Scenario 5 requires Scenarios 1–4 (or equivalent) plus foundational Pass.
 - Quickstart non-goals MUST NOT appear in Pass criteria ([quickstart.md](../quickstart.md) Scenario 4).
 
@@ -96,6 +127,7 @@ test -f specs/005-memory-productization/checklists/requirements.md
 test -f specs/005-memory-productization/verifier/README.md
 rg -n 'Scenario 1–5 owners map' specs/005-memory-productization/verifier/README.md
 rg -n 'standing orders 11\+12' specs/005-memory-productization/verifier/README.md
+rg -n 'Foundational Pass checklist — recorded' specs/005-memory-productization/verifier/README.md
 ```
 
-**PO / DH Lead:** T005 Verifier recipe home **Pass** (owners map + SO 11+12 mandate only). Leave [MOH-242](https://linear.app/momadhoun/issue/MOH-242) In Progress until this PR merges; then Done. **Do not** stamp T013 / product SC until Host+Electron foundation (T006–T012) lands. Next: Spec T001–T004 inventories + Runtime/Electron foundation fan-out.
+**PO / DH Lead:** T013 foundational checklist **Pass** (T006–T012 on master tip above). Leave [MOH-250](https://linear.app/momadhoun/issue/MOH-250) In Progress until this stamp PR merges; then Done. Do **not** mark product SC Done on this stamp. Next: US1–US5 fan-out.
