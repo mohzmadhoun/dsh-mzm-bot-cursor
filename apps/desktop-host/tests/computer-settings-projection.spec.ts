@@ -16,6 +16,7 @@ import {
   defaultComputerSettings,
   projectComputerSettingsRows,
   registerComputerSettings,
+  type ComputerSettings,
 } from '../src/computer-settings.ts'
 
 class MemorySettings extends SettingsProvider {
@@ -77,7 +78,9 @@ describe('computer settings Client row projection (T026)', () => {
       defaultComputerSettings(new Date('2026-09-28T12:00:00.000Z')),
     )
     await commitBoxReadiness(ctx, 'ready', new Date('2026-09-28T12:00:01.000Z'))
-    expect(projectComputerSettingsRows(ctx.settings.get(COMPUTER_SETTINGS_NAMESPACE)!)).toEqual({
+    expect(projectComputerSettingsRows(
+      ctx.settings.get(COMPUTER_SETTINGS_NAMESPACE)! as ComputerSettings,
+    )).toEqual({
       shell: {
         boxId: 'desktop-local',
         readiness: 'ready',
