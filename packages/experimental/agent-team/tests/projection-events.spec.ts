@@ -3,13 +3,15 @@ import { SESSION_FORMAT_VERSION, SessionId, SessionSeq } from '@deepseek-ai/dsh-
 import type { SessionEvent, SessionEventMap, SessionEventType } from '@deepseek-ai/dsh-session'
 import {
   teamProjectionDefinition,
+  projectMemory,
+  projectMemories,
   projectRoutine,
   projectRoutines,
   projectSidebarSections,
   projectSkillCatalog,
 } from '../src/projection.ts'
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
-import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId, RoutineId } from '../src/types.ts'
+import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId, MemoryId, RoutineId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
 
 const ROOT = SessionId('team-root')
@@ -48,6 +50,7 @@ function pending(state: TeamState): TeamMessageSnapshot[] {
 /** Whether one Team state contains no projected records. */
 function isEmptyState(state: TeamState): boolean {
   return state.members.length === 0 && state.sections.length === 0 && state.routines.length === 0
+    && state.memories.length === 0
     && state.tasks.length === 0
     && state.messages.length === 0 && state.delivered.length === 0
 }
@@ -193,6 +196,95 @@ describe('Agent Teams projection events', () => {
         updatedAt: 1,
       },
     }, SessionSeq(0))])).toThrow(/intent must be non-empty/)
+  })
+
+  it('persists Host Memory catalog rows and enforces layer/botId + non-empty content', () => {
+    const agentRow = event('team/memory', {
+      version: 2,
+      teamId: TEAM,
+      memory: {
+        memoryId: MemoryId('memory-1'),
+        kind: 'profile',
+        layer: 'agent',
+        botId: CHILD,
+        content: 'Prefers UTC',
+        createdAt: 10,
+        updatedAt: 10,
+      },
+    }, SessionSeq(0))
+    const userRow = event('team/memory', {
+      version: 2,
+      teamId: TEAM,
+      memory: {
+        memoryId: MemoryId('memory-2'),
+        kind: 'note',
+        layer: 'user',
+        botId: null,
+        content: 'Account fact',
+        createdAt: 20,
+        updatedAt: 20,
+      },
+    }, SessionSeq(1))
+    const state = teamState(project(ROOT, [agentRow, userRow]))
+    expect(state.memories).toEqual([
+      {
+        memoryId: MemoryId('memory-1'),
+        kind: 'profile',
+        layer: 'agent',
+        botId: CHILD,
+        content: 'Prefers UTC',
+        createdAt: 10,
+        updatedAt: 10,
+      },
+      {
+        memoryId: MemoryId('memory-2'),
+        kind: 'note',
+        layer: 'user',
+        botId: null,
+        content: 'Account fact',
+        createdAt: 20,
+        updatedAt: 20,
+      },
+    ])
+    expect(() => projectTeam(ROOT, [event('team/memory', {
+      version: 2,
+      teamId: TEAM,
+      memory: {
+        memoryId: MemoryId('memory-empty'),
+        kind: 'log',
+        layer: 'user',
+        botId: null,
+        content: '   ',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }, SessionSeq(0))])).toThrow(/content must be non-empty/)
+    expect(() => projectTeam(ROOT, [event('team/memory', {
+      version: 2,
+      teamId: TEAM,
+      memory: {
+        memoryId: MemoryId('memory-agent-nobot'),
+        kind: 'log',
+        layer: 'agent',
+        botId: null,
+        content: 'missing bot',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }, SessionSeq(0))])).toThrow(/agent layer requires botId/)
+    expect(() => projectTeam(ROOT, [event('team/memory', {
+      version: 2,
+      teamId: TEAM,
+      memory: {
+        memoryId: MemoryId('memory-user-bot'),
+        kind: 'log',
+        layer: 'user',
+        botId: CHILD,
+        content: 'user with bot',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }, SessionSeq(0))])).toThrow(/user layer must not set botId/)
   })
 
   it('derives named membership and Unassigned without a stored Unassigned row', () => {
@@ -620,6 +712,7 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
       members: [],
       sections: [],
       routines: [active, paused],
+      memories: [],
       tasks: [],
       nextTaskNumber: 1,
       messages: [],
@@ -629,6 +722,61 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
     expect(projectRoutines(state, SessionId('child-b'))).toEqual([projectRoutine(paused)])
     expect(projectRoutines(state)).toEqual([projectRoutine(active), projectRoutine(paused)])
     expect(projectRoutines(state, SessionId('missing'))).toEqual([])
+  })
+})
+
+describe('projectMemory / projectMemories (P5 T007–T008)', () => {
+  it('projects agent isolation and user sharing from Host rows', () => {
+    const agentA = {
+      memoryId: MemoryId('memory-agent-a'),
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: CHILD,
+      content: 'Alpha UTC',
+      createdAt: 10,
+      updatedAt: 10,
+    }
+    const agentB = {
+      memoryId: MemoryId('memory-agent-b'),
+      kind: 'log' as const,
+      layer: 'agent' as const,
+      botId: SessionId('child-b'),
+      content: 'Beta event',
+      createdAt: 20,
+      updatedAt: 20,
+    }
+    const user = {
+      memoryId: MemoryId('memory-user'),
+      kind: 'note' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Shared account fact',
+      createdAt: 30,
+      updatedAt: 30,
+    }
+    expect(projectMemory(agentA)).toEqual(agentA)
+    const state = {
+      id: TEAM,
+      members: [],
+      sections: [],
+      routines: [],
+      memories: [agentA, agentB, user],
+      tasks: [],
+      nextTaskNumber: 1,
+      messages: [],
+      delivered: [],
+    }
+    expect(projectMemories(state, CHILD)).toEqual([projectMemory(agentA), projectMemory(user)])
+    expect(projectMemories(state, SessionId('child-b'))).toEqual([
+      projectMemory(agentB),
+      projectMemory(user),
+    ])
+    expect(projectMemories(state)).toEqual([
+      projectMemory(agentA),
+      projectMemory(agentB),
+      projectMemory(user),
+    ])
+    expect(projectMemories(state, SessionId('missing'))).toEqual([projectMemory(user)])
   })
 })
 

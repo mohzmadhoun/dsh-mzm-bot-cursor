@@ -7,6 +7,8 @@ import type {
   AvatarMarker,
   AvatarShapeId,
   BotPersonaProfile,
+  MemoryKind,
+  MemoryLayer,
   SkillId,
 } from './types.ts'
 import { SkillId as toSkillId } from './types.ts'
@@ -14,6 +16,9 @@ import { parseScheduleExpr } from './routine-cron.ts'
 
 const PERSONA_FIELD_MAX = 200
 const PERSONA_ANTI_JOB_MAX_ITEMS = 64
+const MEMORY_CONTENT_MAX = 100_000
+const MEMORY_KINDS: ReadonlySet<string> = new Set(['profile', 'log', 'note'])
+const MEMORY_LAYERS: ReadonlySet<string> = new Set(['agent', 'user'])
 
 /** Fixed preset shape ids accepted by Host `setAvatar` (FR-005 / clarify lock 3). */
 export const AVATAR_SHAPE_IDS = ['circle', 'square', 'triangle', 'hexagon'] as const satisfies readonly AvatarShapeId[]
@@ -106,6 +111,54 @@ export function requiredRoutineIntent(value: string): string {
  */
 export function requiredScheduleExpr(value: string): string {
   return parseScheduleExpr(value).expr
+}
+
+/**
+ * Normalize Host memory content (P5 FR-001…003 / T006).
+ * Empty / whitespace-only content rejects write without persisting.
+ * @param value - raw content from Host write.
+ * @returns trimmed non-empty curated fact text.
+ */
+export function requiredMemoryContent(value: string): string {
+  return requiredText(value, 'content', MEMORY_CONTENT_MAX)
+}
+
+/**
+ * Normalize Host memory kind vocabulary (P5 FR-001…003 / FR-017).
+ * @param value - raw kind candidate.
+ * @returns validated kind (`profile` | `log` | `note`).
+ */
+export function requiredMemoryKind(value: string): MemoryKind {
+  if (typeof value !== 'string') {
+    throw new TeamError('kind must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const kind = value.trim()
+  if (!MEMORY_KINDS.has(kind)) {
+    throw new TeamError(
+      'kind must be one of: profile, log, note',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return kind as MemoryKind
+}
+
+/**
+ * Normalize Host memory layer (P5 ADR / FR-006 / FR-017).
+ * @param value - raw layer candidate.
+ * @returns validated layer (`agent` | `user`).
+ */
+export function requiredMemoryLayer(value: string): MemoryLayer {
+  if (typeof value !== 'string') {
+    throw new TeamError('layer must be a string', 'TEAM_INVALID_ARGUMENT')
+  }
+  const layer = value.trim()
+  if (!MEMORY_LAYERS.has(layer)) {
+    throw new TeamError(
+      'layer must be one of: agent, user',
+      'TEAM_INVALID_ARGUMENT',
+    )
+  }
+  return layer as MemoryLayer
 }
 
 /**

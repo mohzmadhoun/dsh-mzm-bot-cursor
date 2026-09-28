@@ -74,6 +74,8 @@ Host `attachSkill(botId, skillId)` 仅把有序 `{ botId, skillId }` 追加到�
 
 Host Routine 目录（P4 Architect Option 3）把 `RoutineRecord` 持久化在 Lead 日志路径 `team/routine`——按 `botId` 隔离，含非空 `intent`、产品支持的 `scheduleExpr`（`@every 5m`／`@hourly`／`@daily`／五段 cron）、`status: active|paused` 与 `lastRunAt`。Host `createRoutine`（US1 T015–T016）对空 intent 或不支持的 schedule 以明确 Remote `team-rejected` 原因拒绝且不写入；成功仅为该 `botId` 持久化 `status: active`（SC-006）。无确认步骤、无单独 displayName——面板 `identity` 由 intent 派生（SC-007）。Host `listRoutinesByBot`（US2 T019／FR-002）按单个 `botId` 经已认证 HTTP/WS 从该 Host 目录投影 `RoutineProjection`（intent／identity、scheduleExpr／scheduleLabel、status、lastRunAt）；`agentTeams/view.routines` 对 Team 视图暴露同一投影集合。Host `pauseRoutine`／`resumeRoutine`（US3 T022／FR-003/004）持久化 `status: paused|active`；`isRoutineEligibleForWake`／`routinesEligibleForWake` 确保 paused 行绝不会收到 Host cron 唤醒。Host cron 定时器（US4 T025／FR-005；Config `routineCronTickMs`）在 Host 进程中评估到期的 **active** 行，以例行 intent 唤醒 bot 回合（Agent followup／subagent 队列），并在触发提交后更新 `lastRunAt`；paused 行永不唤醒。这不是 `@deepseek-ai/dsh-schedule` 会话提醒，也不是 Electron Main 存储。Host `routine-cron` 校验表达式并计算下次触发／是否到期；可选 `ctx.jobs` 稍后仅可用于飞行中触发可见性。
 
+Host Memory 目录（P5 Host SoT）把 `MemoryRecord` 持久化在 Lead 日志路径 `team/memory`——`kind: profile|log|note`、`layer: agent|user`、`layer=agent` 时必填 `botId`／`layer=user` 时为 null、非空 `content` 与时间戳。Host `writeMemory`（T006–T008）对空 content 或非法 layer／`botId` 组合以明确 Remote `team-rejected` 原因拒绝且不写入；kind 与 layer 正交（FR-017）。Host `listMemories`（可选 `botId`）经已认证 HTTP/WS 投影该 bot 的 agent 层行加上全部账户级 user 行；`agentTeams/view.memories` 暴露完整目录。这不是 Electron Main 存储、不是 Client 独有 SoT、也不是聊天 transcript。
+
 `modelAssignmentsAreDistinct` 在与 `requiredModelSelection` 相同的 trim 之后比较两个赋值。可选的推理强度不会使它们不同。缺少任一 id 的行不是赋值，subagent 后端 id 仍留在 `provider`。
 
 roster 显示每个成员的职责（`lead` 或 `teammate`）与当前状态：`running`、`idle`、`inactive`（存在但未加载的成员）、`provisioning` 或 `failed`。未加载的成员会在唤醒后收到其消息。
@@ -165,7 +167,7 @@ Lead 可以停止 teammate 的当前轮次，而不会删除其排队的消息�
 
 ### 持久性模型
 
-Team 事件追加到精确的 live Lead 会话，并在操作报告成功或唤醒等待者之前 flush。`team/member`、`team/section`、`team/routine`、`team/task`、`team/message/queued` 与 `team/message/delivered` 仅存在于日志：它们从不进入会话表面，因此派生模型历史不受协作记录影响。顺序与时间由会话事件的 `seq` 与 `time` 负责，快照不重复保存。`./invariant` 伴生插件把每条候选 Team 事件对照已提交前缀回放，并在 append 前拒绝非法转换。
+Team 事件追加到精确的 live Lead 会话，并在操作报告成功或唤醒等待者之前 flush。`team/member`、`team/section`、`team/routine`、`team/memory`、`team/task`、`team/message/queued` 与 `team/message/delivered` 仅存在于日志：它们从不进入会话表面，因此派生模型历史不受协作记录影响。顺序与时间由会话事件的 `seq` 与 `time` 负责，快照不重复保存。`./invariant` 伴生插件把每条候选 Team 事件对照已提交前缀回放，并在 append 前拒绝非法转换。
 
 ### Dispose
 
@@ -191,7 +193,7 @@ dispose 会关闭准入、中止并等待已获准的创建、mailbox dispatch �
 
 ### 浏览器 Remote
 
-`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/renameBot`、`agentTeams/updatePersona`、`agentTeams/setAvatar`、`agentTeams/createSection`、`agentTeams/renameSection`、`agentTeams/assignSection`、`agentTeams/deleteBot`、`agentTeams/createRoutine`、`agentTeams/listRoutinesByBot`、`agentTeams/pauseRoutine`、`agentTeams/resumeRoutine`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`agentTeams/view` 返回 roster 行（在存在时投影 displayName、persona、avatar 与 sectionId）、具名 `sections` 与派生 membership、`unassignedBotIds`（clarify lock 4——无 Unassigned 目录行）、未删除任务、`handoffs`（Host mailbox 产品行）、Host 技能目录摘要以及 Host `routines` 投影。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view、handoff、身份 mutation 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
+`TeamService` 除了 roster、mailbox、task 与 lifecycle operation，还拥有生成的 `agentTeams/view`、`agentTeams/createBot`、`agentTeams/renameBot`、`agentTeams/updatePersona`、`agentTeams/setAvatar`、`agentTeams/createSection`、`agentTeams/renameSection`、`agentTeams/assignSection`、`agentTeams/deleteBot`、`agentTeams/createRoutine`、`agentTeams/listRoutinesByBot`、`agentTeams/pauseRoutine`、`agentTeams/resumeRoutine`、`agentTeams/writeMemory`、`agentTeams/listMemories`、`agentTeams/createTask` 与 `agentTeams/updateTask` Remote method。`agentTeams/view` 返回 roster 行（在存在时投影 displayName、persona、avatar 与 sectionId）、具名 `sections` 与派生 membership、`unassignedBotIds`（clarify lock 4——无 Unassigned 目录行）、未删除任务、`handoffs`（Host mailbox 产品行）、Host 技能目录摘要、Host `routines` 投影以及 Host `memories` 投影。`./remote` 导出由 Web UI 挂载的 Client contribution，`./client` 则重新导出可在浏览器 compilation face 中安全使用的 request、view、handoff、身份 mutation 与 task mutation result type。Typert 在外层 `RemoteResult` 中保留 transport failure；create 与 update rejection 则作为 transport 成功响应中的显式 domain result，其中过期的 update revision 会区分为 task conflict。
 
 ## 模型体验
 

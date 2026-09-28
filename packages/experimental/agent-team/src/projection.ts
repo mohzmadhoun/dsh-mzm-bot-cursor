@@ -15,6 +15,8 @@ Bot.`sectionId`. Unassigned/default is null/absent sectionId — no catalog row
 (T031–T033 / FR-006 / clarify lock 4).
 Host Routine catalog rows persist as `team/routine` (P4 Architect Option 3 SoT) —
 not `dsh-schedule` session reminders; Electron Main must not invent parallel rows.
+Host Memory catalog rows persist as `team/memory` (P5 Host Memory catalog SoT) —
+not chat transcript; Electron Main must not invent parallel rows (research R1/R6/R7).
 */
 
 import { z } from 'zod'
@@ -28,6 +30,8 @@ import type {
   AvatarMarker,
   BotPersonaProfile,
   HostMailboxMessage,
+  MemoryProjection,
+  MemoryRecord,
   RoutineProjection,
   RoutineRecord,
   SidebarSectionSnapshot,
@@ -40,6 +44,7 @@ import type {
   TeamTaskSnapshot,
 } from './types.ts'
 import {
+  MemoryId as toMemoryId,
   RoutineId as toRoutineId,
   SidebarSectionId as toSidebarSectionId,
   SkillId,
@@ -212,6 +217,24 @@ const teamRoutineEventSchema = z.object({
   routine: routineRecordSchema,
 }).strict() as z.ZodType<SessionEventMap['team/routine']>
 
+const memoryIdSchema = z.string().min(1).transform(value => toMemoryId(value))
+
+const memoryRecordSchema = z.object({
+  memoryId: memoryIdSchema,
+  kind: z.enum(['profile', 'log', 'note']),
+  layer: z.enum(['agent', 'user']),
+  botId: z.union([sessionIdSchema, z.null()]),
+  content: z.string().min(1),
+  createdAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  updatedAt: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+}).strict() as z.ZodType<MemoryRecord>
+
+const teamMemoryEventSchema = z.object({
+  version: z.literal(2),
+  teamId: teamIdSchema,
+  memory: memoryRecordSchema,
+}).strict() as z.ZodType<SessionEventMap['team/memory']>
+
 /** Current Team state selected by durable Team identity. */
 export interface TeamState {
   readonly id: TeamId
@@ -220,6 +243,8 @@ export interface TeamState {
   readonly sections: SidebarSectionSnapshot[]
   /** Host Routine catalog (P4 Architect Option 3 SoT). */
   readonly routines: RoutineRecord[]
+  /** Host Memory catalog (P5 Host Memory catalog SoT). */
+  readonly memories: MemoryRecord[]
   readonly tasks: TeamTaskSnapshot[]
   readonly messages: TeamMessageSnapshot[]
   readonly delivered: TeamMessageId[]
@@ -237,6 +262,7 @@ export function emptyTeamState(rootId: SessionId): TeamProjectionState {
     members: [],
     sections: [],
     routines: [],
+    memories: [],
     tasks: [],
     messages: [],
     delivered: [],
@@ -260,6 +286,7 @@ const teamProjectionEntrySchema = z.object({
   members: z.array(teamMemberSnapshotSchema),
   sections: z.array(sidebarSectionSnapshotSchema),
   routines: z.array(routineRecordSchema),
+  memories: z.array(memoryRecordSchema),
   tasks: z.array(teamTaskSnapshotSchema),
   messages: z.array(teamMessageSnapshotSchema),
   delivered: z.array(teamMessageIdSchema),
@@ -273,6 +300,7 @@ export type TeamEventType =
   | 'team/task'
   | 'team/section'
   | 'team/routine'
+  | 'team/memory'
   | 'team/message/queued'
   | 'team/message/delivered'
 
@@ -289,6 +317,7 @@ export function isTeamEvent(event: SessionEvent): event is TeamSessionEvent {
     || event.type === 'team/task'
     || event.type === 'team/section'
     || event.type === 'team/routine'
+    || event.type === 'team/memory'
     || event.type === 'team/message/queued'
     || event.type === 'team/message/delivered'
 }
@@ -313,6 +342,8 @@ function parseCurrentTeamEvent(event: TeamSessionEvent): TeamSessionEvent {
       return { ...event, data: parsePersisted(event.type, teamSectionEventSchema, event.data) }
     case 'team/routine':
       return { ...event, data: parsePersisted(event.type, teamRoutineEventSchema, event.data) }
+    case 'team/memory':
+      return { ...event, data: parsePersisted(event.type, teamMemoryEventSchema, event.data) }
     case 'team/message/queued':
       return { ...event, data: parsePersisted(event.type, teamMessageQueuedEventSchema, event.data) }
     case 'team/message/delivered':
@@ -434,6 +465,29 @@ function applyCurrentTeamEvent(state: TeamState, event: TeamSessionEvent): void 
       else state.routines[index] = routine
       break
     }
+    case 'team/memory': {
+      const memory = event.data.memory
+      if (memory.content.trim().length === 0) {
+        throw new Error(`memory "${memory.memoryId}" content must be non-empty`)
+      }
+      if (memory.kind !== 'profile' && memory.kind !== 'log' && memory.kind !== 'note') {
+        throw new Error(`memory "${memory.memoryId}" kind must be profile, log, or note`)
+      }
+      if (memory.layer !== 'agent' && memory.layer !== 'user') {
+        throw new Error(`memory "${memory.memoryId}" layer must be agent or user`)
+      }
+      if (memory.layer === 'agent') {
+        if (memory.botId === null || String(memory.botId).trim().length === 0) {
+          throw new Error(`memory "${memory.memoryId}" agent layer requires botId`)
+        }
+      } else if (memory.botId !== null) {
+        throw new Error(`memory "${memory.memoryId}" user layer must not set botId`)
+      }
+      const index = state.memories.findIndex(candidate => candidate.memoryId === memory.memoryId)
+      if (index < 0) state.memories.push(memory)
+      else state.memories[index] = memory
+      break
+    }
     case 'team/message/queued': {
       const message = event.data.message
       if (state.messages.some(candidate => candidate.id === message.id)) {
@@ -519,8 +573,8 @@ function sameSkillAttachments(
 /** Host-only Team projection selected by the projected Session identity. */
 export const teamProjectionDefinition = {
   key: 'agentTeam',
-  // Bumped when Host Routine catalog joined TeamState (P4 T007).
-  stateVersion: 5,
+  // Bumped when Host Memory catalog joined TeamState (P5 T007).
+  stateVersion: 6,
   stateSchema: teamProjectionEntrySchema,
   init: header => emptyTeamState(header.id),
   apply: (state, event) => {
@@ -589,6 +643,45 @@ export function projectRoutine(routine: RoutineRecord): RoutineProjection {
     lastRunAt: routine.lastRunAt,
     createdAt: routine.createdAt,
     updatedAt: routine.updatedAt,
+  }
+}
+
+/**
+ * Project Host Memory catalog rows for Client browse / recall (P5 FR-007 / US5).
+ * Host journal SoT only — never invent rows from Electron Main, Client local store, or transcript.
+ * When `botId` is set: that bot’s agent-layer rows plus all account-wide user-layer rows.
+ * When omitted: full catalog.
+ * @param state - projected Team state.
+ * @param botId - optional bot context for agent isolation + user sharing.
+ * @returns Client {@link MemoryProjection} rows in catalog order.
+ */
+export function projectMemories(
+  state: TeamState,
+  botId?: SessionId,
+): readonly MemoryProjection[] {
+  const rows = botId === undefined
+    ? state.memories
+    : state.memories.filter(memory => (
+      memory.layer === 'user'
+      || (memory.layer === 'agent' && memory.botId === botId)
+    ))
+  return rows.map(projectMemory)
+}
+
+/**
+ * Map one durable {@link MemoryRecord} to a Client {@link MemoryProjection}.
+ * @param memory - Host catalog row.
+ * @returns browse-ready projection (kinds and layers distinguishable).
+ */
+export function projectMemory(memory: MemoryRecord): MemoryProjection {
+  return {
+    memoryId: memory.memoryId,
+    kind: memory.kind,
+    layer: memory.layer,
+    botId: memory.botId,
+    content: memory.content,
+    createdAt: memory.createdAt,
+    updatedAt: memory.updatedAt,
   }
 }
 

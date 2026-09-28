@@ -1770,6 +1770,7 @@ describe('Team Remote API', () => {
       handoffs: [],
       skills: [],
       routines: [],
+      memories: [],
     })
 
     const createdResult = await ctx.agentTeams.remoteCreateTask(lead, {
@@ -1794,7 +1795,118 @@ describe('Team Remote API', () => {
       handoffs: [],
       skills: [],
       routines: [],
+      memories: [],
     })
+  })
+
+  it('P5 T006-T008: writeMemory / listMemories persist Host catalog over Remotes', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('memory alpha'),
+      textResponse('memory beta'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Memory Alpha',
+      modelSelection: { provider: 'mock', model: 'memory-a' },
+      signal: SIGNAL,
+    })
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Memory Beta',
+      modelSelection: { provider: 'mock', model: 'memory-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    await waitNoAgent(ctx, beta.id)
+
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '   ',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      content: 'missing bot',
+      signal: SIGNAL,
+    })).rejects.toThrow(/botId is required/)
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'user',
+      botId: alpha.id,
+      content: 'user with bot',
+      signal: SIGNAL,
+    })).rejects.toThrow(/must be absent or null/)
+    await expect(ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  ',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/content must be non-empty/) },
+    })
+    expect(ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories)
+      .toEqual([])
+
+    const agentProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Alpha prefers UTC',
+      signal: SIGNAL,
+    })
+    expect(agentProfile.memory).toMatchObject({
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Alpha prefers UTC',
+    })
+    const userNote = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: 'Account timezone America/New_York',
+      signal: SIGNAL,
+    })
+    expect(userNote.memory).toMatchObject({
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: 'Account timezone America/New_York',
+    })
+    const agentLog = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: beta.id,
+      content: 'Beta shipped P5 foundation',
+      signal: SIGNAL,
+    })
+
+    // Agent isolation: bot B must not list A's agent rows as B's agent memory.
+    const alphaListed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(alphaListed).toEqual([agentProfile.memory, userNote.memory])
+    const betaListed = ctx.agentTeams.listMemories(lead, { botId: beta.id, signal: SIGNAL }).memories
+    expect(betaListed).toEqual([userNote.memory, agentLog.memory])
+
+    // User sharing: same user row visible in both bot contexts.
+    expect(alphaListed.some(row => row.memoryId === userNote.memory.memoryId)).toBe(true)
+    expect(betaListed.some(row => row.memoryId === userNote.memory.memoryId)).toBe(true)
+
+    // Orthogonality: kinds independent of layers (profile on agent, note on user, log on agent).
+    expect(new Set(alphaListed.map(row => row.kind))).toEqual(new Set(['profile', 'note']))
+    expect(new Set([agentProfile.memory.layer, userNote.memory.layer, agentLog.memory.layer]))
+      .toEqual(new Set(['agent', 'user']))
+
+    const remoteList = await ctx.agentTeams.remoteListMemories(lead, { botId: alpha.id }, SIGNAL)
+    expect(remoteList).toMatchObject({ ok: true, value: { memories: alphaListed } })
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.memories).toHaveLength(3)
+    expect(view.memories).toEqual([
+      agentProfile.memory,
+      userNote.memory,
+      agentLog.memory,
+    ])
   })
 
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {

@@ -24,7 +24,7 @@ import {
   type PersonaBindRef,
 } from './persona-bind.ts'
 import { readPersistedSession } from './persisted.ts'
-import { projectMailboxHandoffs, projectRoutine, projectRoutines, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
+import { projectMailboxHandoffs, projectMemory, projectMemories, projectRoutine, projectRoutines, projectSidebarSections, projectSkillCatalog, teamProjectionDefinition } from './projection.ts'
 import {
   bindTeammateSkillInstructions,
   composeSkillInstructions,
@@ -33,7 +33,7 @@ import {
 import { TeamRoster } from './roster.ts'
 import type { TeamMembership } from './roster.ts'
 import { TeamTaskBoard } from './task-board.ts'
-import { SidebarSectionId, RoutineId, TeamId, TeamTaskId } from './types.ts'
+import { SidebarSectionId, MemoryId, RoutineId, TeamId, TeamTaskId } from './types.ts'
 import type {
   Config,
   CreateBotInput,
@@ -59,13 +59,16 @@ import type {
   DeleteBotRequest,
   DeleteBotResult,
   HostMailboxMessage,
+  ListMemoriesInput,
+  ListMemoriesRequest,
+  ListMemoriesResult,
   ListRoutinesByBotInput,
   ListRoutinesByBotRequest,
   ListRoutinesByBotResult,
+  MemoryRecord,
   PauseRoutineInput,
   PauseRoutineRequest,
   PauseRoutineResult,
-  RoutineProjection,
   RenameBotInput,
   RenameBotRequest,
   RenameBotResult,
@@ -75,6 +78,7 @@ import type {
   ResumeRoutineInput,
   ResumeRoutineRequest,
   ResumeRoutineResult,
+  RoutineProjection,
   RoutineRecord,
   RoutineStatus,
   SendTeamMessageRequest,
@@ -99,11 +103,17 @@ import type {
   UpsertUserSkillInput,
   UpsertUserSkillRequest,
   UpsertUserSkillResult,
+  WriteMemoryInput,
+  WriteMemoryRequest,
+  WriteMemoryResult,
 } from './types.ts'
 import {
   normalizeAvatarMarker,
   normalizePersonaProfile,
   requiredDisplayName,
+  requiredMemoryContent,
+  requiredMemoryKind,
+  requiredMemoryLayer,
   requiredModelSelection,
   requiredRoutineIntent,
   requiredScheduleExpr,
@@ -117,7 +127,7 @@ import {
 
 export type * from './types.ts'
 export type { TeamMembership } from './roster.ts'
-export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId, RoutineId } from './types.ts'
+export { TeamId, TeamMessageId, TeamTaskId, SidebarSectionId, SkillId, MemoryId, RoutineId } from './types.ts'
 export { TeamError } from './error.ts'
 export { observeMailboxDeliveryState } from './delivery-state.ts'
 export {
@@ -126,6 +136,8 @@ export {
 } from './host-mailbox-message.ts'
 export {
   projectMailboxHandoffs,
+  projectMemories,
+  projectMemory,
   projectRoutines,
   projectRoutine,
   projectSidebarSections,
@@ -689,6 +701,88 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
+   * Lead-authorized Host Memory write (P5 FR-001…003 / T006–T008).
+   * Persists a `MemoryRecord` on the Team journal (`team/memory`).
+   * Rejects empty content without writing; enforces layer/`botId` rules (agent requires
+   * active bot; user requires null/absent botId). Kinds are orthogonal to layers (FR-017).
+   * Electron Main must not invent memory records — Host owns the durable write (research R1).
+   * Not chat transcript (research R6).
+   * @param caller - exact live Lead Agent.
+   * @param request - kind, layer, optional botId, content, and cancellation.
+   * @returns Host-owned Memory projection after write.
+   */
+  async writeMemory(caller: Agent, request: WriteMemoryRequest): Promise<WriteMemoryResult> {
+    const membership = this.roster.membership(caller)
+    if (membership.role !== 'lead') {
+      throw new TeamError('only the Team Lead can write memory', 'TEAM_LEAD_REQUIRED')
+    }
+    request.signal.throwIfAborted()
+    const kind = requiredMemoryKind(request.kind)
+    const layer = requiredMemoryLayer(request.layer)
+    const content = requiredMemoryContent(request.content)
+    const root = membership.root
+    const memory = await this.journal.transact(root.id, async () => {
+      request.signal.throwIfAborted()
+      const state = this.journal.state(root)
+      let botId: MemoryRecord['botId'] = null
+      if (layer === 'agent') {
+        if (request.botId === undefined || request.botId === null || String(request.botId).trim().length === 0) {
+          throw new TeamError(
+            'botId is required when layer is agent',
+            'TEAM_INVALID_ARGUMENT',
+          )
+        }
+        const bot = state.members.find(member => member.id === request.botId)
+        if (bot === undefined || bot.phase !== 'active') {
+          throw new TeamError(
+            `active teammate "${request.botId}" not found`,
+            'TEAM_MEMBER_NOT_FOUND',
+          )
+        }
+        botId = request.botId
+      } else if (request.botId !== undefined && request.botId !== null) {
+        throw new TeamError(
+          'botId must be absent or null when layer is user',
+          'TEAM_INVALID_ARGUMENT',
+        )
+      }
+      const now = Date.now()
+      const row: MemoryRecord = {
+        memoryId: MemoryId(`memory-${randomUUID()}`),
+        kind,
+        layer,
+        botId,
+        content,
+        createdAt: now,
+        updatedAt: now,
+      }
+      await this.journal.appendAndFlush(root, 'team/memory', {
+        version: 2,
+        teamId: TeamId(root.id),
+        memory: row,
+      })
+      return row
+    })
+    return { memory: projectMemory(memory) }
+  }
+
+  /**
+   * Project Host memories for browse / recall (P5 FR-007 / US5 / T007–T008).
+   * When `botId` is set: that bot’s agent-layer rows plus all account-wide user rows.
+   * When omitted: full Host catalog. Host journal SoT only — never Electron Main or transcript.
+   * @param caller - exact live Team member.
+   * @param request - optional bot id and cancellation.
+   * @returns Host Memory projections for the requested scope.
+   */
+  listMemories(caller: Agent, request: ListMemoriesRequest): ListMemoriesResult {
+    const membership = this.roster.membership(caller)
+    request.signal.throwIfAborted()
+    return {
+      memories: projectMemories(this.journal.state(membership.root), request.botId),
+    }
+  }
+
+  /**
    * Lead-authorized Host Routine pause (P4 US3 T022 / FR-003).
    * Persists `status: paused` on the catalog row; Host cron wake MUST NOT fire while paused.
    * Idempotent when already paused. Electron Main must not invent pause flags (research R1).
@@ -1151,14 +1245,15 @@ export class TeamService extends TypertRemoteService {
 
   /**
    * Read the current roster, non-deleted task board, sidebar sections + Unassigned,
-   * Host mailbox handoffs, skill catalog summaries, and Host Routine catalog through
-   * the generated Remote API (FR-005 / FR-006 / P3 T011 / P4 T009).
+   * Host mailbox handoffs, skill catalog summaries, Host Routine catalog, and Host
+   * Memory catalog through the generated Remote API (FR-005 / FR-006 / P3 T011 / P4 T009 / P5 T008).
    * Handoffs reconstruct from Lead Session + target Session logs — never Main-synthesized IPC.
    * Skills project from Host `ctx.skills` when present — never Electron-synthesized.
    * Routines project from Host journal `team/routine` — never `dsh-schedule` or Electron Main.
+   * Memories project from Host journal `team/memory` — never Electron Main, Client-only, or transcript.
    * @param agent - exact live Team member used as the authority credential.
    * @param signal - cancellation for cold target Session reads.
-   * @returns detached current roster, task, section, handoff, skill, and routine views.
+   * @returns detached current roster, task, section, handoff, skill, routine, and memory views.
    */
   @Remote('view')
   async remoteView(agent: Agent, signal: AbortSignal): Promise<TeamView> {
@@ -1173,6 +1268,7 @@ export class TeamService extends TypertRemoteService {
       handoffs: await this.listHandoffs(membership.root, signal),
       skills: await this.listSkillCatalog(signal),
       routines: projectRoutines(state),
+      memories: projectMemories(state),
     }
   }
 
@@ -1436,6 +1532,42 @@ export class TeamService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<BotIdentityMutationResult<ResumeRoutineResult>> {
     return this.botIdentityMutationResult(this.resumeRoutine(agent, { ...request, signal }))
+  }
+
+  /**
+   * Write one Host Memory through the generated Remote API (P5 T006–T008 / FR-001…003).
+   * Authenticated Desktop Host HTTP/WS data plane — Client MUST NOT persist SoT.
+   * @param agent - exact live Lead Agent.
+   * @param request - kind, layer, optional botId, content.
+   * @param signal - cancellation.
+   * @returns the Memory projection or a typed Team rejection with a clear reason.
+   */
+  @Remote('writeMemory')
+  remoteWriteMemory(
+    agent: Agent,
+    request: WriteMemoryInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<WriteMemoryResult>> {
+    return this.botIdentityMutationResult(this.writeMemory(agent, { ...request, signal }))
+  }
+
+  /**
+   * List/browse Host Memories through the generated Remote API (P5 T007–T008 / FR-007).
+   * When `botId` is set: that bot’s agent rows plus account-wide user rows.
+   * @param agent - exact live Team member.
+   * @param request - optional bot id filter.
+   * @param signal - cancellation.
+   * @returns Memory projections or a typed Team rejection.
+   */
+  @Remote('listMemories')
+  remoteListMemories(
+    agent: Agent,
+    request: ListMemoriesInput,
+    signal: AbortSignal,
+  ): Promise<BotIdentityMutationResult<ListMemoriesResult>> {
+    return this.botIdentityMutationResult(
+      Promise.resolve(this.listMemories(agent, { ...request, signal })),
+    )
   }
 
   /**
