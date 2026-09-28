@@ -21,31 +21,34 @@
 
 **P5 (Memory productization)** — **Done.** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) Done. Specs under `specs/005-memory-productization/`. T001–T037 complete (MOH-262 Duplicate canceled); polish close merged as [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`.
 
+**P6 (Connectors / MCP + event routines + trust)** — **Current.** Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P6. **Linear epic create blocked** (workspace free issue limit) — no P6 epic/specify issue ids; do **not** invent fake Linear ids. Proceed on **docs + Spec Kit git path**.
+
 ## Next gate
 
-**P6 kick — Connectors / MCP + event routines + trust** — **held until PO opens the P6 epic** on **DeepSeek Harness - Cursor** (`P-MOH-2`). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P6.
+**P6 specify** — **DH Spec** `/speckit-specify` for P6 only → new `specs/006-…` tree. Do **not** rewrite `specs/001`–`005`. Scope = plan §4 P6.
 
-- Lead does **not** invent or duplicate a P6 Linear epic — PO opens when ready.
-- After PO opens epic (+ specify issue if kicked): **DH Spec** `/speckit-specify` for P6 only → new `specs/006-…` tree. Do **not** rewrite `specs/001`–`005`.
 - **Scope lock (plan In):** MCP/connectors; event-triggered routines; richer trust/permissions productization; 1Password-class credential UX if needed.
 - **Out:** Box/computer parity (P7).
 - **Exit (Verifier-provable):** one connector install → auth → successful tool call; one event-triggered routine fires end-to-end; one denied-permission path proven; secrets absent from session dumps.
-- Do **not** start Spec Kit or implement until PO opens the epic.
+- **Linear:** when free-issue capacity returns, PO opens real P6 epic (+ specify child) on **DeepSeek Harness - Cursor** (`P-MOH-2`) and backfills ids — Lead does **not** invent them.
+- Do **not** start implement until specify (and later Spec Kit gates) land; no product code on this living-gate kick.
 
-## Phase 6 hold (await PO epic)
+## Phase 6 active (Spec Kit path)
 
-1. **PO** — Open P6 epic (and specify child when kicking) on **DeepSeek Harness - Cursor** only; ship/no-ship on kick timing.
-2. **DH Lead** — This living gate; report Status / Next gate / Owners. No feature code; no epic create.
-3. **DH Spec / Verifier / Architect / Runtime / Electron** — **Idle** until PO opens P6 epic and authorize specify (or later gates).
+1. **DH Spec** — `/speckit-specify` for P6 → `specs/006-…` from plan §4 P6 In/Out/Exit.
+2. **DH Lead** — This living gate; Status / Next gate / Owners; no feature code; no fake Linear ids.
+3. **PO** — Orchestration; open real P6 Linear epic when workspace capacity allows; ship/no-ship on later gates.
+4. **DH Verifier / Architect / Runtime / Electron** — Idle until specify (then clarify → plan → tasks → analyze) authorizes their gates.
 
-## Owners / held
+## Owners / next
 
 | Role | Action |
 |------|--------|
-| **PO Assistant** | Open P6 epic when ready; orchestration; no pre-load of Spec Kit |
-| **DH Lead** | This living gate; **no** P6 epic invent; no feature code |
-| **DH Spec / Verifier / Architect / Runtime / Electron** | Idle until PO opens P6 epic |
+| **DH Spec** | **Next:** `/speckit-specify` → `specs/006-…` |
+| **DH Lead** | This living gate; no feature code; no fake Linear ids |
+| **PO Assistant** | Orchestration; backfill Linear epic when free-issue limit clears |
+| **DH Verifier / Architect / Runtime / Electron** | Idle until specify authorizes next gates |
 
 ## Blockers
 
-None for P5 close. Hard gate for next work: **PO opens P6 epic** before specify/implement.
+**Linear create blocked** (free issue limit) — docs + Spec Kit git path only; no invented issue ids. Spec Kit specify is **not** blocked.
