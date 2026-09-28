@@ -1,3 +1,8 @@
+page dsh-app://app/ What is triage in bug reports — DSH Local Build tip=743ebf6eb1
+Step catalog open PASS
+Step A install PASS connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2 auth=ready
+Step B auth ready PASS
+Step C tool success PASS toolName=mcp__verifier_fixture__ping
 {
   "tip": "743ebf6eb1e955290c241ea46e31d869965e3302",
   "tipShort": "743ebf6eb1",
