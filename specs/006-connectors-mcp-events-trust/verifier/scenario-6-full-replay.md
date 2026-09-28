@@ -1,6 +1,6 @@
 # Scenario 6 — Full Phase 6 Verifier replay (SC-006)
 
-**Status:** Recipe delivered (T035) — composite SC-006 product stamp lands under [evidence/scenario-6/](./evidence/scenario-6/) when Verifier re-runs
+**Status:** Recipe delivered (T035) — composite SC-006 product stamp **Pass** under [evidence/scenario-6/VERDICT.txt](./evidence/scenario-6/VERDICT.txt) (2026-09-28 time-boxed composite)
 **Owners:** DH Verifier (this recipe + composite evidence) · DH Runtime / Client / Electron (slice owners under Scenarios 1–5) · PO (scope)
 **Linear:** **Blocked** — PR-only tracking (Epic MOH-281 / `P-MOH-2`; no invented issue ids)
 **Acceptance slice:** T035 — Verifier Scenario 6 recipe covering FR-013 / FR-014/015 / SC-006

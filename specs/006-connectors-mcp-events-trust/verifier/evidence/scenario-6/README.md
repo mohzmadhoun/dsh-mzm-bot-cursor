@@ -8,11 +8,11 @@
 
 | Artifact | Content | Status |
 |----------|---------|--------|
-| `replay-pointer.log` | Gate + SHA/UTC + cited Scenario 1–5 evidence paths | Placeholder (T034) |
-| `vitest-electron-bus.log` | T037 `no-electron-connectors-events-trust-bus` rerun | Placeholder (when T037 stamps) |
-| `non-goals-spotcheck.log` | Contracts + exclusions + no-rewrite + Scenario recipes present | Placeholder |
-| `00-desktop-smoke-sc006.png` | Optional fresh Desktop Agent Team / connector surface smoke | Placeholder (when GUI composite runs) |
-| `VERDICT.txt` | Composite SC-006 stamp | Placeholder |
+| `replay-pointer.log` | Gate + SHA/UTC + cited Scenario 1–5 evidence paths | **Filled** (SC-006 composite 2026-09-28) |
+| `vitest-electron-bus.log` | T037 `no-electron-connectors-events-trust-bus` rerun | **Filled** (3 passed) |
+| `non-goals-spotcheck.log` | Contracts + exclusions + no-rewrite + Scenario recipes present | **Filled** |
+| `00-desktop-smoke-sc006.png` | Fresh Desktop Agent Team / connector surface smoke | **Filled** (+ `01-connectors-events-sc006.png` · walkthrough mp4) |
+| `VERDICT.txt` | Composite SC-006 stamp | **Pass** (time-boxed composite) |
 
 ## Cited prior FR-014/015 media (not duplicated)
 
@@ -37,6 +37,6 @@ Unit/jsdom alone **fails** the GUI half. Foundational Pass (T016) MUST be green 
 
 Do **not** delete existing media under `scenario-1/`…`scenario-4/` or `non-goals/`. Scenario 6 cites those paths rather than duplicating bytes. New composite-only artifacts live here.
 
-## Placeholder policy
+## Stamp policy
 
-Created by T034. Fill when stamping SC-006 via [scenario-6-full-replay.md](../../scenario-6-full-replay.md).
+Created by T034. Filled by SC-006 composite stamp on `cursor/p6-sc006-full-replay-fe1d` via [scenario-6-full-replay.md](../../scenario-6-full-replay.md) (time-boxed cite + Desktop smoke). See [VERDICT.txt](./VERDICT.txt).

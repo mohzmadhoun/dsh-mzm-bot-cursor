@@ -1,0 +1,92 @@
+T035 Verifier Scenario 6 full replay (SC-006) — DH Verifier
+===========================================================
+Verdict: Pass (composite SC-006 — time-boxed: cite Scenario 1–5 Pass stamps
+         on master + fresh Desktop smoke + T037 bus green + non-goals spotcheck)
+Stamp: 2026-09-28
+Product tip: origin/master @ 48341cda04 (#223 polish T038–T040 on tip)
+Evidence tip: cursor/p6-sc006-full-replay-fe1d (this branch)
+Linear: Epic MOH-281 / P-MOH-2 — PR-only; left In Progress (PO closes after merge)
+Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-6-full-replay.md
+Evidence home: specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-6/
+
+Composite rows
+--------------
+[x] Foundational Pass (T016) — Pass (README stamp + evidence/foundation-host/)
+[x] T037 no-electron-connectors-events-trust-bus — Pass (3/3)
+    · vitest-electron-bus.log · host-protocol-exclusions.log
+[x] Scenario 1 connector install→auth→tool (SC-001) — Pass
+    evidence/scenario-1/ VERDICT + FR-014 media
+[x] US5 credential UX (SC-007) — Pass
+    evidence/scenario-1/VERDICT-T031.txt + auth-surface frames / walkthrough
+[x] Scenario 2 event routine create+harness fire (SC-002/SC-008) — Pass
+    evidence/scenario-2/ VERDICT + FR-014 media
+[x] Scenario 3 trust deny (SC-003) — Pass
+    evidence/scenario-3/ VERDICT + FR-014 media
+[x] Scenario 4 secrets absent (SC-004) — Pass
+    evidence/scenario-4/ VERDICT + dump-inspection (non-GUI OK)
+[x] Scenario 5 / non-goals (SC-005 / SC-008) — Pass
+    verifier/non-goals.md · contracts/non-goals.md · evidence/non-goals/
+    · non-goals-spotcheck.log (refined absence + vault-optional affirmative)
+[x] SC-006 Desktop smoke — Pass (Agent Team + connectors + event surfaces live)
+    00-desktop-smoke-sc006.png · 01-connectors-events-sc006.png
+    · panel-state-sc006.json · p6-sc006-smoke-cdp.log
+    · sc006-desktop-smoke-walkthrough.mp4 (DISPLAY=:1 x11grab)
+    measured: fixturePresent=true · installedRows=1 · authReadyRows=1
+             · eventSectionCount=2 · standing deny visible in smoke frame
+[x] SC-006 full composite Pass — prior Scenario 1–4 + US5 media + smoke + bus
+    + non-goals satisfy time-boxed recipe path
+
+Supporting logs (this stamp)
+----------------------------
+  replay-pointer.log
+  vitest-electron-bus.log (3 passed)
+  vitest-foundations.log (11 passed connector|eventTrigger|triggerKind)
+  non-goals-spotcheck.log
+  host-protocol-exclusions.log
+  p6-sc006-smoke-cdp.log
+  panel-state-sc006.json
+  VERDICT.txt (this file)
+
+SO11 mirrors (this PR) — /opt/cursor/artifacts/p6-sc006/
+--------------------------------------------------------
+  /opt/cursor/artifacts/p6-sc006/00-desktop-smoke-sc006.png
+  /opt/cursor/artifacts/p6-sc006/01-connectors-events-sc006.png
+  /opt/cursor/artifacts/p6-sc006/sc006-desktop-smoke-walkthrough.mp4
+  /opt/cursor/artifacts/p6-sc006/p6-sc006-smoke-cdp.log
+  /opt/cursor/artifacts/p6-sc006/vitest-electron-bus.log
+  /opt/cursor/artifacts/p6-sc006/non-goals-spotcheck.log
+  /opt/cursor/artifacts/p6-sc006/replay-pointer.log
+
+Cited prior SO11 GUI media (not re-captured)
+--------------------------------------------
+  scenario-1: evidence/scenario-1/{00..03}*.png · scenario-1-connector-walkthrough.mp4
+              · VERDICT-T031 / p6-t031-us5-credential-ux-walkthrough.mp4
+  scenario-2: evidence/scenario-2/{00..04}*.png · scenario-2-event-routine-walkthrough.mp4
+  scenario-3: evidence/scenario-3/{01..03}*.png · scenario-3-trust-deny-walkthrough.mp4
+  scenario-4: dump-only (FR-014 N/A) · evidence/scenario-4/
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p6-sc006/00-desktop-smoke-sc006.png" alt="SC-006 Agent Team open smoke" />
+  <img src="/opt/cursor/artifacts/p6-sc006/01-connectors-events-sc006.png" alt="SC-006 connectors installed ready + standing deny" />
+  <video src="/opt/cursor/artifacts/p6-sc006/sc006-desktop-smoke-walkthrough.mp4" controls></video>
+
+Claims
+------
+- Recipe + ordered FR-013 path documented: **measured**
+- Foundational T016 + T037 bus: **measured**
+- Scenario 1–4 + US5 Pass stamps on master tip under test: **measured** (cited)
+- Scenario 5 / non-goals absence: **measured** (spotcheck + contracts)
+- SC-006 Desktop smoke (real Electron DISPLAY=:1 CDP): **measured**
+- FR-014 desktop visual (smoke + cited prior GUI media): **measured**
+- FR-015 commit under scenario-6/ + cited scenario homes: **measured**
+- FR-015 PR HTML embeds: **inferred** until PO updates PR body
+- Fresh one-session full GUI replay of Scenarios 1–3: **not claimed**
+  (time-boxed composite allowed by recipe)
+
+Scope lock
+----------
+Does NOT mark SC-006 Linear Done. Does NOT invent Linear issue ids.
+Does NOT merge. Leave Done to PO after merge + SO12 embeds.
+Does NOT invent product code. tasks.md T033–T040 already [x] on master (#223);
+this stamp is the product SC-006 composite evidence only.

@@ -1,0 +1,64 @@
+=== SC-006 non-goals spotcheck (refined) UTC=2026-09-28T14:37:53Z SHA=48341cda04 ===
+
+## 1. Contracts + recipes present
+OK specs/006-connectors-mcp-events-trust/contracts/non-goals.md
+OK specs/006-connectors-mcp-events-trust/verifier/non-goals.md
+OK specs/006-connectors-mcp-events-trust/verifier/webhook-harness-b1.md
+OK specs/006-connectors-mcp-events-trust/verifier/scenario-6-full-replay.md
+
+## 2. T037 bus (already logged) — host-protocol exclusion comments
+9: * payloads are not members and must not be added; that traffic stays on the authenticated Host HTTP/WS
+13: * must not be added — Host Agent Teams owns that durable store (research R1 / T010).
+15: * must not be added — Host owns durable skill catalog and attachments (research R2/R4 / T013).
+17: * members and must not be added — Host owns the durable Routine catalog and cron wake path
+20: * payloads are also not members and must not be added — Host owns the durable Memory catalog
+25: * payloads are also not members and must not be added — Host owns the durable Connector catalog,
+41: * memory-list, memory-browse, memory-recall, memory-injection, connector-catalog,
+
+## 3. Product code must NOT register dsh-desktop connector/event/trust credential-value channels
+OK_no_forbidden_channels
+
+## 4. Affirmative vault-optional language present
+specs/006-connectors-mcp-events-trust/verifier/non-goals.md:21:- Vault / 1Password-class UX is treated as a mandatory Pass gate when in-app auth works
+specs/006-connectors-mcp-events-trust/verifier/non-goals.md:37:| Mandatory vault | Vault not required when in-app auth works (FR-009 / SC-007) | Recipe ready |
+specs/006-connectors-mcp-events-trust/verifier/non-goals.md:86:## Vault not mandatory when in-app works (FR-009)
+specs/006-connectors-mcp-events-trust/verifier/non-goals.md:90:1Password-class vault MUST NOT be a mandatory Pass gate when in-app credential UX completes the Pass connector.
+specs/006-connectors-mcp-events-trust/verifier/non-goals.md:100:rg -n 'vault optional|not mandatory|when in-app' \
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:10:**Architect locks:** In-app credentials primary / vault optional (R5 / FR-009); secrets off renderer durable storage (FR-008); no chat-paste primary; no env-file product Pass; no Electron Main credential-value bus (R6 / R9)
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:19:| SC coverage | SC-007 in-app primary · vault not mandatory when in-app works · FR-008 secrets off renderer durable SoT · FR-009 vault optional · no env-file / chat-paste Pass |
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:52:| Vault | **Not required** for Pass when in-app reaches ready (SC-007 / FR-009) |
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:82:3. Do **not** require vault / 1Password-class UI for Pass when in-app succeeds (FR-009 / SC-007).
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:97:| Vault optional | Pass without vault when in-app works | Vault mandatory for Pass; Fail solely for missing vault UI |
+specs/006-connectors-mcp-events-trust/verifier/scenario-5-credential-ux.md:181:FR-009: Pass — vault optional; Pass not failed for missing vault while in-app works
+specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md:1:# T031 — Client in-app credential UX (Pass / vault optional)
+specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md:6:**Acceptance slice:** T031 — confirm / complete Client in-app credential UX for Pass connector under `packages/experimental/client-ui-agent-team/src/client/` (Host RPC only; secrets off renderer durable storage); document vault/1Password-class **not** required for Pass when in-app auth completes the fixture (FR-008 / FR-009)
+specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md:19:| Vault not mandatory | Locale `connectorAuthVaultOptional` + `data-team-connector-vault-not-required` state FR-009: Pass fixture completes in-app; 1Password-class vault is **not** a Pass gate |
+specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md:31:| **FR-009** | Verifier fixture / thin-catalog Pass auth completes via in-app store | Pass fails solely because vault / 1Password UI is absent when in-app works |
+
+## 5. Scenario recipes do not require Out of Scope as Pass path (measured Fail-matrix language OK)
+specs/006-connectors-mcp-events-trust/verifier/scenario-2-event-routine.md:179:| Pass requires live Slack/GitHub/Linear/email family | **Fail** (FR-018) |
+FAIL_require
+
+## 6. T038 no-rewrite claim documented + empty historical scan note
+130:## T038 — No rewrite of `specs/001`–`005`
+151:**Historical scan (merged Phase 6 subjects on `origin/master`):** for each `git log --format=%H --grep='Phase 6' origin/master` commit, `git diff-tree --name-only` against the five prior-spec roots — **empty** on tip used for this polish stamp (no product edits to `specs/001`–`005` in Phase 6 implement history).
+221:rg -n 'T038 — No rewrite' specs/006-connectors-mcp-events-trust/verifier/README.md
+
+## 7. Cited prior Pass stamps (Verdict lines)
+scenario-1: 3:Verdict: Pass
+scenario-2: 3:Verdict: Pass
+scenario-3: 3:Verdict: Pass
+scenario-4: 1:Verdict: Pass
+US5: 3:Verdict: Pass
+
+## 8. Foundational Pass README
+14:**Verdict:** **Pass** (design artifacts only)
+39:**Verdict:** **Pass** (foundations only)
+93:**Verdict:** **Pass** (docs map consistency)
+
+SPOTCHECK_RESULT: Pass (absence holds; recipe Fail-matrix self-matches excluded by refined checks)
+
+## 5b. Interpretation of scenario-2 line 179
+MATCH is Fail-matrix row ('Pass requires live Slack… | Fail') — documents forbidden Pass path.
+Not an affirmative Pass requirement. Treated as OK for SC-005 absence.
+SPOTCHECK_RESULT: Pass
