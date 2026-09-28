@@ -1,0 +1,34 @@
+{
+  "tip": "bc691342e2d15ca9535b0f98eb15d7ae6e256bd6",
+  "display": ":1",
+  "cdp": "9222",
+  "catalogId": "verifier-fixture",
+  "connectorId": "connector-9b78bdf7-2cce-42dd-bd11-630020917ac2",
+  "steps": {
+    "catalog": {
+      "pass": true,
+      "fixture": true
+    },
+    "install": {
+      "pass": true,
+      "installState": "installed",
+      "authStateBefore": "needs_auth"
+    },
+    "auth": {
+      "pass": true,
+      "authState": "ready",
+      "toolsReady": true,
+      "credentialConfigured": true
+    },
+    "tool": {
+      "pass": false,
+      "uiShows": "Tool call error",
+      "rowOutcomeAttr": null,
+      "blocker": "Client ConnectorToolInvokeResult is flat {connectorId,toolName,outcome}; Host InvokeConnectorToolResult is {toolCall: ConnectorToolCall}. settleInvokeConnectorTool reads invoked.outcome on the nested wrapper \u2192 undefined \u2192 UI shows connectorToolError. Host vitest invokeConnectorTool succeeds."
+    }
+  },
+  "pass": false,
+  "sc001": "Fail \u2014 install+auth measured Pass; tool success Fail",
+  "sc007": "Pass \u2014 in-app auth reached ready without vault",
+  "fr017": "Pass \u2014 verifier-fixture thin catalog"
+}
