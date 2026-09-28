@@ -2005,6 +2005,116 @@ describe('Team Remote API', () => {
     })
   })
 
+  it('US2 T017: writeMemory kind=log validates non-empty content, rejects empty, persists distinguishable from profile', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('log validate a'),
+      textResponse('log validate b'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Log Alpha',
+      modelSelection: { provider: 'mock', model: 'log-a' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+
+    // Empty / whitespace-only log content rejects without writing (FR-002 / SC-002).
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '   \t\n  ',
+      signal: SIGNAL,
+    })).rejects.toThrow(/content must be non-empty/)
+    await expect(ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  ',
+    }, SIGNAL)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'team-rejected', message: expect.stringMatching(/content must be non-empty/) },
+    })
+    expect(ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories)
+      .toEqual([])
+
+    // Non-empty log persists on Host catalog (agent layer + account-wide user layer).
+    const agentLog = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: '  Shipped memory log write  ',
+      signal: SIGNAL,
+    })
+    expect(agentLog.memory).toMatchObject({
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Shipped memory log write',
+    })
+    const userLog = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'user',
+      botId: null,
+      content: 'Account noted P5 US2',
+      signal: SIGNAL,
+    })
+    expect(userLog.memory).toMatchObject({
+      kind: 'log',
+      layer: 'user',
+      botId: null,
+      content: 'Account noted P5 US2',
+    })
+
+    // Leave/return without restart: list + view still show the same curated log rows.
+    const listed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(listed).toEqual([agentLog.memory, userLog.memory])
+    expect(listed.every(row => row.kind === 'log')).toBe(true)
+    const remoteList = await ctx.agentTeams.remoteListMemories(lead, { botId: alpha.id }, SIGNAL)
+    expect(remoteList).toMatchObject({ ok: true, value: { memories: listed } })
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.memories).toEqual([agentLog.memory, userLog.memory])
+
+    // Distinguishable from profile: co-exist with a profile row; kinds remain distinct (SC-002).
+    const profile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Prefers short logs',
+      signal: SIGNAL,
+    })
+    const mixed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(mixed).toEqual([agentLog.memory, userLog.memory, profile.memory])
+    expect(new Set(mixed.map(row => row.kind))).toEqual(new Set(['log', 'profile']))
+    expect(mixed.filter(row => row.kind === 'log')).toEqual([agentLog.memory, userLog.memory])
+    expect(mixed.filter(row => row.kind === 'profile')).toEqual([profile.memory])
+
+    // Remote success path for log write (FR-015: Host Remote write — bot-tool not required).
+    const remoteWrite = await ctx.agentTeams.remoteWriteMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Second log fact',
+    }, SIGNAL)
+    expect(remoteWrite).toMatchObject({
+      ok: true,
+      value: {
+        memory: {
+          kind: 'log',
+          layer: 'agent',
+          botId: alpha.id,
+          content: 'Second log fact',
+        },
+      },
+    })
+  })
+
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
       textResponse('routine validate a'),
