@@ -6,8 +6,8 @@
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
 **PO / Architect lock:** Host Memory catalog SoT (research R1; prefer Agent Teams / Host journal) — see [research.md](../research.md) / [plan.md](../plan.md)
 **Setup inventories:** [host-memory-inventory.md](./host-memory-inventory.md) (T002) · [memory-inject-inventory.md](./memory-inject-inventory.md) (T003) · [memory-seam-locks.md](./memory-seam-locks.md) (T004)
-**Evidence:** [evidence/](./evidence/) — foundation stamp under [evidence/foundation-host/](./evidence/foundation-host/); GUI media + PR embeds for Scenario recipes (SO 11+12; placeholders T032)
-**Linear:** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228) · T001 [MOH-238](https://linear.app/momadhoun/issue/MOH-238) · T002 [MOH-239](https://linear.app/momadhoun/issue/MOH-239) · T003 [MOH-240](https://linear.app/momadhoun/issue/MOH-240) · T004 [MOH-241](https://linear.app/momadhoun/issue/MOH-241) · T005 [MOH-242](https://linear.app/momadhoun/issue/MOH-242) · T013 [MOH-250](https://linear.app/momadhoun/issue/MOH-250)
+**Evidence:** [evidence/](./evidence/) — foundation stamp under [evidence/foundation-host/](./evidence/foundation-host/); Scenario 1 SC-001 under [evidence/scenario-1/](./evidence/scenario-1/) (T016); GUI media + PR embeds for Scenario recipes (SO 11+12)
+**Linear:** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228) · T001 [MOH-238](https://linear.app/momadhoun/issue/MOH-238) · T002 [MOH-239](https://linear.app/momadhoun/issue/MOH-239) · T003 [MOH-240](https://linear.app/momadhoun/issue/MOH-240) · T004 [MOH-241](https://linear.app/momadhoun/issue/MOH-241) · T005 [MOH-242](https://linear.app/momadhoun/issue/MOH-242) · T013 [MOH-250](https://linear.app/momadhoun/issue/MOH-250) · T016 [MOH-253](https://linear.app/momadhoun/issue/MOH-253)
 
 ## Foundational Pass gate (T013)
 
@@ -79,7 +79,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 
 | Scenario | Quickstart | Recipe path (later tasks) | Primary owners | Acceptance | FR-011/012 |
 |----------|------------|---------------------------|----------------|------------|------------|
-| **1** Write profile / log / note | [Scenario 1](../quickstart.md#scenario-1--write-profile--log--note) | `scenario-1-write-kinds.md` (T016 / T019 / T022) · [write-kinds.md](../contracts/write-kinds.md) | **Runtime** + **Client** + **Verifier** | SC-001, SC-002, SC-003, SC-009 | **Required** |
+| **1** Write profile / log / note | [Scenario 1](../quickstart.md#scenario-1--write-profile--log--note) | [scenario-1-write-kinds.md](./scenario-1-write-kinds.md) (T016 SC-001 stamped · T019 / T022 later) · [write-kinds.md](../contracts/write-kinds.md) · [evidence/scenario-1/](./evidence/scenario-1/) | **Runtime** + **Client** + **Verifier** | SC-001, SC-002, SC-003, SC-009 | **Required** |
 | **2** Recall after restart | [Scenario 2](../quickstart.md#scenario-2--recall-after-restart) | `scenario-2-recall.md` (T026) · [recall.md](../contracts/recall.md) | **Runtime** + **Client** + **Verifier** | SC-004 | **Required** |
 | **3** Agent vs user layers | [Scenario 3](../quickstart.md#scenario-3--agent-vs-user-layers) | `scenario-3-layers.md` (T029 / T030) · [layers.md](../contracts/layers.md) | **Runtime** + **Client** + **Verifier** | SC-005, SC-010 | **Required** |
 | **4** Non-goals / seam absence | [Scenario 4](../quickstart.md#scenario-4--non-goals--seam-absence) | `non-goals.md` (T031) + no-Electron-memory-bus (T011) · [non-goals.md](../contracts/non-goals.md) | **Runtime** + **Electron** + **Verifier** | SC-006, SC-008…010 | Docs/absence ok |
