@@ -21,56 +21,33 @@
 
 **P5 (Memory productization)** — **Done.** Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) Done. Specs under `specs/005-memory-productization/`. T001–T037 complete (MOH-262 Duplicate canceled); polish close merged as [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`.
 
-**P6 (Connectors / MCP + event routines + trust)** — **Current / In Progress.** Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) on DeepSeek Harness - Cursor (`P-MOH-2`). Specs under `specs/006-connectors-mcp-events-trust/`. Spec Kit **specify → analyze Done** on `master` ([#198](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/198)–[#203](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/203); analyze **PASS** @ `ff149f38d1`). **Setup T001–T006 Done** ([#205](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/205)). **Electron foundation T013–T014 Done** ([#206](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/206)). **Host foundation T007–T012 In Progress.** `taskstoissues` still deferred (epic backfilled; child T### ids not yet minted).
+**P6 (Connectors / MCP + event routines + trust)** — **Done.** Epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) Done. Specs under `specs/006-connectors-mcp-events-trust/`. T001–T040 complete; US1–US5 Verifier Pass (SO 11+12); SC-006 full replay merged as [#225](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/225) @ `b7052eddd2`.
 
 ## Next gate
 
-**Host foundation T007–T012** (In Progress) — finish Host seam stamp; then remaining Foundational through T016 before any US1–US5 fan-out. Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P6. Tasks: `specs/006-connectors-mcp-events-trust/tasks.md`. Epic: [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust).
+**P7 kick — Computer / box + subagent parity + settings chrome** — **held until PO opens the P7 epic** on **DeepSeek Harness - Cursor** (`P-MOH-2`). Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P7.
 
-### Done on master — Spec Kit + Setup + Electron
+- Lead does **not** invent or duplicate a P7 Linear epic — PO opens when ready.
+- After PO opens epic (+ specify issue if kicked): **DH Spec** `/speckit-specify` for P7 only → new `specs/007-…` tree. Do **not** rewrite `specs/001`–`006`.
+- **Scope lock (plan In):** Box/Shell backends; computerUse-class subagents; settings/chrome polish toward Grok-easy.
+- **Out:** Treating “Verifier” as a P7 feature — Verifier already gates every phase. Inventory items listed as program Out until a later named phase amends the plan (voice, draft-first send-on-behalf, group channels, user machines, learn-from-demo, billing chrome, full skill pack, pixel Grok).
+- **Exit (Verifier-provable):** one local Shell/box tool path proven; one computerUse-class subagent path proven; settings rows required for those daily paths present (chrome polish ≠ Verifier substitute).
+- Do **not** start Spec Kit or implement until PO opens the epic.
 
-| Slice | Evidence |
-|-------|----------|
-| Spec Kit specify → analyze | [#198](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/198)–[#203](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/203) |
-| Setup T001–T006 | [#205](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/205) |
-| Electron foundation T013–T014 | [#206](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/206) |
+## Phase 7 hold (await PO epic)
 
-### Host foundation (T007–T012) — **In Progress**
+1. **PO** — Open P7 epic (and specify child when kicking) on **DeepSeek Harness - Cursor** only; ship/no-ship on kick timing.
+2. **DH Lead** — This living gate; report Status / Next gate / Owners. No feature code; no epic create.
+3. **DH Spec / Verifier / Architect / Runtime / Electron** — **Idle** until PO opens P7 epic and authorize specify (or later gates).
 
-Finish Host Connector / MCP / event / trust / credential foundation stamps per `tasks.md`. No US1–US5 product work until foundational stamp (T016).
-
-### After Host + remaining Foundational — US fan-out
-
-No US1–US5 product work until foundational stamp (T016). Then US fan-out per `tasks.md` priority: US1 → US2 → US3 → US4 → US5.
-
-- **Scope lock (plan In):** MCP/connectors; event-triggered routines; richer trust/permissions productization; 1Password-class credential UX if needed.
-- **Out:** Box/computer parity (P7).
-- **Exit (Verifier-provable):** one connector install → auth → successful tool call; one event-triggered routine fires end-to-end; one denied-permission path proven; secrets absent from session dumps.
-- **Architect Path A locks:** Host Connector catalog SoT + `dsh-mcp-client`; Pass connector = any thin-catalog/fixture; event Pass = webhook harness only (B1); additive `triggerKind`/`eventTrigger`; deny = user-deny or standing `never`; in-app primary / vault optional; **no** Electron Main connector/event/trust/credential bus.
-- **SO 11+12** — GUI recipes need desktop screenshots/recordings committed under `verifier/evidence/` + PR embeds.
-- **Linear:** epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) bound; PO may `taskstoissues` for child T### when ready — Lead does **not** invent child ids.
-- This living update is docs only — **no product code** on this branch.
-
-## Phase 6 active (Host foundation)
-
-1. **DH Runtime / Host** — Host foundation T007–T012 In Progress against `specs/006-connectors-mcp-events-trust/`.
-2. **DH Lead** — This living gate; Status / Next gate / Owners; no feature code; epic MOH-281 bound.
-3. **PO** — Orchestration; optional `taskstoissues` child mint under MOH-281; ship/no-ship on later gates.
-4. **DH Electron** — T013–T014 Done (#206); idle until later story shell slices.
-5. **Held until after Foundational T016** — US1–US5 fan-out.
-
-## Owners / next
+## Owners / held
 
 | Role | Action |
 |------|--------|
-| **DH Runtime** | **Go** — Host foundation T007–T012 |
-| **DH Spec** | Idle until story / remaining foundational docs need |
-| **DH Architect** | Engage on Host foundation seam stamps as needed |
-| **DH Verifier** | Ready for Host foundation evidence when Runtime stamps |
-| **DH Electron** | Idle — T013–T014 Done (#206) |
-| **DH Lead** | This living gate; epic MOH-281; no feature code |
-| **PO Assistant** | Orchestration; optional `taskstoissues` under MOH-281 |
+| **PO Assistant** | Open P7 epic when ready; orchestration; no pre-load of Spec Kit |
+| **DH Lead** | This living gate; **no** P7 epic invent; no feature code |
+| **DH Spec / Verifier / Architect / Runtime / Electron** | Idle until PO opens P7 epic |
 
 ## Blockers
 
-None on Linear create — epic [MOH-281](https://linear.app/momadhoun/issue/MOH-281/p6-connectors-mcp-event-routines-trust) exists. Hard gate before US product work: finish Host T007–T012 + remaining Foundational through T016.
+None for P6 close. Hard gate for next work: **PO opens P7 epic** before specify/implement.
