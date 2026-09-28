@@ -67,7 +67,7 @@ Mohammed opens product settings and finds the settings rows required to use the 
 
 - What happens if the box/computer backend is still pulling an image or booting? User MUST see a clear starting / not-ready state; Pass MUST wait for a successful Shell/box tool outcome after ready (or Fail with documented not-ready evidence—not silent skip).
 - What happens if only unit/jsdom evidence exists for GUI stories? **Fail** for those scenarios — desktop screenshots and/or short screen recordings are mandatory (standing order 11), and those files MUST be committed under `verifier/evidence/` with PR embeds (standing order 12).
-- What happens if settings rows exist but no Shell/box tool and no computerUse-class path succeed? **Fail** Phase 7 — chrome polish ≠ Verifier substitute (FR-010).
+- What happens if settings rows exist but no Shell/box tool and no computerUse-class path succeed? **Fail** Phase 7 — chrome polish ≠ Verifier substitute (FR-005).
 - What happens if the user expects full Grok computer chrome (Update/Reset computer two-click flows, box-doctor, every inventory surface)? Not required for Pass; simplest path that proves Stories 1–3 is enough.
 - What happens if the user expects user-machine targeting (ListMachines, CopyToBox/CopyFromBox, local-execution on the user’s PC)? Explicitly OUT of Phase 7; not required for Pass.
 - What happens if the user expects voice, draft-first send-on-behalf, group channels, learn-from-demo, billing chrome, full skill pack, or pixel Grok? Explicitly OUT until a later named phase; not required for Pass.
