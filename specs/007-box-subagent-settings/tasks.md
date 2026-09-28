@@ -135,10 +135,10 @@ Desktop dual-process layout from [plan.md](./plan.md):
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Client register Global `settings.section` **Computer** (locale-owned English dictionary strings for Verifier) in `packages/client/ui-settings-computer/src/client/` (create package/section if absent) following Models/Plugins `settings.section` pattern in `packages/client/ui-settings*/src/client/`; wire into Desktop Client profile — **Owner: DH Client / Web**
-- [ ] T025 [US3] Client **Shell** and **Computer use** rows (or clearly labeled control groups) under Settings → Computer; **Shell** may be read-only Host readiness projection (PO); rows call Host HTTP/WS Remotes only — `packages/client/ui-settings-computer/src/client/` + `locales.ts`; per-agent gear alone MUST NOT satisfy FR-016 — **Owner: DH Client / Web**
+- [x] T024 [US3] Client register Global `settings.section` **Computer** (locale-owned English dictionary strings for Verifier) in `packages/client/ui-settings-computer/src/client/` (create package/section if absent) following Models/Plugins `settings.section` pattern in `packages/client/ui-settings*/src/client/`; wire into Desktop Client profile — **Owner: DH Client / Web**
+- [x] T025 [US3] Client **Shell** and **Computer use** rows (or clearly labeled control groups) under Settings → Computer; **Shell** may be read-only Host readiness projection (PO); rows call Host HTTP/WS Remotes only — `packages/client/ui-settings-computer/src/client/` + `locales.ts`; per-agent gear alone MUST NOT satisfy FR-016 — **Owner: DH Client / Web**
 - [x] T026 [US3] Host settings projection supplies Computer-section fields for Client rows (Shell readiness + Computer use config as needed) via authenticated Remotes — `packages/settings/**` + `apps/desktop-host/` — no Electron Main Computer-settings SoT (FR-004/010/016) — **Owner: DH Runtime** · stamp `verifier/computer-settings-projection.md` (T011/T012 sufficient; Shell read-only guard + row map)
-- [ ] T027 [US3] Add Verifier Scenario 3 recipe in `specs/007-box-subagent-settings/verifier/scenario-3-settings.md` covering SC-003 (both rows under Computer) **and** SC-004 (chrome alone fails Phase; Stories 1–2 still required) with FR-013/014 evidence under `specs/007-box-subagent-settings/verifier/evidence/settings/` — **Owner: DH Verifier**
+- [x] T027 [US3] Add Verifier Scenario 3 recipe in `specs/007-box-subagent-settings/verifier/scenario-3-settings-computer.md` covering SC-003 (both rows under Computer; Shell readiness visible) **and** SC-004 (chrome alone fails Phase; Stories 1–2 still required; SC-003 alone MUST NOT grant SC-001/SC-002) with FR-013/014 evidence under `specs/007-box-subagent-settings/verifier/evidence/settings/` — **Owner: DH Verifier**
 
 **Checkpoint**: US3 settings rows independently testable; SC-004 coupling explicit in recipe.
 
@@ -209,7 +209,7 @@ Task: "Verifier scenario-1-shell-box.md + evidence/shell-box/"
 ```bash
 Task: "Host computerUse provider + subagent spawn + handoff"
 Task: "Client Settings → Computer section (Shell + Computer use rows)"
-Task: "Verifier scenario-2-computer-use.md + scenario-3-settings.md"
+Task: "Verifier scenario-2-computer-use.md + scenario-3-settings-computer.md"
 ```
 
 ---
