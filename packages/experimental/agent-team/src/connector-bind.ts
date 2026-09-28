@@ -127,8 +127,10 @@ export async function describeConnectorCredential(
 }
 
 /**
- * Store one in-app connector secret under the Host credential seam (P6 T011).
- * Never writes the secret into the Team journal or session dump path.
+ * Store one in-app connector secret under the Host credential seam (P6 T011 / US4 T029).
+ * The secret value lives only in `ctx.credentials` — never on the Team journal,
+ * session-log, or exportable dump plaintext (FR-007). Chat-paste is not the
+ * primary auth path; callers must use Host `authenticateConnector` (FR-008).
  * @param ctx - Host context carrying `credentials`.
  * @param connectorId - durable connector id.
  * @param secret - non-empty secret / API token.
@@ -147,6 +149,7 @@ export async function storeConnectorSecret(
     )
   }
   const key = connectorCredentialKey(connectorId)
+  // Credential seam only — journal/dump paths receive the key address, never `secret`.
   await credentials.modifyRecord(key, async () => ({ kind: 'api-key', key: secret }))
   return key
 }
