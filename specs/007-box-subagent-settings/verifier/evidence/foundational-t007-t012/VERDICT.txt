@@ -1,0 +1,20 @@
+DH Verifier — Foundational T007–T012 gate
+Branch under test: cursor/p7-foundational-runtime-dc28 @ 9624bc575c
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243 (draft)
+Verdict: PASS
+Linear stamps: MOH-363…MOH-368 (confirm Verifier Pass) · MOH-350 epic note (US still locked)
+Date: 2026-09-28
+Agent: DH Verifier
+
+Measured:
+- Diff vs master scoped to apps/desktop-host/** + pnpm-lock.yaml + tasks.md checkboxes + verifier/computer-use-pass-provider.md
+- No apps/desktop Electron Main SoT; no Client Computer UI package; no MzM-Docs
+- BoxReadiness enum not_ready|starting|ready|failed; local:true; Host computer settings SoT
+- assertPassShellStack + assertPassSubagentStack (spawn) on Host composition
+- dsh-computer-use + desktop-pass-fixture register + computer-use-pass-provider.md present
+- computer namespace projected via settings.describe (remote.settings path = settings-controller)
+- Focused vitest: 3 files, 10 passed (vitest-focused.log)
+
+Path A: honored (Host sandboxed Shell assert; Host fixture; no Main bus; no Client SoT)
+
+Not unlocked: US1–US3 · T013–T015 still open · no merge
