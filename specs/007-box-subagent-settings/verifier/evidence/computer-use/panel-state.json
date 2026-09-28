@@ -1,0 +1,39 @@
+{
+  "title": "Computer use screenshot subagent — DSH Local Build",
+  "obs": [
+    {
+      "status": "observed",
+      "text": "Screenshot observation\ncomputerUse observation\ncomputer_use_pass_screenshot · {}\nScreenshot observation"
+    }
+  ],
+  "handoff": [
+    {
+      "status": "handoff",
+      "child": "8440cc6b-a523-4ce7-a2cb-65f2d244ae06",
+      "text": "computerUse handoff\nSubagent\ncomputerUse screenshot observation\ncomputerUse handoff"
+    }
+  ],
+  "labels": [
+    {
+      "obs": "observed",
+      "handoff": null,
+      "text": "Screenshot observation"
+    },
+    {
+      "obs": null,
+      "handoff": "handoff",
+      "text": "computerUse handoff"
+    }
+  ],
+  "screenshotMeta": [
+    {
+      "mediaType": "image/png",
+      "w": "1",
+      "h": "1",
+      "bytes": "90",
+      "id": "sha256:999f1d1527ee7e79266f16add5430fff76b1225d742464a5b1ff1f02971bb8ee"
+    }
+  ],
+  "interactiveBrowserRequired": false,
+  "fr003": "screenshot-only Pass; interactive browser not required"
+}
