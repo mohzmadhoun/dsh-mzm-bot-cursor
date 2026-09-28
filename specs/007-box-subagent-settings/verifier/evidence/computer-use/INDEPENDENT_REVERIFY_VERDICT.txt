@@ -1,0 +1,59 @@
+Independent DH Verifier — SC-002 re-gate
+Target: PR #255 (draft) · cursor/p7-us2-sc002-evidence-dc28 @ f1a97a78d7
+Verdict: PASS
+Stamp: 2026-09-28 · independent re-gate · P-MOH-2 · Epic MOH-350 · T023/MOH-379
+Agent: https://cursor.com/agents/bc-5cb5eece-3c67-5f62-811c-118cb62a4662
+Do not merge from this gate. US3 unlock: NOT granted (SC-002 evidence Pass only).
+
+## Checklist (this re-gate)
+
+1. 01 sha256 ≠ 02 sha256 — PASS (measured)
+   - 01: ce6ce1a14705d27950e5753aab394874b99265fc98a95d4995f14ec05135f55a
+   - 02: 50f0ba9061d5e64126ef63f0818c9ad1e85511c064a04ff6a797e91bdb867abf
+   - cmp exit 1 (blobs unequal); sizes 112699 ≠ 109154 (measured)
+
+2. Real non-trivial media under evidence/computer-use/ — PASS (measured)
+   - 01/02: PNG 1263×803 RGB (~110–113KB each) — Desktop Electron DSH Local Build
+   - mp4: ISO Base Media h264 · duration 125.125s · 2966725 bytes
+   - evidence == /opt/cursor/artifacts/ mirrors (sha256 match YES for 01, 02, mp4)
+   - walkthrough frames @5s/60s/110s show real DISPLAY desktop (wallpaper+dock) + Electron UI (measured)
+
+3. Observation + parent handoff — PASS (measured Desktop frames + DOM/panel)
+   - 01: expanded "Screenshot observation" card + body "Pass fixture desktop observation."
+     + data-computer-use-screenshot figure (Host Pass fixture 1×1 / 90B — FR-003 screenshot-only OK)
+   - 02: same session with "computerUse handoff" badge + Subagent 8440cc6b confirmation (distinct frame)
+   - panel-state.json: obs status=observed; handoff status=handoff child=8440cc6b-…
+   - dom-dump.json: data-computer-use-observation=observed + data-computer-use-handoff=handoff
+   - FR-003 interactive browser not required — prompt + run used Pass fixture; no click/type
+
+4. Path A; not jsdom-alone — PASS (measured)
+   - Real Electron Desktop screenshots/recording (DISPLAY=:1 CDP path claimed in author VERDICT; mp4 proves desktop)
+   - Host SoT: desktop-pass-fixture + computer_use_pass_screenshot + spawn subagent (Path A)
+   - Client projection: data-computer-use-observation / data-computer-use-handoff (measured in DOM)
+   - host-protocol.ts forbids computer-use-control / computer-screenshot / computer-settings-mutate on Main bus (measured)
+   - Host vitest alone does not stamp Pass (author VERDICT + recipe); Desktop media present
+
+5. SO12 PR body absolute /opt/cursor/artifacts/ embeds — PASS (measured + inferred per re-gate rule)
+   - measured: published #255 body currently shows cursor.com/artifacts markdown/img after forge rewrite
+   - measured: video href retains path=%2Fopt%2Fcursor%2Fartifacts%2Fscenario-2-computer-use-walkthrough.mp4
+   - measured: artifacts exist at those absolute paths with matching sha256
+   - inferred: PO/author submitted absolute HTML embeds (VERDICT.txt documents exact <img>/<video>
+     /opt/cursor/artifacts/… sources; re-gate instruction: accept forge rewrite when original absolute
+     paths + artifacts exist)
+
+## Acceptance criteria (scenario-2-computer-use.md / SC-002)
+
+| Criterion | Result |
+| SC-002 observation + parent handoff | Pass |
+| FR-003 screenshot-only; interactive browser N/R | Pass |
+| FR-013 SO11 Desktop media (not jsdom-alone) | Pass |
+| FR-014 SO12 committed + embeds | Pass (committed + SO12 forge-rewrite rule) |
+| FR-015 LLM wording | not scored |
+| Path A Host SoT + Client projection | Pass |
+| Settings chrome alone ≠ SC-002 | Pass (chrome not claimed) |
+
+## Blockers for DH Lead
+
+None for SC-002 evidence Pass on tip f1a97a78d7.
+Do not merge unasked. Do not unlock US3 from this stamp.
+PO may merge GUI evidence draft PR #255 when ready; living gate / US3 remain held separately.
