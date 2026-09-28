@@ -180,13 +180,18 @@ export function registerComputerSettings(
   if (settings === undefined) return undefined
   const authority = pickComputerHostOwned(entry)
   ;(settings as HostOwnedCarrier)[HOST_OWNED_AUTH] = authority
+  // Defer Host-owned enforcement until after the first resolve locks authority to
+  // the stored document — registration resolve compares base+user against entry
+  // timestamps and must not reject a reboot that preserves Host SoT.
+  let locked = false
   const scope = settings.register(COMPUTER_SETTINGS_NAMESPACE, COMPUTER_SETTINGS_SCHEMA, {
     base: entry,
     applies: 'live',
     validate: (value) => {
+      if (!locked) return
       const live = hostOwnedSlot(settings)
       if (live === undefined) return
-      assertComputerHostOwnedMatch(value, live)
+      assertComputerHostOwnedMatch(value as ComputerSettings, live)
     },
   })
   // Lock to the resolved document (base + stored user) so reboot preserves Host SoT.
@@ -195,5 +200,6 @@ export function registerComputerSettings(
   authority.readiness = resolvedOwned.readiness
   authority.local = resolvedOwned.local
   authority.updatedAt = resolvedOwned.updatedAt
+  locked = true
   return scope
 }
