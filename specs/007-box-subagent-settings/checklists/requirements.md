@@ -34,5 +34,6 @@
 - Validation iteration 1 (2026-09-28): all items pass (specify).
 - Validation iteration 2 (2026-09-28 clarify): all items remain passing after Clarifications Session 2026-09-28.
 - Clarify locks: Settings → Computer with Shell + Computer use rows; screenshot-only computerUse Pass; readiness copy meaning-clear / string not scored; global Settings home; evidence slices shell-box / computer-use / settings.
-- Spec status: Clarified — ready for `/speckit-plan`.
+- Spec status: Clarified — plan / tasks / analyze Done (#232 / #234 / #236); implement unlocked at Setup.
+- **T001 (2026-09-28):** Design tree complete under `specs/007-box-subagent-settings/` — stamp [../verifier/design-tree-complete.md](../verifier/design-tree-complete.md). Implementers start at [../contracts/README.md](../contracts/README.md) + [../research.md](../research.md) Path A / PO locks + [../verifier/box-computer-seam-locks.md](../verifier/box-computer-seam-locks.md).
 - Items marked incomplete would require spec updates before `/speckit-plan` — none remain.

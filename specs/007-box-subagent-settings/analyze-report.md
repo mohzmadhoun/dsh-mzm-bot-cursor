@@ -23,7 +23,7 @@
 | A3 | Ambiguity | LOW | T024 / Path Conventions | `ui-settings-computer/` create-if-absent **or** inventory-named sibling | Acceptable Client HOW after T004; package currently absent (expected) |
 | U1 | Underspecification | LOW | T018 / T022 / T025 / Client locales | Exact locale keys for Shell / Computer use / readiness / handoff copy not named | Follow Client i18n standing order at implement (`locales.ts`) |
 | U2 | Underspecification | LOW | T019 vs FR-002 edge | Scenario 1 recipe must also prove not-ready ≠ Pass (spec edge + FR-002); task text emphasizes success path | At T019, require one not-ready observation (or Fail recipe branch) alongside SC-001 success |
-| C1 | Coverage | LOW | Linear taskstoissues | Constitution II expects Linear children from tasks; T001–T035 not filed yet (gates MOH-350…MOH-355 only) | After analyze Verifier Pass: `taskstoissues` under **DeepSeek Harness - Cursor** only — no invented ids now |
+| C1 | Coverage | LOW | Linear taskstoissues | ~~T001–T035 not filed~~ **RESOLVED 2026-09-28** — full map under [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md) (MOH-357…MOH-391; Setup parent MOH-356) | Keep P-MOH-2 only; Verifier Setup gate before Linear Done on Spec artifacts |
 
 **Coverage Summary Table:**
 
@@ -89,7 +89,13 @@
 
 ## Linear taskstoissues map
 
-**Not filed yet for T001–T035.** Phase gates exist: epic MOH-350 · specify MOH-351 · clarify MOH-352 · plan MOH-353 · tasks MOH-354 · analyze MOH-355. Do **not** invent MOH-* child ids. When analyze Verifier Passes: run `taskstoissues` on **DeepSeek Harness - Cursor** only; never **DeepSeek Harness - GrokBot**.
+**Filed 2026-09-28** on **DeepSeek Harness - Cursor** (`P-MOH-2`) only — never GrokBot. Canonical table: [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md).
+
+| Range | Parent | Linear ids |
+|-------|--------|------------|
+| Spec Kit gates | MOH-350 | MOH-351…MOH-355 (+ Setup batch MOH-356) |
+| T001–T006 Setup | [MOH-356](https://linear.app/momadhoun/issue/MOH-356) | [MOH-357](https://linear.app/momadhoun/issue/MOH-357)…[MOH-362](https://linear.app/momadhoun/issue/MOH-362) |
+| T007–T035 | [MOH-350](https://linear.app/momadhoun/issue/MOH-350) | [MOH-363](https://linear.app/momadhoun/issue/MOH-363)…[MOH-391](https://linear.app/momadhoun/issue/MOH-391) |
 
 ## Severity summary
 
@@ -108,7 +114,7 @@
 2. On gate Pass: implement Setup **T001–T006**, then Foundational **T007–T015** (stamp), then US1→US3 per tasks.md.
 3. At T015: enforce no US product work before foundational stamp (supersedes informal T009/T011/T012 fan-out notes — I1).
 4. At T019: include not-ready ≠ Pass observation alongside SC-001 success (U2).
-5. After analyze Pass: `taskstoissues` under **DeepSeek Harness - Cursor** only (C1).
+5. `taskstoissues` **Done** under DeepSeek Harness - Cursor — see [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md) (C1 resolved).
 6. Lead/PO: refresh living gate to analyze Pass → implement (out of this PR; do not edit `MzM-Docs/` here).
 7. **Stop** — do not start `/speckit-implement` in this spawn.
 
