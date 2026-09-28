@@ -1,0 +1,74 @@
+T027 Client deny UI + Scenario 3 (SC-003) — DH Verifier
+=======================================================
+Verdict: Pass
+Stamp: 2026-09-28 · tip origin/cursor/p6-us3-client-deny-verify-70bf @ 057e0e9491
+  (+ evidence commit on this branch; base Client tip d02d11fe30 + unbound-$on boot fix)
+  · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
+  · launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop
+Product tip under test: d02d11fe30 (Client T027) + 057e0e9491 ($on receiver bind fix)
+Host T026 / recipe T028: on master (eba9c0d98d / 2d9ba06164)
+Linear: Epic MOH-281 · T027 Client US3 · T028 Scenario 3
+Recipe: specs/006-connectors-mcp-events-trust/verifier/scenario-3-trust-deny.md
+
+Acceptance (T027 / SC-003 / FR-006 / FR-014 / FR-015)
+----------------------------------------------------
+[x] Permission / trust gate visible — measured Desktop
+    evidence/scenario-3/01-permission-gate.png
+    data-team-trust-deny · standing deny control · Permission request card
+[x] Path B standing never — measured
+    evidence/scenario-3/03-standing-never.png
+    data-team-standing-deny=on · policy=never
+[x] Denied / blocked distinct from success — measured
+    evidence/scenario-3/02-denied-blocked-state.png
+    outcome=denied · "Blocked (denied) mcp__verifier_fixture__ping"
+    successVisible=false · data-team-connector-blocked present
+[x] Either-OK (FR-006) — Path B alone satisfies Pass (user-deny Path A not required)
+[x] Host HTTP/WS answerer plane — measured (Client mount ctx.remote.$on; no Main bus)
+[x] FR-014 (SO 11) — real Desktop screenshots + walkthrough recording
+[x] FR-015 (SO 12) — media committed under verifier/evidence/scenario-3/
+    + PR body MUST embed absolute /opt/cursor/artifacts/… paths (PO)
+
+Boot fix (Verifier-required for Desktop)
+----------------------------------------
+Client tip d02d11fe30 extracted unbound `remote.$on`, dropping the Gateway
+receiver → TypeError reading `events` → Agent Teams fiber FAILED at web boot.
+Fix commit 057e0e9491 calls `ctx.remote.$on(...)` as a method (same as ui-approval).
+
+Provenance (measured)
+---------------------
+Desktop CDP hard-assert @ tip 057e0e9491 (DISPLAY=:1, port 9222):
+  path: B-standing-never
+  connectorId=connector-9b78bdf7-2cce-42dd-bd11-630020917ac2
+  gate: trustDenyVisible policyBefore=ask → never
+  outcome: denied · blockedVisible=true · successVisible=false
+  detailText="Blocked (denied)\nmcp__verifier_fixture__ping"
+panel-state.json · p6-t027-scenario3-cdp.log
+Walkthrough: scenario-3-trust-deny-walkthrough.mp4 (~32s)
+
+SO11 artifact mirrors (for PR embeds)
+-------------------------------------
+  /opt/cursor/artifacts/p6-t028-01-permission-gate.png
+  /opt/cursor/artifacts/p6-t028-02-denied-blocked-state.png
+  /opt/cursor/artifacts/p6-t028-03-standing-never.png
+  /opt/cursor/artifacts/p6-t028-scenario-3-trust-deny-walkthrough.mp4
+
+SO12 recommended PR body embeds
+-------------------------------
+  <img src="/opt/cursor/artifacts/p6-t028-01-permission-gate.png" alt="SC-003 permission gate Trust/deny standing ask" />
+  <img src="/opt/cursor/artifacts/p6-t028-03-standing-never.png" alt="SC-003 standing deny never on" />
+  <img src="/opt/cursor/artifacts/p6-t028-02-denied-blocked-state.png" alt="SC-003 blocked denied distinct from success" />
+  <video src="/opt/cursor/artifacts/p6-t028-scenario-3-trust-deny-walkthrough.mp4" controls></video>
+
+Claims
+------
+- SC-003 one deny with user-visible blocked state: **measured** (Path B)
+- FR-006 standing never OK; denial ≠ success: **measured**
+- FR-014 desktop visual: **measured**
+- FR-015 commit under scenario-3/: **measured** (this stamp)
+- FR-015 PR HTML embeds: **inferred** until product-owner assistant updates Client deny PR body
+- Unbound-$on boot Fail on bare d02d11fe30: **measured** (fixed on evidence tip)
+
+Scope lock
+----------
+Does NOT merge. Leave Linear In Progress until PO merges GUI evidence + SO12 embeds.
+Verifier does not mark Linear Done. Epic MOH-281 US3 Client T027 + Scenario 3 Pass stamped.
