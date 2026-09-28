@@ -1,0 +1,85 @@
+page dsh-app://app/ ping for chrome — DSH Local Build
+targetBotId=4ec8ec63-6eab-4125-b0b8-0f3b87f79793
+ensureKind profile: already present
+ensureKind log: already present
+ensureKind note: already present
+Step A three kinds PASS
+quitDesktop pids=[648372,648454,648486,648488,648493,648540]
+startDesktop launcher_pid=648794
+CDP ready after 3000ms
+Step B cold restart PASS
+Step C surface browse/recall PASS kinds=profile,log,note contentHits={"profile":true,"log":true,"note":true}
+Step D subsequent turn started (LLM wording not scored)
+{
+  "tip": "e6f958e90a",
+  "display": ":1",
+  "cdp": "9222",
+  "fixtures": {
+    "profile": "User prefers Asia/Shanghai timezone for scheduling",
+    "log": "Logged standup: shipped Host writeMemory kind=log validation",
+    "note": "Remember to stamp SC-003 after note write"
+  },
+  "steps": {
+    "preRestart": {
+      "kinds": [
+        "profile",
+        "log",
+        "note"
+      ],
+      "contents": {
+        "profile": [
+          "User prefers Asia/Shanghai timezone for scheduling"
+        ],
+        "log": [
+          "Logged standup: shipped Host writeMemory kind=log validation"
+        ],
+        "note": [
+          "Remember to stamp SC-003 after note write",
+          "Walkthrough note: SC-003 kinds distinguishable on Desktop"
+        ]
+      },
+      "rowCount": 4
+    },
+    "restart": {
+      "quit": true,
+      "relaunched": true
+    },
+    "postRestart": {
+      "kinds": [
+        "profile",
+        "log",
+        "note"
+      ],
+      "contents": {
+        "profile": [
+          "User prefers Asia/Shanghai timezone for scheduling"
+        ],
+        "log": [
+          "Logged standup: shipped Host writeMemory kind=log validation"
+        ],
+        "note": [
+          "Remember to stamp SC-003 after note write",
+          "Walkthrough note: SC-003 kinds distinguishable on Desktop"
+        ]
+      },
+      "rowCount": 4
+    },
+    "contentHits": {
+      "profile": true,
+      "log": true,
+      "note": true
+    },
+    "injectIndicator": {
+      "present": false,
+      "ids": null,
+      "at": null
+    },
+    "subsequentTurn": {
+      "started": true,
+      "llmWordingScored": false
+    }
+  },
+  "pass": true,
+  "botId": "4ec8ec63-6eab-4125-b0b8-0f3b87f79793",
+  "sc004": "surface three kinds after restart + Host inject path (wiring; no LLM scoring)"
+}
