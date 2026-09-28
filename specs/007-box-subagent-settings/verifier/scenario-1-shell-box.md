@@ -179,7 +179,7 @@ Filled stamp lives at [evidence/shell-box/VERDICT.txt](./evidence/shell-box/VERD
 
 ```text
 Verdict: Pass
-Stamp: 2026-09-28 · tip <this evidence branch> · desktop DSH Local Build (DISPLAY=:1)
+Stamp: 2026-09-28 · tip c3936df793 · desktop DSH Local Build (DISPLAY=:1)
 Linear: MOH-375 · Epic MOH-350 · P-MOH-2
 SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
 FR-002: not-ready observed ≠ Pass (00-shell-box-not-ready.png; data-shell-box-outcome=not_ready)
