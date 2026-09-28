@@ -1,0 +1,8 @@
+# SC-006 composite VERDICT — placeholder
+
+Verdict: Not claimed
+Stamp: 2026-09-28 · recipe-only (T030) — no composite Desktop evidence run on this tip
+Linear: MOH-386 · Epic MOH-350 · P-MOH-2
+SC-006: Not claimed — fill this file only after ordered Desktop composite replay (Scenarios 1–4 + T015 + T032 bus) per scenario-5-full-replay.md
+Blockers: Composite Desktop evidence run required before product Pass
+Scope lock: T030 delivers the recipe + this placeholder only
