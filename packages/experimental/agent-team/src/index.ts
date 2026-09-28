@@ -175,7 +175,7 @@ export {
   composeMemoryRecall,
 } from './memory-bind.ts'
 export type { MemoryBindRef } from './memory-bind.ts'
-export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS } from './validation.ts'
+export { AVATAR_COLOR_IDS, AVATAR_SHAPE_IDS, memoryEligibleForBot } from './validation.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -787,8 +787,9 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Project Host memories for browse / recall (P5 FR-004/005 / FR-007 / US4 T023 / US5 / T007–T008).
-   * When `botId` is set: that bot’s agent-layer rows plus all account-wide user rows.
+   * Project Host memories for browse / recall (P5 FR-004/005 / FR-006/007 / US4 T023 / US5 T027).
+   * When `botId` is set: that bot’s agent-layer rows plus all account-wide user rows
+   * (`memoryEligibleForBot` — bot B MUST NOT list A’s agent rows as B’s).
    * When omitted: full Host catalog. Host journal SoT only — never Electron Main or transcript.
    * Rows survive Host child restart via Lead Session `team/memory` replay; kinds stay distinguishable.
    * @param caller - exact live Team member.

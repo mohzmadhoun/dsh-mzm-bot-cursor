@@ -2325,6 +2325,124 @@ describe('Team Remote API', () => {
     await waitNoAgent(ctx, botB.id)
   })
 
+  it('US5 T027: listMemories isolates agent by botId and shares user across bots', async () => {
+    const { ctx, lead } = await setup([
+      textResponse('layer alpha'),
+      textResponse('layer beta'),
+    ])
+    const alpha = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Layer Alpha',
+      modelSelection: { provider: 'mock', model: 'layer-a' },
+      signal: SIGNAL,
+    })
+    const beta = await ctx.agentTeams.createBot(lead, {
+      displayName: 'Layer Beta',
+      modelSelection: { provider: 'mock', model: 'layer-b' },
+      signal: SIGNAL,
+    })
+    await waitNoAgent(ctx, alpha.id)
+    await waitNoAgent(ctx, beta.id)
+
+    // Orthogonality (FR-017 / SC-010): every kind on both layers — no kind→layer lock.
+    const alphaAgentProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Alpha agent profile UTC',
+      signal: SIGNAL,
+    })
+    const alphaAgentLog = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Alpha agent log shipped',
+      signal: SIGNAL,
+    })
+    const alphaAgentNote = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'agent',
+      botId: alpha.id,
+      content: 'Alpha agent note private',
+      signal: SIGNAL,
+    })
+    const betaAgentProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'agent',
+      botId: beta.id,
+      content: 'Beta agent profile private',
+      signal: SIGNAL,
+    })
+    const userProfile = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'profile',
+      layer: 'user',
+      botId: null,
+      content: 'User profile shared timezone',
+      signal: SIGNAL,
+    })
+    const userLog = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'log',
+      layer: 'user',
+      botId: null,
+      content: 'User log shared event',
+      signal: SIGNAL,
+    })
+    const userNote = await ctx.agentTeams.writeMemory(lead, {
+      kind: 'note',
+      layer: 'user',
+      botId: null,
+      content: 'User note shared fact',
+      signal: SIGNAL,
+    })
+
+    const alphaListed = ctx.agentTeams.listMemories(lead, { botId: alpha.id, signal: SIGNAL }).memories
+    expect(alphaListed).toEqual([
+      alphaAgentProfile.memory,
+      alphaAgentLog.memory,
+      alphaAgentNote.memory,
+      userProfile.memory,
+      userLog.memory,
+      userNote.memory,
+    ])
+    // Bot B MUST NOT list A's agent rows as B's agent memory (FR-006 / SC-005).
+    expect(alphaListed.some(row => row.memoryId === betaAgentProfile.memory.memoryId)).toBe(false)
+    expect(alphaListed.filter(row => row.layer === 'agent').every(row => row.botId === alpha.id)).toBe(true)
+
+    const betaListed = ctx.agentTeams.listMemories(lead, { botId: beta.id, signal: SIGNAL }).memories
+    expect(betaListed).toEqual([
+      betaAgentProfile.memory,
+      userProfile.memory,
+      userLog.memory,
+      userNote.memory,
+    ])
+    expect(betaListed.some(row => row.content.includes('Alpha'))).toBe(false)
+    expect(betaListed.filter(row => row.layer === 'agent').every(row => row.botId === beta.id)).toBe(true)
+
+    // User layer account-wide across bot contexts (FR-007 / SC-005).
+    for (const listed of [alphaListed, betaListed]) {
+      expect(listed.filter(row => row.layer === 'user').map(row => row.memoryId)).toEqual([
+        userProfile.memory.memoryId,
+        userLog.memory.memoryId,
+        userNote.memory.memoryId,
+      ])
+    }
+
+    // Kinds × layers orthogonal — all three kinds on agent and on user (FR-017).
+    expect(new Set(alphaListed.filter(row => row.layer === 'agent').map(row => row.kind)))
+      .toEqual(new Set(['profile', 'log', 'note']))
+    expect(new Set([userProfile.memory.kind, userLog.memory.kind, userNote.memory.kind]))
+      .toEqual(new Set(['profile', 'log', 'note']))
+
+    const remoteAlpha = await ctx.agentTeams.remoteListMemories(lead, { botId: alpha.id }, SIGNAL)
+    expect(remoteAlpha).toMatchObject({ ok: true, value: { memories: alphaListed } })
+    const remoteBeta = await ctx.agentTeams.remoteListMemories(lead, { botId: beta.id }, SIGNAL)
+    expect(remoteBeta).toMatchObject({ ok: true, value: { memories: betaListed } })
+
+    // Full catalog via view — still Host journal SoT, not transcript.
+    const view = await ctx.agentTeams.remoteView(lead, SIGNAL)
+    expect(view.memories).toHaveLength(7)
+    expect(view.memories.every(row => row.memoryId.startsWith('memory-'))).toBe(true)
+  })
+
   it('US1 T015: createRoutine rejects empty intent / bad schedule loudly and persists active', async () => {
     const { ctx, lead } = await setup([
       textResponse('routine validate a'),

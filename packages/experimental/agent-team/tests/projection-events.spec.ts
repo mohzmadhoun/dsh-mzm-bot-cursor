@@ -13,6 +13,7 @@ import {
 import type { TeamProjectionState, TeamState } from '../src/projection.ts'
 import { SidebarSectionId, TeamId, TeamMessageId, TeamTaskId, MemoryId, RoutineId } from '../src/types.ts'
 import type { TeamMemberSnapshot, TeamMessageSnapshot, TeamTaskSnapshot } from '../src/types.ts'
+import { memoryEligibleForBot } from '../src/validation.ts'
 
 const ROOT = SessionId('team-root')
 const TEAM = TeamId(ROOT)
@@ -725,7 +726,7 @@ describe('projectRoutine / projectRoutines (US2 T019 / FR-002)', () => {
   })
 })
 
-describe('projectMemory / projectMemories (P5 T007–T008)', () => {
+describe('projectMemory / projectMemories (P5 T007–T008 / US5 T027)', () => {
   it('projects agent isolation and user sharing from Host rows', () => {
     const agentA = {
       memoryId: MemoryId('memory-agent-a'),
@@ -777,6 +778,13 @@ describe('projectMemory / projectMemories (P5 T007–T008)', () => {
       projectMemory(user),
     ])
     expect(projectMemories(state, SessionId('missing'))).toEqual([projectMemory(user)])
+  })
+
+  it('US5 T027: memoryEligibleForBot keys agent by botId and shares user account-wide', () => {
+    expect(memoryEligibleForBot({ layer: 'agent', botId: CHILD }, CHILD)).toBe(true)
+    expect(memoryEligibleForBot({ layer: 'agent', botId: CHILD }, SessionId('child-b'))).toBe(false)
+    expect(memoryEligibleForBot({ layer: 'user', botId: null }, CHILD)).toBe(true)
+    expect(memoryEligibleForBot({ layer: 'user', botId: null }, SessionId('child-b'))).toBe(true)
   })
 })
 

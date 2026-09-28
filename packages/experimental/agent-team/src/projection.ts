@@ -26,6 +26,7 @@ import type { SessionEvent, SessionEventMap, SessionId } from '@deepseek-ai/dsh-
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import { readHostMailboxMessage } from './host-mailbox-message.ts'
 import { describeScheduleExpr } from './routine-cron.ts'
+import { memoryEligibleForBot } from './validation.ts'
 import type {
   AvatarMarker,
   BotPersonaProfile,
@@ -647,9 +648,10 @@ export function projectRoutine(routine: RoutineRecord): RoutineProjection {
 }
 
 /**
- * Project Host Memory catalog rows for Client browse / recall (P5 FR-007 / US5).
+ * Project Host Memory catalog rows for Client browse / recall (P5 FR-007 / US5 T027).
  * Host journal SoT only — never invent rows from Electron Main, Client local store, or transcript.
- * When `botId` is set: that bot’s agent-layer rows plus all account-wide user-layer rows.
+ * When `botId` is set: that bot’s agent-layer rows plus all account-wide user-layer rows
+ * ({@link memoryEligibleForBot} — bot B MUST NOT list A’s agent rows as B’s).
  * When omitted: full catalog.
  * @param state - projected Team state.
  * @param botId - optional bot context for agent isolation + user sharing.
@@ -661,10 +663,7 @@ export function projectMemories(
 ): readonly MemoryProjection[] {
   const rows = botId === undefined
     ? state.memories
-    : state.memories.filter(memory => (
-      memory.layer === 'user'
-      || (memory.layer === 'agent' && memory.botId === botId)
-    ))
+    : state.memories.filter(memory => memoryEligibleForBot(memory, botId))
   return rows.map(projectMemory)
 }
 

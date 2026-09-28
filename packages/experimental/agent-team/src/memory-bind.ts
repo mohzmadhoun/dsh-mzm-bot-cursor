@@ -11,6 +11,7 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-system-prompt'
 import type { MemoryRecord } from './types.ts'
+import { memoryEligibleForBot } from './validation.ts'
 
 /**
  * Scoped system-prompt section that carries curated Host Memory recall text.
@@ -29,7 +30,8 @@ export interface MemoryBindRef {
 
 /**
  * Join non-empty trimmed contents from rows eligible for one Bot.
- * Agent-layer rows must match `botId`; user-layer rows are account-wide.
+ * Agent-layer rows must match `botId`; user-layer rows are account-wide
+ * ({@link memoryEligibleForBot} — US5 T027 / FR-006/007).
  * Blank contents contribute no prose (FR-016 compose / empty-catalog rule).
  * @param rows - durable Host Memory catalog rows (full Team catalog or subset).
  * @param botId - teammate Session identity receiving the turn.
@@ -41,8 +43,7 @@ export function composeMemoryRecall(
 ): string {
   const parts: string[] = []
   for (const row of rows) {
-    if (row.layer === 'agent' && row.botId !== botId) continue
-    if (row.layer !== 'agent' && row.layer !== 'user') continue
+    if (!memoryEligibleForBot(row, botId)) continue
     const trimmed = row.content.trim()
     if (trimmed.length > 0) parts.push(trimmed)
   }
