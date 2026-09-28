@@ -806,12 +806,13 @@ export interface ResumeRoutineResult {
 }
 
 /**
- * Host write-memory input (P5 FR-001…003 / T006–T008).
- * Non-empty `content` required; empty rejects without writing.
+ * Host write-memory input (P5 FR-001…003 / T006–T008 / US1 T014).
+ * Non-empty `content` required after trim; empty rejects without writing (FR-001 profile + log/note).
  * `kind` and `layer` are independently chosen (FR-017).
  * When `layer=agent`, `botId` is required and must name an active Bot.
  * When `layer=user`, `botId` must be absent or null (account-wide).
  * Electron Main must not invent memory records — Host owns the durable write (research R1).
+ * Bot-tool write is not required for Pass (FR-015).
  */
 export interface WriteMemoryInput {
   readonly kind: MemoryKind

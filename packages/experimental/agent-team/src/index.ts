@@ -701,10 +701,12 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Lead-authorized Host Memory write (P5 FR-001…003 / T006–T008).
+   * Lead-authorized Host Memory write (P5 FR-001…003 / T006–T008 / US1 T014).
    * Persists a `MemoryRecord` on the Team journal (`team/memory`).
-   * Rejects empty content without writing; enforces layer/`botId` rules (agent requires
-   * active bot; user requires null/absent botId). Kinds are orthogonal to layers (FR-017).
+   * For `kind=profile` (and log/note): validates non-empty `content` after trim; rejects
+   * empty/whitespace with a clear `TEAM_INVALID_ARGUMENT` reason and writes nothing (FR-001).
+   * Enforces layer/`botId` rules (agent requires active bot; user requires null/absent botId).
+   * Kinds are orthogonal to layers (FR-017). Bot-tool write is not required for Pass (FR-015).
    * Electron Main must not invent memory records — Host owns the durable write (research R1).
    * Not chat transcript (research R6).
    * @param caller - exact live Lead Agent.
@@ -1535,8 +1537,9 @@ export class TeamService extends TypertRemoteService {
   }
 
   /**
-   * Write one Host Memory through the generated Remote API (P5 T006–T008 / FR-001…003).
+   * Write one Host Memory through the generated Remote API (P5 T006–T008 / US1 T014 / FR-001…003).
    * Authenticated Desktop Host HTTP/WS data plane — Client MUST NOT persist SoT.
+   * Empty profile (and other kind) content rejects as `team-rejected` with a clear reason.
    * @param agent - exact live Lead Agent.
    * @param request - kind, layer, optional botId, content.
    * @param signal - cancellation.

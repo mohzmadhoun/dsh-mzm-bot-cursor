@@ -74,6 +74,7 @@ const view: TeamView = {
     },
   ],
   routines: [],
+  memories: [],
 }
 
 function taskSuccess(value: TeamTask): TeamTaskActionResult {
