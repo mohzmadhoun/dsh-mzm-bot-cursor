@@ -8,9 +8,9 @@
 
 **Organization**: Shared Host Memory catalog foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority**: US1 Write profile → US2 Write log → US3 Write note → US4 Recall after restart → US5 Agent vs user layers (all P1).
 
-**Linear**: Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) · Plan Done [MOH-233](https://linear.app/momadhoun/issue/MOH-233) (PR #170) · Tasks [MOH-235](https://linear.app/momadhoun/issue/MOH-235/p5-spec-kit-tasks-memory-productization) · Project **DeepSeek Harness - Cursor** only · Issues from stories via later `/speckit-analyze` → `/speckit-taskstoissues` (not this PR)
+**Linear**: Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) · Plan Done [MOH-233](https://linear.app/momadhoun/issue/MOH-233) (PR #170) · Tasks Done [MOH-235](https://linear.app/momadhoun/issue/MOH-235) (PR #171) · Analyze + taskstoissues [MOH-237](https://linear.app/momadhoun/issue/MOH-237/p5-spec-kit-analyze-taskstoissues-memory) · Project **DeepSeek Harness - Cursor** only · T001–T037 Linear children under MOH-228 (see [analyze-report.md](./analyze-report.md))
 
-**Branch**: `cursor/p5-tasks-fe1d` (from `origin/master` @ plan merge)
+**Branch**: `cursor/p5-analyze-fe1d` (from `origin/master` @ tasks merge #171)
 
 **PO / Architect Option locks (honor in every story/recipe)**:
 
@@ -262,4 +262,4 @@ Task: "Verifier scenario-1-write-kinds.md + evidence path"
 - Clarify locks (Write UI Pass; surface+inject Recall Pass; orthogonal kinds×layers) non-negotiable
 - Standing orders **11** + **12** non-negotiable on GUI recipes
 - Do not rewrite specs/001–004
-- This PR is **tasks.md only** — no implement, no `taskstoissues`. After Verifier Pass on tasks: `/speckit-analyze` → `/speckit-taskstoissues` under MOH-228 → implement. Leave [MOH-235](https://linear.app/momadhoun/issue/MOH-235/p5-spec-kit-tasks-memory-productization) **In Progress** until PO Done after Verifier Pass.
+- Analyze + `taskstoissues` owned by [MOH-237](https://linear.app/momadhoun/issue/MOH-237/p5-spec-kit-analyze-taskstoissues-memory). Implement only after Verifier Pass on analyze. No product implement in the analyze PR.

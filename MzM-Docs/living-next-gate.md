@@ -19,37 +19,35 @@
 
 **P4 (Routines — cron only)** — **Done.** Epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only) Done. Specs under `specs/004-routines-cron/`. SC-001…SC-005 Pass; product close merged as [#166](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/166) @ `aca0c2b7c5` (optional T026 canceled).
 
-**P5 (Memory productization)** — Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) **In Progress**. Spec Kit tree `specs/005-memory-productization` does **not** exist yet.
+**P5 (Memory productization)** — Epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) **In Progress**. Spec Kit tree `specs/005-memory-productization/` on `master` through **tasks** (#171). Specify / clarify / plan / tasks Verifier gates Done. **Analyze + taskstoissues** [MOH-237](https://linear.app/momadhoun/issue/MOH-237/p5-spec-kit-analyze-taskstoissues-memory) In Progress.
 
 ## Next gate
 
-**P5 Spec Kit — specify** ([MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization)). Owner: **DH Spec**. Plan home: [mzm-bot-plan.md](./mzm-bot-plan.md) §4 P5.
+**P5 Spec Kit — analyze + taskstoissues** ([MOH-237](https://linear.app/momadhoun/issue/MOH-237/p5-spec-kit-analyze-taskstoissues-memory)). Owner: **DH Spec**. Then **DH Verifier** Pass on analyze; PO kicks implement Setup only after that.
 
-- **Authorize specify only** — no clarify/plan/tasks/analyze/implement until Verifier Pass on specify.
-- New tree only: `specs/005-memory-productization` (or Spec Kit sequential `005-…` with memory/productization in the slug). Do **not** rewrite `specs/001`–`004`.
-- **Scope lock (plan In):** profile / log / note + recall UX; agent vs user memory layers per [adr/agent-vs-user-memory-layers.md](./adr/agent-vs-user-memory-layers.md).
-- **Out:** full Grok memory chrome parity beyond agreed ADR; P6 connectors/events; P7 Box/Shell.
-- **Exit (Verifier-provable):** write profile/log/note fact → restart → recall returns it; Verifier scripted path documented; SO 11+12 desktop visual evidence for every GUI recipe.
-- Do **not** invent FR detail in this gate — Spec owns FRs/acceptance when specify runs; Lead/this doc carry plan In/Out/Exit only.
+- Spec Kit tree: `specs/005-memory-productization/` (spec / plan / tasks / analyze-report).
+- **Locks:** Host Memory catalog SoT; no Electron Main memory bus; Write Pass = UI; Recall Pass = surface + inject; kinds × layers orthogonal; SO 11+12 GUI evidence.
+- **Out:** full Grok memory chrome parity beyond ADR; P6 connectors/events; P7 Box/Shell.
+- **Exit (Verifier-provable):** write profile/log/note → restart → recall returns it; Verifier scripted path; desktop visual evidence.
+- Do **not** start product implement until Verifier Pass on analyze + Linear T001–T037 children exist under MOH-228.
 
-## Phase 5 kickoff (specify authorized)
+## Phase 5 gate sequence (current)
 
-1. **PO** — Confirmed P4 Verifier Pass + MOH-188 Done (#166 @ `aca0c2b7c5`); opened epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization) and specify [MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization). Lead does **not** create/duplicate epics.
-2. **DH Lead** — This living gate; authorize Spec specify; report Status / Next gate / Owners to PO. No feature code; no Spec Kit tree edits.
-3. **DH Spec** — `/speckit-specify` for P5 Memory productization only against plan §4 P5 In/Out/Exit + prior ADR; new `specs/005-…` tree; FRs from specify, not from this gate. GUI paths must call out desktop visual evidence (SO 11+12).
-4. **DH Verifier** — Gate specify delivery (Pass/Fail) before clarify.
-5. **Held until after specify Pass** — clarify → plan → tasks → analyze → taskstoissues → implement (same Spec Kit order as P2–P4); Architect / Runtime / Electron engage when plan/tasks demand.
+1. **PO** — Analyze [MOH-237](https://linear.app/momadhoun/issue/MOH-237) authorized after tasks Done (#171 / [MOH-235](https://linear.app/momadhoun/issue/MOH-235)).
+2. **DH Spec** — `/speckit-analyze` (0 CRITICAL target) + `/speckit-taskstoissues` Linear children T001–T037 under MOH-228 / **DeepSeek Harness - Cursor** only.
+3. **DH Verifier** — Gate analyze + issue map Pass/Fail before implement.
+4. **Held until after analyze Verifier Pass** — implement Setup (T001–T005) → Foundational (T006–T013) → US1–US5 → polish; Architect / Runtime / Electron engage on implement.
 
 ## Owners / held
 
 | Role | Action |
 |------|--------|
-| **DH Spec** | **Go** — P5 specify ([MOH-229](https://linear.app/momadhoun/issue/MOH-229/p5-spec-kit-specify-memory-productization)); new `specs/005-…`; no rewrite of 001–004 |
-| **DH Verifier** | Gate specify PR Pass/Fail before clarify |
-| **DH Lead** | This living gate + kickoff; no epic create; no feature code; no Spec Kit specs |
-| **DH Architect / Runtime / Electron** | Idle until after specify Verifier Pass (clarify/plan follow) |
-| **PO Assistant** | Orchestration; Linear statuses; ship/no-ship on later P5 gates |
+| **DH Spec** | **Go** — analyze + taskstoissues ([MOH-237](https://linear.app/momadhoun/issue/MOH-237)); no product implement |
+| **DH Verifier** | Gate analyze PR + Linear T001–T037 map before implement kick |
+| **DH Lead** | This living gate; no feature code |
+| **DH Architect / Runtime / Electron** | Idle until after analyze Verifier Pass (implement Setup kick) |
+| **PO Assistant** | Orchestration; ship/no-ship on analyze Verifier; then implement Setup kick |
 
 ## Blockers
 
-None for specify kick. P4 Done (MOH-188 / #166) + epic MOH-228 + specify MOH-229 In Progress satisfied. Next hard gate after specify draft: Verifier Pass on specify before clarify.
+None for analyze/taskstoissues. Tasks tree on master (#171). Next hard gate after Spec delivers: Verifier Pass on analyze before implement Setup.
