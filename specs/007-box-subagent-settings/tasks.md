@@ -8,9 +8,9 @@
 
 **Organization**: Shared Host box-readiness + sandboxed Shell mount + computerUse registry + Computer settings SoT foundations (Phase 2) **block** all user-story fan-out. Stories follow **spec priority** (all P1): US1 Shell/box → US2 computerUse-class → US3 Settings rows. Chrome polish ≠ Verifier substitute (FR-005 / SC-004).
 
-**Linear**: Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · tasks gate [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356). **T001–T035 filed** — map [verifier/linear-taskstoissues.md](./verifier/linear-taskstoissues.md) (MOH-357…MOH-391). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
+**Linear**: Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · tasks gate [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · Setup [MOH-356](https://linear.app/momadhoun/issue/MOH-356). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
-**Branch**: `cursor/p7-setup-spec-dc28` (Setup Spec slice; tasks landed via #234)
+**Branch**: `cursor/p7-setup-runtime-dc28` (Setup Runtime T002–T003; from `origin/master` @ analyze #236 / `6fa18cfcfe`)
 
 **Architect Path A + clarify + PO locks (honor in every story/recipe)**:
 
