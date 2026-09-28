@@ -1,0 +1,33 @@
+Verdict: Pass (evidence rework after independent FAIL on duplicate 01/02 blobs)
+Stamp: 2026-09-28 · tip f00bb540df · desktop DSH Local Build 0.1.6-alpha.2 @ master 930afcfc72 (DISPLAY=:1)
+Linear: MOH-375 · Epic MOH-350 · P-MOH-2
+PR: #250 (PO updates body + re-spawns independent Verifier)
+SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
+FR-002: not-ready observed ≠ Pass — 00-shell-box-not-ready.png (Box not ready; danger-full-access Rejected)
+FR-011: Pass — local Host sandboxed Shell only (bubblewrap); not PTC/remote-only
+FR-013: desktop screenshots + short recording of real Electron Desktop (DISPLAY=:1); not unit/jsdom-only (SO 11)
+FR-014: media committed under verifier/evidence/shell-box/ AND mirrored under /opt/cursor/artifacts/ with identical filenames for PR embeds (SO 12)
+FR-015: LLM wording not scored
+Path A: Host SoT; Client HTTP/WS projection; no Electron Main shell-exec/box-ready bus
+Blockers: none for SC-001 after bubblewrap + distinct ready vs success frames
+
+## Independent FAIL remediation (this tip)
+Prior tip duplicated `01-shell-box-ready.png` and `02-shell-box-success.png` (identical sha256). Recaptured:
+- `01-shell-box-ready.png` — New Session idle composer ("Into the Unknown" / Describe what you want…) with no Shell success card in main pane (ready path after bubblewrap; measured).
+- `02-shell-box-success.png` — prior success session with visible "Shell tool succeeded" + `SC001_SHELL_BOX_OK` + data-shell-box-outcome=success (measured).
+- `00-shell-box-not-ready.png` — unchanged distinct not-ready frame (sha kept).
+- `scenario-1-shell-box-walkthrough.mp4` — refreshed short recording (ready idle → success session).
+
+sha256 (evidence == artifacts):
+- 00: 5e6da8dbf9c8fbb6818012371c0d1f4cd8dcd01905eedb6f406d3e8883a94dd1
+- 01: a175a162d3444dc47304756dba72f8c68c180a8ffa91fea9d3fa3e3b8c95f1cb
+- 02: 55c72df67dc033091418382ad359d184173786a6b0118bbbb5cf443d07321fe7
+- mp4: 0577cd63a1a73eea3087dd07c12d6b22a076938082fd8c8aed39b4da206b0473
+
+## PR body embeds (PO / ManagePullRequest — SO 12)
+<img src="/opt/cursor/artifacts/00-shell-box-not-ready.png" alt="Shell/box not-ready — Box not ready ≠ Pass" />
+<img src="/opt/cursor/artifacts/01-shell-box-ready.png" alt="Shell/box ready idle — New Session composer before tool invoke" />
+<img src="/opt/cursor/artifacts/02-shell-box-success.png" alt="Local Shell/box tool success — Shell tool succeeded + SC001_SHELL_BOX_OK" />
+<video src="/opt/cursor/artifacts/scenario-1-shell-box-walkthrough.mp4" controls></video>
+
+Committed mirrors: specs/007-box-subagent-settings/verifier/evidence/shell-box/*
