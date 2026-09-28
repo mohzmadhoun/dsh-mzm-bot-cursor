@@ -17,6 +17,7 @@
     {
       "path": "../../packages/core/agent"
     },
+    { "path": "../../packages/api/settings-controller" },
     {
       "path": "../../packages/attachment/attachment"
     },

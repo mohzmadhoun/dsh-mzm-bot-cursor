@@ -14,6 +14,7 @@
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/dsh": "workspace:^",
     "@deepseek-ai/dsh-agent": "workspace:^",
+    "@deepseek-ai/dsh-api-settings-controller": "workspace:^",
     "@deepseek-ai/dsh-app-boot": "workspace:^",
     "@deepseek-ai/dsh-attachment": "workspace:^",
     "@deepseek-ai/dsh-brand": "workspace:^",

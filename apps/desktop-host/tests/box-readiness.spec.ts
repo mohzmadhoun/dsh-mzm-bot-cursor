@@ -102,7 +102,7 @@ describe('computer settings SoT', () => {
     await ctx.plugin(MemorySettings)
     const scope = registerComputerSettings(ctx, defaultComputerSettings(new Date('2026-09-28T00:00:00.000Z')))
     expect(scope).toBeDefined()
-    await commitBoxReadiness(scope!, 'starting', new Date('2026-09-28T00:00:01.000Z'))
+    await commitBoxReadiness(ctx, 'starting', new Date('2026-09-28T00:00:01.000Z'))
     expect(scope!.get()).toMatchObject({
       boxId: DESKTOP_LOCAL_BOX_ID,
       readiness: 'starting',
@@ -119,7 +119,7 @@ describe('computer settings SoT', () => {
     })
     await scope!.update({ computerUseEnabled: false })
     expect(scope!.get().computerUseEnabled).toBe(false)
-    await commitBoxReadiness(scope!, 'ready', new Date('2026-09-28T00:00:02.000Z'))
+    await commitBoxReadiness(ctx, 'ready', new Date('2026-09-28T00:00:02.000Z'))
     expect(scope!.get()).toMatchObject({
       readiness: 'ready',
       computerUseEnabled: false,

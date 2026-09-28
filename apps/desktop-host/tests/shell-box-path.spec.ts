@@ -121,7 +121,7 @@ describe('shell-box-path T016 ready → success', () => {
     await ctx.plugin(ToolRuntime)
 
     const scope = registerComputerSettings(ctx, defaultComputerSettings())!
-    await commitBoxReadiness(scope, 'ready')
+    await commitBoxReadiness(ctx, 'ready')
     const path = installShellBoxPath(ctx, {
       getComputer: () => {
         const live = scope.get()
@@ -179,7 +179,7 @@ describe('shell-box-path T017 not-ready ≠ SC-001 Pass', () => {
       await ctx.plugin(ToolRuntime)
 
       const scope = registerComputerSettings(ctx, defaultComputerSettings())!
-      await commitBoxReadiness(scope, readiness)
+      await commitBoxReadiness(ctx, readiness)
       const path = installShellBoxPath(ctx, {
         getComputer: () => {
           const live = scope.get()
@@ -252,7 +252,7 @@ describe('desktop-computer mounts shell-box gate', () => {
     expect(ready.isError).toBe(false)
     expect(shell.runs).toBe(1)
 
-    await ctx.settings.update(COMPUTER_SETTINGS_NAMESPACE, { readiness: 'starting' })
+    await commitBoxReadiness(ctx, 'starting')
     const blocked = await ctx.tools.execute({
       name: 'bash',
       callId: ToolCallId('composed-starting'),

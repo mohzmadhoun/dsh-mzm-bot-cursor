@@ -1,10 +1,12 @@
 /**
  * Desktop Host composition for Phase 7 computer / box substrate
- * (Foundational + US1 Host + US2 Host).
+ * (Foundational + US1 Host + US2 Host + US3 Host settings projection).
  * Owns BoxBackend readiness SoT, Computer settings fields, computerUse registry
  * + Pass fixture, Path A Shell stack checks, ShellBoxToolCall projection
- * (T016/T017), and ComputerUseRun projection for Pass screenshot + spawn
- * handoff (T020/T021). Client Computer / observation UI is T018 / T022.
+ * (T016/T017), ComputerUseRun projection for Pass screenshot + spawn handoff
+ * (T020/T021), and Host `computer` settings Remotes for Client Settings →
+ * Computer rows (T026; Shell readiness read-only + computerUseEnabled mutate).
+ * Client Computer chrome / observation UI is T018 / T022 / T024–T025.
  * @module desktop-host/computer
  */
 
