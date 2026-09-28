@@ -3694,4 +3694,148 @@ describe('TeamAction', () => {
     expect(screen.getByText('Keep after browse fail')).toBeTruthy()
   })
 
+  it('filters browse list by Agent vs User layer and keeps write layer choice (T028 / US5)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const agentProfile = {
+      memoryId: 'memory-agent-a' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Agent fact for bot A',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const userNote = {
+      memoryId: 'memory-user-shared' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'note' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'User fact shared across bots',
+      createdAt: 2,
+      updatedAt: 2,
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: { ...view, memories: [agentProfile, userNote] },
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Agent fact for bot A')).toBeTruthy()
+    expect(screen.getByText('User fact shared across bots')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer-filter="all"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer-label="agent"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer-label="user"]')).toBeTruthy()
+    expect(screen.getByText(zh.memoryBrowseLayerFilterHint)).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText(zh.memoryBrowseLayerFilter), {
+      target: { value: 'agent' },
+    })
+    expect(document.querySelector('[data-team-memory-layer-filter="agent"]')).toBeTruthy()
+    expect(screen.getByText('Agent fact for bot A')).toBeTruthy()
+    expect(screen.queryByText('User fact shared across bots')).toBeNull()
+    expect(document.querySelector('[data-team-memory-layer="agent"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer="user"]')).toBeNull()
+
+    fireEvent.change(screen.getByLabelText(zh.memoryBrowseLayerFilter), {
+      target: { value: 'user' },
+    })
+    expect(document.querySelector('[data-team-memory-layer-filter="user"]')).toBeTruthy()
+    expect(screen.getByText('User fact shared across bots')).toBeTruthy()
+    expect(screen.queryByText('Agent fact for bot A')).toBeNull()
+    expect(document.querySelector('[data-team-memory-layer-label="user"]')).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText(zh.memoryBrowseLayerFilter), {
+      target: { value: 'all' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    const layerSelect = document.querySelector('[data-team-memory-layer-select]')
+    expect(layerSelect).toBeTruthy()
+    expect(layerSelect?.querySelector('option[value="agent"]')?.textContent).toBe(zh['memoryLayer.agent'])
+    expect(layerSelect?.querySelector('option[value="user"]')?.textContent).toBe(zh['memoryLayer.user'])
+  })
+
+  it('hides bot A agent rows on bot B while sharing user-layer rows (T028 / FR-007)', async () => {
+    const botA = 'worker-id' as SessionId
+    const botB = 'worker-b-id' as SessionId
+    const agentA = {
+      memoryId: 'memory-agent-a-only' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'log' as const,
+      layer: 'agent' as const,
+      botId: botA,
+      content: 'Secret agent log for A',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const agentB = {
+      memoryId: 'memory-agent-b-only' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'log' as const,
+      layer: 'agent' as const,
+      botId: botB,
+      content: 'Secret agent log for B',
+      createdAt: 2,
+      updatedAt: 2,
+    }
+    const userShared = {
+      memoryId: 'memory-user-cross' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Shared user profile',
+      createdAt: 3,
+      updatedAt: 3,
+    }
+    const twoBotView: TeamView = {
+      ...view,
+      members: [
+        view.members[0]!,
+        {
+          id: botA,
+          name: 'worker-a',
+          role: 'teammate',
+          status: 'inactive',
+          model: 'model-a',
+          modelSelection: { provider: 'fixture', model: 'model-a' },
+          diagnostics: [],
+        },
+        {
+          id: botB,
+          name: 'worker-b',
+          role: 'teammate',
+          status: 'inactive',
+          model: 'model-b',
+          modelSelection: { provider: 'fixture', model: 'model-b' },
+          diagnostics: [],
+        },
+      ],
+      unassignedBotIds: [SESSION, botA, botB],
+      memories: [agentA, agentB, userShared],
+    }
+    const load = vi.fn().mockResolvedValue({
+      ok: true as const,
+      value: twoBotView,
+    })
+    render(<TeamAction {...props(actions({ load }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Secret agent log for A')).toBeTruthy()
+    expect(screen.getByText('Secret agent log for B')).toBeTruthy()
+    expect(screen.getAllByText('Shared user profile')).toHaveLength(2)
+
+    const paneA = document.querySelector(`[data-team-bot-memories="${botA}"]`)
+    const paneB = document.querySelector(`[data-team-bot-memories="${botB}"]`)
+    expect(paneA?.textContent).toContain('Secret agent log for A')
+    expect(paneA?.textContent).not.toContain('Secret agent log for B')
+    expect(paneB?.textContent).toContain('Secret agent log for B')
+    expect(paneB?.textContent).not.toContain('Secret agent log for A')
+    expect(paneA?.querySelector('[data-team-memory-layer="agent"]')).toBeTruthy()
+    expect(paneB?.querySelector('[data-team-memory-layer="agent"]')).toBeTruthy()
+    expect(paneA?.querySelector('[data-team-memory-layer="user"]')).toBeTruthy()
+    expect(paneB?.querySelector('[data-team-memory-layer="user"]')).toBeTruthy()
+
+    const filter = screen.getAllByLabelText(zh.memoryBrowseLayerFilter)[0]!
+    fireEvent.change(filter, { target: { value: 'agent' } })
+    expect(screen.getByText('Secret agent log for A')).toBeTruthy()
+    expect(screen.getByText('Secret agent log for B')).toBeTruthy()
+    expect(screen.queryByText('Shared user profile')).toBeNull()
+  })
+
 })
