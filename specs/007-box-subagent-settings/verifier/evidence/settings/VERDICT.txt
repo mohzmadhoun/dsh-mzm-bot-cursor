@@ -1,5 +1,5 @@
 Verdict: Pass
-Stamp: 2026-09-28 · tip b7941cb3353c59f2763574d9c7dbfd2aa45b920e · media 981fd35aca1f93a83cffb2ccb161e6a45587927d · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
+Stamp: 2026-09-28 · tip 880e5072f8e4f6ef385d5f6a43bf78b67e51e233 · media 981fd35aca1f93a83cffb2ccb161e6a45587927d · desktop DSH Local Build 0.1.6-alpha.2 (DISPLAY=:1 CDP 9222)
 Linear: MOH-383 · Epic MOH-350 · P-MOH-2
 Branch: cursor/p7-us3-sc003-evidence-dc28 (PO opens PR + independent re-gate)
 SC-003: Pass — evidence: evidence/settings/{01-settings-computer-section,02-settings-shell-readiness}.png + scenario-3-settings-walkthrough.mp4
