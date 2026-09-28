@@ -153,7 +153,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 4
 
 - [x] T029 [US4] Host credential path ensures connector secret values are stored only in credential seam and are **not** written into session-log / exportable dump plaintext (`packages/credentials/**` + Agent Teams / session dump path under `apps/desktop-host/` / inventory) per FR-007/008 — chat-paste MUST NOT be primary auth path
-- [ ] T030 [US4] Add Verifier Scenario 4 dump-inspection recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-4-secrets-absent.md` covering SC-004 with committed evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-4/` (dump log/artifact OK; GUI auth steps still need SO 11+12 when shown)
+- [x] T030 [US4] Add Verifier Scenario 4 dump-inspection recipe in `specs/006-connectors-mcp-events-trust/verifier/scenario-4-secrets-absent.md` covering SC-004 with committed evidence under `specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-4/` (dump log/artifact OK; GUI auth steps still need SO 11+12 when shown)
 
 **Checkpoint**: US4 secrets-absent independently testable via dump inspection.
 

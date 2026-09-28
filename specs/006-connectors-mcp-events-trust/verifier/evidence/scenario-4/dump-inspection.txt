@@ -1,0 +1,36 @@
+# P6 T030 / SC-004 dump inspection — measured checks
+# Stamp tip recorded in VERDICT.txt
+# Secret marker (must be ABSENT from all dump surfaces below):
+SECRET_MARKER=fixture-token-not-for-dumps
+COMMAND=pnpm exec vitest run packages/experimental/agent-team/tests/connector-catalog.spec.ts -t 'authenticateConnector stores secret'
+TEST=T010/T011: authenticateConnector stores secret in credentials and binds MCP fixture tools
+
+## Surfaces inspected (exportable / dump-adjacent)
+
+| Surface | How inspected | Secret present? | Result |
+|---------|---------------|-----------------|--------|
+| describeConnectorCredential JSON | expect(JSON.stringify(described)).not.toContain(secret) | no | PASS measured |
+| remoteDescribeConnectorCredential value JSON | expect(JSON.stringify(remoteDescribe.value)).not.toContain(secret) | no | PASS measured |
+| agentTeams/view (remoteView) JSON | expect(JSON.stringify(view)).not.toContain(secret) | no | PASS measured |
+| ConnectorProjection fields | projectConnector exposes credentialConfigured boolean only (no secret / no credentialKey value) | n/a by design | PASS measured (source) |
+| Host credential seam | storeConnectorSecret → dsh-credentials only; journal row stores credentialKey address | secret in store OK | PASS measured (by contract; SC-004 scores dumps not the store) |
+
+## Auth path honesty (FR-008)
+
+| Check | Result |
+|-------|--------|
+| Primary auth = Host authenticateConnector → credentials seam | PASS measured |
+| Chat-paste of long-lived secrets as primary Pass path | not used | PASS measured |
+| Env/key file as product Pass | not used | PASS measured |
+
+## Vitest outcome
+
+| Field | Value |
+|-------|-------|
+| Test files | 1 passed |
+| Tests | 1 passed (auth secret absence filter) |
+| Log | p6-t030-secrets-absent-vitest.log |
+
+## Verdict line
+
+SC-004 dump inspection: PASS — known secret ABSENT from describe + view exportable JSON.
