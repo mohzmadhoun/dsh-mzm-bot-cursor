@@ -1,12 +1,12 @@
 T031 Client US5 credential UX / SC-007 (auth surface) — DH Verifier
 ===================================================================
 Verdict: Pass
-Stamp: 2026-09-28 · tip origin/cursor/p6-us5-client-credential-fe1d @ b8609fad91
+Stamp: 2026-09-28 · tip origin/cursor/p6-us5-client-credential-fe1d @ b86a050956
   · Desktop DISPLAY=:1 CDP 9222 · DSH Local Build (Electron)
   · launch: DSH_DESKTOP_OPEN_DEVTOOLS=0 DSH_HOME=<desktop development home> pnpm run start:desktop
   · client-ui-agent-team lib/client.js rebundled (tsdown) before Desktop boot
-Product tip under test: b8609fad91 (PR #221) — Phase 6 - T031 - Client in-app credential UX
-Evidence tip (this stamp commit): 58efb21c62 (58efb21c62507c9e3fd5d6e7cc876d1b6c9376b9)
+Product tip under test: b86a050956 (PR #221) — Phase 6 - T031 - Client in-app credential UX
+Evidence tip (this stamp commit): 78fa338b18 (78fa338b18884f80680dd23c8276dbe79858b835)
 Linear: Epic MOH-281 · T031 Client US5 · SC-007
 Recipe: specs/006-connectors-mcp-events-trust/verifier/credential-ux-in-app.md
   · companion deep checks: scenario-5-credential-ux.md (T032 recipe on PR #220)
@@ -35,7 +35,7 @@ Acceptance (T031 / SC-007 / FR-008 / FR-009 / FR-014 / FR-015)
 
 Provenance (measured)
 ---------------------
-Desktop CDP hard-assert @ tip b8609fad91 (DISPLAY=:1, port 9222):
+Desktop CDP hard-assert @ tip b86a050956 (DISPLAY=:1, port 9222):
   catalog: verifier-fixture
   install: installState=installed authState=needs_auth (pre-auth frame)
   auth surface: authMode=in_app · vault-not-required marker present
