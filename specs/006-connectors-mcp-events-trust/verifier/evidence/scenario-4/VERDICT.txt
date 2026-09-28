@@ -1,5 +1,5 @@
 Verdict: Pass
-Stamp: 2026-09-28 · tip a9acf9ddd7 · dump-inspection (Host vitest exportable artifacts)
+Stamp: 2026-09-28 · tip ffd1e37df4 · dump-inspection (Host vitest exportable artifacts @ a9acf9ddd7 + recipe)
 Linear: MOH-328 · Epic MOH-281
 SC-004: Pass — evidence: evidence/scenario-4/{p6-t030-secrets-absent-vitest.log,dump-inspection.txt}
 FR-007: Pass — fixture-token-not-for-dumps absent from describeConnectorCredential + agentTeams/view JSON
