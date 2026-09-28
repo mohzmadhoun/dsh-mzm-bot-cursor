@@ -143,6 +143,63 @@ export interface RoutineProjection {
   readonly updatedAt: number
 }
 
+/** Opaque Host Memory catalog identity (P5 Host Memory catalog SoT). */
+export type MemoryId = Branded<'MemoryId'>
+
+/**
+ * Brand a validated Host memory id.
+ * @param id - Host memory identity.
+ * @returns the same string branded as a Memory identity.
+ */
+export function MemoryId(id: string): MemoryId {
+  return id as MemoryId
+}
+
+/** Curated memory kind vocabulary — orthogonal to {@link MemoryLayer} (FR-017). */
+export type MemoryKind = 'profile' | 'log' | 'note'
+
+/** ADR memory layer: agent-scoped (one bot) or user-scoped (account-wide). */
+export type MemoryLayer = 'agent' | 'user'
+
+/**
+ * Host-owned durable Memory catalog row (data-model `MemoryRecord`).
+ * Persists on the Lead Session `team/memory` journal path — not Electron Main,
+ * not Client local store, not chat transcript (research R1/R6/R7).
+ */
+export interface MemoryRecord {
+  /** Immutable Host memory id. */
+  readonly memoryId: MemoryId
+  /** Curated kind; independent of layer. */
+  readonly kind: MemoryKind
+  /** ADR scope: agent (bot-keyed) or user (account-wide). */
+  readonly layer: MemoryLayer
+  /**
+   * Owning Bot Session id when `layer=agent`; null when `layer=user`.
+   * Absent is not used on durable rows — normalize to null for user layer.
+   */
+  readonly botId: SessionId | null
+  /** Non-empty curated fact text (empty rejects without write). */
+  readonly content: string
+  /** Epoch ms when the memory was created. */
+  readonly createdAt: number
+  /** Epoch ms of the latest durable mutation. */
+  readonly updatedAt: number
+}
+
+/**
+ * Client-readable Memory projection derived only from Host (data-model `MemoryProjection`).
+ * Never invent rows from Electron Main, Client local store, or transcript dump.
+ */
+export interface MemoryProjection {
+  readonly memoryId: MemoryId
+  readonly kind: MemoryKind
+  readonly layer: MemoryLayer
+  readonly botId: SessionId | null
+  readonly content: string
+  readonly createdAt: number
+  readonly updatedAt: number
+}
+
 /**
  * Association of one Skill to one Bot (FR-003 / FR-005).
  * Stored on the Bot snapshot; `botId` matches the owning member id.
@@ -352,6 +409,11 @@ export interface TeamView {
    * Empty until create; never `dsh-schedule` session reminders or Electron Main rows.
    */
   readonly routines: readonly RoutineProjection[]
+  /**
+   * Host Memory catalog projections (P5 Host Memory catalog SoT).
+   * Empty until write; never Electron Main, Client-only, or transcript rows.
+   */
+  readonly memories: readonly MemoryProjection[]
 }
 
 /** One peer message retained until its target Session records it. */
@@ -744,6 +806,50 @@ export interface ResumeRoutineResult {
 }
 
 /**
+ * Host write-memory input (P5 FR-001…003 / T006–T008).
+ * Non-empty `content` required; empty rejects without writing.
+ * `kind` and `layer` are independently chosen (FR-017).
+ * When `layer=agent`, `botId` is required and must name an active Bot.
+ * When `layer=user`, `botId` must be absent or null (account-wide).
+ * Electron Main must not invent memory records — Host owns the durable write (research R1).
+ */
+export interface WriteMemoryInput {
+  readonly kind: MemoryKind
+  readonly layer: MemoryLayer
+  readonly botId?: SessionId | null
+  readonly content: string
+}
+
+/** Lead-authorized Host memory write, including cancellation. */
+export interface WriteMemoryRequest extends WriteMemoryInput {
+  readonly signal: AbortSignal
+}
+
+/** Host-owned Memory after a successful write. */
+export interface WriteMemoryResult {
+  readonly memory: MemoryProjection
+}
+
+/**
+ * Host list/browse memories input (P5 FR-007 / US5 / T007–T008).
+ * When `botId` is set: that bot’s agent-layer rows plus all account-wide user rows.
+ * When omitted: full Host catalog (same as `agentTeams/view.memories`).
+ */
+export interface ListMemoriesInput {
+  readonly botId?: SessionId
+}
+
+/** Lead-authorized Host memory list, including cancellation. */
+export interface ListMemoriesRequest extends ListMemoriesInput {
+  readonly signal: AbortSignal
+}
+
+/** Host Memory projections for browse / recall surface. */
+export interface ListMemoriesResult {
+  readonly memories: readonly MemoryProjection[]
+}
+
+/**
  * Host delete input (FR-007 / FR-008 / clarify lock 5).
  * Confirm UX is Client-owned; this mutation performs identity removal when invoked.
  * Pass = absence from sidebar / overview / section membership — not transcript wipe.
@@ -880,6 +986,11 @@ declare module '@deepseek-ai/dsh-session/types' {
      * Not `dsh-schedule` session reminders; Electron Main must not invent parallel rows.
      */
     'team/routine': { version: 2; teamId: TeamId; routine: RoutineRecord }
+    /**
+     * Host Memory catalog row (P5 Host Memory catalog SoT), Lead Session only.
+     * Not chat transcript; Electron Main must not invent parallel rows (research R1/R6/R7).
+     */
+    'team/memory': { version: 2; teamId: TeamId; memory: MemoryRecord }
     /** Durable mailbox enqueue, stored before delivery is attempted. */
     'team/message/queued': { version: 2; teamId: TeamId; message: TeamMessageSnapshot }
     /** Durable acknowledgement that the target Session recorded the message. */

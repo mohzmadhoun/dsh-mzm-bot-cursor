@@ -3,8 +3,9 @@
 Restart/reload rebuilds Host Bot identity (including optional persona, avatar,
 displayName, section membership, and skillAttachments) by replaying Lead
 `team/member` events into the Team projection, named sidebar section catalog
-rows via `team/section`, and Host Routine catalog rows via `team/routine`; this
-helper only opens child Session logs for recovery.
+rows via `team/section`, Host Routine catalog rows via `team/routine`, and Host
+Memory catalog rows via `team/memory`; this helper only opens child Session logs
+for recovery.
 */
 
 import type { SessionEvent, SessionHeader, SessionId , SessionLogOffset } from '@deepseek-ai/dsh-session'
