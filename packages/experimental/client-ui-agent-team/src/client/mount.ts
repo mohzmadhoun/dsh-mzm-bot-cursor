@@ -37,18 +37,22 @@ import {
   HandoffNotices, type HandoffNoticesInjected,
 } from './HandoffNotices.tsx'
 import {
-  TeamAction, type ConnectorToolInvokeResult, type InvokeConnectorToolInput,
+  TeamAction, type AnswerTrustApprovalInput, type AnswerTrustApprovalResult,
+  type ConnectorToolInvokeResult, type InvokeConnectorToolInput,
+  type PendingTrustApproval, type SetStandingDenyInput,
   type TeamActionInjected, type TeamActionResult,
   type TeamAssignSectionActionResult, type TeamAttachSkillActionResult,
   type TeamAuthenticateConnectorActionResult, type TeamCreateBotActionResult,
   type TeamCreateRoutineActionResult, type TeamCreateSectionActionResult,
   type TeamDeleteBotActionResult, type TeamDescribeConnectorCredentialActionResult,
-  type TeamInstallConnectorActionResult, type TeamInvokeConnectorToolActionResult,
+  type TeamGetTrustPolicyActionResult, type TeamInstallConnectorActionResult,
+  type TeamInvokeConnectorToolActionResult,
   type TeamListConnectorCatalogActionResult, type TeamListConnectorsActionResult,
   type TeamListMemoriesActionResult, type TeamPauseRoutineActionResult,
   type TeamRenameBotActionResult, type TeamRenameSectionActionResult,
   type TeamResumeRoutineActionResult, type TeamSetAvatarActionResult,
-  type TeamTaskActionResult, type TeamUpdatePersonaActionResult,
+  type TeamSetStandingDenyActionResult, type TeamTaskActionResult,
+  type TeamUpdatePersonaActionResult,
   type TeamUpsertUserSkillActionResult, type TeamWriteMemoryActionResult,
 } from './TeamAction.tsx'
 import { en, NS, zh, type TeamKey } from './locales.ts'
@@ -145,6 +149,90 @@ function registerUi(ctx: ClientContext): void {
       request: InvokeConnectorToolInput,
       signal?: AbortSignal,
     ) => Promise<TeamInvokeConnectorToolActionResult>
+  }
+
+
+  /**
+   * Host trust Remotes (P6 US3 T027). Narrow-cast until typert regenerates
+   * `getTrustPolicy` / `setStandingDeny` onto the generated contribution.
+   */
+  const trustRemotes = ctx.remote.agentTeams as typeof ctx.remote.agentTeams & {
+    getTrustPolicy?: (
+      agentId: SessionId,
+      request: Record<string, never>,
+      signal?: AbortSignal,
+    ) => Promise<TeamGetTrustPolicyActionResult>
+    setStandingDeny?: (
+      agentId: SessionId,
+      request: SetStandingDenyInput,
+      signal?: AbortSignal,
+    ) => Promise<TeamSetStandingDenyActionResult>
+  }
+
+  /**
+   * Host HTTP approval/request answerer bridge for the Team deny card (T027 Path A).
+   * Parks connector-tool prompts for TeamAction; Electron Main is not the answerer.
+   */
+  type ParkedApproval = PendingTrustApproval & {
+    readonly resolve: (outcome: 'rejected' | 'allowed-once') => void
+  }
+  const parkedApprovals = new Map<string, ParkedApproval>()
+  const pendingListeners = new Set<(rows: readonly PendingTrustApproval[]) => void>()
+  const publishPending = (): void => {
+    const rows: PendingTrustApproval[] = [...parkedApprovals.values()].map(({
+      requestId, toolName, reason, connectorId,
+    }) => ({
+      requestId,
+      toolName,
+      ...reason === undefined ? {} : { reason },
+      ...connectorId === undefined ? {} : { connectorId },
+    }))
+    for (const listener of pendingListeners) listener(rows)
+  }
+  const remoteEvents = ctx.remote as typeof ctx.remote & {
+    $on?: (
+      event: 'approval/request',
+      listener: (request: {
+        readonly toolName?: string
+        readonly reason?: string
+        readonly signal?: AbortSignal
+      }, next: () => Promise<'rejected' | 'allowed-once' | 'cancelled' | 'unavailable'>) =>
+      Promise<'rejected' | 'allowed-once' | 'cancelled' | 'unavailable'>,
+    ) => () => void
+  }
+  const onApprovalRequest = remoteEvents.$on
+  if (typeof onApprovalRequest === 'function') {
+    ctx.effect(() => onApprovalRequest('approval/request', function (request, next) {
+      const toolName = String(request.toolName ?? '')
+      // Team deny card owns connector MCP tool prompts; other asks fall through.
+      if (!toolName.startsWith('mcp__')) return next()
+      const requestId = `team-approval:${toolName}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`
+      return new Promise<'rejected' | 'allowed-once' | Awaited<ReturnType<typeof next>>>((resolve, reject) => {
+        const parked: ParkedApproval = {
+          requestId,
+          toolName,
+          ...request.reason === undefined ? {} : { reason: String(request.reason) },
+          resolve: (outcome) => {
+            parkedApprovals.delete(requestId)
+            publishPending()
+            resolve(outcome)
+          },
+        }
+        parkedApprovals.set(requestId, parked)
+        publishPending()
+        const signal = request.signal as AbortSignal | undefined
+        if (signal !== undefined) {
+          const onAbort = (): void => {
+            if (!parkedApprovals.has(requestId)) return
+            parkedApprovals.delete(requestId)
+            publishPending()
+            void next().then(resolve, reject)
+          }
+          if (signal.aborted) onAbort()
+          else signal.addEventListener('abort', onAbort, { once: true })
+        }
+      })
+    }), 'client-ui-agent-team: trust-deny answerer')
   }
 
   const actions: TeamActionInjected = {
@@ -273,6 +361,75 @@ function registerUi(ctx: ClientContext): void {
         },
       }
       return { ok: true, value: { ok: true, value: invoked } }
+    },
+    async getTrustPolicy(sessionId): Promise<TeamGetTrustPolicyActionResult> {
+      const lead = leadSessionId(sessionId)
+      if (typeof trustRemotes.getTrustPolicy === 'function') {
+        return await trustRemotes.getTrustPolicy(lead, {})
+      }
+      return {
+        ok: true,
+        value: {
+          ok: false,
+          error: {
+            code: 'team-rejected',
+            message: 'Host getTrustPolicy Remote is unavailable',
+          },
+        },
+      }
+    },
+    async setStandingDeny(
+      sessionId,
+      input: SetStandingDenyInput,
+    ): Promise<TeamSetStandingDenyActionResult> {
+      const lead = leadSessionId(sessionId)
+      if (typeof trustRemotes.setStandingDeny === 'function') {
+        return await trustRemotes.setStandingDeny(lead, input)
+      }
+      return {
+        ok: true,
+        value: {
+          ok: false,
+          error: {
+            code: 'team-rejected',
+            message: 'Host setStandingDeny Remote is unavailable',
+          },
+        },
+      }
+    },
+    async listPendingTrustApprovals(_sessionId): Promise<readonly PendingTrustApproval[]> {
+      return [...parkedApprovals.values()].map(({ requestId, toolName, reason, connectorId }) => ({
+        requestId,
+        toolName,
+        ...reason === undefined ? {} : { reason },
+        ...connectorId === undefined ? {} : { connectorId },
+      }))
+    },
+    async answerTrustApproval(
+      _sessionId,
+      input: AnswerTrustApprovalInput,
+    ): Promise<AnswerTrustApprovalResult> {
+      const parked = parkedApprovals.get(input.requestId)
+      if (parked === undefined) {
+        throw new Error(`pending trust approval "${input.requestId}" not found`)
+      }
+      const outcome = input.decision === 'deny' ? 'rejected' as const : 'allowed-once' as const
+      parked.resolve(outcome)
+      return {
+        requestId: input.requestId,
+        outcome,
+        source: input.decision === 'deny' ? 'user_deny' : 'user_allow',
+      }
+    },
+    subscribePendingTrustApprovals(listener) {
+      pendingListeners.add(listener)
+      listener([...parkedApprovals.values()].map(({ requestId, toolName, reason, connectorId }) => ({
+        requestId,
+        toolName,
+        ...reason === undefined ? {} : { reason },
+        ...connectorId === undefined ? {} : { connectorId },
+      })))
+      return () => { pendingListeners.delete(listener) }
     },
     async createTask(sessionId, input): Promise<TeamTaskActionResult> {
       return await ctx.remote.agentTeams.createTask(leadSessionId(sessionId), input)
