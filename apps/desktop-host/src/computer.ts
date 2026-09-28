@@ -1,8 +1,8 @@
 /**
- * Desktop Host composition for Phase 7 Foundational computer / box substrate.
+ * Desktop Host composition for Phase 7 computer / box substrate (Foundational + US1 Host).
  * Owns BoxBackend readiness SoT, Computer settings fields, computerUse registry
- * + Pass fixture, and loud checks that Path A Shell/subagent stacks from the
- * Desktop profile remain mounted. Product UI (US1–US3) stays out of scope.
+ * + Pass fixture, Path A Shell stack checks, and the Shell/box readiness gate +
+ * ShellBoxToolCall projection (T016/T017). Client Computer UI is T018.
  * @module desktop-host/computer
  */
 
@@ -18,6 +18,7 @@ import {
   registerComputerSettings,
 } from './computer-settings.ts'
 import * as computerUsePassFixture from './computer-use-pass-fixture.ts'
+import { installShellBoxPath } from './shell-box-path.ts'
 
 /** Loader identity for the Desktop Host computer/box composition. */
 export const name = 'desktop-computer'
@@ -64,8 +65,8 @@ export function assertPassSubagentStack(ctx: Context): void {
 }
 
 /**
- * Mount Computer settings SoT, readiness probe, computerUse registry + Pass
- * fixture, and verify Shell/subagent Path A substrate from the Desktop profile.
+ * Mount Computer settings SoT, readiness probe, Shell/box gate + projection,
+ * computerUse registry + Pass fixture, and verify Path A substrate.
  * @param ctx - Profile scope after `runProfile({ profile: 'desktop' })`.
  */
 export async function apply(ctx: Context): Promise<void> {
@@ -73,7 +74,20 @@ export async function apply(ctx: Context): Promise<void> {
   assertPassSubagentStack(ctx)
 
   const scope = registerComputerSettings(ctx, defaultComputerSettings())
-  await runBoxReadinessProbe(ctx, scope)
+  const projection = await runBoxReadinessProbe(ctx, scope)
+  const fallback = {
+    boxId: projection.boxId,
+    readiness: projection.readiness,
+    local: projection.local,
+  }
+
+  installShellBoxPath(ctx, {
+    getComputer: () => {
+      if (scope === undefined) return fallback
+      const live = scope.get()
+      return { boxId: live.boxId, readiness: live.readiness, local: live.local }
+    },
+  })
 
   await ctx.plugin(ComputerUseRegistry)
   await ctx.plugin(computerUsePassFixture)
