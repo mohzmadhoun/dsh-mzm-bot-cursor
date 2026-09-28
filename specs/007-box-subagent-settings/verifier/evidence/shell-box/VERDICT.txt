@@ -1,5 +1,5 @@
 Verdict: Pass (evidence rework after independent FAIL on duplicate 01/02 blobs)
-Stamp: 2026-09-28 · tip (filled at commit) · desktop DSH Local Build 0.1.6-alpha.2 @ master 930afcfc72 (DISPLAY=:1)
+Stamp: 2026-09-28 · tip f00bb540df · desktop DSH Local Build 0.1.6-alpha.2 @ master 930afcfc72 (DISPLAY=:1)
 Linear: MOH-375 · Epic MOH-350 · P-MOH-2
 PR: #250 (PO updates body + re-spawns independent Verifier)
 SC-001: Pass — evidence: evidence/shell-box/{00-shell-box-not-ready,01-shell-box-ready,02-shell-box-success}.png + scenario-1-shell-box-walkthrough.mp4
