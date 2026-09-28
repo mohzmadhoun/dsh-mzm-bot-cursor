@@ -36,4 +36,5 @@
 - Clarify locks: Settings → Computer with Shell + Computer use rows; screenshot-only computerUse Pass; readiness copy meaning-clear / string not scored; global Settings home; evidence slices shell-box / computer-use / settings.
 - Spec status: Clarified — plan / tasks / analyze Done (#232 / #234 / #236); implement unlocked at Setup.
 - **T001 (2026-09-28):** Design tree complete under `specs/007-box-subagent-settings/` — stamp [../verifier/design-tree-complete.md](../verifier/design-tree-complete.md). Implementers start at [../contracts/README.md](../contracts/README.md) + [../research.md](../research.md) Path A / PO locks + [../verifier/box-computer-seam-locks.md](../verifier/box-computer-seam-locks.md).
+- **T015 (2026-09-28):** Foundational Pass recorded in [../verifier/README.md](../verifier/README.md) — T007–T014 complete on master tip `47cd9dd45f` (#242/#243/#244). No US product work before this stamp; US1 may begin after Verifier Pass on the T015 PR. Product SC-001…SC-006 remain open.
 - Items marked incomplete would require spec updates before `/speckit-plan` — none remain.

@@ -4,10 +4,10 @@
 **Role:** DH Verifier evidence home. Recipes are rerunnable acceptance scripts/outlines; they do not implement product features.
 **Quickstart outline:** [../quickstart.md](../quickstart.md)
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
-**Architect Path A:** Host sandboxed Shell + `ctx.computerUse` (+ Cua or Host Pass fixture) + `dsh-subagent` spawn-in-process; Settings → **Computer** over Host SoT; Client projects Host HTTP/WS; no Electron Main box/Shell/computerUse/settings bus — see [research.md](../research.md) / [plan.md](../plan.md) / (T005) `box-computer-seam-locks.md` when landed
-**Setup inventories (T002–T005):** `host-shell-box-inventory.md` · `computer-use-inventory.md` · `settings-computer-inventory.md` · `box-computer-seam-locks.md` — expected under this directory; not yet required for this T006 stamp
+**Architect Path A:** Host sandboxed Shell + `ctx.computerUse` (+ Cua or Host Pass fixture) + `dsh-subagent` spawn-in-process; Settings → **Computer** over Host SoT; Client projects Host HTTP/WS; no Electron Main box/Shell/computerUse/settings bus — see [research.md](../research.md) / [plan.md](../plan.md) / [box-computer-seam-locks.md](./box-computer-seam-locks.md) (T005)
+**Setup inventories (T002–T005):** [host-shell-box-inventory.md](./host-shell-box-inventory.md) · [computer-use-inventory.md](./computer-use-inventory.md) · [settings-computer-inventory.md](./settings-computer-inventory.md) · [box-computer-seam-locks.md](./box-computer-seam-locks.md)
 **Evidence:** [evidence/](./evidence/) — GUI slices locked as [evidence/shell-box/](./evidence/shell-box/) · [evidence/computer-use/](./evidence/computer-use/) · [evidence/settings/](./evidence/settings/) (FR-014; placeholders via plan tree / T029)
-**Linear:** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) · tasks issue [MOH-354](https://linear.app/momadhoun/issue/MOH-354). **Children only after** Spec Kit `taskstoissues` (constitution §II) following Verifier Pass on the tasks artifact. **Do not invent issue ids.** Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
+**Linear:** Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350/p7-computer-box-subagent-parity-settings-chrome) · tasks [MOH-354](https://linear.app/momadhoun/issue/MOH-354) · T015 [MOH-371](https://linear.app/momadhoun/issue/MOH-371). Project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot.
 
 ## T006 — Recipe home + Scenario 1–5 owners map (Setup)
 
@@ -29,11 +29,55 @@
 
 **Implementer pointers:** Start at [contracts/README.md](../contracts/README.md). Honor Architect **Path A** + Clarify/PO locks in [research.md](../research.md) R0–R6. Do not invent a competing SoT (Electron Main / Client-only).
 
-## Foundational Pass gate (T015) — pending
+## Foundational Pass gate (T015)
 
-**Rule:** Product success criteria **SC-001…SC-006** MUST NOT be marked Done without a recorded foundational Pass (Host `BoxBackend` readiness + sandboxed Shell mount + computerUse provider slot + subagent spawn + Computer settings SoT + Host HTTP/WS + Electron exclusion docs + no-Electron-box-shell-computer-bus guard). Product SC evidence stays under Scenario recipes; T015 stamps this README when T007–T014 land.
+**Rule:** Product success criteria **SC-001…SC-006** MUST NOT be marked Done without a recorded foundational Pass (Host `BoxBackend` readiness + sandboxed Shell mount + computerUse provider slot + subagent spawn + Computer settings SoT + Host HTTP/WS + Electron exclusion docs + no-Electron-box-shell-computer-bus guard). Product SC evidence stays under Scenario recipes; this section is the foundation gate only.
 
-Setup T001–T006 does **not** claim foundational Pass. US1–US3 fan-out waits for that stamp.
+| Gate artifact | Location |
+|---------------|----------|
+| Design tree (T001) | [design-tree-complete.md](./design-tree-complete.md) (merged [#241](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/241)) |
+| Host Shell/box inventory (T002) | [host-shell-box-inventory.md](./host-shell-box-inventory.md) (merged [#240](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/240)) |
+| computerUse inventory (T003) | [computer-use-inventory.md](./computer-use-inventory.md) (merged [#240](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/240)) |
+| Settings Computer inventory (T004) | [settings-computer-inventory.md](./settings-computer-inventory.md) (merged [#239](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/239)) |
+| Seam locks (T005) | [box-computer-seam-locks.md](./box-computer-seam-locks.md) (merged [#241](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/241)) |
+| Verifier recipe home (T006) | this README (merged [#237](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/237)) |
+| Host box readiness + Shell + computerUse + subagent + settings SoT + HTTP/WS (T007–T012) | `apps/desktop-host/` + `packages/settings/**` + [computer-use-pass-provider.md](./computer-use-pass-provider.md) (merged [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243)) |
+| Electron exclusion docs + no-box-shell-computer bus (T013–T014) | `apps/desktop/` (merged [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244)) |
+| Foundational Pass checklist (T015) | this README (checklist below) |
+| Living gate (docs only) | merged [#242](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/242) @ `800b1507a6` |
+
+### Foundational Pass checklist — recorded
+
+**Verdict:** **Pass** (foundations only — no product SC)
+**Stamp:** 2026-09-28 · tip `origin/master` @ `47cd9dd45f` (includes merged [#242](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/242) living · [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) T007–T012 @ `742b8bf3f6` · [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) T013–T014 @ `47cd9dd45f` · Setup [#241](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/241)/[#240](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/240)/[#239](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/239)/[#237](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/237))
+**Linear:** [MOH-371](https://linear.app/momadhoun/issue/MOH-371) · Epic [MOH-350](https://linear.app/momadhoun/issue/MOH-350) · project `P-MOH-2` only
+**Scope lock:** This Pass does **not** mark SC-001…SC-006 Done. Scenario recipes (T019/T023/T027/T028/T030) and product US1–US3 remain open. **No US product work landed before this stamp.** US1 may begin **after Verifier Pass on this T015 PR** merges to master.
+
+| # | Foundation | Task | Pass bar | Evidence | Claim |
+|---|------------|------|----------|----------|-------|
+| 1 | **BoxBackend readiness SoT** | T007 | Host `readiness: not_ready\|starting\|ready\|failed`, `local: true` for Pass, `updatedAt` — not Electron Main, not Client-only | **measured:** `apps/desktop-host/src/box-readiness.ts` + `computer-settings.ts`; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 2 | **Sandboxed Shell mount** | T008 | Pass local `ctx.shell` via bash/pwsh sandbox + sandbox-local + tool-bash/pwsh on Desktop Host | **measured:** `apps/desktop-host/src/computer.ts` requires `ctx.shell`; profile mount; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 3 | **computerUse provider slot** | T009 | One `ctx.computerUse.register` provider (Cua or Host Pass fixture) documented | **measured:** [computer-use-pass-provider.md](./computer-use-pass-provider.md); `computer-use-pass-fixture.ts`; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 4 | **Subagent spawn** | T010 | `dsh-subagent` + spawn-in-process + tool-subagent available on Desktop Host | **measured:** `computer.ts` requires spawn provider; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 5 | **Computer settings SoT** | T011 | Host settings fields for Shell readiness + Computer use projection | **measured:** `apps/desktop-host/src/computer-settings.ts` + settings packages; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 6 | **Host HTTP/WS Remotes** | T012 | Authenticated Host projection/mutate for box readiness + Computer settings; Client invents no SoT | **measured:** desktop-host Remotes + box-readiness / computer specs; merge [#243](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/243) | Pass |
+| 7 | **Electron exclusion docs** | T013 | host-protocol / ipc forbid `shell-exec`, `box-ready`, `computer-use-control`, `computer-screenshot`, `computer-settings-mutate` on Node IPC | **measured:** `apps/desktop/src/host-protocol.ts` + `ipc.ts`; merge [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) | Pass |
+| 8 | **No Electron box/Shell/computer bus** | T014 | Electron Main has no parallel box/Shell/computerUse/Computer-settings store/bus | **measured:** `apps/desktop/tests/no-electron-box-shell-computer-bus.spec.ts`; merge [#244](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/244) | Pass |
+
+**Rerun (idempotent):**
+
+```sh
+test -f specs/007-box-subagent-settings/verifier/computer-use-pass-provider.md
+test -f specs/007-box-subagent-settings/verifier/box-computer-seam-locks.md
+test -f apps/desktop-host/src/box-readiness.ts
+test -f apps/desktop-host/src/computer-use-pass-fixture.ts
+test -f apps/desktop/tests/no-electron-box-shell-computer-bus.spec.ts
+rg -n 'shell-exec|box-ready|computer-use-control|computer-screenshot|computer-settings-mutate' apps/desktop/src/host-protocol.ts
+pnpm exec vitest run apps/desktop/tests/no-electron-box-shell-computer-bus.spec.ts
+pnpm exec vitest run apps/desktop-host/tests/box-readiness.spec.ts apps/desktop-host/tests/computer-use-pass-fixture.spec.ts
+```
+
+**PO / DH Lead:** Foundations hold on master tip above. Do **not** close product SC Done on this stamp. Leave [MOH-371](https://linear.app/momadhoun/issue/MOH-371) In Progress until this stamp PR merges + Verifier Pass; then Done. **Next:** US1 Shell/box (T016–T019) after Verifier Pass — no US1–US3 product code in this PR. Do **not** edit `MzM-Docs/` here (Lead owns living after Pass).
 
 ## FR-013/FR-014 / standing orders 11+12 — desktop visual evidence (mandatory)
 
@@ -62,7 +106,7 @@ Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts
 | **4** Non-goals absence | [Scenario 4](../quickstart.md#scenario-4--non-goals-absence) | `non-goals.md` (T028) · [contracts/non-goals.md](../contracts/non-goals.md) | optional notes under `evidence/` | **Runtime** + **Electron** + **Verifier** | SC-005 | Docs/absence OK |
 | **5** Full Phase 7 replay | [Scenario 5](../quickstart.md#scenario-5--full-phase-7-replay) | `scenario-5-full-replay.md` (T030) · all contracts | all three GUI slices | **Verifier** | SC-006 (+ composite of 1–4 + T015) | **Required** for GUI slices |
 
-Foundational Pass (T015) must hold before Scenario evidence counts toward phase Done. T031 re-validates this map against quickstart after recipes land.
+Foundational Pass (T015) is **recorded** above. Scenario evidence still required before phase Done. T031 re-validates this map against quickstart after recipes land.
 
 ## Owner roles
 
@@ -105,5 +149,5 @@ Phase 7 implement / Verifier PRs for `specs/007-box-subagent-settings` MUST NOT 
 
 - **This file (`verifier/README.md`)** — DH Verifier owns for T006 / T015 / T031 / T033 / T035 stamps.
 - Inventories T002–T004, seam locks T005 — Runtime / Client / Electron / Spec own those files under `verifier/`; do not collide with this README.
-- Evidence placeholders T029 and Scenario recipes T019/T023/T027/T028/T030 — Verifier-owned follow-ons; not claimed by this Setup stamp.
-- Do **not** edit `MzM-Docs/` in this PR (Lead-owned living gate).
+- Evidence placeholders T029 and Scenario recipes T019/T023/T027/T028/T030 — Verifier-owned follow-ons; not claimed by this T015 stamp.
+- Do **not** edit `MzM-Docs/` in this PR (Lead owns living after Verifier Pass).
