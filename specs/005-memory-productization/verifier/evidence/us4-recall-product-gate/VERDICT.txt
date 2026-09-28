@@ -1,0 +1,32 @@
+US4 product gate — Host T023–T024 (#190) + Client T025 (#189)
+==============================================================
+Verdict: PASS
+Stamp: 2026-09-28
+Gate instruction: Pass if durable list + inject bind + Client browse;
+  SO11 full Scenario 2 deferred to T026. Do not merge.
+
+PRs gated
+---------
+[x] #190 Host T023–T024 — Pass (product tip a698ef84bc)
+    evidence/us4-host-t023-t024/VERDICT.txt
+    Linear MOH-260 / MOH-261 — leave In Progress
+[x] #189 Client T025 — Pass (product tip 1a87f74bd5)
+    evidence/us4-client-t025/VERDICT.txt
+    Linear MOH-263 — leave In Progress
+
+Acceptance checked (this gate)
+------------------------------
+[x] Durable Host listMemories / MemoryProjection across restart + kinds
+[x] Host agent-teams:memory-recall inject bind (≥1 curated fact; no LLM scoring)
+[x] Client browse/recall surface projecting Host list; optional inject indicator
+[x] No Electron Main memory bus (both tips)
+[ ] SO11 full Scenario 2 / SC-004 desktop — deferred to T026 (MOH-264)
+
+Not claimed
+-----------
+SC-004 Scenario Done · merge · Linear Done · T026 recipe/evidence
+
+DH Lead
+-------
+Product PRs #190 and #189 may merge when ready (Verifier does not merge).
+Next Verifier work: T026 Scenario 2 recipe + FR-011/012 under evidence/scenario-2/.

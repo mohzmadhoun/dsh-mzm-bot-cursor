@@ -1,0 +1,70 @@
+T023–T024 Host durable list + MemoryRecallInject bind — DH Verifier
+======================================================================
+Verdict: PASS (Host product slice only)
+Stamp: 2026-09-28
+Product tip gated: cursor/p5-us4-host-recall-fe1d @ a698ef84bc
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/190 (OPEN, base master)
+Linear: MOH-260 (T023) · MOH-261 (T024) — left In Progress
+  (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T023–T024 / Host product — not SC-004 / Scenario 2 desktop Done)
+--------------------------------------------------------------------------
+[x] T023: listMemories / view.memories returns durable MemoryProjection rows
+    across Host child restart with kinds distinguishable (profile/log/note).
+    MUST NOT treat transcript dump as Pass.
+[x] T024: Host MemoryRecallInject bind via scoped agent-teams:memory-recall
+    (Candidate A / memory-inject-bind.md) assembles ≥1 curated MemoryRecord into
+    subsequent bot-turn system-prompt; live write refreshes bind; bot B does not
+    gain A's agent-layer rows; LLM wording not scored (FR-014).
+[x] Host catalog SoT — Lead journal team/memory; no Electron Main memory bus.
+[x] Unit/session proof covers US4 T023 + T024; tasks.md T023–T024 [x] on Host tip;
+    T025–T026 unchecked on that tip.
+[x] Host-only: unit/session proof enough for T023–T024 Pass — Desktop SC-004 /
+    Scenario 2 SO11 is T026 (explicitly deferred for this gate).
+
+Evidence (measured)
+-------------------
+Commands @ a698ef84bc (/tmp/p5-us4-host-recall-wt; native linux-x64 linked from /workspace):
+
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/memory-bind.spec.ts \
+    packages/experimental/agent-team/tests/persistence.spec.ts \
+    packages/experimental/agent-team/tests/team.spec.ts \
+    -t 'US4 T023|US4 T024|composeMemoryRecall|bindTeammateMemoryRecall'
+  → 4 passed | 86 skipped (3 files)
+    - composeMemoryRecall() joins eligible rows + agent-layer isolation
+    - bindTeammateMemoryRecall() registers agent-teams:memory-recall + live update
+    - JSONL Agent Teams recovery > US4 T023: listMemories durable kinds across restart
+    - Team Remote API > US4 T024: binds curated MemoryRecord into memory-recall
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-memory-bus.spec.ts
+  → 3 passed
+
+Logs: p5-us4-host-t023-t024-vitest.log · p5-us4-host-t023-t024-vitest-verbose.log
+      p5-us4-host-t023-t024-electron-bus.log
+(also under /opt/cursor/artifacts/p5-us4-host-t023-t024-*)
+
+Diff scope (origin/master...a698ef84bc): 8 files under
+  packages/experimental/agent-team/{src,tests,README*}
+  + specs/005-memory-productization/tasks.md
+  Zero Client UI / apps/desktop product paths in this Host slice.
+  Adds memory-bind.ts; wires bind on agent/created + writeMemory refresh.
+
+Claims
+------
+- Durable listMemories / view.memories across restart with kinds: **measured**
+- agent-teams:memory-recall assemble contains curated fact substring: **measured**
+- Live write refreshes bind; peer agent-layer isolation: **measured**
+- Cold-resume inject reattach via agent/created + journal compose: **inferred**
+  (same bindTeammateMemoryRecall path; T023 proves journal rows survive restart)
+- No Electron memory bus: **measured**
+- tasks.md T023–T024 [x], T025–T026 [ ] on Host tip: **measured**
+- Desktop SC-004 / Scenario 2 SO11 (T026): **not run** (deferred by gate)
+
+Scope lock
+----------
+Does NOT stamp SC-004 product Done or Scenario 2 desktop FR-011/012.
+Does NOT gate Client browse UI (T025 / #189) — separate Client stamp.
+Does NOT mark Linear MOH-260 / MOH-261 Done.
+Next: Client T025 gate · Verifier T026 Scenario 2 recipe + SO11 evidence.
+Leave MOH-260 / MOH-261 In Progress until PO merges.

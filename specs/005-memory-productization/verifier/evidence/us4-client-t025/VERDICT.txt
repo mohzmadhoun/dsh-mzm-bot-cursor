@@ -1,0 +1,64 @@
+T025 Client US4 browse / recall memory surface — DH Verifier
+============================================================
+Verdict: PASS (Client product UI slice only)
+Stamp: 2026-09-28
+Product tip: origin/cursor/p5-us4-client-recall-fe1d @ 1a87f74bd5
+Evidence tip: this verifier stamp branch
+PR: https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/189 (OPEN, base master)
+Linear: MOH-263 (T025) — left In Progress (PO closes after merge; Verifier must not mark Done)
+
+Acceptance (T025 / Client product UI — not full SC-004 / T026 Scenario Done)
+---------------------------------------------------------------------------
+[x] Client browse/recall surface under client-ui-agent-team projects Host
+    listMemories after refresh; kinds distinguishable (profile/log/note).
+[x] data-team-memory-recall-surface + browse/recall control calls Host
+    listMemories (HTTP/WS path) — never Electron Main IPC or transcript dump.
+[x] Optional inject/application indicator when Host projects memoryRecallInjects;
+    absent when Host omits the field.
+[x] Locale-owned copy (browseMemories / browseMemoriesHint / memoryInjectApplied /
+    memoryInjectHint in locales.ts; TeamAction uses t()).
+[x] Focused client tests pass (US4 T025 browse/inject/fail → 3 passed).
+[x] No Electron Main memory bus (no-electron-memory-bus.spec.ts — 3 passed).
+[x] tasks.md T025 [x] on Client tip; T023–T024 unchecked there (Host #190 owns);
+    T026 unchecked.
+[!] SO11 full Scenario 2 desktop visual: **deferred to T026** (gate instruction).
+
+Evidence (measured)
+-------------------
+Commands @ 1a87f74bd5 (/workspace):
+
+  pnpm exec vitest run \
+    packages/experimental/client-ui-agent-team/tests/team-action.client.spec.tsx \
+    -t 'T025 / US4|memoryRecallInjects|browse / recalls|browse listMemories'
+  → 3 passed | 87 skipped
+    - browses / recalls Host listMemories on the memory surface (T025 / US4)
+    - shows optional Host inject indicator when memoryRecallInjects present (T025)
+    - keeps prior memories and shows failure when browse listMemories unavailable
+
+  pnpm exec vitest run apps/desktop/tests/no-electron-memory-bus.spec.ts
+  → 3 passed
+
+Logs: p5-us4-client-t025-vitest.log · p5-us4-client-t025-vitest-verbose.log
+      p5-us4-client-t025-electron-bus.log
+(also under /opt/cursor/artifacts/p5-us4-client-t025-*)
+
+Diff scope (origin/master...1a87f74bd5): 8 files under
+  packages/experimental/client-ui-agent-team/{src/client,tests,README*}
+  + specs/005-memory-productization/tasks.md
+  Zero Host agent-team product paths in this Client slice.
+
+Claims
+------
+Pass: Client US4 T025 product UI slice only.
+- Browse/recall button → Host listMemories + kinds on surface: **measured**
+- Optional inject indicator when memoryRecallInjects present: **measured** (jsdom)
+- Locale-owned copy; no Electron memory bus: **measured**
+- Desktop post-restart SO11 / SC-004 Scenario 2: **not run** (deferred to T026)
+
+Scope lock
+----------
+Does NOT stamp SC-004 / quickstart Scenario 2 Done (T026).
+Does NOT gate Host durable list / inject bind (T023–T024 / #190) — separate Host stamp.
+Does NOT mark Linear MOH-263 Done.
+Next: Verifier T026 Scenario 2 recipe + SO11/12 evidence under evidence/scenario-2/.
+Leave MOH-263 In Progress until PO merges.
