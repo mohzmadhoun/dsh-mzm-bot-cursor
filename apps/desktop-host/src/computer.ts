@@ -1,8 +1,10 @@
 /**
- * Desktop Host composition for Phase 7 computer / box substrate (Foundational + US1 Host).
+ * Desktop Host composition for Phase 7 computer / box substrate
+ * (Foundational + US1 Host + US2 Host).
  * Owns BoxBackend readiness SoT, Computer settings fields, computerUse registry
- * + Pass fixture, Path A Shell stack checks, and the Shell/box readiness gate +
- * ShellBoxToolCall projection (T016/T017). Client Computer UI is T018.
+ * + Pass fixture, Path A Shell stack checks, ShellBoxToolCall projection
+ * (T016/T017), and ComputerUseRun projection for Pass screenshot + spawn
+ * handoff (T020/T021). Client Computer / observation UI is T018 / T022.
  * @module desktop-host/computer
  */
 
@@ -18,6 +20,7 @@ import {
   registerComputerSettings,
 } from './computer-settings.ts'
 import * as computerUsePassFixture from './computer-use-pass-fixture.ts'
+import { installComputerUsePath } from './computer-use-path.ts'
 import { installShellBoxPath } from './shell-box-path.ts'
 
 /** Loader identity for the Desktop Host computer/box composition. */
@@ -66,7 +69,7 @@ export function assertPassSubagentStack(ctx: Context): void {
 
 /**
  * Mount Computer settings SoT, readiness probe, Shell/box gate + projection,
- * computerUse registry + Pass fixture, and verify Path A substrate.
+ * computerUse registry + Pass fixture, ComputerUseRun path, and verify Path A.
  * @param ctx - Profile scope after `runProfile({ profile: 'desktop' })`.
  */
 export async function apply(ctx: Context): Promise<void> {
@@ -79,11 +82,14 @@ export async function apply(ctx: Context): Promise<void> {
     boxId: projection.boxId,
     readiness: projection.readiness,
     local: projection.local,
+    computerUseEnabled: true as const,
   }
 
   installShellBoxPath(ctx, {
     getComputer: () => {
-      if (scope === undefined) return fallback
+      if (scope === undefined) {
+        return { boxId: fallback.boxId, readiness: fallback.readiness, local: fallback.local }
+      }
       const live = scope.get()
       return { boxId: live.boxId, readiness: live.readiness, local: live.local }
     },
@@ -91,4 +97,12 @@ export async function apply(ctx: Context): Promise<void> {
 
   await ctx.plugin(ComputerUseRegistry)
   await ctx.plugin(computerUsePassFixture)
+
+  installComputerUsePath(ctx, {
+    isComputerUseEnabled: () => {
+      if (scope === undefined) return fallback.computerUseEnabled
+      return scope.get().computerUseEnabled
+    },
+    getProviderName: () => ctx.get('computerUse')?.providerName,
+  })
 }
