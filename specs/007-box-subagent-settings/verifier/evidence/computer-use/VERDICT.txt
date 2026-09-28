@@ -1,0 +1,35 @@
+Verdict: Pass
+Stamp: 2026-09-28 · tip c85ed4c804 · desktop DSH Local Build 0.1.6-alpha.2 @ origin/master c85ed4c804 (DISPLAY=:1 CDP 9222)
+Linear: MOH-379 · Epic MOH-350 · P-MOH-2
+Branch: cursor/p7-us2-sc002-evidence-dc28 (PO opens PR + independent re-gate)
+SC-002: Pass — evidence: evidence/computer-use/{01-computer-use-observation,02-computer-use-parent-handoff}.png + scenario-2-computer-use-walkthrough.mp4
+FR-003: screenshot-only Pass; interactive browser not required (prompt + run used Pass fixture; no click/type)
+FR-013: desktop screenshots + short recording of real Electron Desktop (DISPLAY=:1); not unit/jsdom-only (SO 11)
+FR-014: media committed under verifier/evidence/computer-use/ AND mirrored under /opt/cursor/artifacts/ with identical filenames for PR embeds (SO 12)
+FR-015: LLM wording not scored
+Path A: Host SoT (desktop-pass-fixture + computer_use_pass_screenshot + spawn subagent); Client HTTP/WS projection (data-computer-use-observation / data-computer-use-handoff); no Electron Main computer-use bus
+Blockers: none for SC-002 after Desktop observation + parent handoff frames
+
+## Measured Desktop path (this tip)
+- Launch: DISPLAY=:1 DSH_DESKTOP_OPEN_DEVTOOLS=0 pnpm run start:desktop (CDP :9222)
+- New Session → parent invoked computer_use_pass_screenshot then subagent (description computerUse screenshot observation)
+- Observation card: data-computer-use-observation=observed · label "Screenshot observation" · body "Pass fixture desktop observation." · data-computer-use-screenshot 1×1 PNG 90 bytes (Host Pass fixture)
+- Parent handoff: data-computer-use-handoff=handoff · label "computerUse handoff" · childId 8440cc6b-a523-4ce7-a2cb-65f2d244ae06
+- Supporting Host vitest (not alone for Pass): computer-use-pass-fixture + computer + computer-use-path → 10/10 pass (see /opt/cursor/artifacts/p7-us2-sc002-host-vitest.log)
+
+## Distinct frames (not duplicate blobs)
+- 01-computer-use-observation.png — expanded turn-process showing Screenshot observation card + Pass fixture body (measured)
+- 02-computer-use-parent-handoff.png — same session scrolled/settled with computerUse handoff badge + subagent confirmation visible (measured)
+- scenario-2-computer-use-walkthrough.mp4 — ffmpeg x11grab of Desktop during CDP drive (measured)
+
+sha256 (evidence == artifacts):
+- 01: ce6ce1a14705d27950e5753aab394874b99265fc98a95d4995f14ec05135f55a
+- 02: 50f0ba9061d5e64126ef63f0818c9ad1e85511c064a04ff6a797e91bdb867abf
+- mp4: 5b0e4a6226ebe94f9e683257fffde4e62d8c91934de2aed37cf2a33595066541
+
+## PR body embeds (PO / ManagePullRequest — SO 12)
+<img src="/opt/cursor/artifacts/01-computer-use-observation.png" alt="computerUse-class GUI observation — Screenshot observation + Pass fixture" />
+<img src="/opt/cursor/artifacts/02-computer-use-parent-handoff.png" alt="Parent handoff for computerUse path — computerUse handoff badge" />
+<video src="/opt/cursor/artifacts/scenario-2-computer-use-walkthrough.mp4" controls></video>
+
+Committed mirrors: specs/007-box-subagent-settings/verifier/evidence/computer-use/*

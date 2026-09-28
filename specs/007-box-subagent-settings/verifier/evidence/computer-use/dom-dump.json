@@ -1,0 +1,97 @@
+[
+  {
+    "tag": "DIV",
+    "attrs": {
+      "class": "T-aRzG_root",
+      "data-computer-use-observation": "observed",
+      "data-expandable": "true",
+      "role": "button",
+      "tabindex": "0",
+      "aria-expanded": "true"
+    },
+    "text": "Screenshot observation\ncomputerUse observation\ncomputer_use_pass_screenshot · {}\nScreenshot observation",
+    "rect": {
+      "x": 436.9682922363281,
+      "y": 299.8095397949219,
+      "w": 680.0000610351562,
+      "h": 28.000001907348633
+    }
+  },
+  {
+    "tag": "SPAN",
+    "attrs": {
+      "class": "T-aRzG_badge T-aRzG_observed",
+      "data-computer-use-observation-label": "observed"
+    },
+    "text": "Screenshot observation",
+    "rect": {
+      "x": 973.1270141601562,
+      "y": 301.8095397949219,
+      "w": 143.84127807617188,
+      "h": 24.000001907348633
+    }
+  },
+  {
+    "tag": "DIV",
+    "attrs": {
+      "class": "T-aRzG_bodyWrap",
+      "data-computer-use-observation-body": "true"
+    },
+    "text": "Screenshot\nPass fixture desktop observation.",
+    "rect": {
+      "x": 436.9682922363281,
+      "y": 327.8095397949219,
+      "w": 680.0000610351562,
+      "h": 87.5714340209961
+    }
+  },
+  {
+    "tag": "FIGURE",
+    "attrs": {
+      "class": "T-aRzG_imageBody",
+      "data-computer-use-screenshot": "true",
+      "data-media-type": "image/png",
+      "data-width": "1",
+      "data-height": "1",
+      "data-bytes": "90",
+      "data-attachment-id": "sha256:999f1d1527ee7e79266f16add5430fff76b1225d742464a5b1ff1f02971bb8ee"
+    },
+    "text": "",
+    "rect": {
+      "x": 476.9682922363281,
+      "y": 372.0952453613281,
+      "w": 600.0000610351562,
+      "h": 1
+    }
+  },
+  {
+    "tag": "DIV",
+    "attrs": {
+      "class": "T-aRzG_root",
+      "data-subagent-card": "true",
+      "data-computer-use-handoff": "handoff",
+      "data-computer-use-child-id": "8440cc6b-a523-4ce7-a2cb-65f2d244ae06"
+    },
+    "text": "computerUse handoff\nSubagent\ncomputerUse screenshot observation\ncomputerUse handoff",
+    "rect": {
+      "x": 436.9682922363281,
+      "y": 431.3809814453125,
+      "w": 680.0000610351562,
+      "h": 28.000001907348633
+    }
+  },
+  {
+    "tag": "SPAN",
+    "attrs": {
+      "class": "T-aRzG_badge T-aRzG_handoff",
+      "data-computer-use-handoff-label": "handoff"
+    },
+    "text": "computerUse handoff",
+    "rect": {
+      "x": 982.84130859375,
+      "y": 433.3809814453125,
+      "w": 134.1269989013672,
+      "h": 24.000001907348633
+    }
+  }
+]
