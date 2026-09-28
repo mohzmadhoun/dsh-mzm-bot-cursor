@@ -28,3 +28,5 @@ Dump-inspection artifacts for [Scenario 4 secrets-absent recipe](../../scenario-
 | `dump-inspection.txt` | `p6-t030-dump-inspection.txt` |
 
 **Status:** Host dump-inspection Pass stamped — see [VERDICT.txt](./VERDICT.txt).
+
+**T034 layout:** Quickstart Scenario 4 evidence home (dump/log OK). Not the non-goals home — that is [../non-goals/](../non-goals/) for quickstart Scenario 5 / SC-005.

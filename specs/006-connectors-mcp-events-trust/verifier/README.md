@@ -6,7 +6,7 @@
 **Contracts:** [../contracts/](../contracts/) — start at [contracts/README.md](../contracts/README.md)
 **Architect Path A:** Host Connector catalog SoT + `dsh-mcp-client`; B1 webhook→Routine wake; additive `triggerKind`/`eventTrigger`; deny = user-deny or standing never; in-app primary / vault optional; no Electron Main bus — see [research.md](../research.md) / [plan.md](../plan.md) / [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md)
 **Setup inventories:** [host-connector-inventory.md](./host-connector-inventory.md) (T002) · [event-harness-inventory.md](./event-harness-inventory.md) (T003) · [credentials-trust-inventory.md](./credentials-trust-inventory.md) (T004) · [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md) (T005) · [credential-ux-in-app.md](./credential-ux-in-app.md) (T031)
-**Evidence:** [evidence/](./evidence/) — Scenario 1 under [evidence/scenario-1/](./evidence/scenario-1/) (T021); Scenario 2 under [evidence/scenario-2/](./evidence/scenario-2/) (T025); Scenario 3 under [evidence/scenario-3/](./evidence/scenario-3/) (T028); Scenario 4 dump under [evidence/scenario-4/](./evidence/scenario-4/) (T030); US5 credential-UX / SC-007 deep checks in [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) (T032; auth-surface evidence reuses `evidence/scenario-1/`); remaining dirs in polish T034; Scenario recipes land with US tasks
+**Evidence:** [evidence/](./evidence/) — Scenario 1 under [evidence/scenario-1/](./evidence/scenario-1/) (T021 · US5 T032); Scenario 2 under [evidence/scenario-2/](./evidence/scenario-2/) (T025); Scenario 3 under [evidence/scenario-3/](./evidence/scenario-3/) (T028); Scenario 4 dump under [evidence/scenario-4/](./evidence/scenario-4/) (T030); Scenario 5 non-goals under [evidence/non-goals/](./evidence/non-goals/) (T033/T034); Scenario 6 full replay under [evidence/scenario-6/](./evidence/scenario-6/) (T034/T035); US5 credential-UX deep checks in [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) (auth-surface evidence reuses `evidence/scenario-1/`)
 **Linear:** **Blocked** — workspace free-issue limit; **no invented epic/issue ids**; **no `taskstoissues` in this PR**. Track T001–T040 via PR only until capacity returns (project **DeepSeek Harness - Cursor** / `P-MOH-2` only — never GrokBot).
 
 ## T001 — Design tree confirm (Setup)
@@ -71,20 +71,30 @@ specs/006-connectors-mcp-events-trust/verifier/evidence/
 └── scenario-6/   # QS6 full replay
 ```
 
-## Scenario 1–6 owners map (T006)
+## Scenario 1–6 owners map (T036 re-validated)
 
 Mapped to [quickstart.md](../quickstart.md). Owner columns name who owns scripts/evidence for that scenario (not who implements the product feature alone). Owner labels are **Host / Runtime** / **Client** / **Electron** / **Verifier** per tasks.md ownership legend.
 
-| Scenario | Quickstart | Recipe path (later) | Evidence | Primary owners | Acceptance | FR-014/015 |
-|----------|------------|---------------------|----------|----------------|------------|------------|
-| **1** Install → auth → tool call | [Scenario 1](../quickstart.md#scenario-1--connector-install--auth--successful-tool-call) | [scenario-1-connector.md](./scenario-1-connector.md) (T021) · US5 deep SC-007: [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) (T032) · [connector.md](../contracts/connector.md) / [secrets.md](../contracts/secrets.md) | [evidence/scenario-1/](./evidence/scenario-1/) | **Host / Runtime** + **Client** + **Verifier** | SC-001, SC-007 | **Required** |
+| Scenario | Quickstart | Recipe path | Evidence | Primary owners | Acceptance | FR-014/015 |
+|----------|------------|-------------|----------|----------------|------------|------------|
+| **1** Install → auth → tool call | [Scenario 1](../quickstart.md#scenario-1--connector-install--auth--successful-tool-call) | [scenario-1-connector.md](./scenario-1-connector.md) (T021) · US5 deep SC-007: [scenario-5-credential-ux.md](./scenario-5-credential-ux.md) (T032) · [credential-ux-in-app.md](./credential-ux-in-app.md) (T031) · [connector.md](../contracts/connector.md) / [secrets.md](../contracts/secrets.md) | [evidence/scenario-1/](./evidence/scenario-1/) | **Host / Runtime** + **Client** + **Verifier** | SC-001, SC-007 | **Required** |
 | **2** Event routine create + fire | [Scenario 2](../quickstart.md#scenario-2--event-triggered-routine-e2e) | [scenario-2-event-routine.md](./scenario-2-event-routine.md) (T025) · [event-routine.md](../contracts/event-routine.md) | [evidence/scenario-2/](./evidence/scenario-2/) | **Host / Runtime** + **Client** + **Verifier** | SC-002, SC-008 | **Required** |
 | **3** Denied permission | [Scenario 3](../quickstart.md#scenario-3--denied-permission) | [scenario-3-trust-deny.md](./scenario-3-trust-deny.md) (T028) · [trust-deny.md](../contracts/trust-deny.md) | [evidence/scenario-3/](./evidence/scenario-3/) | **Host / Runtime** + **Client** + **Verifier** | SC-003 | **Required** |
 | **4** Secrets absent from dumps | [Scenario 4](../quickstart.md#scenario-4--secrets-absent-from-session-dumps) | [scenario-4-secrets-absent.md](./scenario-4-secrets-absent.md) (T030) · [secrets.md](../contracts/secrets.md) | [evidence/scenario-4/](./evidence/scenario-4/) | **Host / Runtime** + **Verifier** | SC-004, SC-007 | Dump log OK; GUI auth if shown |
-| **5** Non-goals absence | [Scenario 5](../quickstart.md#scenario-5--non-goals-absence) | `non-goals.md` (T033) · [contracts/non-goals.md](../contracts/non-goals.md) | `evidence/non-goals/` | **Host / Runtime** + **Electron** + **Verifier** | SC-005 | Docs/absence OK |
-| **6** Full Phase 6 replay | [Scenario 6](../quickstart.md#scenario-6--full-phase-6-replay) | `scenario-6-full-replay.md` (T035) · all contracts | `evidence/scenario-6/` | **Verifier** | SC-006 (+ composite of 1–5 + T016) | **Required** for GUI slices |
+| **5** Non-goals absence | [Scenario 5](../quickstart.md#scenario-5--non-goals-absence) | [non-goals.md](./non-goals.md) (T033) · [contracts/non-goals.md](../contracts/non-goals.md) | [evidence/non-goals/](./evidence/non-goals/) | **Host / Runtime** + **Electron** + **Verifier** | SC-005, SC-008 | Docs/absence OK |
+| **6** Full Phase 6 replay | [Scenario 6](../quickstart.md#scenario-6--full-phase-6-replay) | [scenario-6-full-replay.md](./scenario-6-full-replay.md) (T035) · all contracts | [evidence/scenario-6/](./evidence/scenario-6/) | **Verifier** | SC-006 (+ composite of 1–5 + T016) | **Required** for GUI slices |
 
-Foundational Pass (T016) must hold before Scenario evidence counts toward phase Done. Scenario recipes themselves are **not** created in Setup T001–T006.
+**Naming note:** Recipe file `scenario-5-credential-ux.md` is the US5 / SC-007 auth-surface split — evidence stays under `evidence/scenario-1/`. Quickstart Scenario 5 is **non-goals** (`non-goals.md` / SC-005), not that file.
+
+Foundational Pass (T016) must hold before Scenario evidence counts toward phase Done.
+
+### T036 map re-validation stamp
+
+**Verdict:** **Pass** (docs map consistency)
+**Stamp:** 2026-09-28 · polish branch `cursor/p6-polish-recipes-fe1d` (T033–T036)
+**Checks:** quickstart Scenario 1–6 sections link recipes + evidence dirs; this table matches; T034 placeholders present under `non-goals/` + `scenario-6/` (scenario-1…4 already populated); T033 non-goals + T035 full-replay recipes present.
+
+**Seam honesty:** Connectors / events / trust Pass is Host Connector catalog + Host credential store + Host HTTP/WS — **not** Electron Main bus, **not** Client-only SoT, **not** live Slack/GitHub required, **not** fixed named connector, **not** mandatory vault when in-app works. See [non-goals.md](./non-goals.md) · [connector-event-trust-seam-locks.md](./connector-event-trust-seam-locks.md).
 
 ## Owner roles
 
@@ -112,7 +122,7 @@ Foundational Pass (T016) must hold before Scenario evidence counts toward phase 
 - Setup T001–T006 may land before Host foundation.
 - **US1–US5 product work blocked** until Foundational T007–T016 land on master.
 - Scenario 6 requires Scenarios 1–5 (or equivalent) plus foundational Pass.
-- Quickstart non-goals MUST NOT appear in Pass criteria ([quickstart.md](../quickstart.md) Scenario 5).
+- Quickstart non-goals MUST NOT appear in Pass criteria ([quickstart.md](../quickstart.md) Scenario 5 · [non-goals.md](./non-goals.md)).
 - Do **not** rewrite `specs/001`–`005` in P6 implement PRs (T038).
 
 ## Rerun Setup (idempotent)
@@ -135,11 +145,17 @@ test -f specs/006-connectors-mcp-events-trust/verifier/host-connector-inventory.
 test -f specs/006-connectors-mcp-events-trust/verifier/event-harness-inventory.md
 test -f specs/006-connectors-mcp-events-trust/verifier/credentials-trust-inventory.md
 test -f specs/006-connectors-mcp-events-trust/verifier/connector-event-trust-seam-locks.md
+test -f specs/006-connectors-mcp-events-trust/verifier/non-goals.md
+test -f specs/006-connectors-mcp-events-trust/verifier/scenario-6-full-replay.md
+test -f specs/006-connectors-mcp-events-trust/verifier/evidence/non-goals/README.md
+test -f specs/006-connectors-mcp-events-trust/verifier/evidence/scenario-6/README.md
 rg -n 'T001 — Design tree confirm' specs/006-connectors-mcp-events-trust/verifier/README.md
 rg -n 'Scenario 1–6 owners map' specs/006-connectors-mcp-events-trust/verifier/README.md
+rg -n 'T036 map re-validation stamp' specs/006-connectors-mcp-events-trust/verifier/README.md
+rg -n 'Scenario → recipe map \(T036\)' specs/006-connectors-mcp-events-trust/quickstart.md
 rg -n 'standing orders 11\+12' specs/006-connectors-mcp-events-trust/verifier/README.md
 rg -n 'Linear.*Blocked' specs/006-connectors-mcp-events-trust/verifier/README.md
 rg -n 'Architect Path A' specs/006-connectors-mcp-events-trust/verifier/connector-event-trust-seam-locks.md
 ```
 
-**PO / DH Lead:** Setup T001–T006 complete on this branch. Do **not** mark product SC Done. Next: Foundational T007–T016 (Host catalog + additive Routines + MCP/credential bind + protocol exclusions + B1 doc). Linear remains blocked — leave tracking on the PR.
+**PO / DH Lead:** Polish T033–T036 complete on this branch (non-goals recipe, evidence layout, SC-006 full-replay recipe, quickstart↔README map). Do **not** mark product SC-006 Done until Scenario 6 composite stamp lands. Next polish: T037 bus reconfirm · T038 no-rewrite · T039 Pass-path language · T040 Linear note. Linear remains blocked — leave tracking on the PR.
