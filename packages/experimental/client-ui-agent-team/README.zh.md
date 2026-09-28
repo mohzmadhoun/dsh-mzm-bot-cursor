@@ -85,7 +85,7 @@ kind: "package-reference"
 
 ### 发现、安装并认证连接器
 
-打开面板时经 `agentTeams/listConnectorCatalog` 加载 Host 精简连接器目录，并从 `TeamView.connectors`（与 `listConnectors` 同一 Host 投影）加载已安装行。**连接器**库列出每个可安装条目（任一精简目录／Verifier 夹具——FR-017）；**安装**调用 Host `agentTeams/installConnector`。可用≠已安装。Host 目录为空或不可用时显示明确失败——绝不当作空列表成功。**认证**打开应用内密钥字段并调用 Host `agentTeams/authenticateConnector`（密钥仅存 Host 凭据库；不以聊天粘贴为主路径；不要求外部保险库）。`authState=ready` 后面板显示工具已绑定，以及**运行工具**控件，经 Host RPC 投影用户可见的成功／拒绝／错误结果（优先 `invokeConnectorTool`；否则在就绪确认后投影 Pass 夹具公共工具名）。Electron Main 不持有连接器目录、凭据或工具结果。
+打开面板时经 `agentTeams/listConnectorCatalog` 加载 Host 精简连接器目录，并从 `TeamView.connectors`（与 `listConnectors` 同一 Host 投影）加载已安装行。**连接器**库列出每个可安装条目（任一精简目录／Verifier 夹具——FR-017）；**安装**调用 Host `agentTeams/installConnector`。可用≠已安装。Host 目录为空或不可用时显示明确失败——绝不当作空列表成功。**认证**打开应用内密钥字段并调用 Host `agentTeams/authenticateConnector`（密钥仅存 Host 凭据库；不以聊天粘贴为主路径；应用内完成 Pass 夹具认证时不要求 1Password 类外部保险库——FR-008/009；草稿密钥仅存 React 状态，保存后清除）。`authState=ready` 后面板显示工具已绑定，以及**运行工具**控件，经 Host RPC 投影用户可见的成功／拒绝／错误结果（优先 `invokeConnectorTool`；否则在就绪确认后投影 Pass 夹具公共工具名）。Electron Main 不持有连接器目录、凭据或工具结果。
 
 ### 拒绝连接器工具（站立拒绝或审批卡）
 
