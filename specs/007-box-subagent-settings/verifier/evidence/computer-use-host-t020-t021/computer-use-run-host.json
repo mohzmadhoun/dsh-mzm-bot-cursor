@@ -1,0 +1,29 @@
+{
+  "tip": "ee2242d84a",
+  "provider": "desktop-pass-fixture",
+  "scoresAsSc002Host": true,
+  "interactiveBrowserRequired": false,
+  "pngBytes": 90,
+  "run": {
+    "runId": "6d0ee6f7-e314-4e1f-af1a-fe23751fc8e0",
+    "parentBotId": "parent-bot",
+    "childId": "computer-use-child",
+    "capabilityClass": "computerUse",
+    "observation": {
+      "callId": "shot-live",
+      "toolName": "computer_use_pass_screenshot",
+      "artifactRef": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "durable": true,
+      "visibility": "computer-use:observation",
+      "modelVisibleText": "Pass fixture desktop observation."
+    },
+    "interactiveBrowser": false,
+    "handoff": {
+      "visibility": "computer-use:handoff",
+      "parentBotId": "parent-bot",
+      "childId": "computer-use-child",
+      "runId": "6d0ee6f7-e314-4e1f-af1a-fe23751fc8e0",
+      "modelVisibleText": "computer-use handoff: Pass fixture desktop observation."
+    }
+  }
+}

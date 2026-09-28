@@ -1,0 +1,44 @@
+Verdict: PASS (Host T020–T021 only)
+Stamp: 2026-09-28 · tip ee2242d84a · PR #251 head cursor/p7-us2-runtime-dc28
+Linear: MOH-376 · MOH-377 · Epic MOH-350 · P-MOH-2
+Scope: Path A Host computerUse observation + spawn handoff; screenshot-only Pass OK; focused vitest; no Client UI
+SC-002 product Pass: NOT claimed (Client T022 + Desktop FR-013/014 Scenario 2 still open)
+
+## Acceptance checked (Host half)
+
+| Criterion | Result | Evidence tag |
+|-----------|--------|--------------|
+| T020 Pass provider `register()` + ≥1 GUI observation | PASS | measured: vitest T020 cases; computer-use-run-host.json observation; pass-fixture-observation.png |
+| T021 spawn-class parent handoff + observation | PASS | measured: vitest T021 cases; run.handoff visibility=computer-use:handoff; scoresAsSc002Host=true |
+| Screenshot-only (interactiveBrowser not required true) | PASS | measured: interactiveBrowser=false on ComputerUseRun; path-a-spotcheck.log |
+| Architect Path A (Host SoT; Cua-or-fixture; spawn-in-process) | PASS | measured: provider=desktop-pass-fixture; installComputerUsePath on Desktop Host; Electron bus keys absent as channels (comments only) |
+| Focused Host vitest | PASS | measured: 7/7 — computer-use-path.spec.ts (6) + computer-use-pass-fixture.spec.ts (1) |
+| Client UI / Desktop product SC-002 | Out of scope | inferred: T022 unchecked; no Desktop FR-013 media in this stamp |
+
+## Commands (measured)
+
+```
+pnpm exec vitest run apps/desktop-host/tests/computer-use-path.spec.ts apps/desktop-host/tests/computer-use-pass-fixture.spec.ts --reporter=verbose
+# Test Files 2 passed · Tests 7 passed
+```
+
+Live dump (same tip): ComputerUseRun with durable PNG observation + parent handoff — see computer-use-run-host.json.
+
+## Explicit non-claims
+
+- Not SC-002 product Done (needs Client projection T022 + Scenario 2 Desktop evidence T023).
+- Not interactive-browser Pass.
+- Unit alone would fail SC-002 product gate; this stamp is Host T020–T021 only per PO/Path A screenshot-only Host rehearsal.
+
+## PR body embeds (PO — optional for Host-only; required later for SC-002)
+
+<img src="/opt/cursor/artifacts/t020-t021-host-verify-summary.png" alt="Host T020-T021 verify summary @ ee2242d84a" />
+<img src="/opt/cursor/artifacts/t020-pass-observation-card.png" alt="Pass fixture observation card (scaled)" />
+<img src="/opt/cursor/artifacts/pass-fixture-observation.png" alt="Raw 1x1 Pass fixture PNG bytes" />
+
+Committed mirrors: specs/007-box-subagent-settings/verifier/evidence/computer-use-host-t020-t021/*
+
+## Blockers for DH Lead
+
+- None for Host T020–T021 Pass.
+- Remaining for SC-002 product: T022 Client UI + T023 Scenario 2 Desktop FR-013/014 under evidence/computer-use/.

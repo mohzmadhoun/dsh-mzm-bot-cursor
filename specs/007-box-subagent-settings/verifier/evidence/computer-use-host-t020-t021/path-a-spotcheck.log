@@ -1,0 +1,37 @@
+=== tip ===
+ee2242d84a0b6a96c913262139cfc557ddd562f7
+=== PR #251 files vs base SC-001 tip 17d2b3efe3 ===
+ apps/desktop-host/package.json                     |   5 +
+ apps/desktop-host/src/computer-use-path.ts         | 391 ++++++++++++++++
+ apps/desktop-host/src/computer.ts                  |  24 +-
+ apps/desktop-host/tests/computer-use-path.spec.ts  | 495 +++++++++++++++++++++
+ apps/desktop-host/tsconfig.json                    |  79 +++-
+ pnpm-lock.yaml                                     |  75 ++--
+ specs/007-box-subagent-settings/tasks.md           |   4 +-
+ .../verifier/computer-use-pass-provider.md         |   6 +-
+ 8 files changed, 1024 insertions(+), 55 deletions(-)
+=== Electron forbidden bus keys (comments only expected) ===
+apps/desktop/src/host-protocol.ts:28: * shell-exec / box-ready / computer-use-control / computer-screenshot /
+apps/desktop/src/host-protocol.ts:29: * computer-settings-mutate payloads are also not members and must not be added — Host owns the sandboxed Shell
+apps/desktop/src/host-protocol.ts:48: * credential-set, secret-payload, shell-exec, box-ready, computer-use-control,
+apps/desktop/src/host-protocol.ts:49: * computer-screenshot, or computer-settings-mutate control type on this channel.
+apps/desktop/src/ipc.ts:38: * There is no shell-exec, box-ready, computer-use-control, computer-screenshot,
+apps/desktop/src/ipc.ts:39: * or computer-settings-mutate channel — Host owns the sandboxed Shell execution world,
+=== Path A register + installComputerUsePath ===
+apps/desktop-host/src/computer-use-pass-fixture.ts:21:export const PASS_PROVIDER_NAME = ComputerUseProviderName('desktop-pass-fixture')
+apps/desktop-host/src/computer-use-pass-fixture.ts:39:    const releaseProvider = ctx.computerUse.register(PASS_PROVIDER_NAME)
+apps/desktop-host/src/computer-use-pass-fixture.ts:40:    const unregisterTool = ctx.tools.register(createMcpToolDefinition(ctx, {
+apps/desktop-host/src/computer-use-path.ts:20:  PASS_PROVIDER_NAME,
+apps/desktop-host/src/computer-use-path.ts:205:  return providerName === PASS_PROVIDER_NAME
+apps/desktop-host/src/computer-use-path.ts:217:export function installComputerUsePath(ctx: Context, options: ComputerUsePathOptions): ComputerUsePathHandle {
+apps/desktop-host/src/computer.ts:23:import { installComputerUsePath } from './computer-use-path.ts'
+apps/desktop-host/src/computer.ts:101:  installComputerUsePath(ctx, {
+=== interactiveBrowser ===
+apps/desktop-host/tests/computer-use-path.spec.ts:258:      interactiveBrowser: false,
+apps/desktop-host/tests/computer-use-path.spec.ts:354:      interactiveBrowser: false,
+apps/desktop-host/tests/computer-use-path.spec.ts:368:    expect(run!.interactiveBrowser).toBe(false)
+apps/desktop-host/src/computer-use-path.ts:75: * Pass needs observation + handoff; `interactiveBrowser` must not be required true.
+apps/desktop-host/src/computer-use-path.ts:91:  interactiveBrowser: false
+apps/desktop-host/src/computer-use-path.ts:128:    && run.interactiveBrowser === false
+apps/desktop-host/src/computer-use-path.ts:281:        interactiveBrowser: false,
+apps/desktop-host/src/computer-use-path.ts:332:            interactiveBrowser: false,
