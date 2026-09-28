@@ -3375,6 +3375,141 @@ describe('TeamAction', () => {
     expect(screen.getAllByText(zh['memoryKind.log']).length).toBeGreaterThan(0)
   })
 
+  it('writes a non-empty note memory via Host writeMemory and lists it (T021 / US3)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const createdMemory = {
+      memoryId: 'memory-note-1' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'note' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Remember to stamp SC-003 after note write',
+      createdAt: 30,
+      updatedAt: 30,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, value: { ...view, memories: [] } })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, memories: [createdMemory] },
+      })
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memory: createdMemory } },
+    }))
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memories: [createdMemory] } },
+    }))
+    render(<TeamAction {...props(actions({ load, writeMemory, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText(zh.botMemoriesEmpty)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    fireEvent.change(screen.getByLabelText(zh.memoryKind), {
+      target: { value: 'note' },
+    })
+    expect(document.querySelector('[data-team-write-memory-kind="note"]')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Remember to stamp SC-003 after note write' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'user' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(writeMemory).toHaveBeenCalledWith(SESSION, {
+        kind: 'note',
+        layer: 'user',
+        content: 'Remember to stamp SC-003 after note write',
+        botId: null,
+      })
+    })
+    await waitFor(() => {
+      expect(listMemories).toHaveBeenCalledWith(SESSION, { botId: workerId })
+    })
+    expect(await screen.findByText('Remember to stamp SC-003 after note write')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="note"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-layer="user"]')).toBeTruthy()
+    expect(screen.queryByText(zh.botMemoriesEmpty)).toBeNull()
+  })
+
+  it('keeps profile, log, and note distinguishable after three writes (T021 / SC-003)', async () => {
+    const workerId = 'worker-id' as SessionId
+    const profileMemory = {
+      memoryId: 'memory-profile-3' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'profile' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Role: release engineer',
+      createdAt: 1,
+      updatedAt: 1,
+    }
+    const logMemory = {
+      memoryId: 'memory-log-3' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'log' as const,
+      layer: 'user' as const,
+      botId: null,
+      content: 'Cut Phase 5 memory write surface',
+      createdAt: 2,
+      updatedAt: 2,
+    }
+    const noteMemory = {
+      memoryId: 'memory-note-3' as import('@deepseek-ai/dsh-experimental-agent-team/client').MemoryId,
+      kind: 'note' as const,
+      layer: 'agent' as const,
+      botId: workerId,
+      content: 'Follow-up: complete Scenario 1 three kinds',
+      createdAt: 3,
+      updatedAt: 3,
+    }
+    const load = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true as const,
+        value: { ...view, memories: [profileMemory, logMemory] },
+      })
+      .mockResolvedValue({
+        ok: true as const,
+        value: { ...view, memories: [profileMemory, logMemory, noteMemory] },
+      })
+    const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memory: noteMemory } },
+    }))
+    const listMemories = vi.fn((): Promise<TeamListMemoriesActionResult> => Promise.resolve({
+      ok: true,
+      value: { ok: true, value: { memories: [profileMemory, logMemory, noteMemory] } },
+    }))
+    render(<TeamAction {...props(actions({ load, writeMemory, listMemories }))} />)
+    fireEvent.click(screen.getByRole('button', { name: zh.trigger }))
+    expect(await screen.findByText('Role: release engineer')).toBeTruthy()
+    expect(screen.getByText('Cut Phase 5 memory write surface')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh.writeMemory }))
+    fireEvent.change(screen.getByLabelText(zh.memoryKind), {
+      target: { value: 'note' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryContent), {
+      target: { value: 'Follow-up: complete Scenario 1 three kinds' },
+    })
+    fireEvent.change(screen.getByLabelText(zh.memoryLayer), {
+      target: { value: 'agent' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: zh.save }))
+    await waitFor(() => {
+      expect(writeMemory).toHaveBeenCalledWith(SESSION, {
+        kind: 'note',
+        layer: 'agent',
+        content: 'Follow-up: complete Scenario 1 three kinds',
+        botId: workerId,
+      })
+    })
+    expect(await screen.findByText('Follow-up: complete Scenario 1 three kinds')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="profile"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="log"]')).toBeTruthy()
+    expect(document.querySelector('[data-team-memory-kind="note"]')).toBeTruthy()
+    expect(screen.getAllByText(zh['memoryKind.profile']).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(zh['memoryKind.log']).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(zh['memoryKind.note']).length).toBeGreaterThan(0)
+  })
+
   it('shows Host writeMemory rejection without inventing a listed memory (T015)', async () => {
     const writeMemory = vi.fn((): Promise<TeamWriteMemoryActionResult> => Promise.resolve({
       ok: true,

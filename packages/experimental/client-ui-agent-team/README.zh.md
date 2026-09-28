@@ -71,9 +71,9 @@ kind: "package-reference"
 
 每个 teammate 卡片展示由 Host `TeamView.routines` 按该 `botId` 投影的 **Bot 定时任务**面（SC-006）。**新建定时任务**打开意图与产品支持的日程字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/createRoutine`——不是 Electron Main IPC。空意图或日程显示明确 Client 拒绝；Host 拒绝时列表不变。确认步骤可选（SC-007）；身份可由意图派生（无需单独显示名称）。成功后刷新 Team 视图，使进行中的定时任务出现在该 Bot 上。列表行上的**暂停**／**恢复**分别调用 Host Remote `agentTeams/pauseRoutine`／`agentTeams/resumeRoutine`（传入该 `routineId`）；面板状态由刷新后的 Host 投影更新（`active` ↔ `paused`）。传输或 Team 拒绝时保留先前状态。Electron Main 不持有定时任务目录或暂停标志。
 
-### 写入档案与日志记忆事实
+### 写入档案、日志与笔记记忆事实
 
-每个 teammate 卡片展示由 Host `TeamView.memories` 投影的 **Bot 记忆**面（该 Bot 的 agent 层行加上账户级 user 行——与 Host `listMemories` 同一过滤）。**写入记忆**打开类型（档案或日志）、内容与 Agent／User 层级字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/writeMemory`——不是 Electron Main IPC。空内容或缺少类型／层级显示明确 Client 拒绝且不调用 Host；Host 拒绝时列表不变。成功后调用 Host `agentTeams/listMemories` 并刷新 Team 视图，使已保存事实以可区分的 kind／layer 标签出现。Electron Main 不持有记忆记录。
+每个 teammate 卡片展示由 Host `TeamView.memories` 投影的 **Bot 记忆**面（该 Bot 的 agent 层行加上账户级 user 行——与 Host `listMemories` 同一过滤）。**写入记忆**打开类型（档案、日志或笔记）、内容与 Agent／User 层级字段，经已认证 HTTP/WS 调用 Host Remote `agentTeams/writeMemory`——不是 Electron Main IPC。空内容或缺少类型／层级显示明确 Client 拒绝且不调用 Host；Host 拒绝时列表不变。成功后调用 Host `agentTeams/listMemories` 并刷新 Team 视图，使已保存事实以可区分的 kind／layer 标签出现。Electron Main 不持有记忆记录。
 
 ### 在 Bot 面列出 Host 定时任务
 
