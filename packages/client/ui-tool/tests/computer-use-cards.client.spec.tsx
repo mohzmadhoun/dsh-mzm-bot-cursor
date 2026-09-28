@@ -37,7 +37,7 @@ function observationProps(block: RunningToolCall | ToolResultNode) {
     openFile: () => {},
     loadImage,
     t,
-  }
+  } as unknown as Parameters<typeof ComputerUseObservationRow>[0]
 }
 
 function subagentProps(block: RunningToolCall | ToolResultNode) {
@@ -50,7 +50,7 @@ function subagentProps(block: RunningToolCall | ToolResultNode) {
     openFile: () => {},
     loadImage,
     t,
-  }
+  } as unknown as Parameters<typeof ComputerUseSubagentRow>[0]
 }
 
 describe('ComputerUseObservationRow', () => {
@@ -68,7 +68,7 @@ describe('ComputerUseObservationRow', () => {
       ],
       isError: false,
       subCalls: [],
-    }
+    } as ToolResultNode
     const view = render(<ComputerUseObservationRow {...observationProps(settled)} />)
     expect(view.container.querySelector('[data-computer-use-observation="observed"]')).not.toBeNull()
     expect(view.container.querySelector('[data-computer-use-observation-label="observed"]')?.textContent)
