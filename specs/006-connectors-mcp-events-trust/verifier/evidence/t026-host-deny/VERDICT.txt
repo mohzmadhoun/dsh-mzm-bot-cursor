@@ -1,0 +1,39 @@
+T026 Host enforce deny path (US3 / FR-006) — DH Verifier
+========================================================
+Verdict: Pass
+Stamp: 2026-09-28 · tip cursor/p6-us3-host-deny-fe1d @ c49baa5d4a
+  · measured Vitest (Host; no Desktop GUI required for Host T026)
+  · product tip under test: c49baa5d4a66e2dd72716d12bc51f793b160a27d
+    "Phase 6 - fix - narrow tools undefined in T026 deny test"
+Linear: MOH-324 (T026) · Epic MOH-281 — leave In Progress (PO closes after product merge)
+Recipe: contracts/trust-deny.md · tasks.md T026 · Path A either-OK
+
+Acceptance (T026 Host)
+----------------------
+[x] standing never → invokeConnectorTool outcome=denied (not success)
+    measured: connector-deny.spec.ts "standing never → …"
+[x] user-deny answerer rejected → outcome=denied (not success)
+    measured: connector-deny.spec.ts "user-deny answerer rejected → …"
+[x] ask + allowed-once → outcome=success
+    measured: connector-deny.spec.ts "ask + allowed-once still yields outcome=success"
+[x] US1 regression: install/auth/invoke success path still green
+    measured: connector-catalog.spec.ts T007–T012 + T017–T018 (incl. T018 outcome=success)
+[x] Gate wired: gateConnectorToolApproval before tools.execute when ctx.approval mounted
+    measured: packages/experimental/agent-team/src/index.ts invokeConnectorTool + connector-approval.ts
+
+Provenance (measured)
+---------------------
+Command:
+  pnpm exec vitest run \
+    packages/experimental/agent-team/tests/connector-deny.spec.ts \
+    packages/experimental/agent-team/tests/connector-catalog.spec.ts \
+    --reporter=verbose
+
+Result: Test Files 2 passed · Tests 8 passed · Duration ~1.85s
+Log: evidence/t026-host-deny/p6-t026-host-deny-vitest.log
+SO11 mirror: /opt/cursor/artifacts/p6-t026-host-deny-vitest.log
+
+Notes
+-----
+- Host T026 Pass bar is Vitest enforcement (FR-006 Host). Desktop SC-003 / FR-014 is Scenario 3 (T028), not this stamp.
+- Did not merge.
