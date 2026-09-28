@@ -1,16 +1,24 @@
 # Feature Specification: Phase 6 — Connectors / MCP + event routines + trust
 
-**Feature Branch**: `cursor/p6-specify-fe1d`
+**Feature Branch**: `cursor/p6-clarify-fe1d`
 
 **Spec Directory**: `specs/006-connectors-mcp-events-trust`
 
 **Created**: 2026-09-28
 
-**Status**: Draft
+**Status**: Clarified
 
 **Input**: User description: "Phase 6 (Connectors / MCP + event routines + trust productization) Spec Kit specify only: MCP/connectors; event-triggered routines; richer trust/permissions productization; 1Password-class credential UX if needed. Explicit Out: Box/computer parity (P7); do not rewrite specs/001–005. Exit: one connector install→auth→successful tool call; one event-triggered routine E2E; one denied-permission path; secrets absent from session dumps; SO 11+12 for GUI. Linear free-issue limit blocked — track via PR only; no invented ticket numbers; no Linear comments. Plan accepted in MzM-Docs/mzm-bot-plan.md §4 P6."
 
-**Program refs**: `MzM-Docs/mzm-bot-plan.md` (P6) · `MzM-Docs/living-next-gate.md` (P6 kick held; Lead-owned) · `MzM-Docs/mzm-bot-initial-plan.md` (§5 event triggers; §9 Connectors/MCP; §13 Security & trust; §5 auth — 1Password/connectors wait for P6) · `.specify/memory/constitution.md` v1.0.0 · predecessors `specs/001-multi-model-bots` (P1 Done) · `specs/002-identity-personas` (P2 Done) · `specs/003-skills-ux` (P3 Done) · `specs/004-routines-cron` (P4 Done; cron only) · `specs/005-memory-productization` (P5 Done) · Linear project DeepSeek Harness - Cursor (`P-MOH-2`) — **no P6 epic/issues in this specify PR** (workspace free-issue limit)
+**Program refs**: `MzM-Docs/mzm-bot-plan.md` (P6) · `MzM-Docs/living-next-gate.md` (P6 kick held; Lead-owned) · `MzM-Docs/mzm-bot-initial-plan.md` (§5 event triggers; §9 Connectors/MCP; §13 Security & trust; §5 auth — 1Password/connectors wait for P6) · `.specify/memory/constitution.md` v1.0.0 · predecessors `specs/001-multi-model-bots` (P1 Done) · `specs/002-identity-personas` (P2 Done) · `specs/003-skills-ux` (P3 Done) · `specs/004-routines-cron` (P4 Done; cron only) · `specs/005-memory-productization` (P5 Done) · Linear project DeepSeek Harness - Cursor (`P-MOH-2`) — **no P6 epic/issues in this clarify PR** (workspace free-issue limit)
+
+## Clarifications
+
+### Session 2026-09-28
+
+- Q: Which single event-trigger family is required for Verifier Pass — webhook test harness, or a named live family such as Slack/GitHub/Linear/email? → A: Webhook harness / Verifier fixture — a named live Slack/GitHub/Linear/email family is NOT required for Pass.
+- Q: Is a 1Password-class vault UX required as a Pass gate for P6, or only when the chosen Pass connector cannot complete auth via in-app store? → A: Only when in-app auth cannot complete the Pass connector — vault UX is NOT a mandatory Pass gate.
+- Q: Must Pass use a fixed named connector, or is any one connector from a thin managed catalog / Verifier fixture acceptable? → A: Any one from a thin managed catalog / Verifier fixture — not a fixed named connector.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -37,11 +45,11 @@ Mohammed creates a routine whose trigger is an external **event** (not cron), an
 
 **Why this priority**: Plan exit requires one event-triggered routine fire E2E; P4 explicitly deferred event listeners to P6.
 
-**Independent Test**: Create one event-triggered routine with a non-empty intent on one bot using a product-supported event trigger type chosen for Pass ([NEEDS CLARIFICATION: which single event-trigger family is required for Verifier Pass — webhook test harness, or a named live family such as Slack/GitHub/Linear/email?]); deliver one matching event (or Verifier-simulated event on the documented harness); confirm the routine fires and a last-run / fire indicator is visible. Verifier captures and commits desktop visual evidence.
+**Independent Test**: Create one event-triggered routine with a non-empty intent on one bot using the Pass-locked event trigger family (**webhook harness / Verifier fixture**); deliver one matching event (or Verifier-simulated event on the documented harness); confirm the routine fires and a last-run / fire indicator is visible. A named live Slack/GitHub/Linear/email family is NOT required for Pass. Verifier captures and commits desktop visual evidence.
 
 **Acceptance Scenarios**:
 
-1. **Given** the desktop app is running with at least one bot, **When** the user creates a routine with a non-empty intent and an event (non-cron) trigger of the Pass-chosen type, **Then** the routine is saved and appears in that bot’s routines pane (or equivalent) distinguishable from cron-only routines by trigger type or equivalent clear labeling.
+1. **Given** the desktop app is running with at least one bot, **When** the user creates a routine with a non-empty intent and a webhook-harness / Verifier-fixture event (non-cron) trigger, **Then** the routine is saved and appears in that bot’s routines pane (or equivalent) distinguishable from cron-only routines by trigger type or equivalent clear labeling.
 2. **Given** an active event-triggered routine, **When** a matching event is delivered via the documented Pass path, **Then** the routine fires at least once without the user manually starting the bot turn (Host applies the intent as a bot wake/turn); proving specific LLM reply wording or external side effects beyond the fire is NOT required.
 3. **Given** a fire has occurred, **When** the user views the routines pane (or linked fire/activity indication), **Then** a last-run / fire indicator tied to that routine is visible—listing the routine alone without fire evidence is insufficient for Pass.
 4. **Given** the same routine is paused (P4 pause/resume remains available), **When** a matching event that would have fired occurs, **Then** no fire is recorded for that paused interval.
@@ -93,7 +101,7 @@ Mohammed completes connector authentication using the product’s credential UX�
 
 1. **Given** the user authenticates the Pass connector, **When** credentials are required, **Then** the product offers a user-visible credential UX that does not rely on renderer-held secrets or chat-pasted tokens as the Pass path.
 2. **Given** in-app secure store is sufficient for the Pass connector, **When** auth completes, **Then** a separate 1Password/vault product surface is NOT required for Pass.
-3. **Given** in-app secure store is insufficient for the Pass connector ([NEEDS CLARIFICATION: is a 1Password-class vault UX required as a Pass gate for P6, or only when the chosen Pass connector cannot complete auth via in-app store?]), **When** auth is attempted, **Then** the product provides a vault/connector-class credential path that enables Story 1 success, or Pass selects a connector that authenticates via the locked in-app primary path.
+3. **Given** in-app secure store is insufficient for the Pass connector, **When** auth is attempted, **Then** the product provides a vault/connector-class credential path that enables Story 1 success, or Pass selects a connector that authenticates via the locked in-app primary path. A 1Password-class vault UX is **not** a mandatory Pass gate when in-app auth completes the Pass connector.
 4. **Given** Verifier is proving this story, **When** the auth surface is shown, **Then** Pass evidence includes desktop screenshot(s) and/or a short screen recording committed under `verifier/evidence/` with PR embeds when the surface is GUI.
 
 ---
@@ -102,7 +110,7 @@ Mohammed completes connector authentication using the product’s credential UX�
 
 - What happens if connector install fails (network, catalog miss, corrupt package)? User MUST see a clear failure reason; a failed install MUST NOT count as Pass for Story 1.
 - What happens if auth is abandoned mid-flow? Connector MUST remain in a non-ready / needs-auth state; successful tool call MUST NOT be claimed.
-- What happens if the user expects the full Grok connector catalog (every Linear/GitHub/Gmail/Slack/Drive/calendar connector)? Full catalog parity is **not** required for Pass; one Pass connector path is enough ([NEEDS CLARIFICATION: must Pass use a fixed named connector, or is any one connector from a thin managed catalog acceptable?]).
+- What happens if the user expects the full Grok connector catalog (every Linear/GitHub/Gmail/Slack/Drive/calendar connector)? Full catalog parity is **not** required for Pass; any one connector from a thin managed catalog / Verifier fixture is enough (not a fixed named connector).
 - What happens if the user expects Box / local Shell / computer-use from connector or routine runs? Out of scope (P7); not required for Pass.
 - What happens if the user expects cron-only routine behavior from P4? Cron paths remain available and MUST NOT be rewritten; P6 adds event triggers without invalidating `specs/004-routines-cron`.
 - What happens if Verifier only has unit/jsdom evidence for GUI stories? **Fail** for those scenarios — desktop screenshots and/or short screen recordings are mandatory (standing order 11), and those files MUST be committed under `verifier/evidence/` with PR embeds (standing order 12).
@@ -125,7 +133,7 @@ Mohammed completes connector authentication using the product’s credential UX�
 - **FR-006**: Phase 6 MUST provide one Verifier-observable denied-permission path for a connector tool or trust-gated connector action (user deny or standing deny/block), with clear user-visible denial distinct from success.
 - **FR-007**: Connector secrets, tokens, passwords, and API keys MUST be absent from session dumps / exportable session artifacts (plaintext credential values MUST NOT appear).
 - **FR-008**: Credential UX for connector auth MUST keep secrets off the renderer as durable storage and MUST honor the P1 in-app primary auth lock; env/key files remain dev/CI only and MUST NOT be the product Pass path.
-- **FR-009**: 1Password-class (or equivalent vault) credential UX is in scope **if needed** for connector auth that cannot complete via in-app secure store; it is NOT automatically a Pass gate when in-app auth suffices for the Pass connector (subject to clarify on FR vault requirement).
+- **FR-009**: 1Password-class (or equivalent vault) credential UX is in scope **only when** the Pass connector cannot complete auth via in-app secure store; it is NOT a mandatory Pass gate when in-app auth suffices.
 - **FR-010**: Phase 6 MUST NOT require Box / local Shell / computer-use parity (P7) for acceptance.
 - **FR-011**: Phase 6 MUST NOT rewrite or expand P1–P5 requirements; `specs/001`–`005` remain authoritative for those phases. Cron routine create/list/pause/resume/fire from P4 remain available.
 - **FR-012**: Phase 6 MUST NOT require full Grok connector-catalog parity, send-on-behalf, group channels, voice, or pixel Grok chrome for acceptance.
@@ -133,8 +141,8 @@ Mohammed completes connector authentication using the product’s credential UX�
 - **FR-014**: For every GUI acceptance scenario in this feature (Stories 1–3, Story 5 GUI surfaces, and corresponding success criteria), Verifier Pass MUST include real desktop-app visual evidence: screenshots and/or short screen recordings (**standing order 11**). Unit tests or jsdom-only runs MUST NOT alone constitute Pass for those GUI scenarios.
 - **FR-015**: GUI Pass evidence MUST be **committed** under `specs/006-connectors-mcp-events-trust/verifier/evidence/<slice>/` on the PR branch and **embedded** in the GUI PR body via HTML `<img>` / `<video controls>` tags using absolute `/opt/cursor/artifacts/…` paths (**standing order 12**). Cursor agent artifact page links alone MUST NOT satisfy Pass. Docs/absence-only and dump-inspection checks may skip GUI embeds when no GUI is shown.
 - **FR-016**: Proving specific LLM reply wording beyond tool-call success / routine fire visibility is NOT required for Pass.
-- **FR-017**: The Pass connector MAY be any one connector from a thin managed catalog OR a Verifier fixture connector, unless clarify locks a named connector; full multi-family catalog is NOT required.
-- **FR-018**: Event-trigger Pass MUST use exactly one product-supported event-trigger family for the scripted path; shipping every inventory event type (Slack, GitHub, Origin, Teams, Linear, Sentry, PagerDuty, email, webhook, group) is NOT required for Pass.
+- **FR-017**: The Pass connector MUST be any one connector from a thin managed catalog OR a Verifier fixture connector; a fixed named connector is NOT required; full multi-family catalog is NOT required.
+- **FR-018**: Event-trigger Pass MUST use the **webhook harness / Verifier fixture** family for the scripted path; a named live Slack/GitHub/Linear/email family is NOT required for Pass; shipping every inventory event type is NOT required for Pass.
 
 ### Out of Scope (explicit non-goals for this feature)
 
@@ -145,7 +153,10 @@ Mohammed completes connector authentication using the product’s credential UX�
 - Replacing P4 cron routines (event triggers are additive)
 - Env/key-file auth as the product Pass path (dev/CI only)
 - Inventing Linear epic/issue numbers while workspace free-issue limit blocks creation
-- Spec Kit clarify / plan / tasks / implement artifacts in this specify change (held for later gates)
+- Spec Kit plan / tasks / implement artifacts in this clarify change (held for later gates)
+- Named live event families (Slack/GitHub/Linear/email) as Pass requirements (webhook harness / Verifier fixture is the Pass lock)
+- Fixed named Pass connector (any one thin-catalog / fixture connector is enough)
+- Mandatory 1Password-class vault Pass gate when in-app auth completes the Pass connector
 
 ### Key Entities
 
@@ -153,7 +164,7 @@ Mohammed completes connector authentication using the product’s credential UX�
 - **Connector catalog**: User-visible set of installable connectors; Phase 6 Pass needs a thin/managed set sufficient for one Pass path, not full Grok parity.
 - **Connector tool call**: One invocation of a tool exposed by an authenticated connector with a success or failure outcome visible to the user/Verifier.
 - **Event-triggered routine**: Saved intent/prompt + non-cron event trigger; fires when a matching event arrives; listed alongside (but distinguishable from) cron routines from P4.
-- **Event trigger**: Product-supported external or harness event type that wakes a routine (inventory examples: Slack, GitHub, webhook, etc.); Pass uses one family.
+- **Event trigger**: Product-supported external or harness event type that wakes a routine; Pass is locked to the **webhook harness / Verifier fixture** family (other inventory families are optional beyond Pass).
 - **Permission / trust gate**: User-visible approval or standing allow/deny control that can permit or deny a connector tool or trust-gated connector action.
 - **Denied-permission outcome**: Explicit user-visible deny/block distinct from successful execution.
 - **Credential / secret**: Token, password, API key, or equivalent used for connector auth; stored via secure product credential UX; MUST NOT appear in session dumps.
@@ -170,7 +181,7 @@ Mohammed completes connector authentication using the product’s credential UX�
 - **SC-004**: After connector auth, Verifier dump inspection shows connector secrets/tokens/passwords/API keys are absent from session dumps / exportable session artifacts; evidence committed under `verifier/evidence/`.
 - **SC-005**: Phase 6 Pass does not require Box/Shell (P7), full connector-catalog parity, send-on-behalf/group/voice, or rewriting P1–P5; Verifier non-goals checks confirm those absences are acceptable.
 - **SC-006**: DH Verifier re-runs the documented Phase 6 acceptance path on the real desktop app and records pass/fail evidence against this spec, including FR-014/FR-015 visual evidence for all GUI scenarios.
-- **SC-007**: Credential UX for the Pass connector keeps secrets off chat-paste and off renderer durable storage; 1Password-class vault is required for Pass only when clarify locks it or when in-app auth cannot complete the Pass connector.
+- **SC-007**: Credential UX for the Pass connector keeps secrets off chat-paste and off renderer durable storage; 1Password-class vault is required for Pass only when in-app auth cannot complete the Pass connector (not a mandatory Pass gate otherwise).
 - **SC-008**: Cron routines from P4 remain usable; Verifier does not fail Pass solely because event triggers are additive to cron.
 
 ## Assumptions
@@ -181,14 +192,14 @@ Mohammed completes connector authentication using the product’s credential UX�
 - Inventory `MzM-Docs/mzm-bot-initial-plan.md` §5 / §9 / §13 supplies vocabulary (MCP install/auth/tool call; event trigger families; auto-review / credentials / untrusted fences) without requiring Grok-identical chrome or full family coverage.
 - P1 auth primary remains **in-app** (Electron main → OS secure store / Host credential seam); env/keys = dev/CI only; 1Password/connector vault waits for P6 **if needed**.
 - P1 trust floor remains in force (isolated agent scopes, Host mailbox only, sessions are not credential dumps) and P6 productizes richer trust/permissions around connectors without replacing that floor.
-- **Draft default — Pass connector**: any one connector from a thin managed catalog (or Verifier fixture) is enough unless clarify locks a named connector (FR-017).
-- **Draft default — Event family**: one event-trigger family is enough for Pass; full inventory matrix is not required (FR-018). Preferred default for cheapest Verifier harness is **webhook**, pending clarify.
-- **Draft default — Vault UX**: not required for Pass when in-app auth completes the Pass connector; required only if Pass connector cannot authenticate that way (FR-009) — pending clarify lock.
-- Standing order 11: GUI Verifier Pass requires real desktop screenshots and/or short screen recordings—not unit/jsdom alone (FR-014). Specify does **not** capture media.
+- **Locked — Pass connector**: any one connector from a thin managed catalog (or Verifier fixture); not a fixed named connector (FR-017).
+- **Locked — Event family**: webhook harness / Verifier fixture for Pass; named live Slack/GitHub/Linear/email families are NOT required for Pass (FR-018).
+- **Locked — Vault UX**: not a mandatory Pass gate; required only when the Pass connector cannot authenticate via in-app secure store (FR-009).
+- Standing order 11: GUI Verifier Pass requires real desktop screenshots and/or short screen recordings—not unit/jsdom alone (FR-014). Clarify does **not** capture media.
 - Standing order 12: those artifacts MUST be committed under `verifier/evidence/` and embedded in the GUI PR body via ManagePullRequest absolute `/opt/cursor/artifacts/…` paths (FR-015).
-- Linear: workspace free-issue limit blocks new issues; this specify PR MUST NOT invent ticket numbers and MUST NOT comment on Linear. `taskstoissues` is deferred until capacity exists. Track progress via PR only.
+- Linear: workspace free-issue limit blocks new issues; this clarify PR MUST NOT invent ticket numbers and MUST NOT comment on Linear. `taskstoissues` is deferred until capacity exists. Track progress via PR only.
 - Single primary user for Phase 6 acceptance: Mohammed (founder = customer).
-- Living gate / plan file updates are owned by DH Lead / PO on a separate branch; this specify change owns only `specs/006-connectors-mcp-events-trust/` (+ local kit feature pointer). Do not edit `MzM-Docs/mzm-bot-plan.md` or `MzM-Docs/living-next-gate.md` in this PR.
+- Living gate / plan file updates are owned by DH Lead / PO on a separate branch; this clarify change owns only `specs/006-connectors-mcp-events-trust/` (+ local kit feature pointer). Do not edit `MzM-Docs/mzm-bot-plan.md` or `MzM-Docs/living-next-gate.md` in this PR.
 
 ## Traceability (capability → requirement → acceptance)
 
@@ -206,4 +217,4 @@ Mohammed completes connector authentication using the product’s credential UX�
 | Verifier replay + desktop visual (SO 11) | FR-013, FR-014 | US1–3, US5 evidence; SC-001–SC-003, SC-006 |
 | Committed evidence + PR embeds (SO 12) | FR-015 | US1–3, US5 evidence; SC-001–SC-003, SC-006 |
 
-**Intended follow-ons (after PO/Lead accept this draft):** `/speckit-clarify` (resolve NEEDS CLARIFICATION) → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-taskstoissues` **when Linear capacity exists** (project DeepSeek Harness - Cursor; never DeepSeek Harness - GrokBot) → implement → Verifier. Until Linear unblocks, track via PR only; do not invent issue ids.
+**Intended follow-ons (after PO/Lead accept this clarify):** `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-taskstoissues` **when Linear capacity exists** (project DeepSeek Harness - Cursor; never DeepSeek Harness - GrokBot) → implement → Verifier. Until Linear unblocks, track via PR only; do not invent issue ids.

@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,12 +31,11 @@
 
 ## Notes
 
-- **Specify-only gate**: Three `[NEEDS CLARIFICATION]` markers remain by design for `/speckit-clarify` (max 3). Checklist item “No NEEDS CLARIFICATION markers remain” is intentionally incomplete until clarify.
-- Open clarifications (also summarized for PO):
-  1. **Event-trigger family for Pass** — webhook harness vs named live family (Slack/GitHub/Linear/email).
-  2. **1Password-class vault** — Pass gate vs only-if-needed when in-app auth cannot complete the Pass connector.
-  3. **Pass connector identity** — fixed named connector vs any one from a thin managed catalog / Verifier fixture.
-- Draft defaults recorded in Assumptions (webhook preferred; vault only-if-needed; any one thin-catalog connector) pending clarify lock.
+- Spec Quality Checklist: 15/16 → 16/16 items passing after clarify (newly checked: No [NEEDS CLARIFICATION] markers remain).
+- PO-locked clarifications (Session 2026-09-28):
+  1. **Event-trigger for Pass** — webhook harness / Verifier fixture (not a named live Slack/GitHub/Linear/email family).
+  2. **1Password-class vault** — only when in-app auth cannot complete the Pass connector (not a mandatory Pass gate).
+  3. **Pass connector identity** — any one from thin managed catalog / Verifier fixture (not a fixed named connector).
 - Living plan / living-next-gate updates are **out of this PR** (Lead-owned).
 - Linear free-issue limit: no invented ticket numbers; track via PR only.
-- Ready for `/speckit-clarify` next; **not** ready for `/speckit-plan` until clarifications resolve.
+- Ready for `/speckit-plan` next; **not** ready for tasks/implement in this clarify change.
