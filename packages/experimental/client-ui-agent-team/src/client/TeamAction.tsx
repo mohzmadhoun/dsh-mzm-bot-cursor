@@ -298,7 +298,7 @@ function skillSessionActiveKey(botId: SessionId, skillId: SkillId): string {
 
 /**
  * Host listMemories filter mirrored for Client display from `TeamView.memories`.
- * Agent-layer rows for this bot plus all account-wide user rows (P5 T007–T008).
+ * Agent-layer rows for this bot plus all account-wide user rows (P5 T007–T008 / US5).
  * @param memories - Host Memory projections from `agentTeams/view` or `listMemories`.
  * @param botId - Bot Session whose agent-layer rows are in scope.
  * @returns memories visible in that bot’s memory surface.
@@ -311,6 +311,36 @@ function memoriesForBot(
     memory.layer === 'user'
     || (memory.layer === 'agent' && memory.botId === botId)
   ))
+}
+
+/**
+ * Browse layer filter on the Bot memory surface (P5 US5 T028 / FR-006 / FR-007).
+ * `all` keeps Host bot-scoped projection; `agent` / `user` narrow to that layer.
+ */
+type MemoryBrowseLayerFilter = MemoryLayer | 'all'
+
+/** Select sentinel — never a Host MemoryLayer or product filter value. */
+const MEMORY_BROWSE_LAYER_FILTER_ALL = 'all' as const satisfies MemoryBrowseLayerFilter
+
+/** Product browse layer filter choices (US5 — distinguishable Agent vs User). */
+const MEMORY_BROWSE_LAYER_FILTER_OPTIONS = [
+  { value: 'all', label: 'memoryBrowseLayerFilter.all' },
+  { value: 'agent', label: 'memoryLayer.agent' },
+  { value: 'user', label: 'memoryLayer.user' },
+] as const satisfies readonly { readonly value: MemoryBrowseLayerFilter; readonly label: TeamKey }[]
+
+/**
+ * Narrow bot-scoped Host memories by Client browse layer filter (US5 T028).
+ * @param memories - Host Memory projections already scoped by `memoriesForBot`.
+ * @param layerFilter - `all` | `agent` | `user`.
+ * @returns memories matching the browse filter.
+ */
+function memoriesForBrowseLayer(
+  memories: readonly MemoryProjection[],
+  layerFilter: MemoryBrowseLayerFilter,
+): MemoryProjection[] {
+  if (layerFilter === 'all') return memories
+  return memories.filter(memory => memory.layer === layerFilter)
 }
 
 
@@ -638,6 +668,10 @@ export function TeamAction({
   /** Bot whose Host writeMemory (profile|log|note) editor is open (P5 US1–US3 / T015+T018+T021). */
   const [writingMemoryBotId, setWritingMemoryBotId] = useState<SessionId | null>(null)
   const [writeMemoryDraft, setWriteMemoryDraft] = useState<WriteMemoryDraft>(EMPTY_WRITE_MEMORY_DRAFT)
+  /** Browse layer filter on Bot memory panes (P5 US5 T028 — all | agent | user). */
+  const [memoryBrowseLayerFilter, setMemoryBrowseLayerFilter] = useState<MemoryBrowseLayerFilter>(
+    MEMORY_BROWSE_LAYER_FILTER_ALL,
+  )
   /**
    * Session-local instructional bodies from successful upserts (edit prefill).
    * Host catalog summaries omit body; this cache is Client-only for reopen/edit.
@@ -1746,7 +1780,10 @@ export function TeamAction({
       : view.routines.filter((routine: RoutineProjection) => routine.botId === member.id)
     const botMemories = view === null
       ? []
-      : memoriesForBot(view.memories ?? [], member.id)
+      : memoriesForBrowseLayer(
+        memoriesForBot(view.memories ?? [], member.id),
+        memoryBrowseLayerFilter,
+      )
     const memoryInject = view === null ? null : memoryRecallInjectForBot(view, member.id)
     const identityBusy = personaPending || renamePending || avatarPending
       || deletePending || assignPending || attachPending || createRoutinePending
@@ -2036,9 +2073,29 @@ export function TeamAction({
           >
             <div className={css.botMemoriesHeader}>
               <span className={css.botMemoriesLabel}>{t('botMemories')}</span>
+              <select
+                className={css.memoryBrowseLayerFilter}
+                aria-label={t('memoryBrowseLayerFilter')}
+                data-team-memory-layer-filter={memoryBrowseLayerFilter}
+                value={memoryBrowseLayerFilter}
+                disabled={identityBusy}
+                onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                  const value = event.target.value
+                  if (value === 'all' || value === 'agent' || value === 'user') {
+                    setMemoryBrowseLayerFilter(value)
+                  }
+                }}
+              >
+                {MEMORY_BROWSE_LAYER_FILTER_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </option>
+                ))}
+              </select>
             </div>
             <p className={css.hint} data-team-bot-memories-hint="">{t('botMemoriesHint')}</p>
             <p className={css.hint} data-team-memory-browse-hint="">{t('browseMemoriesHint')}</p>
+            <p className={css.hint} data-team-memory-layer-filter-hint="">{t('memoryBrowseLayerFilterHint')}</p>
             {memoryInject !== null && (
               <div
                 className={css.memoryInjectIndicator}

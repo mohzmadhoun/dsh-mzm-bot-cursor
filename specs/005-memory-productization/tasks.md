@@ -155,7 +155,7 @@ Desktop dual-process layout from [plan.md](./plan.md):
 ### Implementation for User Story 5
 
 - [x] T027 [US5] Host catalog enforces `layer=agent` keyed by `botId` (bot B MUST NOT list A’s agent rows as B’s) and `layer=user` account-wide availability across bot contexts in `packages/experimental/agent-team/src/{types,journal,persisted,projection,index}.ts` per FR-006/007 / ADR — transcript MUST NOT substitute for either layer
-- [ ] T028 [P] [US5] Client layer-distinguishable UI (write layer choice + browse filter/labels) under `packages/experimental/client-ui-agent-team/src/client/` via Host projection
+- [x] T028 [P] [US5] Client layer-distinguishable UI (write layer choice + browse filter/labels) under `packages/experimental/client-ui-agent-team/src/client/` via Host projection
 - [x] T029 [US5] Confirm Host + Client allow any kind on either layer (no kind→layer lock tables as Pass requirements) — document orthogonality check in `specs/005-memory-productization/verifier/scenario-3-layers.md` (FR-017 / SC-010)
 - [ ] T030 [US5] Complete Verifier Scenario 3 recipe in `specs/005-memory-productization/verifier/scenario-3-layers.md` covering SC-005 (agent isolation + user sharing after save + restart/recall) and SC-010 with FR-011/012 evidence under `specs/005-memory-productization/verifier/evidence/scenario-3/`
 
