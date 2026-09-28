@@ -1,0 +1,34 @@
+# P7 US1 T018 Client Shell/box projection — Verifier stamp
+
+**Verdict:** FAIL-with-rebase
+**PR:** https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/248
+**Tip:** 02bbad7b415da561e84e3c99a1653b70291d0994 (`cursor/p7-us1-client-dc28`)
+**Linear:** MOH-374 (marked Done prematurely — Verifier did not Pass)
+**Date:** 2026-09-28
+
+## Gate
+
+FAIL-with-rebase: `specs/007-box-subagent-settings/tasks.md` is **CONFLICTING** when this Client tip is merged after either open US1 sibling onto master:
+
+- after `cursor/p7-us1-runtime-dc28` (#246) — content conflict on T016/T017/T018 checkboxes
+- after `cursor/p7-us1-verifier-dc28` (#249) — content conflict on T018/T019 checkboxes
+
+vs `origin/master` alone the PR is currently MERGEABLE (not the fail trigger).
+
+Do **not** merge until Client rebases and preserves all sibling `[x]` rows (T016–T019 as landed).
+
+## Acceptance criteria (product surface @ tip — measured separately; not a Pass stamp)
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| Locale-owned copy | PASS (measured) | `shellBox.*` in ui-conversation locales; `boxReadiness.*` in agent-team locales (zh+en); `verify-client-ui-i18n` clean |
+| Host HTTP/WS only | PASS (measured) | `settingsScope.bind({ namespace: 'computer' })` + session Tool blocks; `ctx.remote.*` / Remotes — no Main IPC SoT wiring in diff |
+| No Main SoT | PASS (measured) | Diff has zero `ipcMain`/`ipcRenderer`/`contextBridge`/electron Main store; comments explicitly exclude Main SoT |
+| No Host mounts | PASS (measured) | Diff touches only Client packages + tasks.md checkbox; no `apps/desktop-host/` / Host mount paths |
+| Focused vitest | PASS (measured) | 4 files / 29 tests green — see `p7-us1-client-t018-vitest.log` |
+
+## Blockers for DH Lead / Client
+
+1. Rebase `cursor/p7-us1-client-dc28` after Runtime (#246) and/or Verifier (#249) land (or rebase onto the surviving sibling stack) so `tasks.md` auto-merges with T016/T017/T018/T019 checkboxes all correct.
+2. Re-request Verifier after rebase tip is published; do not treat Linear Done as Verifier Pass.
+3. Product SC-001 Desktop Pass still waits on Verifier Scenario 1 + FR-013/014 evidence (T019) — Client T018 alone is projection, not SC Pass.

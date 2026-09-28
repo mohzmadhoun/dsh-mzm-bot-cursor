@@ -1,0 +1,40 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /workspace
+
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > registers one disposable header action with RPC-backed bot and task operations 13ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > unmounts the Remote contribution when later Client registration fails 8ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > returns the generated task business result without a Client transport wrapper 3ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > returns Remote carrier failures unchanged 32ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > routes createBot from an addressed teammate conversation back through its Lead 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > refreshes the descriptor catalog before opening a continuable teammate address 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > routes Team actions from an addressed teammate conversation back through its Lead 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > does not open a teammate after navigation switches during catalog refresh 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > re-registers after the conversation header slot is collapsed and declared again 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/browser-plugin.client.spec.ts > ui-team browser plugin > keeps the node half inert 1ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > decodeComputerBoxProjection > accepts a well-formed Host computer section 2ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > decodeComputerBoxProjection > rejects malformed readiness values 1ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > BoxReadinessNotices > hides while Host computer settings are loading or unavailable 13ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > BoxReadinessNotices > projects Host not_ready distinctly from ready (FR-002) 13ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > BoxReadinessNotices > projects Host readiness=starting 4ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > BoxReadinessNotices > projects Host readiness=ready 4ms
+ ✓ |thread-safe| packages/experimental/client-ui-agent-team/tests/box-readiness-notices.client.spec.tsx > BoxReadinessNotices > projects Host readiness=failed 3ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/coverage-tails.client.spec.tsx > Tool presentation tails > ToolRow stopped state renders the warning dot in the leading slot 22ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/coverage-tails.client.spec.tsx > Tool presentation tails > a settled others-variant row renders the sparkle icon in the leading slot 8ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/coverage-tails.client.spec.tsx > Tool presentation tails > BashRow summarizes the description without a row click target 5ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/coverage-tails.client.spec.tsx > Tool presentation tails > BashRow carries data-state for running and StateDots for error/stopped 12ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/coverage-tails.client.spec.tsx > Tool presentation tails > BashRow projects Shell/box success and not_ready outcomes (T018) 8ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > returns null while running or for non-shell tools 1ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > projects success for a settled bash/pwsh exit-0 result (SC-001 indicator) 1ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > projects error for isError results that are not readiness Failures 0ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > projects not_ready from Host meta.outcome / shellBoxOutcome (FR-002) 0ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > projects not_ready from SANDBOX_UNAVAILABLE / BOX_NOT_READY error codes 0ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > projects error for a non-zero exit terminal result (not SC-001 success) 0ms
+ ✓ |thread-safe| packages/client/ui-tool/tests/shell-box-outcome.client.spec.ts > shellBoxOutcome > does not treat a background acknowledgement as Shell/box success 0ms
+
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+   Start at  16:49:47
+   Duration  3.06s (transform 5.08s, setup 623ms, import 6.91s, tests 170ms, environment 915ms)
