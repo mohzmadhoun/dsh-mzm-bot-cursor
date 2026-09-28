@@ -2,8 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done; P4 Routines cron (MOH-188) Done; **P5** Memory (MOH-228) Done on master 2026-09-28 (T001–T037; polish [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`; MOH-262 Duplicate canceled); **next = P6** Connectors/MCP + event routines + trust — held until PO opens epic |
-| **Date** | 2026-09-25 (living §10 updated 2026-09-28 P5 Done → P6 hold) |
+| **Status** | ACCEPTED v0.3 — P1 (MOH-37) Done; P2 (MOH-88) Done; P3 Skills UX (MOH-142) Done; P4 Routines cron (MOH-188) Done; P5 Memory (MOH-228) Done on master 2026-09-28 (T001–T037; polish [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`; MOH-262 Duplicate canceled); **P6** Connectors/MCP + event routines + trust **In Progress** 2026-09-28 — Spec Kit path; **Linear epic/specify create blocked** (free issue limit; no invented ids) |
+| **Date** | 2026-09-25 (living §10 updated 2026-09-28 P6 kick → specify) |
 | **Owners** | DH Product Owner Assistant (draft) · DH Spec (requirements review) · DH Lead (gates) · DH Architect (seams) |
 | **Repo** | `C:\Users\Mohammed\Desktop\DSH - MzM Bot` (`mohzmadhoun/dsh-mzm-bot`) |
 | **Inputs** | `MzM-Docs/mzm-bot-initial-plan.md` · `docs/designs/mzbot-wedge-to-grok-like.md` · `.specify/memory/constitution.md` · MzM Bot Plan room freeze |
@@ -109,13 +109,14 @@ Each phase = one Spec Kit loop: `specify → clarify → plan → tasks → anal
 | **Exit (Verifier-provable)** | Write profile/log/note fact → restart → recall returns it; Verifier scripted path documented; SO 11+12 desktop visual evidence for GUI |
 | **Status** | **Done** — epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization); specs under `specs/005-memory-productization/`. T001–T037 complete (MOH-262 Duplicate canceled); polish close [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`. |
 
-### P6 — Connectors / MCP + event routines + trust productization (next — held)
+### P6 — Connectors / MCP + event routines + trust productization (in progress)
 
 | | |
 |--|--|
 | **In** | MCP/connectors; event-triggered routines; richer trust/permissions productization; 1Password-class credential UX if needed |
 | **Out** | Box/computer parity (P7) |
 | **Exit (Verifier-provable)** | One connector: install → auth → successful tool call; one event-triggered routine fires end-to-end; one denied-permission path proven; secrets absent from session dumps |
+| **Status** | **In Progress** 2026-09-28 — kicked on docs + Spec Kit git path. **Linear epic/specify create blocked** (workspace free issue limit); do **not** invent fake Linear ids. Next gate = Spec Kit specify → `specs/006-…`. Living gate: [living-next-gate.md](./living-next-gate.md). |
 
 ### P7 — Computer / box + subagent parity + settings chrome
 
@@ -209,7 +210,8 @@ Source: `MzM-Docs/mzm-bot-initial-plan.md` §16–17 + Appendix B.
 6. ~~P3 Spec Kit design + implement + Verifier~~ **DONE** 2026-09-27 — epic [MOH-142](https://linear.app/momadhoun/issue/MOH-142/p3-skills-ux); SC-005 Pass [#136](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/136) @ `337f25a964`; specs `specs/003-skills-ux/`.
 7. ~~**P4 Spec Kit design + implement + Verifier**~~ **DONE** 2026-09-28 — epic [MOH-188](https://linear.app/momadhoun/issue/MOH-188/p4-routines-cron-only); SC-001…SC-005 Pass [#166](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/166) @ `aca0c2b7c5`; specs `specs/004-routines-cron/`.
 8. ~~**P5 Spec Kit design + implement + Verifier**~~ **DONE** 2026-09-28 — epic [MOH-228](https://linear.app/momadhoun/issue/MOH-228/p5-memory-productization); T001–T037 complete (MOH-262 Duplicate canceled); polish [#196](https://github.com/mohzmadhoun/dsh-mzm-bot-cursor/pull/196) @ `16cafad98d`; specs `specs/005-memory-productization/`.
-9. **Next — P6 kick (held):** Connectors / MCP + event routines + trust productization — **PO opens epic** on **DeepSeek Harness - Cursor** when ready → then Spec Kit specify → new `specs/006-…` (do not rewrite 001–005). Lead does **not** invent the P6 epic. Living gate: [living-next-gate.md](./living-next-gate.md).
+9. ~~**P6 kick**~~ **DONE** 2026-09-28 — Connectors / MCP + event routines + trust productization **In Progress** on docs + Spec Kit path. **Linear epic/specify create blocked** (free issue limit); no invented ids. Living gate: [living-next-gate.md](./living-next-gate.md).
+10. **Next — P6 specify:** **DH Spec** `/speckit-specify` for P6 only → new `specs/006-…` from §4 P6 In/Out/Exit (do not rewrite 001–005). When Linear capacity returns, PO opens real epic (+ specify child) on **DeepSeek Harness - Cursor** and backfills ids.
 
 ---
 
