@@ -8,6 +8,22 @@ It is built on an **everything-is-a-plugin** architecture and powered by [Cordis
 
 Documentation: [https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
 
+## MzM Bot (this fork)
+
+This checkout also carries **MzM Bot**: a Desktop agent workspace on DeepSeek Harness (bots, chat, skills, cron routines, memory, connectors/trust, Shell/box, and computer use). Plan phases **P1–P7 are complete**.
+
+- **User guide (PDF):** [MzM-Docs/user-guide/MzM-Bot-Desktop-User-Guide.pdf](MzM-Docs/user-guide/MzM-Bot-Desktop-User-Guide.pdf) — how to use shipped features, with Desktop screenshots ([guide folder](MzM-Docs/user-guide/))
+- **Living next gate:** [MzM-Docs/living-next-gate.md](MzM-Docs/living-next-gate.md)
+- **Program plan:** [MzM-Docs/mzm-bot-plan.md](MzM-Docs/mzm-bot-plan.md)
+
+Launch Desktop from a built source checkout:
+
+```sh
+pnpm install
+pnpm run build
+pnpm run start:desktop
+```
+
 ## Developer preview
 
 DeepSeek Harness is in _developer preview_ and iterating rapidly. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**

@@ -8,6 +8,22 @@ DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的�
 
 文档：[https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
 
+## MzM Bot（本 fork）
+
+本仓库同时包含 **MzM Bot**：基于 DeepSeek Harness 的 Desktop 智能体工作区（多 bot、聊天、技能、cron 例行任务、记忆、连接器/信任、Shell/box 与 computer use）。计划阶段 **P1–P7 已完成**。
+
+- **用户指南（PDF）：** [MzM-Docs/user-guide/MzM-Bot-Desktop-User-Guide.pdf](MzM-Docs/user-guide/MzM-Bot-Desktop-User-Guide.pdf) — 已交付功能用法与 Desktop 截图（[指南目录](MzM-Docs/user-guide/)）
+- **当前活门（living next gate）：** [MzM-Docs/living-next-gate.md](MzM-Docs/living-next-gate.md)
+- **项目计划：** [MzM-Docs/mzm-bot-plan.md](MzM-Docs/mzm-bot-plan.md)
+
+从已构建的源码检出启动 Desktop：
+
+```sh
+pnpm install
+pnpm run build
+pnpm run start:desktop
+```
+
 ## 开发者预览
 
 DeepSeek Harness 处于 _开发者预览_ 阶段，正在快速迭代。**未来将出现破坏兼容性的变更。**
